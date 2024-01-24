@@ -14,12 +14,14 @@ namespace Linguine
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private UIComponents _UIcomponents;
+        private MainModel _model;
 
         public RelayCommand LoadTextualMediaCommand { get; }
 
-        public MainViewModel(UIComponents uiComponents)
+        public MainViewModel(UIComponents uiComponents, MainModel model)
         {
             _UIcomponents = uiComponents;
+            _model = model;
         }
     }
 }

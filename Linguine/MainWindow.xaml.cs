@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Infrastructure;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +33,46 @@ namespace Linguine
                 new UserInteractionServiceWPF()
                 );
 
-            this.DataContext = new MainViewModel(uiComponents);
+            MainModel model;
+            try
+            {
+                model = new MainModel();
+            }
+            catch (FileNotFoundException e)
+            {
+                bool configLoaded = false;
+
+                while (!configLoaded)
+                {
+                    if (uiComponents.CanVerify.AskYesNo("No config located, browse for file?"))
+                    {
+                        string configPath = uiComponents.CanBrowseFiles.Browse();
+
+                        if (!string.IsNullOrEmpty(configPath))
+                        {
+                            Config? config = ConfigManager.LoadConfig(configPath);
+
+                            if (config is not null)
+                            {
+                                ConfigManager.UpdateConfig(config);
+                                configLoaded = true;
+                            }
+                        }
+                    }
+                    else if (uiComponents.CanVerify.AskYesNo("Generate default config?"))
+                    {
+                        ConfigManager.UpdateConfig(ConfigManager.GenerateDefaultConfig());
+                        configLoaded = true;
+                    }
+                    else
+                    {
+                        throw new Exception("Startup failed due to lack of config!");
+                    }
+                }
+
+                model = new MainModel();
+            }
+            this.DataContext = new MainViewModel(uiComponents, model);
         }
     }
 }
