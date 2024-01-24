@@ -23,6 +23,7 @@ namespace Linguine
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = new MainViewModel(new UserInteractionServiceWPF(), new UserSelectionServiceWPF(), new FileBrowserService());
         }
     }
 }
