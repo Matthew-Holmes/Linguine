@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UserInputInterfaces;
 
 namespace Linguine
 {
@@ -23,7 +24,14 @@ namespace Linguine
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new MainViewModel(new UserInteractionServiceWPF(), new UserSelectionServiceWPF(), new FileBrowserService());
+
+            UIComponents uiComponents = new UIComponents(
+                new FileBrowserService(),
+                new UserSelectionServiceWPF(),
+                new UserInteractionServiceWPF()
+                );
+
+            this.DataContext = new MainViewModel(uiComponents);
         }
     }
 }
