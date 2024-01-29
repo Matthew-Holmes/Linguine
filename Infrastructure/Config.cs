@@ -9,5 +9,7 @@ namespace Infrastructure
     public class Config
     {
         public string FileStoreLocation;
+        public string DictionariesDirectory;
+        public Dictionary<LanguageCode, List<Tuple<String, String>>> SavedDictionariesNamesAndConnnectionStrings;
     }
 }

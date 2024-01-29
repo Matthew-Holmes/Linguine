@@ -11,6 +11,17 @@ namespace Infrastructure
     {
         public const String ConfigPath = "config.json";
 
+        public static Config GenerateDefaultConfig()
+        {
+            Config config = new Config();
+
+            config.FileStoreLocation = "Filestore/";
+            config.DictionariesDirectory = "Dictionaries/";
+            config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
+
+            return config;
+        }
+
         public static Config? LoadCustomConfig(String path)
         {
             if (!File.Exists(path))
@@ -47,15 +58,6 @@ namespace Infrastructure
             {
                 return false;
             }
-        }
-
-        public static Config GenerateDefaultConfig()
-        {
-            Config config = new Config();
-
-            config.FileStoreLocation = "Filestore/";
-
-            return config;
         }
     }
 }
