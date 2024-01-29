@@ -11,7 +11,7 @@ namespace Infrastructure
     {
         public const String ConfigPath = "config.json";
 
-        public static Config? LoadConfig(String path = ConfigPath)
+        public static Config? LoadCustomConfig(String path)
         {
             if (!File.Exists(path))
             {
@@ -28,6 +28,11 @@ namespace Infrastructure
             {
                 return null;
             }
+        }
+
+        public static Config? LoadConfig()
+        {
+            return LoadCustomConfig(ConfigPath);
         }
 
         public static bool UpdateConfig(Config newConfig)

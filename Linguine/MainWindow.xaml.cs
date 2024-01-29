@@ -50,7 +50,7 @@ namespace Linguine
 
                         if (!string.IsNullOrEmpty(configPath))
                         {
-                            Config? config = ConfigManager.LoadConfig(configPath);
+                            Config? config = ConfigManager.LoadCustomConfig(configPath);
 
                             if (config is not null)
                             {
