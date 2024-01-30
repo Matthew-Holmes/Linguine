@@ -4,6 +4,14 @@
              xmlns:local="clr-namespace:Linguine"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Include your HomeTabTemplate Resource Dictionary -->
+                <ResourceDictionary Source="Tabs/WPF/TabViews/HomeTabTemplate.xaml"/>
+                <ResourceDictionary Source="Tabs/WPF/TabViews/ConfigManagerTabTemplate.xaml"/>
+                <ResourceDictionary Source="Tabs/WPF/TabViews/TextualMediaViewerTabTemplate.xaml"/>
+                <!-- Add other Resource Dictionaries as needed -->
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
