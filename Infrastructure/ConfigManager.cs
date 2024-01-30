@@ -19,6 +19,9 @@ namespace Infrastructure
             config.DictionariesDirectory = "Dictionaries/";
             config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
 
+            config.TargetLanguage = LanguageCode.eng;
+            config.NativeLanguage = LanguageCode.eng;
+
             return config;
         }
 
