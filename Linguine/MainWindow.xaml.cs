@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Linguine.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,34 +41,12 @@ namespace Linguine
             }
             catch (FileNotFoundException e)
             {
-                bool configLoaded = false;
-
-                while (!configLoaded)
+                if (MissingConfigHelper.TryFindConfig(uiComponents))
+                { 
+                    /* success */
+                } else
                 {
-                    if (uiComponents.CanVerify.AskYesNo("No config located, browse for file?"))
-                    {
-                        string configPath = uiComponents.CanBrowseFiles.Browse();
-
-                        if (!string.IsNullOrEmpty(configPath))
-                        {
-                            Config? config = ConfigManager.LoadCustomConfig(configPath);
-
-                            if (config is not null)
-                            {
-                                ConfigManager.UpdateConfig(config);
-                                configLoaded = true;
-                            }
-                        }
-                    }
-                    else if (uiComponents.CanVerify.AskYesNo("Generate default config?"))
-                    {
-                        ConfigManager.UpdateConfig(ConfigManager.GenerateDefaultConfig());
-                        configLoaded = true;
-                    }
-                    else
-                    {
-                        throw new Exception("Startup failed due to lack of config!");
-                    }
+                    throw new Exception("Startup failed due to lack of config!");
                 }
 
                 model = new MainModel();
