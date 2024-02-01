@@ -13,11 +13,11 @@ namespace LearningStore
 {
     public static class ExternalDictionaryManager
     {
-        public static List<String> AvailableDictionaries( LanguageCode lc)
+        public static List<String> AvailableDictionaries(Config config, LanguageCode lc)
         {
-            if (ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))
+            if (config.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))
             {
-                return ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Select(t => t.Item1).ToList();
+                return config.SavedDictionariesNamesAndConnnectionStrings[lc].Select(t => t.Item1).ToList();
             }
             else
             {
@@ -25,63 +25,75 @@ namespace LearningStore
             }
         }
 
-        public static ExternalDictionary? GetDictionary(LanguageCode lc, String name)
+        public static ExternalDictionary? GetDictionary(Config config, LanguageCode lc, String name)
         {
-            if (!AvailableDictionaries(lc).Contains(name))
+            if (!AvailableDictionaries(config, lc).Contains(name))
             {
                 return null;
             }
 
-            String connectionString = ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Where(t => t.Item1 == name).FirstOrDefault().Item2;
+            String connectionString = config.SavedDictionariesNamesAndConnnectionStrings[lc].Where(t => t.Item1 == name).FirstOrDefault().Item2;
 
             return new ExternalDictionary(lc, name, connectionString);
         }
 
-        public static void AddNewDictionaryFromCSV(LanguageCode lc, String name, String csvFileLocation)
+        public static void AddNewDictionaryFromCSV(Config config, LanguageCode lc, String name, String csvFileLocation)
         {
-            if (AvailableDictionaries(lc).Contains(name))
+            if (AvailableDictionaries(config, lc).Contains(name))
             {
                 throw new InvalidDataException("naming conflict identified, dictionary adding aborted");
             }
 
             String connectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(
-                csvFileLocation, lc, name);
+                csvFileLocation, config, lc, name);
 
-            UpdateConfigWithExistingDictionaryDatabase(lc, name, connectionString); 
+            UpdateConfigWithExistingDictionaryDatabase(config, lc, name, connectionString); 
         }
 
-        public static void VerifyIntegrity()
+        public static void VerifyIntegrityWith(Config config)
         {
-            if (!VerifyNoDuplicateDictionaries())
+            if (!VerifyNoDuplicateDictionaries(config))
             {
                 throw new Exception("Duplicate dictionaries found");
             }
 
-            if (!VerifyExternalDictionariesExist())
+            if (!VerifyExternalDictionariesExist(config))
             {
                 throw new Exception("Expected dictionary not found");
             }
         }
 
-        private static void UpdateConfigWithExistingDictionaryDatabase(LanguageCode lc, String name, String connectionString)
+
+        private static void UpdateConfigWithExistingDictionaryDatabase(Config config, LanguageCode lc, String name, String connectionString)
         {
             ExternalDictionary dict = new ExternalDictionary(lc, name, connectionString); // check that it exists
             dict.Dispose();
 
+            if (config.SavedDictionariesNamesAndConnnectionStrings is null)
+            {
+                config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
+            }
 
-            if (ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Any(t => t.Item1 == name))
+            if (!config.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))
+            {
+                config.SavedDictionariesNamesAndConnnectionStrings[lc] = new List<Tuple<string, string>>();
+            }
+
+            if (config.SavedDictionariesNamesAndConnnectionStrings[lc].Any(t => t.Item1 == name))
             {
                 throw new Exception("Already an existing dictionary with this name");
             }
 
-            ConfigManager.AddDictionaryDetails(lc, Tuple.Create(name, connectionString));
+            config.SavedDictionariesNamesAndConnnectionStrings[lc].Add(Tuple.Create(name, connectionString));
+
+            ConfigManager.UpdateConfig(config);
         }
 
-        private static bool VerifyNoDuplicateDictionaries()
+        private static bool VerifyNoDuplicateDictionaries(Config config)
         {
-            foreach (LanguageCode lc in ConfigManager.SavedDictionariesNamesAndConnnectionStrings.Keys)
+            foreach (LanguageCode lc in config.SavedDictionariesNamesAndConnnectionStrings.Keys)
             {
-                List<String> names = AvailableDictionaries(lc);
+                List<String> names = AvailableDictionaries(config, lc);
                 if (names.Distinct().Count() != names.Count())
                 {
                     return false;
@@ -90,12 +102,12 @@ namespace LearningStore
             return true;
         }
 
-        private static bool VerifyExternalDictionariesExist()
+        private static bool VerifyExternalDictionariesExist(Config config)
         {
             // checks that all the dictionaries outlined in config do exist
-            foreach (LanguageCode lc in ConfigManager.SavedDictionariesNamesAndConnnectionStrings.Keys)
+            foreach (LanguageCode lc in config.SavedDictionariesNamesAndConnnectionStrings.Keys)
             {
-                if (!VerifyExternalDictionariesExist(lc))
+                if (!VerifyExternalDictionariesExist(config, lc))
                 {
                     return false;
                 }
@@ -103,16 +115,16 @@ namespace LearningStore
             return true;
         }
 
-        private static bool VerifyExternalDictionariesExist(LanguageCode lc)
+        private static bool VerifyExternalDictionariesExist(Config config, LanguageCode lc)
         {
             // checks that all the dictionaries outlined in config do exist for a specific language
 
-            if (!ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))
+            if (!config.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))
             {
                 return true; // vacuous truth
             }
 
-            foreach (Tuple<String, String> details in ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc])
+            foreach (Tuple<String, String> details in config.SavedDictionariesNamesAndConnnectionStrings[lc])
             {
                 try
                 {

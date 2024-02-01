@@ -17,11 +17,4 @@
   		<_Parameter1>Tests_Infrastructure</_Parameter1>
   	</AssemblyAttribute>
   </ItemGroup>
-
-	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-			<_Parameter1>Tests_LearningStore</_Parameter1>
-		</AssemblyAttribute>
-	</ItemGroup>
-
 </Project>
