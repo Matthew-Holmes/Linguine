@@ -3,9 +3,20 @@
     <!-- any template like this must be referenced in App.xaml too! -->
     <DataTemplate x:Key="ConfigManagerTabTemplate">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
             <StackPanel Orientation="Horizontal">
 
                 <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Native Language:"/>
                     <ComboBox ItemsSource="{Binding LanguageOptions, Mode=OneWay}" 
                       SelectedIndex="{Binding NativeLanguageIndex, Mode=OneWayToSource}"
                               Text="{Binding NativeLanguage, Mode=OneWay}"
@@ -13,11 +24,13 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Target Language:"/>
                     <ComboBox ItemsSource="{Binding LanguageOptions, Mode=OneWay}" 
                       SelectedIndex="{Binding TargetLanguageIndex, Mode=OneWayToSource}"
                       Text="{Binding TargetLanguage, Mode=OneWay}"
                       Width="100"/>
-                    </StackPanel>
+                </StackPanel>
+                
             </StackPanel>
         </Grid>
 
