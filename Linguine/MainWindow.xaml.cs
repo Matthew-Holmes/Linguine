@@ -31,8 +31,10 @@ namespace Linguine
             UIComponents uiComponents = new UIComponents(
                 new FileBrowserService(),
                 new UserSelectionServiceWPF(),
-                new UserInteractionServiceWPF()
-                );
+                new UserInteractionServiceWPF(),
+                new UserResponseService(),
+                new MessageUserService()
+                ); ; ;
 
             MainModel model;
             try

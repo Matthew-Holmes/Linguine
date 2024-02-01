@@ -13,7 +13,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Name="Languages" Orientation="Horizontal" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="Native Language:"/>
@@ -32,6 +32,20 @@
                 </StackPanel>
                 
             </StackPanel>
+
+            <StackPanel Name="Dictionaries" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Native Dictionaries"/>
+                    <ListBox ItemsSource="{Binding NativeLanguageDictionaries}"/>
+                    <Button Content="Add" Command="{Binding AddNewNativeDictionaryCommand}"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Target Dictionaries"/>
+                    <ListBox ItemsSource="{Binding TargetLanguageDictionaries}"/>
+                    <Button Content="Add" Command="{Binding AddNewTargetDictionaryCommand}"/>
+                </StackPanel>
+            </StackPanel>
+            
         </Grid>
 
     </DataTemplate>
