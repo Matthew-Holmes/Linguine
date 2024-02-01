@@ -11,13 +11,18 @@ namespace Tests_Infrastructure
     public class LanguageCodeDetailsTests
     {
         [TestMethod]
-        public void EnglishName_AllEnumValues_ShouldNotReturnEmptyString()
+        public void LanguagehName_AllEnumValueCombinations_ShouldNotReturnEmptyString()
         {
-            foreach (var code in Enum.GetValues(typeof(LanguageCode)).Cast<LanguageCode>())
+            var allLanguageCodes = Enum.GetValues(typeof(LanguageCode)).Cast<LanguageCode>().ToList();
+
+            foreach (var nativeLanguageCode in allLanguageCodes)
             {
-                var result = LanguageCodeDetails.EnglishName(code);
-                Assert.AreNotEqual("", result, $"The method returned an empty string for LanguageCode.{code}");
+                foreach (var targetLanguageCode in allLanguageCodes)
+                {
+                    string languageName = LanguageCodeDetails.LanguageName(nativeLanguageCode, targetLanguageCode);
+                    Assert.IsFalse(string.IsNullOrEmpty(languageName), $"Language name not implemented for native language '{nativeLanguageCode}' and target language '{targetLanguageCode}'");
+                }
             }
         }
-    }
+    }   
 }
