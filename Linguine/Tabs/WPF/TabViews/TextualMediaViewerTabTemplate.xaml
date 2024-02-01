@@ -3,8 +3,26 @@
     <!-- any template like this must be referenced in App.xaml too! -->
     <DataTemplate x:Key="TextualMediaViewerTabTemplate">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
             <!-- Home tab view content -->
-            <TextBlock Text="This is a textual media viewer Tab" />
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Button Content="Load" Command="{Binding LoadCommand}" Grid.Row="0"/>
+            </Grid>
+            <TextBlock Text="{Binding RawText}" TextWrapping="Wrap"/>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
