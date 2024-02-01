@@ -15,5 +15,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
+	
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>Tests_LearningStore</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 
 </Project>
