@@ -3,6 +3,7 @@ using Infrastructure;
 using System;
 using System.Collections.Generic;
 
+
 namespace Tests_Infrastructure
 {
     [TestClass]
@@ -47,5 +48,37 @@ namespace Tests_Infrastructure
             copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(new Tuple<string, string>("Name2", "ConnectionString2"));
             Assert.AreNotEqual(originalConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Count, copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Count);
         }
+
+        [TestMethod]
+        public void Equal_returnsTrueForCopy()
+        {
+            Assert.IsTrue(originalConfig.Equals(originalConfig.Copy()));
+        }
+
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedCopyAdditive()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("Dictionary2", "ConnectionString2"));
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedRemoved()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng] = new List<Tuple<string, string>>();
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedRemovedKeyEntirely()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings.Remove(LanguageCode.eng);
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
+
     }
 }
