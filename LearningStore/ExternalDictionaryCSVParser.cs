@@ -12,7 +12,6 @@ namespace LearningStore
     {
         public static String ParseDictionaryFromCSVToSQLiteAndSave(
             String csvFileLocation,
-            Config config,
             LanguageCode lc,
             String name)
         {
@@ -24,7 +23,7 @@ namespace LearningStore
             }
 
             // Construct the path to the database file, creating directory if it doesn't exist
-            string dir = Path.Combine(config.FileStoreLocation, config.DictionariesDirectory, lc.ToString());
+            string dir = Path.Combine(ConfigManager.FileStoreLocation, ConfigManager.DictionariesDirectory, lc.ToString());
             System.IO.Directory.CreateDirectory(dir);
 
             string dbFilePath = Path.Combine(dir, name + ".db");
