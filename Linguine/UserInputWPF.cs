@@ -76,4 +76,58 @@ namespace Linguine
         }
 
     }
+
+    public class UserResponseService : ICanGetText
+    {
+        public string GetResponse(string question)
+        {
+            // Create a new window for the input dialog
+            var inputWindow = new Window
+            {
+                Title = question,
+                Width = 300,
+                Height = 150,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
+
+            // Create a StackPanel to layout the controls
+            var stackPanel = new System.Windows.Controls.StackPanel();
+
+            // Create a TextBox for user input
+            var textBox = new System.Windows.Controls.TextBox();
+            stackPanel.Children.Add(textBox);
+
+            // Create a Button for submission
+            var submitButton = new System.Windows.Controls.Button
+            {
+                Content = "Submit",
+                Margin = new Thickness(5)
+            };
+            submitButton.Click += (s, e) =>
+            {
+                // Close the window when the button is clicked
+                inputWindow.DialogResult = true;
+            };
+            stackPanel.Children.Add(submitButton);
+
+            // Set the StackPanel as the content of the window
+            inputWindow.Content = stackPanel;
+
+            // Show the window as a dialog
+            var result = inputWindow.ShowDialog();
+
+            // Return the text entered by the user or an empty string if no input was given
+            return result == true ? textBox.Text : string.Empty;
+        }
+    }
+
+    public class MessageUserService : ICanShowMessage
+    {
+        public void Show(string message)
+        {
+            MessageBox.Show(message);
+        }
+    }
+
+
 }

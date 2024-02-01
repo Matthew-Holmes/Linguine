@@ -11,12 +11,15 @@ namespace UserInputInterfaces
         public ICanBrowseFiles CanBrowseFiles;
         public ICanChooseFromList CanChooseFromList;
         public ICanVerify CanVerify;
-
-        public UIComponents(ICanBrowseFiles canBrowseFiles, ICanChooseFromList canChooseFromList, ICanVerify canVerify)
+        public ICanGetText CanGetText;
+        public ICanShowMessage CanMessage;
+        public UIComponents(ICanBrowseFiles canBrowseFiles, ICanChooseFromList canChooseFromList, ICanVerify canVerify, ICanGetText canGetText, ICanShowMessage canMessage)
         {
             CanBrowseFiles = canBrowseFiles;
             CanChooseFromList = canChooseFromList;
             CanVerify = canVerify;
+            CanGetText = canGetText;
+            CanMessage = canMessage;
         }
     }
 
