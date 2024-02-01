@@ -3,8 +3,23 @@
     <!-- any template like this must be referenced in App.xaml too! -->
     <DataTemplate x:Key="ConfigManagerTabTemplate">
         <Grid>
-            <!-- Config manager view content -->
-            <TextBlock Text="This is the config manager Tab" />
+            <StackPanel Orientation="Horizontal">
+
+                <StackPanel Orientation="Vertical">
+                    <ComboBox ItemsSource="{Binding LanguageOptions, Mode=OneWay}" 
+                      SelectedIndex="{Binding NativeLanguageIndex, Mode=OneWayToSource}"
+                              Text="{Binding NativeLanguage, Mode=OneWay}"
+                      Width="100"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical">
+                    <ComboBox ItemsSource="{Binding LanguageOptions, Mode=OneWay}" 
+                      SelectedIndex="{Binding TargetLanguageIndex, Mode=OneWayToSource}"
+                      Text="{Binding TargetLanguage, Mode=OneWay}"
+                      Width="100"/>
+                    </StackPanel>
+            </StackPanel>
         </Grid>
+
     </DataTemplate>
 </ResourceDictionary>
