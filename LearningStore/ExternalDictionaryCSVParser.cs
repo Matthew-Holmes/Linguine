@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LearningStore
 {
-    public class ExternalDictionaryCSVParser
+    internal class ExternalDictionaryCSVParser
     {
         public static String ParseDictionaryFromCSVToSQLiteAndSave(
             String csvFileLocation,
@@ -57,17 +57,23 @@ namespace LearningStore
                 string line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    var parts = line.Split(new[] { ',' }, 3); // Split only into three parts
-                    if (parts.Length == 3)
+                    try
                     {
-                        var definition = new DictionaryDefinition
+                        var parts = line.Split(new[] { ',' }, 3); // Split only into three parts
+                        if (parts.Length == 3)
                         {
-                            ID = int.Parse(parts[0]),
-                            Word = parts[1],
-                            Definition = parts[2]
-                        };
+                            var definition = new DictionaryDefinition
+                            {
+                                ID = int.Parse(parts[0]),
+                                Word = parts[1],
+                                Definition = parts[2]
+                            };
 
-                        definitions.Add(definition);
+                            definitions.Add(definition);
+                        }
+                    } catch (Exception e)
+                    {
+                        throw new Exception($"Parsing the following line failed {line}");
                     }
                 }
             }
