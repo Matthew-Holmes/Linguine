@@ -14,7 +14,6 @@ namespace LearningStoreTests
     public class ExternalDictionaryCSVParserTests
     {
         private string _csvFilePath;
-        private Config _config;
         private LanguageCode _testLanguageCode;
         private string _testDictionaryName;
         private string _databaseFilePath;
@@ -25,12 +24,6 @@ namespace LearningStoreTests
             _testLanguageCode = LanguageCode.eng; 
             _testDictionaryName = "TestDictionary";
             _databaseFilePath = "testDatabase.db";
-
-            _config = new Config
-            {
-                FileStoreLocation = "Filestore",
-                DictionariesDirectory = "Dictionaries"
-            };
 
             // Create a mock CSV file with test data
             _csvFilePath = CreateMockCSVFile();
@@ -54,14 +47,14 @@ namespace LearningStoreTests
         [TestMethod]
         public void ParseNewDictionaryFromCSV_ValidCSV_Runs()
         {
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(_csvFilePath, _config, _testLanguageCode, _testDictionaryName);
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(_csvFilePath, _testLanguageCode, _testDictionaryName);
         }
 
         [TestMethod]
         public void ParseNewDictionaryFromCSV_ValidCSV_CreatesDatabase()
         {
             String expectedConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(
-                _csvFilePath, _config, _testLanguageCode, _testDictionaryName);
+                _csvFilePath, _testLanguageCode, _testDictionaryName);
 
             using (ExternalDictionaryContext context = new ExternalDictionaryContext(expectedConnectionString))
             {
@@ -87,7 +80,7 @@ namespace LearningStoreTests
             // Create an empty CSV file
             string emptyCsvFilePath = CreateEmptyCSVFile();
 
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(emptyCsvFilePath, _config, _testLanguageCode, _testDictionaryName);
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(emptyCsvFilePath,  _testLanguageCode, _testDictionaryName);
         }
 
         [TestMethod]
@@ -97,7 +90,7 @@ namespace LearningStoreTests
             // Create an empty CSV file
             string emptyCsvFilePath = CreateCompletelyEmptyCSVFile();
 
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(emptyCsvFilePath, _config, _testLanguageCode, _testDictionaryName);
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(emptyCsvFilePath,  _testLanguageCode, _testDictionaryName);
         }
 
         private string CreateCompletelyEmptyCSVFile()

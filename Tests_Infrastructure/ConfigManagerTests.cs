@@ -1,28 +1,11 @@
-﻿using Infrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using Newtonsoft.Json;
-using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Infrastructure;
 
 namespace Tests_Infrastructure
 {
     [TestClass]
     public class ConfigManagerTests
     {
-        public static bool ArePropertiesEqual<T>(T obj1, T obj2)
-        {
-            foreach (var property in typeof(T).GetProperties())
-            {
-                var value1 = property.GetValue(obj1);
-                var value2 = property.GetValue(obj2);
-
-                if (!Equals(value1, value2))
-                    return false;
-            }
-            return true;
-        }
-
-
         [TestInitialize]
         public void Initialize()
         {
@@ -33,88 +16,83 @@ namespace Tests_Infrastructure
             {
                 throw new InvalidOperationException("Tests must be run in a directory containing 'Tests_Infrastructure'");
             }
-            if (File.Exists(ConfigManager.ConfigPath))
-            {
-                File.Delete(ConfigManager.ConfigPath);
-            }
-            if (File.Exists("customConfig.json"))
-            {
-                File.Delete("customConfig.json");
-            }
+
+            ConfigFileHandler.SetConfigToDefault();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            if (File.Exists(ConfigManager.ConfigPath))
+            ConfigFileHandler.SetConfigToDefault();
+
+            if (File.Exists(ConfigFileHandler.ConfigPath))
             {
-                File.Delete(ConfigManager.ConfigPath);
-            }
-            if (File.Exists("customConfig.json"))
-            {
-                File.Delete("customConfig.json");
+                File.Delete(ConfigFileHandler.ConfigPath);
             }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FileNotFoundException))]
-        public void LoadConfig_WithNonExistingPath_ShouldThrowFileNotFoundException()
+        public void TestFileStoreLocationGetSet()
         {
-            if (File.Exists(ConfigManager.ConfigPath))
-            {
-                File.Delete(ConfigManager.ConfigPath);
-            }
-            ConfigManager.LoadConfig();
+            string testValue = "test/path";
+            ConfigManager.FileStoreLocation = testValue;
+            Assert.AreEqual(testValue, ConfigManager.FileStoreLocation);
         }
 
         [TestMethod]
-        public void UpdateConfig_WithValidConfig_ShouldReturnTrue()
+        public void TestDictionariesDirectoryGetSet()
         {
-            var newConfig = new Config();
-            var result = ConfigManager.UpdateConfig(newConfig);
-
-            Assert.IsTrue(result);
+            string testValue = "test/dictionaries";
+            ConfigManager.DictionariesDirectory = testValue;
+            Assert.AreEqual(testValue, ConfigManager.DictionariesDirectory);
         }
 
         [TestMethod]
-        public void UpdateConfig_WithValidConfig_ShouldCreateFile()
+        public void TestNativeLanguageGetSet()
         {
-            var newConfig = new Config();
-            var result = ConfigManager.UpdateConfig(newConfig);
-
-            Assert.IsTrue(File.Exists(ConfigManager.ConfigPath));
-        }
-
-
-        [TestMethod]
-        public void LoadConfig_WithValidPath_ShouldReturnTheSame()
-        {
-            var config = new Config { FileStoreLocation = "TestLocation/" };
-            var result = ConfigManager.UpdateConfig(config);
-            Assert.IsTrue(result);
-
-            var loadedConfig = ConfigManager.LoadConfig();
-            Assert.IsNotNull(loadedConfig);
-            Assert.IsTrue(ArePropertiesEqual<Config>(config, loadedConfig));
+            LanguageCode testValue = LanguageCode.eng;
+            ConfigManager.NativeLanguage = testValue;
+            Assert.AreEqual(testValue, ConfigManager.NativeLanguage);
         }
 
         [TestMethod]
-        public void LoadCustomConfig_WithValidPath_ShouldReturnTheSame()
+        public void TestTargetLanguageGetSet()
         {
-            var config = new Config { FileStoreLocation = "TestLocation/" };
-            var result = ConfigManager.UpdateConfig(config);
+            LanguageCode testValue = LanguageCode.fra;
+            ConfigManager.TargetLanguage = testValue;
+            Assert.AreEqual(testValue, ConfigManager.TargetLanguage);
+        }
 
-            Assert.IsTrue(result);
+        [TestMethod]
+        public void TestAddDictionaryDetails()
+        {
+            var details = new Tuple<string, string>("name", "connectionString");
+            LanguageCode lc = LanguageCode.zho;
 
-            File.Copy(ConfigManager.ConfigPath, "customConfig.json");
-            File.Delete(ConfigManager.ConfigPath);
+            ConfigManager.AddDictionaryDetails(lc, details);
 
-            var loadedConfig = ConfigManager.LoadCustomConfig("customConfig.json");
+            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc));
+            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details));
+        }
 
-            Assert.IsNotNull(loadedConfig);
-            Assert.IsTrue(ArePropertiesEqual<Config>(config, loadedConfig));
+        [TestMethod]
+        public void TestAddMultipleDictionaryDetails()
+        {
+            var details1 = new Tuple<string, string>("name1", "connectionString1");
+            var details2 = new Tuple<string, string>("name2", "connectionString2");
+            var details3 = new Tuple<string, string>("name3", "connectionString3");
+            LanguageCode lc = LanguageCode.zho;
+
+            ConfigManager.AddDictionaryDetails(lc, details1);
+            ConfigManager.AddDictionaryDetails(lc, details2);
+            ConfigManager.AddDictionaryDetails(lc, details3);
+
+            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc));
+            Assert.AreEqual(3, ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Count);
+            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details1));
+            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details2));
+            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details3));
         }
     }
-
-
 }
+

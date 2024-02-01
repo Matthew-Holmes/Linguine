@@ -11,25 +11,14 @@ namespace LearningStoreTests
     [TestClass]
     public class ExternalDictionaryManagerTests
     {
-        private static Config Config { get; set; }
-
         [ClassInitialize]
         public static void ClassInitialize(TestContext tc)
         {
-           Config = new Config
-            {
-                FileStoreLocation = "DummyFileStore",
-                DictionariesDirectory = "DummyDictionaries",
-                SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>()
-            };
-
-            Config.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng] = new List<Tuple<string, string>>();
-            Config.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.zho] = new List<Tuple<string, string>>();
-
-
-            String dummyData = CreateMockCSVFile();
-            InitializeDummyDatabases(dummyData);
+            InitializeDummyDatabases();
+            testStartState = ConfigFileHandler.Copy;
         }
+
+        private static Config testStartState;
 
         private static string CreateMockCSVFile()
         {
@@ -45,15 +34,22 @@ namespace LearningStoreTests
             return filePath;
         }
 
-        private static void InitializeDummyDatabases(String dummyData)
-        {
-            String eng1ConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dummyData, Config, LanguageCode.eng, "EnglishDict1");
-            String eng2ConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dummyData, Config, LanguageCode.eng, "EnglishDict2");
-            String zhoConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dummyData, Config, LanguageCode.zho, "ChineseDict");
 
-            Config.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("English1", eng1ConnectionString));
-            Config.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("English2", eng2ConnectionString));
-            Config.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.zho].Add(Tuple.Create("Chinese", zhoConnectionString));
+        private static void InitializeDummyDatabases()
+        {
+            String dummyData = CreateMockCSVFile();
+
+            ConfigFileHandler.SetConfigToDefault();
+            ConfigManager.FileStoreLocation = "DummyFileStore";
+            ConfigManager.DictionariesDirectory = "DummyDictionaries";
+
+            String eng1ConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dummyData, LanguageCode.eng, "EnglishDict1");
+            String eng2ConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dummyData, LanguageCode.eng, "EnglishDict2");
+            String zhoConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dummyData, LanguageCode.zho, "ChineseDict");
+
+            ConfigManager.AddDictionaryDetails(LanguageCode.eng, Tuple.Create("English1", eng1ConnectionString));
+            ConfigManager.AddDictionaryDetails(LanguageCode.eng, Tuple.Create("English2", eng2ConnectionString));
+            ConfigManager.AddDictionaryDetails(LanguageCode.zho, Tuple.Create("Chinese", zhoConnectionString));
         }
 
 
@@ -61,7 +57,7 @@ namespace LearningStoreTests
         public void AvailableDictionaries_ReturnsCorrectDictionaryNames()
         {
             var expected = new List<string> { "English1", "English2" };
-            var result = ExternalDictionaryManager.AvailableDictionaries(Config, LanguageCode.eng);
+            var result = ExternalDictionaryManager.AvailableDictionaries(LanguageCode.eng);
             CollectionAssert.AreEqual(expected, result);
         }
 
@@ -69,7 +65,7 @@ namespace LearningStoreTests
         public void AvailableDictionaries_ReturnsCorrectDictionaryNamesWhenNone()
         {
             var expected = new List<string>();
-            var result = ExternalDictionaryManager.AvailableDictionaries(Config, LanguageCode.fra);
+            var result = ExternalDictionaryManager.AvailableDictionaries(LanguageCode.fra);
             CollectionAssert.AreEqual(expected, result);
         }
 
@@ -78,7 +74,7 @@ namespace LearningStoreTests
         {
             string expectedName = "English1";
             LanguageCode lc = LanguageCode.eng;
-            ExternalDictionary result = ExternalDictionaryManager.GetDictionary(Config, lc, expectedName);
+            ExternalDictionary result = ExternalDictionaryManager.GetDictionary(lc, expectedName);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedName, result.Name);
@@ -90,7 +86,7 @@ namespace LearningStoreTests
             string name = "NonExistingDict";
             LanguageCode lc = LanguageCode.eng;
 
-            ExternalDictionary result = ExternalDictionaryManager.GetDictionary(Config, lc, name);
+            ExternalDictionary result = ExternalDictionaryManager.GetDictionary(lc, name);
             Assert.IsNull(result);
         }
 
@@ -100,7 +96,7 @@ namespace LearningStoreTests
             string name = "NonExistingDict";
             LanguageCode lc = LanguageCode.fra; // we don't even have any of these
 
-            ExternalDictionary result = ExternalDictionaryManager.GetDictionary(Config, lc, name);
+            ExternalDictionary result = ExternalDictionaryManager.GetDictionary(lc, name);
             Assert.IsNull(result);
         }
 
@@ -111,9 +107,9 @@ namespace LearningStoreTests
             LanguageCode lc = LanguageCode.zho;
             string csvFileLocation = CreateMockCSVFile();
 
-            ExternalDictionaryManager.AddNewDictionaryFromCSV(Config, lc, name, csvFileLocation);
+            ExternalDictionaryManager.AddNewDictionaryFromCSV(lc, name, csvFileLocation);
 
-            var dictionaries = ExternalDictionaryManager.AvailableDictionaries(Config, lc);
+            var dictionaries = ExternalDictionaryManager.AvailableDictionaries(lc);
             Assert.IsTrue(dictionaries.Contains(name));
         }
 
@@ -125,19 +121,18 @@ namespace LearningStoreTests
             LanguageCode lc = LanguageCode.eng;
             string csvFileLocation = CreateMockCSVFile();
 
-            ExternalDictionaryManager.AddNewDictionaryFromCSV(Config, lc, name, csvFileLocation);
+            ExternalDictionaryManager.AddNewDictionaryFromCSV(lc, name, csvFileLocation);
         }
 
 
         [TestMethod]
         [ExpectedException(typeof(Exception), "Duplicate dictionaries found")]
-        public void VerifyIntegrityWith_ThrowsExceptionForDuplicateDictionaries()
+        public void VerifyIntegrity_ThrowsExceptionForDuplicateDictionaries()
         {
             // Add a duplicate dictionary to a tmp for testing
-            Config tmp = Config.Copy();
-            tmp.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("English1", "CanBeDifferentConnectionString"));
+            ConfigManager.AddDictionaryDetails(LanguageCode.eng, Tuple.Create("English1", "CanBeDifferentConnectionString"));
 
-            ExternalDictionaryManager.VerifyIntegrityWith(tmp);
+            ExternalDictionaryManager.VerifyIntegrity();
 
             // Assert is handled by ExpectedException
         }
@@ -146,11 +141,8 @@ namespace LearningStoreTests
         [ExpectedException(typeof(Exception), "Expected dictionary not found")]
         public void VerifyIntegrityWith_ThrowsExceptionForNonexistantDictionary()
         {
-            // Add a duplicate dictionary to a tmp for testing
-            Config tmp = Config.Copy();
-            tmp.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("Nonexistant", "CanBeDifferentConnectionString"));
-
-            ExternalDictionaryManager.VerifyIntegrityWith(tmp);
+            ConfigManager.AddDictionaryDetails(LanguageCode.eng, Tuple.Create("Nonexistant", "doesntmatter"));
+            ExternalDictionaryManager.VerifyIntegrity();
 
             // Assert is handled by ExpectedException
         }
@@ -158,9 +150,17 @@ namespace LearningStoreTests
         [TestMethod]
         public void VerifyIntegrityWith_PassesForValidConfig()
         {
-            ExternalDictionaryManager.VerifyIntegrityWith(Config);
+            ExternalDictionaryManager.VerifyIntegrity();
         }
-        
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            if (!ConfigFileHandler.Copy.Equals(testStartState))
+            {
+                InitializeDummyDatabases();
+            }
+        }
 
         [ClassCleanup]
         public static void ClassCleanUp()
@@ -174,7 +174,7 @@ namespace LearningStoreTests
                     File.Delete(csvFilePath);
                 }
 
-                string directoryPath = Config.FileStoreLocation;
+                string directoryPath = ConfigManager.FileStoreLocation;
                 if (Directory.Exists(directoryPath))
                 {
                     // Delete all files and subdirectories in the directory

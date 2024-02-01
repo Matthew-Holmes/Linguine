@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,58 +10,74 @@ namespace Infrastructure
 {
     public static class ConfigManager
     {
-        public const String ConfigPath = "config.json";
 
-        public static Config GenerateDefaultConfig()
+        public static String FileStoreLocation
         {
-            Config config = new Config();
-
-            config.FileStoreLocation = "Filestore/";
-            config.DictionariesDirectory = "Dictionaries/";
-            config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
-
-            config.TargetLanguage = LanguageCode.eng;
-            config.NativeLanguage = LanguageCode.eng;
-
-            return config;
-        }
-
-        public static Config? LoadCustomConfig(String path)
-        {
-            if (!File.Exists(path))
+            get => ConfigFileHandler.Copy.FileStoreLocation;
+            set
             {
-                throw new FileNotFoundException();
-            }
-
-            String json = File.ReadAllText(path);
-
-            try
-            {
-                return JsonConvert.DeserializeObject<Config>(json);
-            }
-            catch
-            {
-                return null;
+                Config tmp = ConfigFileHandler.Copy;
+                tmp.FileStoreLocation = value;
+                ConfigFileHandler.UpdateConfig(tmp);
             }
         }
 
-        public static Config? LoadConfig()
+        public static String DictionariesDirectory
         {
-            return LoadCustomConfig(ConfigPath);
+            get => ConfigFileHandler.Copy.DictionariesDirectory;
+            set
+            {
+                Config tmp = ConfigFileHandler.Copy;
+                tmp.DictionariesDirectory = value;
+                ConfigFileHandler.UpdateConfig(tmp);
+            }
         }
 
-        public static bool UpdateConfig(Config newConfig)
+        public static LanguageCode NativeLanguage
         {
-            try
+            get => ConfigFileHandler.Copy.NativeLanguage;
+            set
             {
-                string json = JsonConvert.SerializeObject(newConfig, Formatting.Indented);
-                File.WriteAllText(ConfigPath, json);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
+                Config tmp = ConfigFileHandler.Copy;
+                tmp.NativeLanguage = value;
+                ConfigFileHandler.UpdateConfig(tmp);
             }
         }
+
+        public static LanguageCode TargetLanguage
+        {
+            get => ConfigFileHandler.Copy.TargetLanguage;
+            set
+            {
+                Config tmp = ConfigFileHandler.Copy;
+                tmp.TargetLanguage = value;
+                ConfigFileHandler.UpdateConfig(tmp);
+            }
+        }
+
+        public static Dictionary<LanguageCode, List<Tuple<String, String>>> SavedDictionariesNamesAndConnnectionStrings
+        {
+            get => ConfigFileHandler.Copy.SavedDictionariesNamesAndConnnectionStrings;
+        }
+
+        public static void AddDictionaryDetails(LanguageCode lc, Tuple<String,String> details)
+        {
+            Config tmp = ConfigFileHandler.Copy;
+            if (tmp.SavedDictionariesNamesAndConnnectionStrings is null)
+            {
+                tmp.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
+            }
+            if (tmp.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc) is not true)
+            {
+                tmp.SavedDictionariesNamesAndConnnectionStrings[lc] = new List<Tuple<string, string>>();
+            }
+
+            tmp.SavedDictionariesNamesAndConnnectionStrings[lc].Add(details);
+
+            ConfigFileHandler.UpdateConfig(tmp);
+        }
+
+
+        
     }
 }
