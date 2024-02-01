@@ -68,10 +68,12 @@ namespace LearningStore
             ExternalDictionary dict = new ExternalDictionary(lc, name, connectionString); // check that it exists
             dict.Dispose();
 
-
-            if (ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Any(t => t.Item1 == name))
+            if (ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))
             {
-                throw new Exception("Already an existing dictionary with this name");
+                if (ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Any(t => t.Item1 == name))
+                {
+                    throw new Exception("Already an existing dictionary with this name");
+                }
             }
 
             ConfigManager.AddDictionaryDetails(lc, Tuple.Create(name, connectionString));
