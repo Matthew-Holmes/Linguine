@@ -25,7 +25,7 @@
             <Button Content="+Config+" Command="{Binding OpenConfigManagerTabCommand}" Grid.Column="2"/>
             <Button Content="+Text Viewer+" Command="{Binding OpenTextualMediaViewerTabCommand}" Grid.Column="4"/>
         </Grid>
-        <TabControl ItemsSource="{Binding Tabs}" Grid.Row="1">
+        <TabControl ItemsSource="{Binding Tabs}" SelectedItem ="{Binding SelectedTab}" Grid.Row="1">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
