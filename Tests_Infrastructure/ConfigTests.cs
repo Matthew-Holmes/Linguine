@@ -55,6 +55,13 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void Copy_OpenAIAPIIsIndependent()
+        {
+            copiedConfig.OpenAI_APIKeyLocation = "somethingelse.txt";
+            Assert.AreNotEqual(originalConfig.OpenAI_APIKeyLocation, copiedConfig.OpenAI_APIKeyLocation);
+        }
+
+        [TestMethod]
         public void Copy_SavedDictionariesNamesAndConnnectionStringsIsDeepCopied()
         {
             copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(new Tuple<string, string>("Name2", "ConnectionString2"));

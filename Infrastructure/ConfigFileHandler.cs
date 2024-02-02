@@ -25,6 +25,9 @@ namespace Infrastructure
             config.FileStoreLocation = "Filestore/";
             config.DictionariesDirectory = "Dictionaries/";
             config.VariantsDirectory = "Variants/";
+
+            config.OpenAI_APIKeyLocation = "APIKeys/OpenAI.txt";
+
             config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
 
             config.TargetLanguage = LanguageCode.eng;

@@ -44,6 +44,17 @@ namespace Infrastructure
             }
         }
 
+        public static String OpenAI_APIKey
+        {
+            get => ConfigFileHandler.Copy.OpenAI_APIKeyLocation;
+            set
+            {
+                Config tmp = ConfigFileHandler.Copy;
+                tmp.OpenAI_APIKeyLocation = value;
+                ConfigFileHandler.UpdateConfig(tmp);
+            }
+        }
+
         public static LanguageCode NativeLanguage
         {
             get => ConfigFileHandler.Copy.NativeLanguage;

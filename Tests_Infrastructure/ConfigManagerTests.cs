@@ -56,6 +56,14 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void TestOpenAIAPIKeyGetSet()
+        {
+            string testValue = "keys/somethingelse.txt";
+            ConfigManager.OpenAI_APIKey = testValue;
+            Assert.AreEqual(testValue, ConfigManager.OpenAI_APIKey);
+        }
+
+        [TestMethod]
         public void TestNativeLanguageGetSet()
         {
             LanguageCode testValue = LanguageCode.eng;

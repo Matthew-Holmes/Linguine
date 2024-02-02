@@ -15,6 +15,7 @@ namespace Infrastructure
         internal string FileStoreLocation;
         internal string DictionariesDirectory;
         internal string VariantsDirectory;
+        internal string OpenAI_APIKeyLocation;
 
         internal Dictionary<LanguageCode, List<Tuple<String, String>>> SavedDictionariesNamesAndConnnectionStrings;
         internal Dictionary<LanguageCode, List<Tuple<String, String>>> SavedVariantsNamesAndConnnectionStrings;
@@ -31,6 +32,7 @@ namespace Infrastructure
                 FileStoreLocation = this.FileStoreLocation,
                 DictionariesDirectory = this.DictionariesDirectory,
                 VariantsDirectory = this.VariantsDirectory,
+                OpenAI_APIKeyLocation = this.OpenAI_APIKeyLocation,
 
                 NativeLanguage = this.NativeLanguage,
                 TargetLanguage = this.TargetLanguage,
@@ -76,6 +78,7 @@ namespace Infrastructure
             bool sameFileStore = FileStoreLocation == rhs.FileStoreLocation;
             bool sameDictionaryDir = DictionariesDirectory == rhs.DictionariesDirectory;
             bool sameVariantsDir = VariantsDirectory == rhs.VariantsDirectory;
+            bool sameAPIKeyLocation = OpenAI_APIKeyLocation == rhs.OpenAI_APIKeyLocation;
 
             // pigeon hole principle
             bool sameDictionaryDatabases = (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0) == (rhs.SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0);
@@ -116,7 +119,7 @@ namespace Infrastructure
                 }
             }
 
-            return sameTarget && sameNative && sameFileStore && sameDictionaryDir && sameVariantsDir && sameDictionaryDatabases && sameVariantsDatabases;
+            return sameTarget && sameNative && sameFileStore && sameDictionaryDir && sameVariantsDir && sameDictionaryDatabases && sameVariantsDatabases && sameAPIKeyLocation;
         }
 
     }
