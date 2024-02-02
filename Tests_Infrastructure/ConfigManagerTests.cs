@@ -48,6 +48,14 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void TestVariantsDirectoryGetSet()
+        {
+            string testValue = "test/variants";
+            ConfigManager.VariantsDirectory = testValue;
+            Assert.AreEqual(testValue, ConfigManager.VariantsDirectory);
+        }
+
+        [TestMethod]
         public void TestNativeLanguageGetSet()
         {
             LanguageCode testValue = LanguageCode.eng;
@@ -92,6 +100,37 @@ namespace Tests_Infrastructure
             Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details1));
             Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details2));
             Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details3));
+        }
+
+        [TestMethod]
+        public void TestAddVariantsDetails()
+        {
+            var details = new Tuple<string, string>("name", "connectionString");
+            LanguageCode lc = LanguageCode.zho;
+
+            ConfigManager.AddVariantsDetails(lc, details);
+
+            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc));
+            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details));
+        }
+
+        [TestMethod]
+        public void TestAddMultipleVariantsDetails()
+        {
+            var details1 = new Tuple<string, string>("name1", "connectionString1");
+            var details2 = new Tuple<string, string>("name2", "connectionString2");
+            var details3 = new Tuple<string, string>("name3", "connectionString3");
+            LanguageCode lc = LanguageCode.zho;
+
+            ConfigManager.AddVariantsDetails(lc, details1);
+            ConfigManager.AddVariantsDetails(lc, details2);
+            ConfigManager.AddVariantsDetails(lc, details3);
+
+            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc));
+            Assert.AreEqual(3, ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Count);
+            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details1));
+            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details2));
+            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details3));
         }
     }
 }

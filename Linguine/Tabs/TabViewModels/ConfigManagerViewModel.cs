@@ -92,16 +92,12 @@ namespace Linguine.Tabs
         }
         #endregion
 
+        #region dictionary loading
         public List<String> TargetLanguageDictionaries { get; private set; }
         public List<String> NativeLanguageDictionaries { get; private set; }
 
-
-        public ConfigManagerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
-        {
-            Title = "Config Manager";
-            SetupLanguageSelection();
-            SetupDictionarySelection();
-        }
+        public ICommand AddNewNativeDictionaryCommand { get; private set; }
+        public ICommand AddNewTargetDictionaryCommand { get; private set; }
 
         private void SetupDictionarySelection()
         {
@@ -150,7 +146,8 @@ namespace Linguine.Tabs
             try
             {
                 ExternalDictionaryManager.AddNewDictionaryFromCSV(lc, name, filename);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 _uiComponents.CanMessage.Show(e.Message);
             }
@@ -167,7 +164,89 @@ namespace Linguine.Tabs
             OnPropertyChanged(nameof(NativeLanguageDictionaries));
         }
 
-        public ICommand AddNewNativeDictionaryCommand { get; private set; }
-        public ICommand AddNewTargetDictionaryCommand { get; private set; }
+        #endregion
+
+        #region variants loading
+        public List<String> TargetLanguageVariantSources { get; private set; }
+        public List<String> NativeLanguageVariantSources { get; private set; }
+
+        public ICommand AddNewNativeVariantsSourceCommand { get; private set; }
+        public ICommand AddNewTargetVariantsSourceCommand { get; private set; }
+
+        private void SetupVariantsSelection()
+        {
+            RefreshAvailableVariantsSources();
+            ConfigFileHandler.ConfigUpdated += RefreshAvailableVariantsSources;
+
+            AddNewNativeVariantsSourceCommand = new RelayCommand(() => AddNewNativeVariantsSource());
+            AddNewTargetVariantsSourceCommand = new RelayCommand(() => AddNewTargetVariantsSource());
+        }
+
+        private void AddNewTargetVariantsSource()
+        {
+            if (_uiComponents.CanVerify.AskYesNo($"add a new {TargetLanguage} variants source for variant/root mapping?"))
+            {
+                AddNewVariantsSource(ConfigManager.TargetLanguage);
+            }
+        }
+
+        private void AddNewNativeVariantsSource()
+        {
+            if (_uiComponents.CanVerify.AskYesNo($"add a new {NativeLanguage} variants source for variant/root mapping?"))
+            {
+                AddNewVariantsSource(ConfigManager.NativeLanguage);
+            }
+        }
+
+        private void AddNewVariantsSource(LanguageCode lc)
+        {
+            String name;
+            String filename;
+
+            while (true)
+            {
+                filename = _uiComponents.CanBrowseFiles.Browse();
+                if (filename is not null && filename != "") { break; }
+                if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
+            }
+
+            while (true)
+            {
+                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictioary");
+                if (name is not null && name != "") { break; }
+                if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
+            }
+
+            try
+            {
+                VariantsManager.AddNewVariantsSourceFromCSV(lc, name, filename);
+            }
+            catch (Exception e)
+            {
+                _uiComponents.CanMessage.Show(e.Message);
+            }
+
+            RefreshAvailableVariantsSources();
+        }
+
+        private void RefreshAvailableVariantsSources()
+        {
+            TargetLanguageVariantSources = VariantsManager.AvailableVariantsSources(ConfigManager.TargetLanguage);
+            NativeLanguageVariantSources = VariantsManager.AvailableVariantsSources(ConfigManager.NativeLanguage);
+
+            OnPropertyChanged(nameof(TargetLanguageVariantSources));
+            OnPropertyChanged(nameof(NativeLanguageVariantSources));
+        }
+        #endregion
+
+        public ConfigManagerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
+        {
+            Title = "Config Manager";
+            SetupLanguageSelection();
+            SetupDictionarySelection();
+            SetupVariantsSelection();
+        }
+
+       
     }
 }

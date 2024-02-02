@@ -14,8 +14,10 @@ namespace Infrastructure
     {
         internal string FileStoreLocation;
         internal string DictionariesDirectory;
+        internal string VariantsDirectory;
 
         internal Dictionary<LanguageCode, List<Tuple<String, String>>> SavedDictionariesNamesAndConnnectionStrings;
+        internal Dictionary<LanguageCode, List<Tuple<String, String>>> SavedVariantsNamesAndConnnectionStrings;
 
         [JsonConverter(typeof(StringEnumConverter))]
         internal LanguageCode NativeLanguage;
@@ -28,11 +30,14 @@ namespace Infrastructure
             {
                 FileStoreLocation = this.FileStoreLocation,
                 DictionariesDirectory = this.DictionariesDirectory,
+                VariantsDirectory = this.VariantsDirectory,
 
                 NativeLanguage = this.NativeLanguage,
                 TargetLanguage = this.TargetLanguage,
 
-                SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>()
+                SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>(),
+                SavedVariantsNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>()
+                
             };
 
             if (this.SavedDictionariesNamesAndConnnectionStrings is not null)
@@ -40,6 +45,16 @@ namespace Infrastructure
                 foreach (var entry in this.SavedDictionariesNamesAndConnnectionStrings)
                 {
                     copy.SavedDictionariesNamesAndConnnectionStrings.Add(
+                        entry.Key,
+                        new List<Tuple<String, String>>(entry.Value));
+                }
+            }
+
+            if (this.SavedVariantsNamesAndConnnectionStrings is not null)
+            {
+                foreach (var entry in this.SavedVariantsNamesAndConnnectionStrings)
+                {
+                    copy.SavedVariantsNamesAndConnnectionStrings.Add(
                         entry.Key,
                         new List<Tuple<String, String>>(entry.Value));
                 }
@@ -60,28 +75,48 @@ namespace Infrastructure
 
             bool sameFileStore = FileStoreLocation == rhs.FileStoreLocation;
             bool sameDictionaryDir = DictionariesDirectory == rhs.DictionariesDirectory;
+            bool sameVariantsDir = VariantsDirectory == rhs.VariantsDirectory;
 
             // pigeon hole principle
-            bool sameDatabases = (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0) == (rhs.SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0);
-            if (sameDatabases && (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0 ) > 0)
+            bool sameDictionaryDatabases = (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0) == (rhs.SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0);
+            if (sameDictionaryDatabases && (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0 ) > 0)
             {
                 foreach (var entry in SavedDictionariesNamesAndConnnectionStrings)
                 {
                     if (!rhs.SavedDictionariesNamesAndConnnectionStrings.TryGetValue(entry.Key, out var rhsValue))
                     {
-                        sameDatabases = false;
+                        sameDictionaryDatabases = false;
                         break;
                     }
 
-                    sameDatabases = sameDatabases && entry.Value.SequenceEqual(rhsValue);
-                    if (!sameDatabases)
+                    sameDictionaryDatabases = sameDictionaryDatabases && entry.Value.SequenceEqual(rhsValue);
+                    if (!sameDictionaryDatabases)
                     {
                         break;
                     }
                 }
             }
 
-            return sameTarget && sameNative && sameFileStore && sameDictionaryDir && sameDatabases;
+            bool sameVariantsDatabases = (SavedVariantsNamesAndConnnectionStrings?.Count ?? 0) == (rhs.SavedVariantsNamesAndConnnectionStrings?.Count ?? 0);
+            if (sameVariantsDatabases && (SavedVariantsNamesAndConnnectionStrings?.Count ?? 0) > 0)
+            {
+                foreach (var entry in SavedVariantsNamesAndConnnectionStrings)
+                {
+                    if (!rhs.SavedVariantsNamesAndConnnectionStrings.TryGetValue(entry.Key, out var rhsValue))
+                    {
+                        sameVariantsDatabases = false;
+                        break;
+                    }
+
+                    sameVariantsDatabases = sameVariantsDatabases && entry.Value.SequenceEqual(rhsValue);
+                    if (!sameVariantsDatabases)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return sameTarget && sameNative && sameFileStore && sameDictionaryDir && sameVariantsDir && sameDictionaryDatabases && sameVariantsDatabases;
         }
 
     }

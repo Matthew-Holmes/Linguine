@@ -24,6 +24,7 @@ namespace Infrastructure
 
             config.FileStoreLocation = "Filestore/";
             config.DictionariesDirectory = "Dictionaries/";
+            config.VariantsDirectory = "Variants/";
             config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
 
             config.TargetLanguage = LanguageCode.eng;

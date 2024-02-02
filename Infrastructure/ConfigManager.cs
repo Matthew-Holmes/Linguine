@@ -33,6 +33,17 @@ namespace Infrastructure
             }
         }
 
+        public static String VariantsDirectory
+        {
+            get => ConfigFileHandler.Copy.VariantsDirectory;
+            set
+            {
+                Config tmp = ConfigFileHandler.Copy;
+                tmp.VariantsDirectory = value;
+                ConfigFileHandler.UpdateConfig(tmp);
+            }
+        }
+
         public static LanguageCode NativeLanguage
         {
             get => ConfigFileHandler.Copy.NativeLanguage;
@@ -60,6 +71,11 @@ namespace Infrastructure
             get => ConfigFileHandler.Copy.SavedDictionariesNamesAndConnnectionStrings;
         }
 
+        public static Dictionary<LanguageCode, List<Tuple<String, String>>> SavedVariantsNamesAndConnnectionStrings
+        {
+            get => ConfigFileHandler.Copy.SavedVariantsNamesAndConnnectionStrings;
+        }
+
         public static void AddDictionaryDetails(LanguageCode lc, Tuple<String,String> details)
         {
             Config tmp = ConfigFileHandler.Copy;
@@ -77,7 +93,22 @@ namespace Infrastructure
             ConfigFileHandler.UpdateConfig(tmp);
         }
 
+        public static void AddVariantsDetails(LanguageCode lc, Tuple<String, String> details)
+        {
+            Config tmp = ConfigFileHandler.Copy;
+            if (tmp.SavedVariantsNamesAndConnnectionStrings is null)
+            {
+                tmp.SavedVariantsNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
+            }
+            if (tmp.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc) is not true)
+            {
+                tmp.SavedVariantsNamesAndConnnectionStrings[lc] = new List<Tuple<string, string>>();
+            }
 
-        
+            tmp.SavedVariantsNamesAndConnnectionStrings[lc].Add(details);
+
+            ConfigFileHandler.UpdateConfig(tmp);
+        }
+
     }
 }

@@ -19,7 +19,12 @@ namespace Tests_Infrastructure
             {
                 FileStoreLocation = "OriginalLocation",
                 DictionariesDirectory = "OriginalDictionary",
+                VariantsDirectory = "OriginalVariants",
                 SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>
+                {
+                    { LanguageCode.eng, new List<Tuple<string, string>> { new Tuple<string, string>("Name1", "ConnectionString1") } }
+                },
+                SavedVariantsNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>
                 {
                     { LanguageCode.eng, new List<Tuple<string, string>> { new Tuple<string, string>("Name1", "ConnectionString1") } }
                 }
@@ -43,10 +48,24 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void Copy_VariantsDirectoryIsIndependent()
+        {
+            copiedConfig.VariantsDirectory = "ChangedDictionary";
+            Assert.AreNotEqual(originalConfig.VariantsDirectory, copiedConfig.VariantsDirectory);
+        }
+
+        [TestMethod]
         public void Copy_SavedDictionariesNamesAndConnnectionStringsIsDeepCopied()
         {
             copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(new Tuple<string, string>("Name2", "ConnectionString2"));
             Assert.AreNotEqual(originalConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Count, copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Count);
+        }
+
+        [TestMethod]
+        public void Copy_SavedVariantsNamesAndConnnectionStringsIsDeepCopied()
+        {
+            copiedConfig.SavedVariantsNamesAndConnnectionStrings[LanguageCode.eng].Add(new Tuple<string, string>("Name2", "ConnectionString2"));
+            Assert.AreNotEqual(originalConfig.SavedVariantsNamesAndConnnectionStrings[LanguageCode.eng].Count, copiedConfig.SavedVariantsNamesAndConnnectionStrings[LanguageCode.eng].Count);
         }
 
         [TestMethod]
@@ -56,7 +75,7 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void Equal_returnsFalseForModifiedCopyAdditive()
+        public void Equal_returnsFalseForModifiedCopyAdditiveDictionaries()
         {
             Config modifiedCopy = originalConfig.Copy();
             modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("Dictionary2", "ConnectionString2"));
@@ -64,7 +83,7 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void Equal_returnsFalseForModifiedRemoved()
+        public void Equal_returnsFalseForModifiedRemovedDictionaries()
         {
             Config modifiedCopy = originalConfig.Copy();
             modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng] = new List<Tuple<string, string>>();
@@ -72,7 +91,7 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void Equal_returnsFalseForModifiedRemovedKeyEntirely()
+        public void Equal_returnsFalseForModifiedRemovedKeyEntirelyDictionaries()
         {
             Config modifiedCopy = originalConfig.Copy();
             modifiedCopy.SavedDictionariesNamesAndConnnectionStrings.Remove(LanguageCode.eng);
@@ -80,5 +99,28 @@ namespace Tests_Infrastructure
         }
 
 
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedCopyAdditiveVariants()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("Dictionary2", "ConnectionString2"));
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedRemovedVariants()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng] = new List<Tuple<string, string>>();
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedRemovedKeyEntirelyVariants()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings.Remove(LanguageCode.eng);
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
     }
 }

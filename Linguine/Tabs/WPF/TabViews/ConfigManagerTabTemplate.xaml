@@ -45,7 +45,20 @@
                     <Button Content="Add" Command="{Binding AddNewTargetDictionaryCommand}"/>
                 </StackPanel>
             </StackPanel>
-            
+
+            <StackPanel Name="Variantss" Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Native Variant Sources"/>
+                    <ListBox ItemsSource="{Binding NativeLanguageVariantSources}"/>
+                    <Button Content="Add" Command="{Binding AddNewNativeVariantsSourceCommand}"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Target Variant Sources"/>
+                    <ListBox ItemsSource="{Binding TargetLanguageVariantSources}"/>
+                    <Button Content="Add" Command="{Binding AddNewTargetVariantsSourceCommand}"/>
+                </StackPanel>
+            </StackPanel>
+
         </Grid>
 
     </DataTemplate>
