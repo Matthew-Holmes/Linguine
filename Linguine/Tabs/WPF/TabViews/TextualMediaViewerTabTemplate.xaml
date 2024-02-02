@@ -21,8 +21,12 @@
                 </Grid.RowDefinitions>
 
                 <Button Content="Load" Command="{Binding LoadCommand}" Grid.Row="0"/>
+                <Button Content="Decompose" Command="{Binding DecomposeCommand}" Grid.Row="1"/>
             </Grid>
-            <TextBlock Text="{Binding RawText}" TextWrapping="Wrap"/>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding RawText}" TextWrapping="Wrap"/>
+                <ListBox ItemsSource="{Binding DiscoveredUnits}"/>
+            </StackPanel>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

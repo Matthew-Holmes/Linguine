@@ -5,7 +5,9 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using Agents.DummyAgents;
 using Infrastructure;
+using LearningExtraction;
 
 namespace Linguine
 {
@@ -19,5 +21,15 @@ namespace Linguine
                 throw new FileNotFoundException("Couldn't find config");
             }
         }
+
+        public TextDecomposer? TextDecomposer { get; private set; } = null;
+
+        public bool LoadTextDecompositionService()
+        {
+            TextDecomposer = new TextDecomposer(1000, new DummyTextDecompositionAgent()); // TODO - this should be a factory?
+            return true;
+        }
+
+
     }
 }

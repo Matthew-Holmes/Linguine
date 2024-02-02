@@ -1,11 +1,13 @@
 ﻿using ExternalMedia;
 using Infrastructure;
+using LearningExtraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Navigation;
 using UserInputInterfaces;
 
 namespace Linguine.Tabs
@@ -13,20 +15,33 @@ namespace Linguine.Tabs
     internal class TextualMediaViewerViewModel : TabViewModelBase
     {
         public ICommand LoadCommand { get; private set; }
+        public ICommand DecomposeCommand { get; private set; }
 
         public String RawText
         {
-            get => rawText;
+            get => _rawText;
             private set
             {
-                rawText = value;
+                _rawText = value;
                 OnPropertyChanged(nameof(RawText));
             }
         }
 
+        public List<String> DiscoveredUnits
+        {
+            get => _discoveredUnits;
+            private set
+            {
+                _discoveredUnits = value;
+                OnPropertyChanged(nameof(DiscoveredUnits));
+            }
+        }
+        
         private TextualMedia? _textualMedia;
         private TextualMediaLoader _loader;
-        private string rawText;
+        private TextDecomposition? _decomposition;
+        private String _rawText;
+        private List<String> _discoveredUnits;
 
         public TextualMediaViewerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
         {
@@ -35,6 +50,28 @@ namespace Linguine.Tabs
             _loader = new TextualMediaLoader(uiComponents.CanVerify, uiComponents.CanChooseFromList);
 
             LoadCommand = new RelayCommand(() => Load());
+            DecomposeCommand = new RelayCommand(() => Decompose());
+        }
+
+        private void Decompose()
+        {
+            if (_textualMedia is null)
+            {
+                _uiComponents.CanMessage.Show("Please load text first");
+                return;
+            }
+
+            if (_mainModel.TextDecomposer is null)
+            {
+                if (!_mainModel.LoadTextDecompositionService())
+                {
+                    _uiComponents.CanMessage.Show("Text decomposition service loading failed");
+                    return;
+                }
+            }
+
+            _decomposition = _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
+            DiscoveredUnits = _decomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
         }
 
         private void Load()
