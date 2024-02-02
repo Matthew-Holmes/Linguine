@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +11,13 @@ namespace ExternalMedia
     {
         String _text;
         String _description;
+        LanguageCode _languageCode;
 
-        public InternalTextualMedia(string text, string description = "")
+        public InternalTextualMedia(string text, LanguageCode lc, string description = "")
         {
             _text = text;
             _description = description;
+            _languageCode = lc;
         }
 
         public String Text
@@ -25,6 +28,11 @@ namespace ExternalMedia
         public String Description
         {
             get => _description;
+        }
+
+        public LanguageCode LanguageCode
+        {
+            get => _languageCode;
         }
     }
 }

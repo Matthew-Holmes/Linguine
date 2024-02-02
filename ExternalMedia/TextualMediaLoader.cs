@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Infrastructure;
+using System.Text;
 using System.Threading.Tasks.Sources;
 using UserInputInterfaces;
 
@@ -15,14 +16,14 @@ namespace ExternalMedia
             _userChoosesFromList = userChoosesFromList;
         }
 
-        public InternalTextualMedia LoadFromFile(String path)
+        public InternalTextualMedia LoadFromFile(String path, LanguageCode lc)
         {
-            return LoadFromString(ReadStringFromFile(path));
+            return LoadFromString(ReadStringFromFile(path), lc);
         }
 
-        private InternalTextualMedia LoadFromString(String rawText)
+        private InternalTextualMedia LoadFromString(String rawText, LanguageCode lc)
         {
-            InternalTextualMedia textualMedia = new InternalTextualMedia(rawText);
+            InternalTextualMedia textualMedia = new InternalTextualMedia(rawText, lc);
             return textualMedia;
         }
 

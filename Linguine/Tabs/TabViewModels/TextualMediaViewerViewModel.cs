@@ -1,4 +1,5 @@
 ﻿using ExternalMedia;
+using Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +51,7 @@ namespace Linguine.Tabs
 
             try
             {
-                _textualMedia = _loader.LoadFromFile(filename);
+                _textualMedia = _loader.LoadFromFile(filename, ConfigManager.TargetLanguage);
                 RawText = _textualMedia.Text;
             }
             catch (Exception e)
