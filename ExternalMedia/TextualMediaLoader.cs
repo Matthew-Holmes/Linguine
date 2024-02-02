@@ -16,14 +16,14 @@ namespace ExternalMedia
             _userChoosesFromList = userChoosesFromList;
         }
 
-        public InternalTextualMedia LoadFromFile(String path, LanguageCode lc)
+        public TextualMedia LoadFromFile(String path, LanguageCode lc)
         {
             return LoadFromString(ReadStringFromFile(path), lc);
         }
 
-        private InternalTextualMedia LoadFromString(String rawText, LanguageCode lc)
+        private TextualMedia LoadFromString(String rawText, LanguageCode lc)
         {
-            InternalTextualMedia textualMedia = new InternalTextualMedia(rawText, lc);
+            TextualMedia textualMedia = new TextualMedia(rawText, lc);
             return textualMedia;
         }
 

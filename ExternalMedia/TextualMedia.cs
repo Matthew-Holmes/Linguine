@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace ExternalMedia
 {
-    public class InternalTextualMedia
+    public class TextualMedia
     {
         String _text;
         String _description;
         LanguageCode _languageCode;
 
-        public InternalTextualMedia(string text, LanguageCode lc, string description = "")
+        public TextualMedia(string text, LanguageCode lc, string description = "")
         {
             _text = text;
             _description = description;

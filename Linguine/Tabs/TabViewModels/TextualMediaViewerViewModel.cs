@@ -24,7 +24,7 @@ namespace Linguine.Tabs
             }
         }
 
-        private InternalTextualMedia? _textualMedia;
+        private TextualMedia? _textualMedia;
         private TextualMediaLoader _loader;
         private string rawText;
 

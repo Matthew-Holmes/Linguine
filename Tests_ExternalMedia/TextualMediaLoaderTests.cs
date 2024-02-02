@@ -63,7 +63,7 @@ namespace Tests_ExternalMedia
             string testContent = "Hello World";
             File.WriteAllText(path, testContent);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -77,7 +77,7 @@ namespace Tests_ExternalMedia
             string testContent = "Hello World";
             File.WriteAllText(path, testContent,Encoding.ASCII);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -90,7 +90,7 @@ namespace Tests_ExternalMedia
             string testContent = "Hello World";
             File.WriteAllText(path, testContent, Encoding.UTF8);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -104,7 +104,7 @@ namespace Tests_ExternalMedia
             string testContent = "Hello World";
             File.WriteAllText(path, testContent, Encoding.Unicode);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -117,7 +117,7 @@ namespace Tests_ExternalMedia
             string testContent = "Hello World";
             File.WriteAllText(path, testContent, Encoding.Latin1);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -130,7 +130,7 @@ namespace Tests_ExternalMedia
             string testContent = "Hello World";
             File.WriteAllText(path, testContent, Encoding.BigEndianUnicode);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -143,7 +143,7 @@ namespace Tests_ExternalMedia
             string testContent = "你好世界"; // "Hello World" in Chinese
             File.WriteAllText(path, testContent);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.zho);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.zho);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -157,7 +157,7 @@ namespace Tests_ExternalMedia
             string testContent = "مرحبا بالعالم"; // "Hello World" in Arabic
             File.WriteAllText(path, testContent);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -170,7 +170,7 @@ namespace Tests_ExternalMedia
             string testContent = "🌍👋"; // Earth and waving hand emojis
             File.WriteAllText(path, testContent);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -183,7 +183,7 @@ namespace Tests_ExternalMedia
             string testContent = "こんにちは世界"; // "Hello World" in Japanese
             File.WriteAllText(path, testContent);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
@@ -197,7 +197,7 @@ namespace Tests_ExternalMedia
             string testContent = "Привет мир"; // "Hello World" in Russian
             File.WriteAllText(path, testContent);
 
-            InternalTextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
+            TextualMedia result = loader.LoadFromFile(path, LanguageCode.eng);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(testContent, result.Text);
