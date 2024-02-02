@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using Agents;
 using Agents.DummyAgents;
 using Infrastructure;
 using LearningExtraction;
@@ -26,7 +27,11 @@ namespace Linguine
 
         public bool LoadTextDecompositionService()
         {
-            TextDecomposer = new TextDecomposer(1000, new DummyTextDecompositionAgent()); // TODO - this should be a factory?
+            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
+
+            TextDecompositionAgent agent = new TextDecompositionAgent(apiKey);
+
+            TextDecomposer = new TextDecomposer(1000, agent); // TODO - this should be a factory?
             return true;
         }
 
