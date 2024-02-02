@@ -45,7 +45,7 @@ namespace LearningStore
             return connectionString;
         }
 
-        private static List<DictionaryDefinition> ParseCsv(string filePath)
+        private static List<DictionaryDefinition> ParseCsv(String filePath)
         {
             var definitions = new List<DictionaryDefinition>();
 

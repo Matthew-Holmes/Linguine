@@ -11,9 +11,9 @@ namespace LearningStore
     public class ExternalDictionaryContext : DbContext
     {
         public DbSet<DictionaryDefinition> DictionaryDefinitions { get; set; }
-        private readonly string _connectionString;
+        private readonly String _connectionString;
 
-        public ExternalDictionaryContext(string connectionString)
+        public ExternalDictionaryContext(String connectionString)
         {
             _connectionString = connectionString;
         }
