@@ -17,6 +17,10 @@ namespace Agents.OpenAI
         private readonly int _maxTokens;
         private readonly decimal _temperature;
 
+        public int MaxTokens => _maxTokens;
+        public int PreambleCharCount => _preamble.Length + 30; // TODO - really its the number of tokens we care about
+        // 30 is rough guide for the number of "user"/"system"/"assistant" that has been added
+
         public OpenAIBase(String apiKey, String preamble, int promptDepth, int maxTokens, decimal temperature = 0.5m)
         {
             _apiKey             = apiKey;
@@ -56,7 +60,7 @@ namespace Agents.OpenAI
 
             var data = new
             {
-                model = "gpt-3.5-turbo",
+                model = "gpt-3.5-turbo-0125",
                 messages = messages.ToArray(),
                 temperature = _temperature,
                 max_tokens = _maxTokens,
