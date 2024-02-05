@@ -1,4 +1,5 @@
-﻿using ExternalMedia;
+﻿using Agents.OpenAI;
+using ExternalMedia;
 using Infrastructure;
 using LearningExtraction;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using UserInputInterfaces;
@@ -69,9 +71,28 @@ namespace Linguine.Tabs
                     return;
                 }
             }
-
-            _decomposition = await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
-            DiscoveredUnits = _decomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+            try
+            {
+                _decomposition = await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
+                DiscoveredUnits = _decomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+            } 
+            catch (AggregateException ae)
+            {
+                // flatten the AggregateException to make it easier to handle individual exceptions
+                ae.Flatten().Handle(ex =>
+                {
+                    if (ex is ApiException apiEx)
+                    {
+                        _uiComponents.CanMessage.Show($"Error calling API: {apiEx.Message}\nStatus Code: {apiEx.StatusCode}");
+                        return true; 
+                    }
+                    return false; // indicate that we haven't handled other types of exceptions
+                });
+            }
+            catch (Exception ex)
+            {
+                _uiComponents.CanMessage.Show($"An unexpected error occurred: {ex.Message}");
+            }
         }
 
         private void Load()
