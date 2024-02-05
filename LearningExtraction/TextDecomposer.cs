@@ -11,8 +11,6 @@ namespace LearningExtraction
 {
     public class TextDecomposer
     {
-        // TODO - write some tests with a mocked up agent that just does dummy split
-
         public int MaxVolumeToProcess { get; set; } // if given text larger than this, chunk it
 
         public AgentBase Agent { get; set; }

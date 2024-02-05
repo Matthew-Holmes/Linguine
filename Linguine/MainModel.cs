@@ -31,7 +31,8 @@ namespace Linguine
 
             TextDecompositionAgent agent = new TextDecompositionAgent(apiKey);
 
-            TextDecomposer = new TextDecomposer(1000, agent); // TODO - this should be a factory?
+            // upper bound max volume to process since #tokens <= #chars
+            TextDecomposer = new TextDecomposer(agent.MaxTokens - agent.PreambleCharCount, agent); // TODO - this should be a factory?
             return true;
         }
 
