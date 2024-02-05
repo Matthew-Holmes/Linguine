@@ -5,6 +5,7 @@ using System;
 using ExternalMedia;
 using Infrastructure;
 using Agents;
+using System.Security.Cryptography;
 
 namespace Tests_LearningExtraction
 {
@@ -14,18 +15,18 @@ namespace Tests_LearningExtraction
 
         private class WontBijectWillInjectAgent : AgentBase
         {
-            protected override string GetResponseCore(string prompt)
+            protected override Task<String> GetResponseCore(string prompt)
             {
-                return prompt.Substring(0, 5);
+                return Task.FromResult(prompt.Substring(0, 5));
             }
         }
 
 
         private class WontlInjectAgent : AgentBase
         {
-            protected override string GetResponseCore(string prompt)
+            protected override Task<String> GetResponseCore(string prompt)
             {
-                return "Here's your decomposition:\n" + prompt.Substring(0, 5);
+                return Task.FromResult("Here's your decomposition:\n" + prompt.Substring(0, 5));
             }
         }
 
@@ -39,7 +40,7 @@ namespace Tests_LearningExtraction
             var textSource = new TextualMedia("Hello", LanguageCode.eng);
 
             // Act
-            var result = decomposer.DecomposeText(textSource);
+            var result = decomposer.DecomposeText(textSource).Result;
 
             // Assert
             Assert.IsNotNull(result);
@@ -56,7 +57,7 @@ namespace Tests_LearningExtraction
             var textSource = new TextualMedia("This is a longer text for testing purposes", LanguageCode.fra);
 
             // Act
-            var result = decomposer.DecomposeText(textSource);
+            var result = decomposer.DecomposeText(textSource).Result;
 
             // Assert
             Assert.IsNotNull(result);
@@ -66,28 +67,62 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Invalid decomposition")]
         public void DecomposeText_WithBijectRequirementNotMet_ShouldThrowException()
         {
-            // Arrange
-            var decomposer = new TextDecomposer(100, new WontBijectWillInjectAgent());
-            var textSource = new TextualMedia("This is a longer text for testing biject requirements", LanguageCode.eng);
+            try
+            {
+                var decomposer = new TextDecomposer(100, new WontBijectWillInjectAgent());
+                var textSource = new TextualMedia("This is a longer text for testing biject requirements", LanguageCode.eng);
 
-            // Act
-            decomposer.DecomposeText(textSource, mustBiject: true);
+                // Act
+                decomposer.DecomposeText(textSource, mustBiject: true).Wait();
+                Assert.Fail("Expected an invalid decomposition exception");
+            } catch (AggregateException ae)
+            {
+                bool expectedExceptionThrown = false;
+
+                foreach (var exception in ae.InnerExceptions)
+                {
+                    if (exception is Exception && exception.Message == "Invalid decomposition")
+                    {
+                        expectedExceptionThrown = true;
+                        break;
+                    }
+                }
+
+                Assert.IsTrue(expectedExceptionThrown, "expected an Invalid Decomposition exception");
+
+            }
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Invalid decomposition")]
         public void DecomposeText_WithInjectRequirementNotMet_ShouldThrowException()
         {
             // Arrange
-            var agent = new DummyTextDecompositionAgent();
-            var decomposer = new TextDecomposer(50, new WontlInjectAgent());
-            var textSource = new TextualMedia("This text is not expected to inject properly", LanguageCode.eng);
+            try
+            {
+                var agent = new DummyTextDecompositionAgent();
+                var decomposer = new TextDecomposer(50, new WontlInjectAgent());
+                var textSource = new TextualMedia("This text is not expected to inject properly", LanguageCode.eng);
 
-            // Act
-            decomposer.DecomposeText(textSource, mustInject: true);
+                decomposer.DecomposeText(textSource, mustBiject: true).Wait();
+                Assert.Fail("Expected an invalid decomposition exception");
+            }
+            catch (AggregateException ae)
+            {
+                bool expectedExceptionThrown = false;
+
+                foreach (var exception in ae.InnerExceptions)
+                {
+                    if (exception is Exception && exception.Message == "Invalid decomposition")
+                    {
+                        expectedExceptionThrown = true;
+                        break;
+                    }
+                }
+
+                Assert.IsTrue(expectedExceptionThrown, "expected an Invalid decomposition exception");
+            }
         }
     }
 }

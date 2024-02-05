@@ -8,7 +8,7 @@ namespace Agents.DummyAgents
 {
     public class DummyTextDecompositionAgent : AgentBase
     {
-        protected override String GetResponseCore(String prompt)
+        protected override Task<String> GetResponseCore(String prompt)
         {
 
             int len = prompt.Length;
@@ -26,8 +26,7 @@ namespace Agents.DummyAgents
                 rhs += 5;
             }
 
-            return response;
-
+            return Task.FromResult(response);
         }
     }
 }

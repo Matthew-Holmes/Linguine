@@ -26,12 +26,7 @@ namespace Agents.OpenAI
             this._maxTokens = maxTokens;
         }
 
-        protected override string GetResponseCore(string prompt)
-        {
-            return Task.Run(async () => await SendMessage(prompt)).Result;
-        }
-
-        private async Task<string> SendMessage(string message)
+        protected override async Task<String> GetResponseCore(string prompt)
         {
             var messages = new List<object>();
 
@@ -55,7 +50,7 @@ namespace Agents.OpenAI
             }
 
             // Add the current user message
-            messages.Add(new { role = "user", content = message });
+            messages.Add(new { role = "user", content = prompt });
 
             var data = new
             {
@@ -81,6 +76,5 @@ namespace Agents.OpenAI
                 throw new Exception($"API Error: {responseString}");
             }
         }
-
     }
 }

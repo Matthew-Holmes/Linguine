@@ -17,14 +17,14 @@ namespace LearningExtraction
 
         public AgentBase Agent { get; set; }
 
-        public TextDecomposition DecomposeText(TextualMedia textSource, bool mustInject = true, bool mustBiject = false)
+        public async Task<TextDecomposition> DecomposeText(TextualMedia textSource, bool mustInject = true, bool mustBiject = false)
         {
             if (textSource.Text.Length > MaxVolumeToProcess)
             {
                 throw new NotImplementedException("need to implement text chunking");
             }
 
-            String newLinedDecomposition = Agent.GetResponse(textSource.Text);
+            String newLinedDecomposition = await Agent.GetResponse(textSource.Text);
 
             TextDecomposition ret = TextDecomposition.FromNewLinedString(textSource.Text, newLinedDecomposition);
 

@@ -53,7 +53,7 @@ namespace Linguine.Tabs
             DecomposeCommand = new RelayCommand(() => Decompose());
         }
 
-        private void Decompose()
+        private async Task Decompose()
         {
             if (_textualMedia is null)
             {
@@ -70,7 +70,7 @@ namespace Linguine.Tabs
                 }
             }
 
-            _decomposition = _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
+            _decomposition = await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
             DiscoveredUnits = _decomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
         }
 
