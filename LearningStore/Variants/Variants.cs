@@ -36,7 +36,7 @@ namespace LearningStore
         public IEnumerable<String> GetVariants(String root)
         {
             return _context.Variants
-                .Where(v => v.Root.Contains(root))
+                .Where(v => v.Root.Equals(root))
                 .Select(v => v.Variant)
                 .Distinct()
                 .ToList();
@@ -45,7 +45,7 @@ namespace LearningStore
         public IEnumerable<String> GetRoots(String variant)
         {
             return _context.Variants
-                .Where(v => v.Variant.Contains(variant))
+                .Where(v => v.Variant.Equals(variant))
                 .Select(v => v.Root)
                 .Distinct()
                 .ToList();
