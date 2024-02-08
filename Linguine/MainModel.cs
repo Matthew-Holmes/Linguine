@@ -105,9 +105,13 @@ namespace Linguine
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
 
             TextDecompositionAndRootingAgent agent = new TextDecompositionAndRootingAgent(apiKey);
+            CaseFixingAgent fixer = new CaseFixingAgent(apiKey);
+
+            CasePossibilitiesAgent casePossibilities = new CasePossibilitiesAgent(apiKey);
+            CaseChoosingAgent caseChoosing = new CaseChoosingAgent(apiKey);
 
             // upper bound max volume to process since #tokens <= #chars
-            TextDecomposerAndRooter = new TextDecomposerAndRooter(agent.MaxTokens - agent.PreambleCharCount, agent); // TODO - this should be a factory?
+            TextDecomposerAndRooter = new TextDecomposerAndRooter(agent.MaxTokens - agent.PreambleCharCount, agent, fixer, casePossibilities, caseChoosing); // TODO - this should be a factory?
             return true;
         }
 

@@ -10,7 +10,7 @@ namespace Agents
     public class RootValidatorAgent : OpenAIBase
     {
         private static String preamble = "Given the context, is the provided root of original correct. ONLY reply y or n";
-        public RootValidatorAgent(string apiKey) : base(apiKey, preamble, 0, 1000) { }
+        public RootValidatorAgent(string apiKey) : base(apiKey, preamble, 0, 1000, "gpt-3.5-turbo-0125") { }
 
     }
 }

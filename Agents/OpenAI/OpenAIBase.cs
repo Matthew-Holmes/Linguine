@@ -16,12 +16,13 @@ namespace Agents.OpenAI
         private readonly int _promptDepth;
         private readonly int _maxTokens;
         private readonly decimal _temperature;
+        private readonly string _model;
 
         public int MaxTokens => _maxTokens;
         public int PreambleCharCount => _preamble.Length + 30; // TODO - really its the number of tokens we care about
         // 30 is rough guide for the number of "user"/"system"/"assistant" that has been added
 
-        public OpenAIBase(String apiKey, String preamble, int promptDepth, int maxTokens, decimal temperature = 0.5m)
+        public OpenAIBase(String apiKey, String preamble, int promptDepth, int maxTokens, string model, decimal temperature = 0.1m)
         {
             _apiKey             = apiKey;
             this._httpClient    = new HttpClient();
@@ -30,6 +31,7 @@ namespace Agents.OpenAI
             this._promptDepth   = promptDepth;
             this._maxTokens     = maxTokens;
             this._temperature   = temperature;
+            this._model         = model;
         }
 
         protected override async Task<String> GetResponseCore(string prompt)
@@ -61,7 +63,7 @@ namespace Agents.OpenAI
             var data = new
             {
                 //model = "gpt-3.5-turbo-0125",
-                model = "gpt-4-0125-preview",
+                model = _model,
                 messages = messages.ToArray(),
                 temperature = _temperature,
                 max_tokens = _maxTokens,
