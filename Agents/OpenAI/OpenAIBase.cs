@@ -4,32 +4,31 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Helpers;
 using Newtonsoft.Json;
 
 namespace Agents.OpenAI
 {
-    public class OpenAIBase : AgentBase
+    public class OpenAIBase : ParametrisedAgentBase
     {
         private readonly String _apiKey;
         private readonly HttpClient _httpClient;
-        private readonly String _preamble;
-        private readonly int _promptDepth;
-        private readonly int _maxTokens;
-        private readonly decimal _temperature;
 
-        public int MaxTokens => _maxTokens;
-        public int PreambleCharCount => _preamble.Length + 30; // TODO - really its the number of tokens we care about
-        // 30 is rough guide for the number of "user"/"system"/"assistant" that has been added
-
-        public OpenAIBase(String apiKey, String preamble, int promptDepth, int maxTokens, decimal temperature = 0.5m)
+        public OpenAIBase(String apiKey)
         {
             _apiKey             = apiKey;
             this._httpClient    = new HttpClient();
             this._httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-            this._preamble      = preamble;
-            this._promptDepth   = promptDepth;
-            this._maxTokens     = maxTokens;
-            this._temperature   = temperature;
+
+            DiscreteParameters.Add(new Parameter<int>("PromptDepth", 10, int.MaxValue, 0, 100,   0));
+            DiscreteParameters.Add(new Parameter<int>("MaxTokens", 1000, int.MaxValue, 0, 16000, 0));
+
+            ContinousParameters.Add(new Parameter<double>("Temperature",      1.0, 2.0, 0.0));
+            ContinousParameters.Add(new Parameter<double>("TopP",             1.0, 1.0, 0.0));
+            ContinousParameters.Add(new Parameter<double>("FrequencyPenalty", 0.0, 1.0, 0.0));
+            ContinousParameters.Add(new Parameter<double>("PresencePenalty",  0.0, 1.0, 0.0));
+
+            StringParameters.Add("system", "You are a helpful assistant");
         }
 
         protected override async Task<String> GetResponseCore(string prompt)
@@ -37,10 +36,10 @@ namespace Agents.OpenAI
             var messages = new List<object>();
 
             // assuming _preamble is a system message about the assistant's role
-            messages.Add(new { role = "system", content = _preamble });
+            messages.Add(new { role = "system", content = StringParameters["system"]});
 
             // add chat history to messages
-            int start = Math.Max(0, PromptResponseHistory.Count - _promptDepth);
+            int start = Math.Max(0, PromptResponseHistory.Count - DiscreteParameter("PromptDepth").Value);
             for (int i = start; i < PromptResponseHistory.Count; i++)
             {
                 var entry = PromptResponseHistory[i];
@@ -62,8 +61,11 @@ namespace Agents.OpenAI
             {
                 model = "gpt-3.5-turbo-0125",
                 messages = messages.ToArray(),
-                temperature = _temperature,
-                max_tokens = _maxTokens,
+                temperature = ContinousParameter("Temperature").Value,
+                max_tokens = DiscreteParameter("MaxTokens").Value,
+                top_p = ContinousParameter("TopP").Value,
+                frequency_penalty = ContinousParameter("FrequencyPenalty").Value,
+                presence_penalyt = ContinousParameter("PresencePenalty").Value
             };
 
             var content         = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
@@ -84,4 +86,5 @@ namespace Agents.OpenAI
             }
         }
     }
+
 }

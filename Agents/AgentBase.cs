@@ -9,6 +9,7 @@ namespace Agents
     public abstract class AgentBase
     {
         public List<Tuple<String, String>> PromptResponseHistory { get; private set; } = new List<Tuple<String, String>>();
+
         private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // use this instead of lock since doing async stuff
 
         public async Task<String> GetResponse(String prompt)
@@ -29,7 +30,5 @@ namespace Agents
         }
 
         protected abstract Task<String> GetResponseCore(String prompt);
-
-        
     }
 }
