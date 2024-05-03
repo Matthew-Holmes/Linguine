@@ -13,6 +13,9 @@ namespace LearningStore
 {
     public static class ExternalDictionaryManager
     {
+        // manages the parsing of new dictionaries from .csv
+        // queries and updates the config, can ensure integrity of config with stored databases
+
         public static List<String> AvailableDictionaries( LanguageCode lc)
         {
             if (ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc))

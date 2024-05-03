@@ -10,6 +10,8 @@ namespace LearningStore
 {
     public class ExternalDictionaryContext : DbContext
     {
+        // ORM for a set of dictionary definitions
+        
         public DbSet<DictionaryDefinition> DictionaryDefinitions { get; set; }
         private readonly String _connectionString;
 

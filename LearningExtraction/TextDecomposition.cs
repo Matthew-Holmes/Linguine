@@ -10,6 +10,9 @@ namespace LearningExtraction
 {
     public class TextDecomposition
     {
+        // a piece of text decomposed into units
+        // a null value for Units means no further decomposition - an 'atom'
+
         public TextUnit Total { get; private set; }
 
         public List<TextDecomposition>? Units { get; private set; }
@@ -22,6 +25,9 @@ namespace LearningExtraction
 
         public bool Injects()
         {
+            // checks if each unit exists in the total, without overlap with other units
+            // this methods validates for the entire hierarchy
+
             if (Units is null)
             {
                 return true; // base case, leaf
@@ -55,6 +61,7 @@ namespace LearningExtraction
 
             // if every tree level injects, then any surplus Total would have to propagate up
             // therefore can apply the pigeonhole principle
+
             int count = Units.Sum(td => td.Total.Text.Length);
             return count == Total.Text.Length && Injects();
         }
@@ -103,7 +110,7 @@ namespace LearningExtraction
             }
             else if (decomposition.Count == 1 && decomposition.First().Total.Text == parent)
             {
-                return new TextDecomposition(total, null); // newLinedDecomposition bijects
+                return new TextDecomposition(total, null); // single element newLinedDecomposition bijects, is a leaf
             }
             else
             {

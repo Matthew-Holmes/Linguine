@@ -10,6 +10,9 @@ namespace LearningStore
 {
     public class VariantsContext : DbContext
     {
+        // ORM for linking variants of a word with the chosen root
+        // e.g. inflections for tense or pluralisations
+
         public DbSet<VariantRoot> Variants { get; set; }
         private readonly String _connectionString;
 
