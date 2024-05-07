@@ -6,6 +6,7 @@ using ExternalMedia;
 using Infrastructure;
 using Agents;
 using System.Security.Cryptography;
+using System.Xml;
 
 namespace Tests_LearningExtraction
 {
@@ -52,9 +53,9 @@ namespace Tests_LearningExtraction
         public void DecomposeText_WithLongText_ShouldDecomposeCorrectly()
         {
             // Arrange
-            var agent = new DummyTextDecompositionAgent();
+            var agent = new WhitespaceDecompositionAgent();
             var decomposer = new TextDecomposer(50, agent); // Set a max volume to process that can handle the text
-            var textSource = new TextualMedia("This is a longer text for testing purposes", LanguageCode.fra);
+            var textSource = new TextualMedia("This is a longer text for testing purposes, lorem ipsum dolor est I don't know the rest", LanguageCode.fra);
 
             // Act
             var result = decomposer.DecomposeText(textSource).Result;
