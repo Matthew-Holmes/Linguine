@@ -37,7 +37,9 @@ namespace Tests_LearningExtraction
         {
             // Arrange
             var agent = new DummyTextDecompositionAgent();
-            var decomposer = new TextDecomposer(10, agent); // Set a max volume to process that is larger than the text
+            var decomposer = new TextDecomposer(); // Set a max volume to process that is larger than the text
+            decomposer.StandardAgent = agent;
+            decomposer.MaxVolumeToProcess = 10;
             var textSource = new TextualMedia("Hello", LanguageCode.eng);
 
             // Act
@@ -54,7 +56,11 @@ namespace Tests_LearningExtraction
         {
             // Arrange
             var agent = new WhitespaceDecompositionAgent();
-            var decomposer = new TextDecomposer(50, agent); // Set a max volume to process that can handle the text
+            var decomposer = new TextDecomposer(/*50, agent*/); // Set a max volume to process that can handle the text
+            decomposer.StandardAgent = agent;
+            decomposer.MaxVolumeToProcess = 50;
+            decomposer.JoinCharacterCount = 10;
+            decomposer.PaddingCharacterCount = 10;
             var textSource = new TextualMedia("This is a longer text for testing purposes, lorem ipsum dolor est I don't know the rest", LanguageCode.fra);
 
             // Act
@@ -72,7 +78,11 @@ namespace Tests_LearningExtraction
         {
             try
             {
-                var decomposer = new TextDecomposer(100, new WontBijectWillInjectAgent());
+                var decomposer = new TextDecomposer(/*100, new WontBijectWillInjectAgent()*/);
+
+                decomposer.StandardAgent = new WontBijectWillInjectAgent();
+                decomposer.MaxVolumeToProcess = 100;
+
                 var textSource = new TextualMedia("This is a longer text for testing biject requirements", LanguageCode.eng);
 
                 // Act
@@ -103,7 +113,11 @@ namespace Tests_LearningExtraction
             try
             {
                 var agent = new DummyTextDecompositionAgent();
-                var decomposer = new TextDecomposer(50, new WontlInjectAgent());
+                var decomposer = new TextDecomposer(/*50, new WontlInjectAgent()*/);
+
+                decomposer.StandardAgent = new WontlInjectAgent();
+                decomposer.MaxVolumeToProcess = 50;
+
                 var textSource = new TextualMedia("This text is not expected to inject properly", LanguageCode.eng);
 
                 decomposer.DecomposeText(textSource, mustBiject: true).Wait();

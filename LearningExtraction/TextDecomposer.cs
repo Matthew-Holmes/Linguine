@@ -12,11 +12,14 @@ namespace LearningExtraction
 {
     public class TextDecomposer
     {
-        public int MaxVolumeToProcess { get; set; } // if given text larger than this, chunk it
-        public int JoinCharacterCount { get; set; } = 10;
-        public int PaddingCharacterCount { get; set; } = 10;
+        public int MaxVolumeToProcess { get; set; } = 200; // if given text larger than this, chunk it
+        public int JoinCharacterCount { get; set; } = 20;
+        public int PaddingCharacterCount { get; set; } = 20;
 
-        public AgentBase Agent { get; set; }
+        public AgentBase StandardAgent { get; set; }
+        public AgentBase HighPerformanceAgent { get; set; }
+
+        public AgentBase FallbackAgent { get; set; }
 
         public async Task<TextDecomposition> DecomposeText(TextualMedia textSource, bool mustInject = true, bool mustBiject = false)
         {
@@ -41,7 +44,7 @@ namespace LearningExtraction
 
             }
 
-            String newLinedDecomposition = await Agent.GetResponse(textSource.Text);
+            String newLinedDecomposition = await StandardAgent.GetResponse(textSource.Text);
 
             TextDecomposition ret = TextDecomposition.FromNewLinedString(textSource.Text, newLinedDecomposition);
 
@@ -195,10 +198,8 @@ namespace LearningExtraction
             return new TextDecomposition(new TextUnit(remaining), remainingUnits);
         }
 
-        public TextDecomposer(int maxVolumeToProcess, AgentBase agent)
+        public TextDecomposer()
         {
-            MaxVolumeToProcess = maxVolumeToProcess;
-            Agent = agent;
         }
     }
 }

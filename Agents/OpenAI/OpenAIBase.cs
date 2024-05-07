@@ -29,6 +29,7 @@ namespace Agents.OpenAI
             ContinousParameters.Add(new Parameter<double>("PresencePenalty",  0.0, 1.0, 0.0));
 
             StringParameters.Add("system", "You are a helpful assistant");
+            StringParameters.Add("model", "gpt-3.5-turbo-0125");
         }
 
         protected override async Task<String> GetResponseCore(string prompt)
@@ -59,7 +60,7 @@ namespace Agents.OpenAI
 
             var data = new
             {
-                model = "gpt-3.5-turbo-0125",
+                model = StringParameters["model"],
                 messages = messages.ToArray(),
                 temperature = ContinousParameter("Temperature").Value,
                 max_tokens = DiscreteParameter("MaxTokens").Value,
