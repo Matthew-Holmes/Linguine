@@ -1,6 +1,7 @@
 ﻿using ExternalMedia;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -21,6 +22,13 @@ namespace LearningExtraction
         {
             Total = total;
             Units = units;
+        }
+
+        public TextDecomposition Copy()
+        {
+            TextUnit totalCopy = new TextUnit(new String(this.Total.Text));
+
+            return new TextDecomposition(totalCopy, Units?.Select(unit => unit.Copy()).ToList() ?? null);
         }
 
         public bool Injects()

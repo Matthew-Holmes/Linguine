@@ -250,5 +250,107 @@ namespace Tests_LearningExtraction
             Assert.IsFalse(result); // This checks that overlapping decompositions do not falsely report as bijecting.
         }
 
+        [TestMethod]
+        public void Copy_ReturnsNewInstanceWithSameTotalAndUnits()
+        {
+            // Arrange
+            TextUnit total = new TextUnit("Unit1Unit2");
+            List<TextDecomposition> units = new List<TextDecomposition>
+            {
+                new TextDecomposition(new TextUnit("Unit1"), null),
+                new TextDecomposition(new TextUnit("Unit2"), null)
+            };
+            TextDecomposition original = new TextDecomposition(total, units);
+
+            // Act
+            TextDecomposition copy = original.Copy();
+
+            // Assert
+            Assert.AreNotSame(original, copy);
+            Assert.AreEqual(original.Total.Text, copy.Total.Text);
+            Assert.AreEqual(original.Units.Count, copy.Units.Count);
+            for (int i = 0; i < original.Units.Count; i++)
+            {
+                Assert.AreEqual(original.Units[i].Total.Text, copy.Units[i].Total.Text);
+            }
+        }
+
+        [TestMethod]
+        public void Copy_ReturnsNewInstanceWithIndependentUnits()
+        {
+            // Arrange
+            TextUnit total = new TextUnit("Unit1Unit2");
+            List<TextDecomposition> units = new List<TextDecomposition>
+            {
+                new TextDecomposition(new TextUnit("Unit1"), null),
+                new TextDecomposition(new TextUnit("Unit2"), null)
+            };
+            TextDecomposition original = new TextDecomposition(total, units);
+
+            // Act
+            TextDecomposition copy = original.Copy();
+
+            // Modify the units in the original
+            original.Units[0] = new TextDecomposition(new TextUnit("Modified"), null);
+
+            // Assert
+            Assert.AreNotEqual(original.Units[0].Total.Text, copy.Units[0].Total.Text);
+        }
+
+        [TestMethod]
+        public void Copy_ReturnsCopyWhenLeaf()
+        {
+            // Arrange
+            TextUnit total = new TextUnit("Test");
+            TextDecomposition original = new TextDecomposition(total, null);
+
+            // Act
+            TextDecomposition copy = original.Copy();
+
+            // Assert
+            Assert.IsNull(copy.Units);
+        }
+
+        [TestMethod]
+        public void Copy_ReturnsNewInstanceWithRecursiveUnits()
+        {
+            // Arrange
+            var parent = new TextUnit("hello world");
+            var child1 = new TextDecomposition(new TextUnit("hello"), null);
+            var child2 = new TextDecomposition(new TextUnit(" world"), new List<TextDecomposition>
+                {
+                    new TextDecomposition(new TextUnit("wor"), null), // Breaking down "world" into "wor"...
+                    new TextDecomposition(new TextUnit("ld"), null)  // ...and "ld"
+                });
+            var original = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
+
+            // Act
+            var copy = original.Copy();
+
+            // Assert
+            Assert.AreNotSame(original, copy);
+            Assert.AreEqual(original.Total.Text, copy.Total.Text);
+            Assert.AreEqual(original.Units.Count, copy.Units.Count);
+
+            // Check recursively for nested units
+            Assert.AreNotSame(original.Units[0], copy.Units[0]);
+            Assert.AreEqual(original.Units[0].Total.Text, copy.Units[0].Total.Text);
+            Assert.IsNull(copy.Units[0].Units); // Ensure "hello" is a leaf
+
+            Assert.AreNotSame(original.Units[1], copy.Units[1]);
+            Assert.AreEqual(original.Units[1].Total.Text, copy.Units[1].Total.Text);
+            Assert.IsNotNull(copy.Units[1].Units); // Ensure "world" has nested units
+            Assert.AreEqual(original.Units[1].Units.Count, copy.Units[1].Units.Count);
+
+            // Check recursively for nested units of "world"
+            Assert.AreNotSame(original.Units[1].Units[0], copy.Units[1].Units[0]);
+            Assert.AreEqual(original.Units[1].Units[0].Total.Text, copy.Units[1].Units[0].Total.Text);
+            Assert.IsNull(copy.Units[1].Units[0].Units); // Ensure "wor" is a leaf
+
+            Assert.AreNotSame(original.Units[1].Units[1], copy.Units[1].Units[1]);
+            Assert.AreEqual(original.Units[1].Units[1].Total.Text, copy.Units[1].Units[1].Total.Text);
+            Assert.IsNull(copy.Units[1].Units[1].Units); // Ensure "ld" is a leaf
+        }
+
     }
 }
