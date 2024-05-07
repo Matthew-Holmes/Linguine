@@ -65,7 +65,7 @@ namespace Agents.OpenAI
                 max_tokens = DiscreteParameter("MaxTokens").Value,
                 top_p = ContinousParameter("TopP").Value,
                 frequency_penalty = ContinousParameter("FrequencyPenalty").Value,
-                presence_penalyt = ContinousParameter("PresencePenalty").Value
+                presence_penalty = ContinousParameter("PresencePenalty").Value
             };
 
             var content         = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
