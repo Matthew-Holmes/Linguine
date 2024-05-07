@@ -58,6 +58,8 @@ namespace Tests_LearningExtraction
             var agent = new WhitespaceDecompositionAgent();
             var decomposer = new TextDecomposer(/*50, agent*/); // Set a max volume to process that can handle the text
             decomposer.StandardAgent = agent;
+            decomposer.HighPerformanceAgent = agent;
+            decomposer.FallbackAgent = agent;
             decomposer.MaxVolumeToProcess = 50;
             decomposer.JoinCharacterCount = 10;
             decomposer.PaddingCharacterCount = 10;
@@ -80,7 +82,10 @@ namespace Tests_LearningExtraction
             {
                 var decomposer = new TextDecomposer(/*100, new WontBijectWillInjectAgent()*/);
 
-                decomposer.StandardAgent = new WontBijectWillInjectAgent();
+                AgentBase agent = new WontBijectWillInjectAgent();
+                decomposer.StandardAgent = agent;
+                decomposer.HighPerformanceAgent = agent;
+                decomposer.FallbackAgent = agent;
                 decomposer.MaxVolumeToProcess = 100;
 
                 var textSource = new TextualMedia("This is a longer text for testing biject requirements", LanguageCode.eng);
@@ -112,11 +117,12 @@ namespace Tests_LearningExtraction
             // Arrange
             try
             {
-                var agent = new DummyTextDecompositionAgent();
                 var decomposer = new TextDecomposer(/*50, new WontlInjectAgent()*/);
 
                 decomposer.StandardAgent = new WontlInjectAgent();
-                decomposer.MaxVolumeToProcess = 50;
+                decomposer.HighPerformanceAgent = new WontlInjectAgent();
+                decomposer.FallbackAgent = new WontlInjectAgent();
+                decomposer.MaxVolumeToProcess = 500;
 
                 var textSource = new TextualMedia("This text is not expected to inject properly", LanguageCode.eng);
 
@@ -138,6 +144,21 @@ namespace Tests_LearningExtraction
 
                 Assert.IsTrue(expectedExceptionThrown, "expected an Invalid decomposition exception");
             }
+        }
+
+        [TestMethod]
+        public void DecomposeText_WithInjectRequirementNotMetThenMet_ShouldNotThrowException()
+        {
+            var decomposer = new TextDecomposer(/*50, new WontlInjectAgent()*/);
+
+            decomposer.StandardAgent = new WontlInjectAgent();
+            decomposer.HighPerformanceAgent = new WhitespaceDecompositionAgent();
+            decomposer.FallbackAgent = new WhitespaceDecompositionAgent();
+            decomposer.MaxVolumeToProcess = 500;
+
+            var textSource = new TextualMedia("This text is not expected to inject properly first time", LanguageCode.eng);
+
+            decomposer.DecomposeText(textSource).Wait();
         }
     }
 }

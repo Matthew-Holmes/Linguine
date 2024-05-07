@@ -12,13 +12,12 @@ namespace LearningExtraction
 {
     public class TextDecomposer
     {
-        public int MaxVolumeToProcess { get; set; } = 200; // if given text larger than this, chunk it
-        public int JoinCharacterCount { get; set; } = 20;
-        public int PaddingCharacterCount { get; set; } = 20;
+        public int MaxVolumeToProcess { get; set; }     = 250; // if given text larger than this, chunk it
+        public int JoinCharacterCount { get; set; }     = 20;
+        public int PaddingCharacterCount { get; set; }  = 30; // longest English word is 45 letters 20+30=50
 
         public AgentBase StandardAgent { get; set; }
         public AgentBase HighPerformanceAgent { get; set; }
-
         public AgentBase FallbackAgent { get; set; }
 
         public async Task<TextDecomposition> DecomposeText(TextualMedia textSource, bool mustInject = true, bool mustBiject = false)
@@ -30,34 +29,43 @@ namespace LearningExtraction
                     MaxVolumeToProcess - 2 * JoinCharacterCount - 2 * PaddingCharacterCount, JoinCharacterCount,
                     PaddingCharacterCount);
 
-                // get agent response for each window
-                List<TextDecomposition> partialDecompositions = new List<TextDecomposition>();
-                foreach (String window in windows)
-                {
-                    TextDecomposition partialDecomposition = await DecomposeText(
-                        new TextualMedia(window, textSource.LanguageCode, textSource.Description),
-                        mustInject, mustBiject);
-                    partialDecompositions.Add(partialDecomposition);
-                }
+                // Asynchronously decompose each window
+                var decompositionTasks = windows.Select(window =>
+                    DecomposeText(new TextualMedia(window, textSource.LanguageCode, textSource.Description),
+                        mustInject, mustBiject));
 
-                return Combine(partialDecompositions, JoinCharacterCount, PaddingCharacterCount);
+                // Wait for all decompositions to complete
+                TextDecomposition[] partialDecompositions = await Task.WhenAll(decompositionTasks);
 
+                // Combine partial decompositions
+                return Combine(partialDecompositions.ToList(), JoinCharacterCount, PaddingCharacterCount);
             }
 
-            String newLinedDecomposition = await StandardAgent.GetResponse(textSource.Text);
-
+            String newLinedDecomposition = await StandardAgent.GetResponse(textSource.Text); // only called in the base case
             TextDecomposition ret = TextDecomposition.FromNewLinedString(textSource.Text, newLinedDecomposition);
 
-            if (mustBiject && !ret.Bijects())
+            if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
             {
-                throw new Exception("Invalid decomposition");
-            }
+                // first attempt failed, use something more powerful
+                String highPoweredAttempt = await HighPerformanceAgent.GetResponse(textSource.Text);
+                ret = TextDecomposition.FromNewLinedString(textSource.Text, highPoweredAttempt);
 
-            if (mustInject && !ret.Injects())
-            {
-                throw new Exception("Invalid decomposition");
-            }
+                if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
+                {
+                    // do default
+                    String finalAttempt = await FallbackAgent.GetResponse(textSource.Text);
+                    ret = TextDecomposition.FromNewLinedString(textSource.Text, finalAttempt);
 
+                    if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
+                    {
+                        throw new Exception("Invalid decomposition");
+                    }
+
+                    return ret;
+                }
+
+                return ret;
+            }
             return ret;
         }
 
@@ -80,12 +88,13 @@ namespace LearningExtraction
             TextDecomposition rhs = partialDecompositions[1].Copy();
 
             // trim padding around join
+            // operates cleanly to leave no truncated units
             lhs = StripEndPadding(  lhs, paddingCharacterCount);
             rhs = StripStartPadding(rhs, paddingCharacterCount);
 
             int numberOfUnitsOverlap = DetermineOverlap(lhs.Units, rhs.Units);
 
-            // remove the overlap regions from the lhs
+            // remove the overlap regions from the lhs to avoid double inclusion
             for (int i = 0; i != numberOfUnitsOverlap; i++)
             {
                 String toRemove = lhs.Units.Last().Total.Text;
@@ -93,7 +102,8 @@ namespace LearningExtraction
 
                 lhs.Units.Remove(lhs.Units.Last());
                 
-                lhs = new TextDecomposition(new TextUnit(lhs.Total.Text.Substring(0, removeIndex)), lhs.Units);
+                lhs = new TextDecomposition(
+                    new TextUnit(lhs.Total.Text.Substring(0, removeIndex)), lhs.Units);
             }
 
             // combine the first and second
@@ -106,7 +116,6 @@ namespace LearningExtraction
 
             // recurse
             return Combine(updated, joinCharacterCount, paddingCharacterCount);
-           
         }
 
         private int DetermineOverlap(List<TextDecomposition>? lhs, List<TextDecomposition>? rhs)
@@ -118,7 +127,6 @@ namespace LearningExtraction
                 return ret;
             }
 
-
             for (int i = 0; i < Math.Min(lhs.Count, rhs.Count); i++)
             {
                 bool overlap = true;
@@ -129,7 +137,7 @@ namespace LearningExtraction
                 if (overlap)
                 {
                     ret = i;
-                } // when the loop is done we'll get the biggest
+                } // when the loop is done we'll get the biggest that worked
 
                 // N^2 runtime --> watch out for slowdown if this handles big stuff
             }

@@ -29,10 +29,11 @@ namespace Linguine
         {
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
 
-            TextDecompositionAgent agent = new TextDecompositionAgent(apiKey);
-
             TextDecomposer = new TextDecomposer();
-            TextDecomposer.StandardAgent = agent;
+
+            TextDecomposer.StandardAgent = new TextDecompositionAgent(apiKey, highPowered: false);
+            TextDecomposer.HighPerformanceAgent = new TextDecompositionAgent(apiKey, highPowered: true);
+            TextDecomposer.FallbackAgent = new WhitespaceDecompositionAgent();
 
             return true;
         }
