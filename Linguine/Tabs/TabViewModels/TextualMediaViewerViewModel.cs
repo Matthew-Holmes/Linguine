@@ -5,6 +5,7 @@ using LearningExtraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Printing;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -41,7 +42,8 @@ namespace Linguine.Tabs
         
         private TextualMedia? _textualMedia;
         private TextualMediaLoader _loader;
-        private TextDecomposition? _decomposition;
+        private TextDecomposition? _injectiveDecomposition;
+        private TextDecomposition? _caseNormalisedDecomposition;
         private String _rawText;
         private List<String> _discoveredUnits;
 
@@ -73,8 +75,9 @@ namespace Linguine.Tabs
             }
             try
             {
-                _decomposition = await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
-                DiscoveredUnits = _decomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+                _injectiveDecomposition = await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
+                _caseNormalisedDecomposition = await _mainModel.CaseNormaliser?.NormaliseCases(_injectiveDecomposition);
+                DiscoveredUnits = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
             } 
             catch (AggregateException ae)
             {

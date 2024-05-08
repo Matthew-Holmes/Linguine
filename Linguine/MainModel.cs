@@ -24,6 +24,7 @@ namespace Linguine
         }
 
         public TextDecomposer? TextDecomposer { get; private set; } = null;
+        public CaseNormaliser? CaseNormaliser { get; private set; } = null;
 
         public bool LoadTextDecompositionService()
         {
@@ -34,6 +35,9 @@ namespace Linguine
             TextDecomposer.StandardAgent = new TextDecompositionAgent(apiKey, highPowered: false);
             TextDecomposer.HighPerformanceAgent = new TextDecompositionAgent(apiKey, highPowered: true);
             TextDecomposer.FallbackAgent = new WhitespaceDecompositionAgent();
+
+            CaseNormaliser = new CaseNormaliser();
+            CaseNormaliser.Agent = new CaseNormalisationAgent(apiKey);
 
             return true;
         }
