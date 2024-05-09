@@ -15,7 +15,7 @@ namespace Agents
         public async Task<String> GetResponse(String prompt)
         {
             String response;
-            await _semaphore.WaitAsync(); // get permission
+            //await _semaphore.WaitAsync(); // get permission
 
             try
             {
@@ -23,7 +23,7 @@ namespace Agents
                 PromptResponseHistory.Add(Tuple.Create(prompt, response));
             } finally
             {
-                _semaphore.Release();
+               // _semaphore.Release();
             }
 
             return response;
