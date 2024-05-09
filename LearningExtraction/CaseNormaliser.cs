@@ -24,9 +24,9 @@ namespace LearningExtraction
                 throw new ArgumentException("No units to normalise");
             }
 
-            String prompt = String.Join('\n', priorDecomposition.Units.Select(unit => unit.Total.Text));
+            String prompt = String.Join('\n', priorDecomposition.Units.Select(unit => unit.Total.Text)).ToLower();
 
-            String response = await NormaliseCases(prompt);
+            String response = await NormaliseCases(prompt); // agent best at identifying lower --> upper, not the other way around
 
             return TextDecomposition.FromNewLinedString(priorDecomposition.Total.Text, response);
 
