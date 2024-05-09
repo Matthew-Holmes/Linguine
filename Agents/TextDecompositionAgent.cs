@@ -9,12 +9,13 @@ namespace Agents
 {
     public class TextDecompositionAgent : OpenAIBase
     {
-        private static String systemMessage = "Decompose the following text into units of meaning, either single words or phrases, do not split full names, nor split words when their composite is very common or cannot be naively inferred from their components - this is a coarse first pass so be generous with what is considered a composite word, only respond using direct contents of the text, with each unit of meaning on a newline, ignore punctuation and brackets that don't affect words' meaning, similarly don't add punctuation to the units unless essential, the result must map injectively into the original text, add no whitespace unless it already existed and conveyed meaning. Do not complete truncated words, all units should map into the original verbatim. format \nunit1\nunit2 etc";
+        private static String systemMessage = "Decompose the following text into units of meaning, normally single words. Do not split compound words such as \nhot dog\n or \nfind out\n. Do not split names such as \nJoe Bloggs\n or \nUnited Kingdom\n. Only respond using direct contents of the text, with each unit of meaning on a newline, ignore punctuation and brackets that don't affect words' meaning, similarly don't add punctuation to the units unless essential, the result must map injectively into the original text, add no whitespace unless it already existed and conveyed meaning. Do not complete truncated words, all units should map into the original verbatim, do not skip words, you can skip punctuation. format \nunit1\nunit2 etc";
 
         public TextDecompositionAgent(string apiKey, bool highPowered = false) : base(apiKey)
         {
-            StringParameters["system"] = systemMessage;  
-
+            StringParameters["system"] = systemMessage;
+            //ContinousParameter("Temperature").Value = 1.0;
+            //ContinousParameter("TopP").Value = 0.1;
             if (highPowered)
             {
                 StringParameters["model"] = "gpt-4-turbo";
