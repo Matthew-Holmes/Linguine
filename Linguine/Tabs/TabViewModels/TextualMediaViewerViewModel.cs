@@ -1,9 +1,12 @@
-﻿using Agents.OpenAI;
+﻿using Agents;
+using Agents.DummyAgents;
+using Agents.OpenAI;
 using ExternalMedia;
 using Infrastructure;
 using LearningExtraction;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Printing;
 using System.Text;
@@ -39,20 +42,66 @@ namespace Linguine.Tabs
                 OnPropertyChanged(nameof(DiscoveredUnitsRaw));
             }
         }
-        public List<String> DiscoveredUnitsCaseNormalised
+        public List<String> RootedUnits1
         {
             get => _discoveredUnits;
             private set
             {
                 _discoveredUnits = value;
-                OnPropertyChanged(nameof(DiscoveredUnitsCaseNormalised));
+                OnPropertyChanged(nameof(RootedUnits1));
+            }
+        }
+
+
+        public List<String> RootedUnits2
+        {
+            get => _discoveredUnits;
+            private set
+            {
+                _discoveredUnits = value;
+                OnPropertyChanged(nameof(RootedUnits2));
+            }
+        }
+
+        public List<String> RootedUnits3
+        {
+            get => _discoveredUnits;
+            private set
+            {
+                _discoveredUnits = value;
+                OnPropertyChanged(nameof(RootedUnits3));
+            }
+        }
+
+
+
+        public List<String> RootedUnits4
+        {
+            get => _discoveredUnits;
+            private set
+            {
+                _discoveredUnits = value;
+                OnPropertyChanged(nameof(RootedUnits4));
+            }
+        }
+
+        public List<String> RootedUnits5
+        {
+            get => _discoveredUnits;
+            private set
+            {
+                _discoveredUnits = value;
+                OnPropertyChanged(nameof(RootedUnits5));
             }
         }
 
         private TextualMedia? _textualMedia;
         private TextualMediaLoader _loader;
+
         private TextDecomposition? _injectiveDecomposition;
         private TextDecomposition? _caseNormalisedDecomposition;
+        private TextDecomposition? _rootedDecomposition;
+
         private String _rawText;
         private List<String> _discoveredUnits;
 
@@ -84,12 +133,61 @@ namespace Linguine.Tabs
             }
             try
             {
+
+                // TODO - this is domain logic emerging, should be put in the model
+
                 _injectiveDecomposition =      await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
                 DiscoveredUnitsRaw                 = _injectiveDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
 
-                _caseNormalisedDecomposition = await _mainModel.CaseNormaliser?.NormaliseCases(_injectiveDecomposition);
-                DiscoveredUnitsCaseNormalised = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
-            } 
+                //_caseNormalisedDecomposition = await _mainModel.CaseNormaliser?.NormaliseCases(_injectiveDecomposition);
+                //DiscoveredUnitsCaseNormalised = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+
+                // best so far
+                List<double> Temps = new List<double> { 1.0, 1.0, 1.4, 1.6, 1.8 };
+                List<double> TopPs = new List<double> { 0.5, 0.5, 0.3, 0.2, 0.1 };
+
+
+                _mainModel.UnitRooter?.SetTemperature(Temps[0]);
+                _mainModel.UnitRooter?.SetTopP(TopPs[0]);
+
+
+                _caseNormalisedDecomposition = await _mainModel.UnitRooter?.RootUnits(_injectiveDecomposition);
+                //_caseNormalisedDecomposition = await DecompositionTransformer.ApplyAgent(new LowercasingAgent(), _injectiveDecomposition, 100000, 100);
+                RootedUnits1 = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+                _mainModel.UnitRooter?.SetTemperature(Temps[1]);
+                _mainModel.UnitRooter?.SetTopP(TopPs[1]);
+
+
+                _rootedDecomposition = await _mainModel.UnitRooter?.RootUnits(_caseNormalisedDecomposition /*_rootedDecomposition*/);
+                RootedUnits2                 = _rootedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+                
+                _mainModel.UnitRooter?.SetTemperature(Temps[2]);
+                _mainModel.UnitRooter?.SetTopP(TopPs[2]);
+
+                _caseNormalisedDecomposition = await _mainModel.UnitRooter?.RootUnits(_rootedDecomposition);
+                RootedUnits3 = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+
+                _mainModel.UnitRooter?.SetTemperature(Temps[3]);
+                _mainModel.UnitRooter?.SetTopP(TopPs[3]);
+
+                _caseNormalisedDecomposition = await _mainModel.UnitRooter?.RootUnits(_rootedDecomposition);
+                RootedUnits4 = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+                _mainModel.UnitRooter?.SetTemperature(Temps[4]);
+                _mainModel.UnitRooter?.SetTopP(TopPs[4]);
+
+                _caseNormalisedDecomposition = await _mainModel.UnitRooter?.RootUnits(_rootedDecomposition);
+                RootedUnits5 = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+                
+
+                // TODO - some sort of annealing process, until the unit rooter stops changing the text
+
+            }
             catch (AggregateException ae)
             {
                 // flatten the AggregateException to make it easier to handle individual exceptions

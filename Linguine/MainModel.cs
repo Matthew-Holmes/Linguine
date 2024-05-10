@@ -26,6 +26,8 @@ namespace Linguine
         public TextDecomposer? TextDecomposer { get; private set; } = null;
         public CaseNormaliser? CaseNormaliser { get; private set; } = null;
 
+        public UnitRooter?     UnitRooter { get; private set; } = null;
+
         public bool LoadTextDecompositionService()
         {
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
@@ -39,8 +41,12 @@ namespace Linguine
             CaseNormaliser = new CaseNormaliser();
             CaseNormaliser.Agent = new CaseNormalisationAgent(apiKey);
 
+            UnitRooter = new UnitRooter();
+            UnitRooter.Agent = new UnitRootingAgent(apiKey);
+
             return true;
         }
+
 
 
     }

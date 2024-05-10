@@ -22,9 +22,17 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <ListBox ItemsSource="{Binding DiscoveredUnitsRaw}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="0"/>
-                    <ListBox ItemsSource="{Binding DiscoveredUnitsCaseNormalised}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="1"/>
+                    <ListBox ItemsSource="{Binding RootedUnits1}"   ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="1"/>
+                    <ListBox ItemsSource="{Binding RootedUnits2}"   ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="2"/>
+                    <ListBox ItemsSource="{Binding RootedUnits3}"   ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="3"/>
+                    <ListBox ItemsSource="{Binding RootedUnits4}"   ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="4"/>
+                    <ListBox ItemsSource="{Binding RootedUnits5}"   ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="5"/>
                 </Grid>
             </Grid>
 
