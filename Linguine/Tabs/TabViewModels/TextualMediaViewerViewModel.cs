@@ -39,20 +39,20 @@ namespace Linguine.Tabs
                 OnPropertyChanged(nameof(DiscoveredUnitsRaw));
             }
         }
-        public List<String> DiscoveredUnitsCaseNormalised
+        public List<String> DiscoveredUnitsRooted
         {
             get => _discoveredUnits;
             private set
             {
                 _discoveredUnits = value;
-                OnPropertyChanged(nameof(DiscoveredUnitsCaseNormalised));
+                OnPropertyChanged(nameof(DiscoveredUnitsRooted));
             }
         }
 
         private TextualMedia? _textualMedia;
         private TextualMediaLoader _loader;
         private TextDecomposition? _injectiveDecomposition;
-        private TextDecomposition? _caseNormalisedDecomposition;
+        private TextDecomposition? _rootedDecomposition;
         private String _rawText;
         private List<String> _discoveredUnits;
 
@@ -87,8 +87,8 @@ namespace Linguine.Tabs
                 _injectiveDecomposition =      await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
                 DiscoveredUnitsRaw                 = _injectiveDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
 
-                _caseNormalisedDecomposition = await _mainModel.CaseNormaliser?.NormaliseCases(_injectiveDecomposition);
-                DiscoveredUnitsCaseNormalised = _caseNormalisedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+                _rootedDecomposition = await _mainModel.UnitRooter?.RootUnits(_injectiveDecomposition);
+                DiscoveredUnitsRooted = _rootedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
             } 
             catch (AggregateException ae)
             {

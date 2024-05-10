@@ -13,32 +13,6 @@ namespace LearningExtraction
         public int MaxVolumeToProcess { get; set; } = 200; // if given text larger than this, chunk it
         public int JoinCharacterCount { get; set; } = 20;
 
-        public void SetTemperature(double temp)
-        {
-            if (Agent is OpenAIBase OpenAiAgent)
-            {
-                OpenAiAgent.ContinousParameter("Temperature").Value = temp;
-            }
-            else
-            {
-                throw new Exception("Can't set temperature on a non OpenAI agent");
-            }
-
-        }
-
-        public void SetTopP(double topP)
-        {
-            if (Agent is OpenAIBase OpenAiAgent)
-            {
-                OpenAiAgent.ContinousParameter("TopP").Value = topP;
-            }
-            else
-            {
-                throw new Exception("Can't set topP on a non OpenAI agent");
-            }
-
-        }
-
         public AgentBase Agent { get; set; }
 
         public async Task<TextDecomposition> RootUnits(TextDecomposition priorDecomposition)

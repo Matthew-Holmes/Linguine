@@ -24,7 +24,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <ListBox ItemsSource="{Binding DiscoveredUnitsRaw}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="0"/>
-                    <ListBox ItemsSource="{Binding DiscoveredUnitsCaseNormalised}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="1"/>
+                    <ListBox ItemsSource="{Binding DiscoveredUnitsRooted}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="1"/>
                 </Grid>
             </Grid>
 
