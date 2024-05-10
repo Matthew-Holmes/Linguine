@@ -40,10 +40,10 @@ namespace Agents.OpenAI
             messages.Add(new { role = "system", content = StringParameters["system"]});
 
             // add chat history to messages
-            int start = Math.Max(0, PromptResponseHistory.Count - DiscreteParameter("PromptDepth").Value);
-            for (int i = start; i < PromptResponseHistory.Count; i++)
+            int start = Math.Max(0, SequentialPromptLog.Count - DiscreteParameter("PromptDepth").Value);
+            for (int i = start; i < SequentialPromptLog.Count; i++)
             {
-                var entry = PromptResponseHistory[i];
+                var entry = SequentialPromptLog[i];
 
                 if (!string.IsNullOrEmpty(entry.Item1))
                 {
