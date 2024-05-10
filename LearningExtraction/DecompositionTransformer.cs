@@ -16,7 +16,7 @@ namespace LearningExtraction
 
             // applies windowing if the prompt would be too big
 
-            String prompt = String.Join('\n', source.Units.Select(unit => unit.Total.Text)).ToLower();
+            String prompt = String.Join('\n', source.Units.Select(unit => unit.Total.Text));
 
             String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinChars); // agent best at identifying lower --> upper, not the other way around
 

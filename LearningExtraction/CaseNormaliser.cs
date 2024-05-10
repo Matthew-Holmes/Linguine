@@ -24,7 +24,11 @@ namespace LearningExtraction
                 throw new ArgumentException("No units to normalise");
             }
 
-            return await DecompositionTransformer.ApplyAgent(Agent, priorDecomposition, MaxVolumeToProcess, JoinCharacterCount);
+            // we do lowercase --> uppercase
+            TextDecomposition allLower = DecompositionTransformer.ApplyAgent(
+                new Agents.DummyAgents.LowercasingAgent(), priorDecomposition, MaxVolumeToProcess, JoinCharacterCount).Result;
+
+            return await DecompositionTransformer.ApplyAgent(Agent, allLower, MaxVolumeToProcess, JoinCharacterCount);
         }
     }
 }
