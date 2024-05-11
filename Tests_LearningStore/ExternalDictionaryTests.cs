@@ -28,26 +28,40 @@ namespace LearningStoreTests
 
             // Add test data
             _context.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWord", Definition = "TestDefinition" });
+            _context.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition001" });
+            _context.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition002" });
             _context.SaveChanges();
         }
 
         [TestMethod]
-        public void TryGetDefinition_ExistingWord_ReturnsDefinition()
+        public void TryGetDefinitions_ExistingWord_ReturnsDefinition()
         {
             _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
             var result = _dictionary.TryGetDefinition("TestWord");
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("TestDefinition", result.Definition);
+            Assert.AreEqual(result.Count, 1);
+            Assert.AreEqual("TestDefinition", result[0].Definition);
         }
 
         [TestMethod]
-        public void TryGetDefinition_NonexistingWord_ReturnsNull()
+        public void TryGetDefinitions_ExistingWord_ReturnsDefinitions()
+        {
+            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
+            var result = _dictionary.TryGetDefinition("TestWordManyDef");
+
+            Assert.AreEqual("TestDefinition001", result[0].Definition);
+            Assert.AreEqual("TestDefinition002", result[1].Definition);
+            Assert.AreEqual(result.Count, 2);
+        }
+
+        [TestMethod]
+        public void TryGetDefinitions_NonexistingWord_ReturnsEmptyList()
         {
             _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
             var result = _dictionary.TryGetDefinition("NoTestWord");
 
-            Assert.IsNull(result);
+            Assert.AreEqual(result.Count, 0);
         }
 
         [TestMethod]

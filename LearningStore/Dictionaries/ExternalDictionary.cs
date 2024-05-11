@@ -34,9 +34,9 @@ namespace LearningStore
             }
         }
 
-        public DictionaryDefinition? TryGetDefinition(String word)
+        public List<DictionaryDefinition> TryGetDefinition(String word)
         {
-            return _context.DictionaryDefinitions.FirstOrDefault(dd => dd.Word == word);
+            return _context.DictionaryDefinitions.Where(dd => dd.Word == word).ToList();
         }
 
         public bool Contains(String word)
