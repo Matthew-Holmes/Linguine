@@ -22,7 +22,15 @@ namespace LearningExtraction
                 throw new ArgumentException("No units to normalise");
             }
 
-            return await DecompositionTransformer.ApplyAgent(Agent, priorDecomposition, MaxVolumeToProcess, JoinCharacterCount);
+            TextDecomposition ret = await DecompositionTransformer.ApplyAgent(Agent, priorDecomposition, MaxVolumeToProcess, JoinCharacterCount);
+
+            if (ret.Units.Count != priorDecomposition.Units.Count)
+            {
+                // rooting removed or combined lines
+                ret = priorDecomposition; // use the identity map instead
+            }
+
+            return ret;
         }
     }
 }
