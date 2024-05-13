@@ -58,7 +58,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
 
-            List<String> windowed = testText.Windowed(4, 2, 0);
+            List<String> windowed = testText.Windowed(8, 2, 0);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(4, windowed.Count);       /* left core right*/
@@ -74,7 +74,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
 
-            List<String> windowed = testText.Windowed(4, 0, 2);
+            List<String> windowed = testText.Windowed(8, 0, 2);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(5, windowed.Count);       /* left core right*/
@@ -90,7 +90,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia testText = new TextualMedia("1234567890abcdefghijk", LanguageCode.eng);
 
-            List<String> windowed = testText.Windowed(4, 0, 2);
+            List<String> windowed = testText.Windowed(8, 0, 2);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(6, windowed.Count);       /* left core right*/
@@ -107,7 +107,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia testText = new TextualMedia("1234567890abcdefghijkl", LanguageCode.eng);
 
-            List<String> windowed = testText.Windowed(3, 2, 3);
+            List<String> windowed = testText.Windowed(13, 2, 3);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(5, windowed.Count);            /* lp  lj  core rj  rp  */
@@ -126,7 +126,7 @@ namespace Tests_ExternalMedia
 
             TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
 
-            List<String> windowed = testText.Windowed(3, 2, 3);
+            List<String> windowed = testText.Windowed(13, 2, 3);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(4, windowed.Count);            /* lp  lj  core rj  rp  */
@@ -144,7 +144,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 0, 50);
+            windowed = test.Windowed(110, 0, 50);
         }
 
         [TestMethod]
@@ -154,7 +154,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 0, 20);
+            windowed = test.Windowed(50, 0, 20);
         }
 
         [TestMethod]
@@ -164,7 +164,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 0, 200);
+            windowed = test.Windowed(410, 0, 200);
         }
 
             [TestMethod]
@@ -174,7 +174,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 200, 0);
+            windowed = test.Windowed(410, 200, 0);
         }
 
         public void Windowed_WideJoin_NoThrow()
@@ -183,7 +183,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 50, 0);
+            windowed = test.Windowed(110, 50, 0);
         }
 
         public void Windowed_RelativelyWideJoin_NoThrow()
@@ -192,7 +192,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 20, 0);
+            windowed = test.Windowed(50, 20, 0);
         }
 
         [TestMethod]
@@ -212,7 +212,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 50, 50);
+            windowed = test.Windowed(210, 50, 50);
         }
 
         [TestMethod]
@@ -222,7 +222,7 @@ namespace Tests_ExternalMedia
 
             List<String> windowed = test.Windowed(100, 0, 0);
 
-            windowed = test.Windowed(10, 20, 20);
+            windowed = test.Windowed(90, 20, 20);
         }
 
         [TestMethod]
@@ -230,9 +230,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(10, 200, 200);
+            List<String> windowed = test.Windowed(810, 200, 200);
         }
 
         [TestMethod]
@@ -240,9 +238,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(10, 10, 10);
+            List<String> windowed = test.Windowed(50, 10, 10);
         }
 
         [TestMethod]
@@ -250,15 +246,14 @@ namespace Tests_ExternalMedia
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed =  test.Windowed(0, 10, 0);
-            windowed = test.Windowed(0, 10, 10);
+            List<String> windowed = test.Windowed(40, 10, 10);
         }
 
         #endregion
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void Windowed_NegativeValueForCoreChars_Throws()
+        public void Windowed_NegativeValueForWindowChars_Throws()
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
@@ -271,7 +266,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed = test.Windowed(10, -1, 10);
+            List<String> windowed = test.Windowed(50, -1, 10);
         }
 
         [TestMethod]
@@ -280,7 +275,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed = test.Windowed(10, 10, -1);
+            List<String> windowed = test.Windowed(50, 10, -1);
         }
 
         [TestMethod]
@@ -289,7 +284,7 @@ namespace Tests_ExternalMedia
         {
             TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed = test.Windowed(0, 0, 10);
+            List<String> windowed = test.Windowed(10, 0, 10);
         }
 
     }

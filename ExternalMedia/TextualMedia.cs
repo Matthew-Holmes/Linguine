@@ -36,7 +36,7 @@ namespace ExternalMedia
             get => _languageCode;
         }
 
-        public List<String> Windowed(int coreChars, int joinChars, int padChars)
+        public List<String> Windowed(int windowWidth, int joinChars, int padChars)
         {
             // chunks up the Text into overlapping windows
             // joinChars is the number of overlap characters
@@ -45,9 +45,17 @@ namespace ExternalMedia
             // since include the start and end of the text
             // and thus don't need padding/joins there
 
+            return Window(Text, windowWidth, joinChars, padChars);
+        }
+
+        public static List<String> Window(String parent, int windowWidth, int joinChars, int padChars)
+        {
+            int coreChars = windowWidth - 2 * joinChars - 2 * padChars;
+
+
             #region argument checking
             if (coreChars < 0)
-{
+            {
                 throw new ArgumentException("core must have non-negative width");
             }
             if (joinChars < 0)
@@ -66,37 +74,39 @@ namespace ExternalMedia
             }
             #endregion
 
-            if (Text.Length <= coreChars) return new List<String> { Text };
+            if (parent.Length <= coreChars) return new List<String> { parent };
 
             List<String> ret = new List<String>();
 
             // no padding/join at the front
-            String firstWindow = Text.Substring(0, Math.Min(coreChars + joinChars + padChars, Text.Length));
+            String firstWindow = parent.Substring(0, Math.Min(coreChars + joinChars + padChars, parent.Length));
             ret.Add(firstWindow);
 
             int nextCoreStarts = coreChars + joinChars;
 
             // iterates until processes penultimate window
-            while (nextCoreStarts < Text.Length - coreChars - joinChars)
+            while (nextCoreStarts < parent.Length - coreChars - joinChars)
             {
-                ret.Add(Text.Substring(
+                ret.Add(parent.Substring(
                     Math.Max(nextCoreStarts - joinChars - padChars, 0),
-                    Math.Min(coreChars + 2*joinChars + 2*padChars,
-                             Math.Min(Text.Length - nextCoreStarts + joinChars + padChars,
-                                      Text.Length /* edge case where max used the 0 branch */))));
+                    Math.Min(coreChars + 2 * joinChars + 2 * padChars,
+                             Math.Min(parent.Length - nextCoreStarts + joinChars + padChars,
+                                      parent.Length /* edge case where max used the 0 branch */))));
 
                 nextCoreStarts += (coreChars + joinChars);
             }
 
             // no padding/join at the back
-            String lastWindow = Text.Substring(
+            String lastWindow = parent.Substring(
                 Math.Max(nextCoreStarts - joinChars - padChars, 0),
-                         Math.Min(Text.Length - nextCoreStarts + joinChars + padChars,
-                                  Text.Length /* edge case where max used the 0 branch */));
+                         Math.Min(parent.Length - nextCoreStarts + joinChars + padChars,
+                                  parent.Length /* edge case where max used the 0 branch */));
 
             ret.Add(lastWindow);
 
             return ret;
         }
+
+
     }
 }
