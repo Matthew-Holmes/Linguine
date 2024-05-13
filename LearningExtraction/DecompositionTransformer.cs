@@ -9,7 +9,7 @@ namespace LearningExtraction
 {
     public static class DecompositionTransformer
     {
-        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int joinChars)
+        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int joinLines)
         {
             // prompts the agent with a prompt derived from each decomposition unit on each line
             // the response is converted to a response decomposition
@@ -18,16 +18,17 @@ namespace LearningExtraction
 
             String prompt = String.Join('\n', source.Units.Select(unit => unit.Total.Text));
 
-            String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinChars); // agent best at identifying lower --> upper, not the other way around
+            String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines); // agent best at identifying lower --> upper, not the other way around
 
             return TextDecomposition.FromNewLinedString(source.Total.Text, response);
         }
 
-        private static async Task<String> GetCombinedResponses(AgentBase agent, string prompt, int maxCharsToProcess, int joinChars)
+        private static async Task<String> GetCombinedResponses(AgentBase agent, string prompt, int maxCharsToProcess, int joinLines)
         {
             if (prompt.Length > maxCharsToProcess)
             {
-                List<String> prompts = Window(prompt, maxCharsToProcess, joinChars);
+
+                (List<String> prompts, int _) = Window(prompt, maxCharsToProcess, joinLines);
 
                 var getResponseTasks = prompts.Select(prompt => agent.GetResponse(prompt));
 
@@ -51,7 +52,14 @@ namespace LearningExtraction
             List<String> lhs = list[0].Split('\n').ToList();
             List<String> rhs = list[1].Split('\n').ToList();
 
-            rhs = rhs.Skip(DetermineOverlap(lhs, rhs)).ToList();
+            // warning - will fail if there are lots of repeated words
+            int overlap = DetermineOverlap(lhs, rhs);
+
+            int rhsDrop = overlap / 2;
+            int lhsDrop = overlap - rhsDrop;
+
+            rhs = rhs.Skip(rhsDrop).ToList();
+            lhs.RemoveRange(lhs.Count - lhsDrop - 1, lhsDrop);
 
             lhs.AddRange(rhs);
 
@@ -70,7 +78,7 @@ namespace LearningExtraction
                 return ret;
             }
 
-            for (int i = 0; i < Math.Min(lhs.Count, rhs.Count); i++)
+            for (int i = 0; i <= Math.Min(lhs.Count, rhs.Count); i++)
             {
                 bool overlap = true;
                 for (int j = 0; j != i; j++)
@@ -89,7 +97,22 @@ namespace LearningExtraction
 
         }
 
-        private static List<String> Window(String original, int maxCharsToProcess, int joinChars)
+        internal static Tuple<List<String>, int> Window(String original, int maxCharsToProcess, int joinLines)
+        {
+            // handles too large join sizes
+            // has to return the join size in case it was reduced
+
+            try
+            {
+                return Tuple.Create(WindowInternal(original, maxCharsToProcess, joinLines), joinLines);
+                    
+            } catch (JoinException _)
+            {
+                return Window(original, maxCharsToProcess, joinLines / 2); // in edge case where the join lines were too many
+            }
+        }
+
+        private static List<String> WindowInternal(String original, int maxCharsToProcess, int joinLines)
         {
             // base case
             if (original.Count() <= maxCharsToProcess)
@@ -100,25 +123,44 @@ namespace LearningExtraction
             List<String> ret = new List<string>();
 
             int rightSlice = maxCharsToProcess;
-            int leftSlice = maxCharsToProcess;
+            int leftSlice;
 
-            while (original[rightSlice] != '\n' && rightSlice != 0)
+            // make the first window
+            
+            while (original[rightSlice] != '\n' && rightSlice > 0)
             {
                 rightSlice--;
             }
 
-            // do the first window
-            while (leftSlice > maxCharsToProcess - joinChars && original[leftSlice] != '\n')
+            rightSlice--; // consume the newline
+            leftSlice = rightSlice;
+
+            // form the join
+            for (int i = 0; i != joinLines; i++)
             {
-                leftSlice--;
+                while (leftSlice >0 && original[leftSlice] != '\n')
+                {
+                    leftSlice--;
+                }
+                leftSlice--; // consume the newline
             }
 
-            ret.Add(original.Substring(0, rightSlice));
+            if (leftSlice <= 0)
+            {
+                // join too big
+                throw new JoinException();
+            }
+
+            ret.Add(original.Substring(0, rightSlice+1));
 
             // recurse
-            ret.AddRange(Window(original.Substring(leftSlice), maxCharsToProcess, joinChars));
+            ret.AddRange(WindowInternal(original.Substring(leftSlice+2), maxCharsToProcess, joinLines));
 
             return ret;
         }
+
+        private class JoinException : Exception
+        { };
+
     }
 }
