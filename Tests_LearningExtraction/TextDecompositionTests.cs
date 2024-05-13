@@ -23,7 +23,7 @@ namespace Tests_LearningExtraction
 
             // Assert
             Assert.AreEqual(total, decomposition.Total);
-            Assert.AreEqual(units, decomposition.Units);
+            Assert.AreEqual(units, decomposition.Decomposition);
         }
 
         [TestMethod]
@@ -38,10 +38,10 @@ namespace Tests_LearningExtraction
 
             // Assert
             Assert.AreEqual(parent, decomposition.Total.Text); // Assuming TextUnit has a Content property
-            Assert.IsNotNull(decomposition.Units);
-            Assert.AreEqual(2, decomposition.Units.Count);
-            Assert.AreEqual("Child text 1", decomposition.Units[0].Total.Text);
-            Assert.AreEqual("Child text 2", decomposition.Units[1].Total.Text);
+            Assert.IsNotNull(decomposition.Decomposition);
+            Assert.AreEqual(2, decomposition.Decomposition.Count);
+            Assert.AreEqual("Child text 1", decomposition.Decomposition[0].Total.Text);
+            Assert.AreEqual("Child text 2", decomposition.Decomposition[1].Total.Text);
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace Tests_LearningExtraction
             TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
 
             Assert.AreEqual(parent, decomposition.Total.Text);
-            Assert.IsNull(decomposition.Units);
+            Assert.IsNull(decomposition.Decomposition);
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace Tests_LearningExtraction
             TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
 
             Assert.AreEqual(parent, decomposition.Total.Text);
-            Assert.IsNull(decomposition.Units);
+            Assert.IsNull(decomposition.Decomposition);
         }
 
         [TestMethod]
@@ -162,10 +162,10 @@ namespace Tests_LearningExtraction
             var flattened = decomposition.Flattened();
 
             // Assert
-            Assert.AreEqual(3, flattened.Units.Count); // Now we expect 3 units after flattening: "hello", "wor", and "ld"
-            Assert.IsNull(flattened.Units[0].Units); // Ensure "hello" is a leaf
-            Assert.IsNull(flattened.Units[1].Units); // Ensure "wor" is a leaf
-            Assert.IsNull(flattened.Units[2].Units); // Ensure "ld" is a leaf
+            Assert.AreEqual(3, flattened.Decomposition.Count); // Now we expect 3 units after flattening: "hello", "wor", and "ld"
+            Assert.IsNull(flattened.Decomposition[0].Decomposition); // Ensure "hello" is a leaf
+            Assert.IsNull(flattened.Decomposition[1].Decomposition); // Ensure "wor" is a leaf
+            Assert.IsNull(flattened.Decomposition[2].Decomposition); // Ensure "ld" is a leaf
         }
 
         [TestMethod]
@@ -268,10 +268,10 @@ namespace Tests_LearningExtraction
             // Assert
             Assert.AreNotSame(original, copy);
             Assert.AreEqual(original.Total.Text, copy.Total.Text);
-            Assert.AreEqual(original.Units.Count, copy.Units.Count);
-            for (int i = 0; i < original.Units.Count; i++)
+            Assert.AreEqual(original.Decomposition.Count, copy.Decomposition.Count);
+            for (int i = 0; i < original.Decomposition.Count; i++)
             {
-                Assert.AreEqual(original.Units[i].Total.Text, copy.Units[i].Total.Text);
+                Assert.AreEqual(original.Decomposition[i].Total.Text, copy.Decomposition[i].Total.Text);
             }
         }
 
@@ -291,10 +291,10 @@ namespace Tests_LearningExtraction
             TextDecomposition copy = original.Copy();
 
             // Modify the units in the original
-            original.Units[0] = new TextDecomposition(new TextUnit("Modified"), null);
+            original.Decomposition[0] = new TextDecomposition(new TextUnit("Modified"), null);
 
             // Assert
-            Assert.AreNotEqual(original.Units[0].Total.Text, copy.Units[0].Total.Text);
+            Assert.AreNotEqual(original.Decomposition[0].Total.Text, copy.Decomposition[0].Total.Text);
         }
 
         [TestMethod]
@@ -308,7 +308,7 @@ namespace Tests_LearningExtraction
             TextDecomposition copy = original.Copy();
 
             // Assert
-            Assert.IsNull(copy.Units);
+            Assert.IsNull(copy.Decomposition);
         }
 
         [TestMethod]
@@ -330,26 +330,26 @@ namespace Tests_LearningExtraction
             // Assert
             Assert.AreNotSame(original, copy);
             Assert.AreEqual(original.Total.Text, copy.Total.Text);
-            Assert.AreEqual(original.Units.Count, copy.Units.Count);
+            Assert.AreEqual(original.Decomposition.Count, copy.Decomposition.Count);
 
             // Check recursively for nested units
-            Assert.AreNotSame(original.Units[0], copy.Units[0]);
-            Assert.AreEqual(original.Units[0].Total.Text, copy.Units[0].Total.Text);
-            Assert.IsNull(copy.Units[0].Units); // Ensure "hello" is a leaf
+            Assert.AreNotSame(original.Decomposition[0], copy.Decomposition[0]);
+            Assert.AreEqual(original.Decomposition[0].Total.Text, copy.Decomposition[0].Total.Text);
+            Assert.IsNull(copy.Decomposition[0].Decomposition); // Ensure "hello" is a leaf
 
-            Assert.AreNotSame(original.Units[1], copy.Units[1]);
-            Assert.AreEqual(original.Units[1].Total.Text, copy.Units[1].Total.Text);
-            Assert.IsNotNull(copy.Units[1].Units); // Ensure "world" has nested units
-            Assert.AreEqual(original.Units[1].Units.Count, copy.Units[1].Units.Count);
+            Assert.AreNotSame(original.Decomposition[1], copy.Decomposition[1]);
+            Assert.AreEqual(original.Decomposition[1].Total.Text, copy.Decomposition[1].Total.Text);
+            Assert.IsNotNull(copy.Decomposition[1].Decomposition); // Ensure "world" has nested units
+            Assert.AreEqual(original.Decomposition[1].Decomposition.Count, copy.Decomposition[1].Decomposition.Count);
 
             // Check recursively for nested units of "world"
-            Assert.AreNotSame(original.Units[1].Units[0], copy.Units[1].Units[0]);
-            Assert.AreEqual(original.Units[1].Units[0].Total.Text, copy.Units[1].Units[0].Total.Text);
-            Assert.IsNull(copy.Units[1].Units[0].Units); // Ensure "wor" is a leaf
+            Assert.AreNotSame(original.Decomposition[1].Decomposition[0], copy.Decomposition[1].Decomposition[0]);
+            Assert.AreEqual(original.Decomposition[1].Decomposition[0].Total.Text, copy.Decomposition[1].Decomposition[0].Total.Text);
+            Assert.IsNull(copy.Decomposition[1].Decomposition[0].Decomposition); // Ensure "wor" is a leaf
 
-            Assert.AreNotSame(original.Units[1].Units[1], copy.Units[1].Units[1]);
-            Assert.AreEqual(original.Units[1].Units[1].Total.Text, copy.Units[1].Units[1].Total.Text);
-            Assert.IsNull(copy.Units[1].Units[1].Units); // Ensure "ld" is a leaf
+            Assert.AreNotSame(original.Decomposition[1].Decomposition[1], copy.Decomposition[1].Decomposition[1]);
+            Assert.AreEqual(original.Decomposition[1].Decomposition[1].Total.Text, copy.Decomposition[1].Decomposition[1].Total.Text);
+            Assert.IsNull(copy.Decomposition[1].Decomposition[1].Decomposition); // Ensure "ld" is a leaf
         }
 
     }

@@ -18,7 +18,7 @@ namespace LearningExtraction
 
             // ensures that as many lines of response as in prompt
 
-            String prompt = String.Join('\n', source.Units.Select(unit => unit.Total.Text));
+            String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total.Text));
 
             String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines, retry); // agent best at identifying lower --> upper, not the other way around
 

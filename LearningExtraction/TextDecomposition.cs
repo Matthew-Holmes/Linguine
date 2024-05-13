@@ -16,19 +16,21 @@ namespace LearningExtraction
 
         public TextUnit Total { get; private set; }
 
-        public List<TextDecomposition>? Units { get; private set; }
+        public List<TextDecomposition>? Decomposition { get; private set; }
 
-        public TextDecomposition(TextUnit total, List<TextDecomposition>? units)
+        public List<TextUnit> Units => Decomposition.Select(x => x.Total).ToList();
+
+        public TextDecomposition(TextUnit total, List<TextDecomposition>? decomposition)
         {
             Total = total;
-            Units = units;
+            Decomposition = decomposition;
         }
 
         public TextDecomposition Copy()
         {
             TextUnit totalCopy = new TextUnit(new String(this.Total.Text));
 
-            return new TextDecomposition(totalCopy, Units?.Select(unit => unit.Copy()).ToList() ?? null);
+            return new TextDecomposition(totalCopy, Decomposition?.Select(unit => unit.Copy()).ToList() ?? null);
         }
 
         public bool Injects()
@@ -36,14 +38,14 @@ namespace LearningExtraction
             // checks if each unit exists in the total, without overlap with other units
             // this methods validates for the entire hierarchy
 
-            if (Units is null)
+            if (Decomposition is null)
             {
                 return true; // base case, leaf
             }
 
             String remaining = new String(Total.Text);
 
-            foreach (TextDecomposition unit in Units)
+            foreach (TextDecomposition unit in Decomposition)
             {
                 String toFind = unit.Total.Text;
                 if (!remaining.Contains(toFind) || !unit.Injects(/*recursion*/))
@@ -62,7 +64,7 @@ namespace LearningExtraction
 
         public bool Bijects()
         {
-            if (Units is null)
+            if (Decomposition is null)
             {
                 return true; // base case, leaf
             }
@@ -70,13 +72,13 @@ namespace LearningExtraction
             // if every tree level injects, then any surplus Total would have to propagate up
             // therefore can apply the pigeonhole principle
 
-            int count = Units.Sum(td => td.Total.Text.Length);
+            int count = Decomposition.Sum(td => td.Total.Text.Length);
             return count == Total.Text.Length && Injects();
         }
 
         public TextDecomposition Flattened()
         {
-            if (Units is null || Units.Count <= 1) /* a leaf or at least should be */
+            if (Decomposition is null || Decomposition.Count <= 1) /* a leaf or at least should be */
             {
                 return new TextDecomposition(Total, null);
             }
@@ -84,15 +86,15 @@ namespace LearningExtraction
             {
                 List<TextDecomposition> flatUnits = new List<TextDecomposition>();
 
-                foreach (TextDecomposition td in Units)
+                foreach (TextDecomposition td in Decomposition)
                 {
-                    if (td.Units is null)
+                    if (td.Decomposition is null)
                     {
                         flatUnits.Add(td); // already a leaf
                     }
                     else
                     {
-                        flatUnits.AddRange(td.Flattened().Units);
+                        flatUnits.AddRange(td.Flattened().Decomposition);
                     }
                 }
 

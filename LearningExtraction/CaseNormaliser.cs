@@ -19,7 +19,7 @@ namespace LearningExtraction
 
         public async Task<TextDecomposition> NormaliseCases(TextDecomposition priorDecomposition)
         {
-            if (priorDecomposition.Units == null)
+            if (priorDecomposition.Decomposition == null)
             {
                 throw new ArgumentException("No units to normalise");
             }

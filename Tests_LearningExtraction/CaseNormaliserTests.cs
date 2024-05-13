@@ -75,8 +75,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(source.Units[0].Total.Text, "Hello");
-            Assert.AreEqual(source.Units[1].Total.Text, "Bob");
+            Assert.AreEqual(source.Decomposition[0].Total.Text, "Hello");
+            Assert.AreEqual(source.Decomposition[1].Total.Text, "Bob");
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(source.Units.Count, 2);
+            Assert.AreEqual(source.Decomposition.Count, 2);
         }
 
         [TestMethod]
@@ -104,8 +104,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.IsNull(source.Units[0].Units);
-            Assert.IsNull(source.Units[1].Units);
+            Assert.IsNull(source.Decomposition[0].Decomposition);
+            Assert.IsNull(source.Decomposition[1].Decomposition);
         }
 
         [TestMethod]
@@ -119,7 +119,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(result.Units.Count, 2);
+            Assert.AreEqual(result.Decomposition.Count, 2);
         }
 
         [TestMethod]
@@ -133,8 +133,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.IsNull(result.Units[0].Units);
-            Assert.IsNull(result.Units[1].Units);
+            Assert.IsNull(result.Decomposition[0].Decomposition);
+            Assert.IsNull(result.Decomposition[1].Decomposition);
         }
 
         [TestMethod]
@@ -148,8 +148,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(result.Units[0].Total.Text, "hello");
-            Assert.AreEqual(result.Units[1].Total.Text, "bob");
+            Assert.AreEqual(result.Decomposition[0].Total.Text, "hello");
+            Assert.AreEqual(result.Decomposition[1].Total.Text, "bob");
         }
 
         [TestMethod]
@@ -183,7 +183,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(result.Units.Count, 100);
+            Assert.AreEqual(result.Decomposition.Count, 100);
         }
 
         [TestMethod]
@@ -201,7 +201,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(source.Units.Count, 100);
+            Assert.AreEqual(source.Decomposition.Count, 100);
         }
 
         [TestMethod]
@@ -221,7 +221,7 @@ namespace Tests_LearningExtraction
 
             for (int i = 0; i != 100; i++)
             {
-                Assert.AreEqual(result.Units[i].Total.Text, "word");
+                Assert.AreEqual(result.Decomposition[i].Total.Text, "word");
             }
         }
 
@@ -242,7 +242,7 @@ namespace Tests_LearningExtraction
 
             for (int i = 0; i != 100; i++)
             {
-                Assert.AreEqual(source.Units[i].Total.Text, "Word");
+                Assert.AreEqual(source.Decomposition[i].Total.Text, "Word");
             }
         }
 
@@ -263,7 +263,7 @@ namespace Tests_LearningExtraction
 
             for (int i = 0; i != 100; i++)
             {
-                Assert.IsNull(result.Units[i].Units);
+                Assert.IsNull(result.Decomposition[i].Decomposition);
             }
         }
 
@@ -284,7 +284,7 @@ namespace Tests_LearningExtraction
 
             for (int i = 0; i != 100; i++)
             {
-                Assert.IsNull(source.Units[i].Units);
+                Assert.IsNull(source.Decomposition[i].Decomposition);
             }
         }
 

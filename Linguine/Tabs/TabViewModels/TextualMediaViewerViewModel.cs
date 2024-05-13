@@ -85,10 +85,10 @@ namespace Linguine.Tabs
             try
             {
                 _injectiveDecomposition =      await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
-                DiscoveredUnitsRaw                 = _injectiveDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+                DiscoveredUnitsRaw                 = _injectiveDecomposition?.Flattened().Decomposition?.Select(td => td.Total.Text).ToList() ?? new List<string>();
 
                 _rootedDecomposition = await _mainModel.UnitRooter?.RootUnits(_injectiveDecomposition);
-                DiscoveredUnitsRooted = _rootedDecomposition?.Flattened().Units?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+                DiscoveredUnitsRooted = _rootedDecomposition?.Flattened().Decomposition?.Select(td => td.Total.Text).ToList() ?? new List<string>();
             } 
             catch (AggregateException ae)
             {

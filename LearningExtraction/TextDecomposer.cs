@@ -92,30 +92,30 @@ namespace LearningExtraction
             lhs = StripEndPadding(  lhs, paddingCharacterCount);
             rhs = StripStartPadding(rhs, paddingCharacterCount);
 
-            int numberOfUnitsOverlap = DetermineOverlap(lhs.Units, rhs.Units);
+            int numberOfUnitsOverlap = DetermineOverlap(lhs.Decomposition, rhs.Decomposition);
 
             // remove the overlap regions from the lhs to avoid double inclusion
             for (int i = 0; i != numberOfUnitsOverlap; i++)
             {
-                String toRemove = lhs.Units.Last().Total.Text;
+                String toRemove = lhs.Decomposition.Last().Total.Text;
                 int removeIndex = lhs.Total.Text.LastIndexOf(toRemove);
 
-                lhs.Units.Remove(lhs.Units.Last());
+                lhs.Decomposition.Remove(lhs.Decomposition.Last());
                 
                 lhs = new TextDecomposition(
-                    new TextUnit(lhs.Total.Text.Substring(0, removeIndex)), lhs.Units);
+                    new TextUnit(lhs.Total.Text.Substring(0, removeIndex)), lhs.Decomposition);
             }
 
             // combine the first and second
-            TextDecomposition both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Units);
-            both.Units.AddRange(rhs.Copy().Units);
+            TextDecomposition both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Decomposition);
+            both.Decomposition.AddRange(rhs.Copy().Decomposition);
 
             for (int i = 1; mustInject && !both.Injects(); i++)
             {
-                both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Units);
-                both.Units.AddRange(rhs.Copy().Units.Skip(i));
+                both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Decomposition);
+                both.Decomposition.AddRange(rhs.Copy().Decomposition.Skip(i));
 
-                if (i == rhs.Units.Count)
+                if (i == rhs.Decomposition.Count)
                 {
                     throw new Exception("failed to merge while maintaining injectivity");
                 }
@@ -164,7 +164,7 @@ namespace LearningExtraction
             // guarantees retention of all non-padding text
 
             String remaining = new String(td.Total.Text);
-            List<TextDecomposition> remainingUnits = new List<TextDecomposition>(td.Units);
+            List<TextDecomposition> remainingUnits = new List<TextDecomposition>(td.Decomposition);
 
             while (remainingUnits.Count > 0)
             {
@@ -194,7 +194,7 @@ namespace LearningExtraction
 
             String remaining = new String(td.Total.Text);
             int removed = 0;
-            List<TextDecomposition> remainingUnits = new List<TextDecomposition>(td.Units);
+            List<TextDecomposition> remainingUnits = new List<TextDecomposition>(td.Decomposition);
 
             while (remainingUnits.Count > 1)
             {
