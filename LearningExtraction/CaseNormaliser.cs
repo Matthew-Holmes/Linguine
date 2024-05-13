@@ -13,7 +13,7 @@ namespace LearningExtraction
     public class CaseNormaliser
     {
         public int MaxVolumeToProcess { get; set; } = 100; // if given text larger than this, chunk it
-        public int JoinCharacterCount { get; set; } = 20;
+        public int JoinLineCount { get; set; } = 3;
 
         public AgentBase Agent { get; set; }
 
@@ -25,10 +25,10 @@ namespace LearningExtraction
             }
 
             // we do lowercase --> uppercase
-            TextDecomposition allLower = DecompositionTransformer.ApplyAgent(
-                new Agents.DummyAgents.LowercasingAgent(), priorDecomposition, MaxVolumeToProcess, JoinCharacterCount).Result;
+            TextDecomposition allLower = DecompositionBijectiveTransformer.ApplyAgent(
+                new Agents.DummyAgents.LowercasingAgent(), priorDecomposition, MaxVolumeToProcess, JoinLineCount).Result;
 
-            return await DecompositionTransformer.ApplyAgent(Agent, allLower, MaxVolumeToProcess, JoinCharacterCount);
+            return await DecompositionBijectiveTransformer.ApplyAgent(Agent, allLower, MaxVolumeToProcess, JoinLineCount);
         }
     }
 }

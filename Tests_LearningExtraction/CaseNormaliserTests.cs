@@ -158,7 +158,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -174,7 +174,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -192,7 +192,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -210,7 +210,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -231,7 +231,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -252,7 +252,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -273,7 +273,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -294,7 +294,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -312,7 +312,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 50;
-            normaliser.JoinCharacterCount = 15;
+            normaliser.JoinLineCount = 3;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
@@ -330,7 +330,7 @@ namespace Tests_LearningExtraction
             CaseNormaliser normaliser = new CaseNormaliser();
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 100;
-            normaliser.JoinCharacterCount = 30;
+            normaliser.JoinLineCount = 30;
 
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));

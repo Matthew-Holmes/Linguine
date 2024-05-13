@@ -25,9 +25,7 @@ namespace LearningExtraction
             if (textSource.Text.Length > MaxVolumeToProcess)
             {
                 // TODO - how to ensure that these will be valid values??
-                List<String> windows = textSource.Windowed(
-                    MaxVolumeToProcess - 2 * JoinCharacterCount - 2 * PaddingCharacterCount, JoinCharacterCount,
-                    PaddingCharacterCount);
+                List<String> windows = textSource.Windowed(MaxVolumeToProcess, JoinCharacterCount, PaddingCharacterCount);
 
                 // Asynchronously decompose each window
                 var decompositionTasks = windows.Select(window =>
@@ -38,7 +36,7 @@ namespace LearningExtraction
                 TextDecomposition[] partialDecompositions = await Task.WhenAll(decompositionTasks);
 
                 // Combine partial decompositions
-                return Combine(partialDecompositions.ToList(), JoinCharacterCount, PaddingCharacterCount);
+                return Combine(partialDecompositions.ToList(), JoinCharacterCount, PaddingCharacterCount, textSource, mustInject, mustBiject);
             }
 
             String newLinedDecomposition = await StandardAgent.GetResponse(textSource.Text); // only called in the base case
@@ -65,7 +63,8 @@ namespace LearningExtraction
             return ret;
         }
 
-        private TextDecomposition Combine(List<TextDecomposition> partialDecompositions, int joinCharacterCount, int paddingCharacterCount)
+        private TextDecomposition Combine(List<TextDecomposition> partialDecompositions, int joinCharacterCount, int paddingCharacterCount,
+            TextualMedia parent, bool mustInject, bool mustBiject)
         {
             // base case 
             if (partialDecompositions.Count == 1)
@@ -76,6 +75,11 @@ namespace LearningExtraction
             if (partialDecompositions.Count == 0)
             {
                 throw new Exception("empty list");
+            }
+
+            if (mustBiject)
+            {
+                throw new NotImplementedException();
             }
 
             // combine first and second
@@ -103,15 +107,26 @@ namespace LearningExtraction
             }
 
             // combine the first and second
-            lhs = new TextDecomposition(new TextUnit(lhs.Total.Text + rhs.Total.Text), lhs.Units);
-            lhs.Units.AddRange(rhs.Units);
+            TextDecomposition both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Units);
+            both.Units.AddRange(rhs.Copy().Units);
+
+            for (int i = 1; mustInject && !both.Injects(); i++)
+            {
+                both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Units);
+                both.Units.AddRange(rhs.Copy().Units.Skip(i));
+
+                if (i == rhs.Units.Count)
+                {
+                    throw new Exception("failed to merge while maintaining injectivity");
+                }
+            }
 
             // create a new set of decompositions using the combined term
-            List<TextDecomposition> updated = new List<TextDecomposition> { lhs };
+            List<TextDecomposition> updated = new List<TextDecomposition> { both };
             updated.AddRange(partialDecompositions.Skip(2));
 
             // recurse
-            return Combine(updated, joinCharacterCount, paddingCharacterCount);
+            return Combine(updated, joinCharacterCount, paddingCharacterCount, parent, mustInject, mustBiject);
         }
 
         private int DetermineOverlap(List<TextDecomposition>? lhs, List<TextDecomposition>? rhs)
