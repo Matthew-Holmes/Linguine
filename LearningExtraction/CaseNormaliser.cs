@@ -25,10 +25,10 @@ namespace LearningExtraction
             }
 
             // we do lowercase --> uppercase
-            TextDecomposition allLower = DecompositionBijectiveTransformer.ApplyAgent(
+            TextDecomposition allLower = DecompositionTransformerBijective.ApplyAgent(
                 new Agents.DummyAgents.LowercasingAgent(), priorDecomposition, MaxVolumeToProcess, JoinLineCount).Result;
 
-            return await DecompositionBijectiveTransformer.ApplyAgent(Agent, allLower, MaxVolumeToProcess, JoinLineCount);
+            return await DecompositionTransformerBijective.ApplyAgent(Agent, allLower, MaxVolumeToProcess, JoinLineCount);
         }
     }
 }

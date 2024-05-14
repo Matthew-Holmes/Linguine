@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LearningExtraction
 {
-    public static class DecompositionBijectiveTransformer
+    public static class DecompositionTransformerBijective
     {
         public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int joinLines, int retry = 2)
         {
@@ -30,7 +30,7 @@ namespace LearningExtraction
             // parallel windows strategy
             if (prompt.Length > maxCharsToProcess)
             {
-                (List<String> prompts, int joinLinesUsed) = DecompositionTransformer.Window(prompt, maxCharsToProcess, joinLines);
+                (List<String> prompts, int joinLinesUsed) = DecompositionHelper.Window(prompt, maxCharsToProcess, joinLines);
 
                 var getResponseTasks = prompts.Select(prompt => agent.GetResponse(prompt));
 
