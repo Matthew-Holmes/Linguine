@@ -9,6 +9,7 @@ using Agents;
 using Agents.DummyAgents;
 using Infrastructure;
 using LearningExtraction;
+using LearningStore;
 
 namespace Linguine
 {
@@ -25,6 +26,7 @@ namespace Linguine
 
         public TextDecomposer? TextDecomposer { get; private set; } = null;
         public UnitRooter? UnitRooter { get; private set; } = null;
+        public DefinitionResolver? DefinitionResolver { get; private set; } = null;
 
         public bool LoadTextDecompositionService()
         {
@@ -36,13 +38,17 @@ namespace Linguine
             TextDecomposer.HighPerformanceAgent = new TextDecompositionAgent(apiKey, highPowered: true);
             TextDecomposer.FallbackAgent = new WhitespaceDecompositionAgent();
 
-
             UnitRooter = new UnitRooter();
             UnitRooter.Agent = new UnitRootingAgent(apiKey);
 
             return true;
         }
 
+        public bool LoadDefinitionResolutionService(ExternalDictionary dictionary)
+        {
+            DefinitionResolver = new DefinitionResolver(dictionary);
+            return true;
+        }
 
     }
 }

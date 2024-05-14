@@ -2,6 +2,7 @@
 using ExternalMedia;
 using Infrastructure;
 using LearningExtraction;
+using LearningStore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,12 +50,25 @@ namespace Linguine.Tabs
             }
         }
 
+        public List<List<String>> PossibleDefinitionStringsForRooted
+        {
+            get => _possibleDefinitionStringsForRooted;
+            private set
+            {
+                _possibleDefinitionStringsForRooted = value;
+                OnPropertyChanged(nameof(PossibleDefinitionStringsForRooted));
+            }
+        }
+
         private TextualMedia? _textualMedia;
         private TextualMediaLoader _loader;
         private TextDecomposition? _injectiveDecomposition;
         private TextDecomposition? _rootedDecomposition;
         private String _rawText;
         private List<String> _discoveredUnits;
+
+        private List<List<DictionaryDefinition>> _possibleDefinitionsForRooted;
+        private List<List<String>> _possibleDefinitionStringsForRooted;
 
         public TextualMediaViewerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
         {
@@ -82,13 +96,42 @@ namespace Linguine.Tabs
                     return;
                 }
             }
+
+            if (_mainModel.DefinitionResolver is null)
+            {
+                var options = ExternalDictionaryManager.AvailableDictionaries(ConfigManager.TargetLanguage);
+
+                if (options.Count == 0)
+                {
+                    _uiComponents.CanMessage.Show("No dictionaries available for target language!");
+                    return;
+                }
+                else if (options.Count > 1)
+                {
+                    throw new NotImplementedException();
+                }
+
+                // TODO - this is just a stopgap, ultimately will need to decide how to deal with the user changing the Target language
+                // TODO++ and what to do if there are multiple dictionaries loaded for that language (primary/secondary etc?)
+                if (!_mainModel.LoadDefinitionResolutionService(ExternalDictionaryManager.GetDictionary(ConfigManager.TargetLanguage, options.First())))
+                {
+                    _uiComponents.CanMessage.Show("Definition resolution service loading failed");
+                }
+            }
+
             try
             {
-                _injectiveDecomposition =      await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
-                DiscoveredUnitsRaw                 = _injectiveDecomposition?.Flattened().Decomposition?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+                _injectiveDecomposition = await _mainModel.TextDecomposer?.DecomposeText(_textualMedia, mustInject: true);
+                DiscoveredUnitsRaw    = _injectiveDecomposition?.Flattened().Decomposition?.Select(td => td.Total.Text).ToList() ?? new List<string>();
 
-                _rootedDecomposition = await _mainModel.UnitRooter?.RootUnits(_injectiveDecomposition);
+                _rootedDecomposition =    await _mainModel.UnitRooter?.RootUnits(_injectiveDecomposition);
                 DiscoveredUnitsRooted = _rootedDecomposition?.Flattened().Decomposition?.Select(td => td.Total.Text).ToList() ?? new List<string>();
+
+                _possibleDefinitionsForRooted = _mainModel.DefinitionResolver?.GetPossibleDefinitions(_rootedDecomposition);
+                PossibleDefinitionStringsForRooted = _possibleDefinitionsForRooted.Select(
+                    defList => defList.Select(
+                        def => def.Definition).ToList()
+                                             ).ToList();
             } 
             catch (AggregateException ae)
             {

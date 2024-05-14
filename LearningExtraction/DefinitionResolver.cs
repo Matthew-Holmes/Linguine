@@ -17,7 +17,7 @@ namespace LearningExtraction
             _dictionary = dictionary;
         }
         
-        private List<List<DictionaryDefinition>> GetPossibleDefinitions(TextDecomposition td)
+        public List<List<DictionaryDefinition>> GetPossibleDefinitions(TextDecomposition td)
         {
             return td.Units.Select(u => _dictionary.TryGetDefinition(u.Text)).ToList();
         }

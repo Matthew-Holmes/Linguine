@@ -22,9 +22,37 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <ListBox ItemsSource="{Binding DiscoveredUnitsRaw}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="0"/>
                     <ListBox ItemsSource="{Binding DiscoveredUnitsRooted}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="1"/>
+
+                    <!-- to Store the definitions -->
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" Grid.Column="2">
+                        <ItemsControl ItemsSource="{Binding PossibleDefinitionStringsForRooted}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ListBox ItemsSource="{Binding}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="Black" BorderThickness="1" Margin="5">
+                                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="200" Margin="5"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </ScrollViewer>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
                 </Grid>
             </Grid>
 
