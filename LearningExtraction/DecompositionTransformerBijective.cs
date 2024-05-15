@@ -85,7 +85,6 @@ namespace LearningExtraction
             List<String> lhs = list[0].Split('\n').ToList();
             List<String> rhs = list[1].Split('\n').ToList();
 
-            // warning - will fail if there are lots of repeated words
             int overlap = joinLines;
 
             int rhsDrop = overlap / 2;

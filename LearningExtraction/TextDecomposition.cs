@@ -19,6 +19,7 @@ namespace LearningExtraction
         public List<TextDecomposition>? Decomposition { get; private set; }
 
         public List<TextUnit> Units => Decomposition.Select(x => x.Total).ToList();
+        public String NewLinedUnitsString => String.Join('\n', Units.Select(u => u.Text));
 
         public TextDecomposition(TextUnit total, List<TextDecomposition>? decomposition)
         {
