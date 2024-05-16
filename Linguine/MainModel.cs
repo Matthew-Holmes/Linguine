@@ -46,7 +46,13 @@ namespace Linguine
 
         public bool LoadDefinitionResolutionService(ExternalDictionary dictionary)
         {
-            DefinitionResolver = new DefinitionResolver(dictionary);
+            DefinitionResolver = new DefinitionResolver();
+            DefinitionResolver.Dictionary = dictionary;
+
+            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
+
+            DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);
+
             return true;
         }
 
