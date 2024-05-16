@@ -1,7 +1,11 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Linguine.Tabs.WPF">
     <!-- any template like this must be referenced in App.xaml too! -->
     <DataTemplate x:Key="TextualMediaViewerTabTemplate">
+        <DataTemplate.Resources>
+            <local:HighlightConverter x:Key="HighlightConverter"/>
+        </DataTemplate.Resources>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
@@ -42,7 +46,8 @@
                                             <ListBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border BorderBrush="Black" BorderThickness="1" Margin="5">
-                                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="200" Margin="5"/>
+                                                        <TextBlock Text="{Binding Item1}" TextWrapping="Wrap" MaxWidth="200" Margin="5" 
+                                                                   Background="{Binding Item2, Converter={StaticResource HighlightConverter}}"/>
                                                     </Border>
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
