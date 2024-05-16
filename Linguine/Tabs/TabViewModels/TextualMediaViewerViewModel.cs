@@ -50,11 +50,14 @@ namespace Linguine.Tabs
             }
         }
 
-        public List<List<String>> PossibleDefinitionStringsForRooted
+        public List<List<Tuple<String,bool>>> PossibleDefinitionStringsForRooted
         {
             get => _possibleDefinitionStringsForRooted;
             private set
             {
+                // so that the app won't get confused
+                _correctDefinitionIndex = Enumerable.Repeat(-1, value.Count).ToList();
+
                 _possibleDefinitionStringsForRooted = value;
                 OnPropertyChanged(nameof(PossibleDefinitionStringsForRooted));
             }
@@ -68,7 +71,10 @@ namespace Linguine.Tabs
         private List<String> _discoveredUnits;
 
         private List<List<DictionaryDefinition>> _possibleDefinitionsForRooted;
-        private List<List<String>> _possibleDefinitionStringsForRooted;
+        private List<List<Tuple<String, bool>>> _possibleDefinitionStringsForRooted;
+        private List<int> _correctDefinitionIndex;
+
+ 
 
         public TextualMediaViewerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
         {
@@ -127,11 +133,39 @@ namespace Linguine.Tabs
                 _rootedDecomposition =    await _mainModel.UnitRooter?.RootUnits(_injectiveDecomposition);
                 DiscoveredUnitsRooted = _rootedDecomposition?.Flattened().Decomposition?.Select(td => td.Total.Text).ToList() ?? new List<string>();
 
+
                 _possibleDefinitionsForRooted = _mainModel.DefinitionResolver?.GetPossibleDefinitions(_rootedDecomposition);
+                
                 PossibleDefinitionStringsForRooted = _possibleDefinitionsForRooted.Select(
                     defList => defList.Select(
-                        def => def.Definition).ToList()
+                        def => Tuple.Create(def.Definition, false)).ToList()
                                              ).ToList();
+
+                _correctDefinitionIndex = await _mainModel.DefinitionResolver?.IdentifyCorrectDefinitions(
+                    _possibleDefinitionsForRooted,
+                    _rootedDecomposition,
+                    _injectiveDecomposition) ?? new List<int>();
+
+                List<List<Tuple<String, bool>>> tmp = new List<List<Tuple<string, bool>>>();
+
+                for (int i = 0; i != _correctDefinitionIndex.Count; i++)
+                {
+                    tmp.Add(new List<Tuple<string, bool>>());
+
+                    for (int j = 0; j != PossibleDefinitionStringsForRooted[i].Count; j++)
+                    {
+                        if (j == _correctDefinitionIndex[i])
+                        {
+                            tmp[i].Add(Tuple.Create(PossibleDefinitionStringsForRooted[i][j].Item1, true));
+                        }
+                        else
+                        {
+                            tmp[i].Add(Tuple.Create(PossibleDefinitionStringsForRooted[i][j].Item1, false));
+                        }
+                    }
+                }
+                PossibleDefinitionStringsForRooted = tmp;
+
             } 
             catch (AggregateException ae)
             {
