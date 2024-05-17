@@ -13,7 +13,8 @@ namespace Agents
         public DefinitionResolutionAgent(string apiKey) : base(apiKey)
         {
             StringParameters["system"] = systemMessage;
-            StringParameters["model"] = "gpt-4-turbo";
+            ContinousParameter("Temperature").Value = 0.01;
+            //StringParameters["model"] = "gpt-4o";
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Agents
             ContinousParameter("Temperature").Value = 1.0; // below 1 tends to recombine lines
             ContinousParameter("TopP").Value = 0.5;
             StringParameters["system"] = systemMessage;
+
+            //StringParameters["model"] = "gpt-4o";
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Agents
             //ContinousParameter("TopP").Value = 0.1;
             if (highPowered)
             {
-                StringParameters["model"] = "gpt-4-turbo";
+                StringParameters["model"] = "gpt-4o";
             }
         }
     }
