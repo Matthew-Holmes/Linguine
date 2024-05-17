@@ -20,50 +20,33 @@ namespace LearningExtraction
 
             String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total.Text));
 
-            String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines, retry); // agent best at identifying lower --> upper, not the other way around
+            String response = await GetResponse(agent, prompt, maxCharsToProcess, joinLines, retry); // agent best at identifying lower --> upper, not the other way around
 
             return TextDecomposition.FromNewLinedString(source.Total.Text, response);
         }
 
-        private static async Task<String> GetCombinedResponses(AgentBase agent, string prompt, int maxCharsToProcess, int joinLines, int retry)
+        private static bool Bijects(String prompt, String response)
+        {
+            return prompt.Split('\n').Count() == response.Split('\n').Count();
+        }
+
+        private static async Task<String> GetResponse(AgentBase agent, string prompt, int maxCharsToProcess, int joinLines, int retry)
         {
             // parallel windows strategy
             if (prompt.Length > maxCharsToProcess)
             {
-                (List<String> prompts, int joinLinesUsed) = DecompositionHelper.Window(prompt, maxCharsToProcess, joinLines);
-
-                var getResponseTasks = prompts.Select(prompt => agent.GetResponse(prompt));
-
-                String[] responses = await Task.WhenAll(getResponseTasks);
-
-                for (int i = 0; i != prompts.Count; i++)
-                {
-                    for( int j = 0; j != retry || prompts[i].Split('\n').Count() != responses[i].Split('\n').Count(); j++)
-                    {
-                        // bijectivity compromised, try again
-                        responses[i] = await agent.GetResponse(prompts[i]);
-                    }
-
-                    if (prompts[i].Split('\n').Count() != responses[i].Split('\n').Count())
-                    {
-                        // bijectivity compromised
-                        // revert to identity map
-                        responses[i] = prompts[i];
-                    }
-                }
-
-                return Combine(responses.ToList(), joinLinesUsed);
+                return await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines, retry);
             }
 
+            // no need for windowing
             String newLinedResponse = await agent.GetResponse(prompt);
 
-            for (int j = 0; j != retry && prompt.Split('\n').Count() != newLinedResponse.Split('\n').Count(); j++)
+            for (int j = 0; j != retry && !Bijects(prompt, newLinedResponse); j++)
             {
-                // bijectivity compromised, try again
                 newLinedResponse = await agent.GetResponse(prompt);
             }
 
-            if (prompt.Split('\n').Count() != newLinedResponse.Split('\n').Count())
+            if (!Bijects(prompt, newLinedResponse))
             {
                 // bijectivity compromised
                 // revert to identity map
@@ -71,6 +54,32 @@ namespace LearningExtraction
             }
 
             return newLinedResponse;
+        }
+
+        private static async Task<String> GetCombinedResponses(AgentBase agent, String prompt, int maxCharsToProcess, int joinLines, int retry)
+        {
+            (List<String> prompts, int joinLinesUsed) = DecompositionHelper.Window(prompt, maxCharsToProcess, joinLines);
+
+            var getResponseTasks = prompts.Select(prompt => agent.GetResponse(prompt));
+
+            String[] responses = await Task.WhenAll(getResponseTasks);
+
+            for (int i = 0; i != prompts.Count; i++)
+            {
+                for (int j = 0; j != retry && !Bijects(prompts[i], responses[i]); j++)
+                {
+                    responses[i] = await agent.GetResponse(prompts[i]);
+                }
+
+                if (!Bijects(prompts[i], responses[i]))
+                {
+                    // bijectivity compromised
+                    // revert to identity map
+                    responses[i] = prompts[i];
+                }
+            }
+
+            return Combine(responses.ToList(), joinLinesUsed);
         }
 
         private static string Combine(List<string> list, int joinLines)
