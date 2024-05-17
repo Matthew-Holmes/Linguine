@@ -88,42 +88,7 @@ namespace Linguine.Tabs
 
         private async Task Decompose()
         {
-            if (_textualMedia is null)
-            {
-                _uiComponents.CanMessage.Show("Please load text first");
-                return;
-            }
-
-            if (_mainModel.TextDecomposer is null)
-            {
-                if (!_mainModel.LoadTextDecompositionService())
-                {
-                    _uiComponents.CanMessage.Show("Text decomposition service loading failed");
-                    return;
-                }
-            }
-
-            if (_mainModel.DefinitionResolver is null)
-            {
-                var options = ExternalDictionaryManager.AvailableDictionaries(ConfigManager.TargetLanguage);
-
-                if (options.Count == 0)
-                {
-                    _uiComponents.CanMessage.Show("No dictionaries available for target language!");
-                    return;
-                }
-                else if (options.Count > 1)
-                {
-                    throw new NotImplementedException();
-                }
-
-                // TODO - this is just a stopgap, ultimately will need to decide how to deal with the user changing the Target language
-                // TODO++ and what to do if there are multiple dictionaries loaded for that language (primary/secondary etc?)
-                if (!_mainModel.LoadDefinitionResolutionService(ExternalDictionaryManager.GetDictionary(ConfigManager.TargetLanguage, options.First())))
-                {
-                    _uiComponents.CanMessage.Show("Definition resolution service loading failed");
-                }
-            }
+            if (!PrepareToDecompose()) { return; }
 
             try
             {
@@ -184,6 +149,49 @@ namespace Linguine.Tabs
             {
                 _uiComponents.CanMessage.Show($"An unexpected error occurred: {ex.Message}");
             }
+        }
+
+        private bool PrepareToDecompose()
+        {
+            if (_textualMedia is null)
+            {
+                _uiComponents.CanMessage.Show("Please load text first");
+                return false;
+            }
+
+            if (_mainModel.TextDecomposer is null)
+            {
+                if (!_mainModel.LoadTextDecompositionService())
+                {
+                    _uiComponents.CanMessage.Show("Text decomposition service loading failed");
+                    return false;
+                }
+            }
+
+            if (_mainModel.DefinitionResolver is null)
+            {
+                var options = ExternalDictionaryManager.AvailableDictionaries(ConfigManager.TargetLanguage);
+
+                if (options.Count == 0)
+                {
+                    _uiComponents.CanMessage.Show("No dictionaries available for target language!");
+                    return false;
+                }
+                else if (options.Count > 1)
+                {
+                    throw new NotImplementedException();
+                }
+
+                // TODO - this is just a stopgap, ultimately will need to decide how to deal with the user changing the Target language
+                // TODO++ and what to do if there are multiple dictionaries loaded for that language (primary/secondary etc?)
+                if (!_mainModel.LoadDefinitionResolutionService(ExternalDictionaryManager.GetDictionary(ConfigManager.TargetLanguage, options.First())))
+                {
+                    _uiComponents.CanMessage.Show("Definition resolution service loading failed");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private void Load()
