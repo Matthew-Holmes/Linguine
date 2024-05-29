@@ -62,8 +62,9 @@ namespace Tests_Infrastructure
             LanguageCode lc = LanguageCode.zho;
 
             ConfigManager.ReplaceConnectionString(lc, "yi xin db");
+            ConfigManager.TargetLanguage = LanguageCode.zho;
 
-            Assert.AreEqual(ConfigManager.ConnectionStrings[lc], "yi xin db");
+            Assert.AreEqual(ConfigManager.ConnectionString, "yi xin db");
         }
     }
 }

@@ -43,7 +43,12 @@ namespace Infrastructure
             }
         }
 
-        public static Dictionary<LanguageCode, String> ConnectionStrings
+        public static String ConnectionString
+        {
+            get => ConnectionStrings[TargetLanguage];
+        }
+
+        private static Dictionary<LanguageCode, String> ConnectionStrings
         {
             get => ConfigFileHandler.Copy.ConnectionStrings;
         }
