@@ -92,7 +92,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void LoadConfig_WithValidPath_ShouldReturnTrue()
         {
-            var config = new Config { FileStoreLocation = "TestLocation/" };
+            var config = new Config();
             ConfigFileHandler.UpdateConfig(config);
 
             bool loadedConfig = ConfigFileHandler.LoadConfig();
@@ -102,7 +102,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void LoadConfig_WithValidPath_ShouldLoadTheSame()
         {
-            var config = new Config { FileStoreLocation = "TestLocation/" };
+            var config = new Config();
             ConfigFileHandler.UpdateConfig(config);
 
             ConfigFileHandler.LoadConfig();
@@ -112,7 +112,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void LoadCustomConfig_WithValidPath_ShouldReturnTrue()
         {
-            var config = new Config { FileStoreLocation = "TestLocation/" };
+            var config = new Config();
             ConfigFileHandler.UpdateConfig(config);
 
             File.Copy(ConfigFileHandler.ConfigPath, "customConfig.json");
@@ -131,7 +131,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void LoadCustomConfig_WithValidPath_ShouldLoadTheSame()
         {
-            var config = new Config { FileStoreLocation = "TestLocation/" };
+            var config = new Config();
             ConfigFileHandler.UpdateConfig(config);
 
             File.Copy(ConfigFileHandler.ConfigPath, "customConfig.json");

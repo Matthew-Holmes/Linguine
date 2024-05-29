@@ -17,41 +17,13 @@ namespace Tests_Infrastructure
         {
             originalConfig = new Config
             {
-                FileStoreLocation = "OriginalLocation",
-                DictionariesDirectory = "OriginalDictionary",
-                VariantsDirectory = "OriginalVariants",
-                SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>
+                ConnectionStrings = new Dictionary<LanguageCode, String>
                 {
-                    { LanguageCode.eng, new List<Tuple<string, string>> { new Tuple<string, string>("Name1", "ConnectionString1") } }
+                    { LanguageCode.eng, "ConnectionString1" }
                 },
-                SavedVariantsNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>
-                {
-                    { LanguageCode.eng, new List<Tuple<string, string>> { new Tuple<string, string>("Name1", "ConnectionString1") } }
-                }
             };
 
             copiedConfig = originalConfig.Copy();
-        }
-
-        [TestMethod]
-        public void Copy_FileStoreLocationIsIndependent()
-        {
-            copiedConfig.FileStoreLocation = "ChangedLocation";
-            Assert.AreNotEqual(originalConfig.FileStoreLocation, copiedConfig.FileStoreLocation);
-        }
-
-        [TestMethod]
-        public void Copy_DictionariesDirectoryIsIndependent()
-        {
-            copiedConfig.DictionariesDirectory = "ChangedDictionary";
-            Assert.AreNotEqual(originalConfig.DictionariesDirectory, copiedConfig.DictionariesDirectory);
-        }
-
-        [TestMethod]
-        public void Copy_VariantsDirectoryIsIndependent()
-        {
-            copiedConfig.VariantsDirectory = "ChangedDictionary";
-            Assert.AreNotEqual(originalConfig.VariantsDirectory, copiedConfig.VariantsDirectory);
         }
 
         [TestMethod]
@@ -62,17 +34,10 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void Copy_SavedDictionariesNamesAndConnnectionStringsIsDeepCopied()
+        public void Copy_ConnectionStringsAreDeepCopied()
         {
-            copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(new Tuple<string, string>("Name2", "ConnectionString2"));
-            Assert.AreNotEqual(originalConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Count, copiedConfig.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Count);
-        }
-
-        [TestMethod]
-        public void Copy_SavedVariantsNamesAndConnnectionStringsIsDeepCopied()
-        {
-            copiedConfig.SavedVariantsNamesAndConnnectionStrings[LanguageCode.eng].Add(new Tuple<string, string>("Name2", "ConnectionString2"));
-            Assert.AreNotEqual(originalConfig.SavedVariantsNamesAndConnnectionStrings[LanguageCode.eng].Count, copiedConfig.SavedVariantsNamesAndConnnectionStrings[LanguageCode.eng].Count);
+            copiedConfig.ConnectionStrings[LanguageCode.eng] = "ConnectionString2";
+            Assert.AreNotEqual(originalConfig.ConnectionStrings[LanguageCode.eng], copiedConfig.ConnectionStrings[LanguageCode.eng]);
         }
 
         [TestMethod]
@@ -82,51 +47,27 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void Equal_returnsFalseForModifiedCopyAdditiveDictionaries()
+        public void Equal_returnsFalseForModifiedConnectionString()
         {
             Config modifiedCopy = originalConfig.Copy();
-            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("Dictionary2", "ConnectionString2"));
-            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
-        }
-
-        [TestMethod]
-        public void Equal_returnsFalseForModifiedRemovedDictionaries()
-        {
-            Config modifiedCopy = originalConfig.Copy();
-            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng] = new List<Tuple<string, string>>();
-            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
-        }
-
-        [TestMethod]
-        public void Equal_returnsFalseForModifiedRemovedKeyEntirelyDictionaries()
-        {
-            Config modifiedCopy = originalConfig.Copy();
-            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings.Remove(LanguageCode.eng);
+            modifiedCopy.ConnectionStrings[LanguageCode.eng] = "newConnString";
             Assert.IsFalse(originalConfig.Equals(modifiedCopy));
         }
 
 
         [TestMethod]
-        public void Equal_returnsFalseForModifiedCopyAdditiveVariants()
+        public void Equal_returnsFalseRemovedKeyInConnectionStrings()
         {
             Config modifiedCopy = originalConfig.Copy();
-            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng].Add(Tuple.Create("Dictionary2", "ConnectionString2"));
+            modifiedCopy.ConnectionStrings.Remove(LanguageCode.eng);
             Assert.IsFalse(originalConfig.Equals(modifiedCopy));
         }
 
         [TestMethod]
-        public void Equal_returnsFalseForModifiedRemovedVariants()
+        public void Equal_returnsFalseAddKeyInConnectionStrings()
         {
             Config modifiedCopy = originalConfig.Copy();
-            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings[LanguageCode.eng] = new List<Tuple<string, string>>();
-            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
-        }
-
-        [TestMethod]
-        public void Equal_returnsFalseForModifiedRemovedKeyEntirelyVariants()
-        {
-            Config modifiedCopy = originalConfig.Copy();
-            modifiedCopy.SavedDictionariesNamesAndConnnectionStrings.Remove(LanguageCode.eng);
+            modifiedCopy.ConnectionStrings[LanguageCode.zho] = "ni hao";
             Assert.IsFalse(originalConfig.Equals(modifiedCopy));
         }
     }

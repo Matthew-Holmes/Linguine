@@ -31,29 +31,6 @@ namespace Tests_Infrastructure
             }
         }
 
-        [TestMethod]
-        public void TestFileStoreLocationGetSet()
-        {
-            string testValue = "test/path";
-            ConfigManager.FileStoreLocation = testValue;
-            Assert.AreEqual(testValue, ConfigManager.FileStoreLocation);
-        }
-
-        [TestMethod]
-        public void TestDictionariesDirectoryGetSet()
-        {
-            string testValue = "test/dictionaries";
-            ConfigManager.DictionariesDirectory = testValue;
-            Assert.AreEqual(testValue, ConfigManager.DictionariesDirectory);
-        }
-
-        [TestMethod]
-        public void TestVariantsDirectoryGetSet()
-        {
-            string testValue = "test/variants";
-            ConfigManager.VariantsDirectory = testValue;
-            Assert.AreEqual(testValue, ConfigManager.VariantsDirectory);
-        }
 
         [TestMethod]
         public void TestOpenAIAPIKeyGetSet()
@@ -80,66 +57,50 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void TestAddDictionaryDetails()
+        public void TestAddConnectionStringReturnsTrueIfValid()
         {
-            var details = new Tuple<string, string>("name", "connectionString");
             LanguageCode lc = LanguageCode.zho;
 
-            ConfigManager.AddDictionaryDetails(lc, details);
+            bool ret = ConfigManager.AddConnectionString(lc, "conn string");
 
-            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc));
-            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details));
+            Assert.IsTrue(ret);
         }
 
         [TestMethod]
-        public void TestAddMultipleDictionaryDetails()
+        public void TestAddConnectionStringReturnsFalseIfInvalid()
         {
-            var details1 = new Tuple<string, string>("name1", "connectionString1");
-            var details2 = new Tuple<string, string>("name2", "connectionString2");
-            var details3 = new Tuple<string, string>("name3", "connectionString3");
             LanguageCode lc = LanguageCode.zho;
 
-            ConfigManager.AddDictionaryDetails(lc, details1);
-            ConfigManager.AddDictionaryDetails(lc, details2);
-            ConfigManager.AddDictionaryDetails(lc, details3);
+            bool ret = ConfigManager.AddConnectionString(lc, "conn string");
+            bool ret2 = ConfigManager.AddConnectionString(lc, "new conn string");
 
-            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc));
-            Assert.AreEqual(3, ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Count);
-            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details1));
-            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details2));
-            Assert.IsTrue(ConfigManager.SavedDictionariesNamesAndConnnectionStrings[lc].Contains(details3));
+            Assert.IsTrue(ret);
+            Assert.IsFalse(ret2);
+        }
+
+
+        [TestMethod]
+        public void TestAddConnectionStringReturnsTrueIfOverridingEmpty()
+        {
+            LanguageCode lc = LanguageCode.zho;
+
+            bool ret = ConfigManager.AddConnectionString(lc, "");
+            bool ret2 = ConfigManager.AddConnectionString(lc, "new conn string");
+
+            Assert.IsTrue(ret2);
         }
 
         [TestMethod]
-        public void TestAddVariantsDetails()
+        public void TestAddConnectionString()
         {
-            var details = new Tuple<string, string>("name", "connectionString");
             LanguageCode lc = LanguageCode.zho;
 
-            ConfigManager.AddVariantsDetails(lc, details);
-
-            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc));
-            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details));
+            bool ret = ConfigManager.AddConnectionString(lc, "conn string");
+            
+            Assert.IsTrue(ConfigManager.ConnectionStrings.ContainsKey(lc));
+            Assert.IsTrue(ConfigManager.ConnectionStrings[lc] == "conn string");
         }
 
-        [TestMethod]
-        public void TestAddMultipleVariantsDetails()
-        {
-            var details1 = new Tuple<string, string>("name1", "connectionString1");
-            var details2 = new Tuple<string, string>("name2", "connectionString2");
-            var details3 = new Tuple<string, string>("name3", "connectionString3");
-            LanguageCode lc = LanguageCode.zho;
-
-            ConfigManager.AddVariantsDetails(lc, details1);
-            ConfigManager.AddVariantsDetails(lc, details2);
-            ConfigManager.AddVariantsDetails(lc, details3);
-
-            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc));
-            Assert.AreEqual(3, ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Count);
-            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details1));
-            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details2));
-            Assert.IsTrue(ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Contains(details3));
-        }
     }
 }
 

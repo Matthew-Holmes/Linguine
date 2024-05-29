@@ -22,13 +22,10 @@ namespace Infrastructure
         {
             Config config = new Config();
 
-            config.FileStoreLocation = "Filestore/";
-            config.DictionariesDirectory = "Dictionaries/";
-            config.VariantsDirectory = "Variants/";
 
             config.OpenAI_APIKeyLocation = "APIKeys/OpenAI.txt";
 
-            config.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
+            config.ConnectionStrings = new Dictionary<LanguageCode, String>();
 
             config.TargetLanguage = LanguageCode.eng;
             config.NativeLanguage = LanguageCode.eng;

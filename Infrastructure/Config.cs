@@ -12,13 +12,9 @@ namespace Infrastructure
     [JsonObject(MemberSerialization.Fields)]
     internal class Config // keep internal: should not be able to instantiate in wider code
     {
-        internal string FileStoreLocation;
-        internal string DictionariesDirectory;
-        internal string VariantsDirectory;
         internal string OpenAI_APIKeyLocation;
 
-        internal Dictionary<LanguageCode, List<Tuple<String, String>>> SavedDictionariesNamesAndConnnectionStrings;
-        internal Dictionary<LanguageCode, List<Tuple<String, String>>> SavedVariantsNamesAndConnnectionStrings;
+        internal Dictionary<LanguageCode, String> ConnectionStrings = new Dictionary<LanguageCode, string>();
 
         [JsonConverter(typeof(StringEnumConverter))]
         internal LanguageCode NativeLanguage;
@@ -29,36 +25,20 @@ namespace Infrastructure
         {
             Config copy = new Config
             {
-                FileStoreLocation = this.FileStoreLocation,
-                DictionariesDirectory = this.DictionariesDirectory,
-                VariantsDirectory = this.VariantsDirectory,
-                OpenAI_APIKeyLocation = this.OpenAI_APIKeyLocation,
-
                 NativeLanguage = this.NativeLanguage,
                 TargetLanguage = this.TargetLanguage,
 
-                SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>(),
-                SavedVariantsNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<String, String>>>()
-                
+                OpenAI_APIKeyLocation = this.OpenAI_APIKeyLocation,
+
+                ConnectionStrings = new Dictionary<LanguageCode, String>()
+
             };
 
-            if (this.SavedDictionariesNamesAndConnnectionStrings is not null)
+            if (this.ConnectionStrings is not null)
             {
-                foreach (var entry in this.SavedDictionariesNamesAndConnnectionStrings)
+                foreach (var entry in this.ConnectionStrings)
                 {
-                    copy.SavedDictionariesNamesAndConnnectionStrings.Add(
-                        entry.Key,
-                        new List<Tuple<String, String>>(entry.Value));
-                }
-            }
-
-            if (this.SavedVariantsNamesAndConnnectionStrings is not null)
-            {
-                foreach (var entry in this.SavedVariantsNamesAndConnnectionStrings)
-                {
-                    copy.SavedVariantsNamesAndConnnectionStrings.Add(
-                        entry.Key,
-                        new List<Tuple<String, String>>(entry.Value));
+                    copy.ConnectionStrings.Add(entry.Key, entry.Value);
                 }
             }
 
@@ -75,51 +55,17 @@ namespace Infrastructure
             bool sameTarget = TargetLanguage == rhs.TargetLanguage;
             bool sameNative = NativeLanguage == rhs.NativeLanguage;
 
-            bool sameFileStore = FileStoreLocation == rhs.FileStoreLocation;
-            bool sameDictionaryDir = DictionariesDirectory == rhs.DictionariesDirectory;
-            bool sameVariantsDir = VariantsDirectory == rhs.VariantsDirectory;
             bool sameAPIKeyLocation = OpenAI_APIKeyLocation == rhs.OpenAI_APIKeyLocation;
 
-            // pigeon hole principle
-            bool sameDictionaryDatabases = (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0) == (rhs.SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0);
-            if (sameDictionaryDatabases && (SavedDictionariesNamesAndConnnectionStrings?.Count ?? 0 ) > 0)
-            {
-                foreach (var entry in SavedDictionariesNamesAndConnnectionStrings)
-                {
-                    if (!rhs.SavedDictionariesNamesAndConnnectionStrings.TryGetValue(entry.Key, out var rhsValue))
-                    {
-                        sameDictionaryDatabases = false;
-                        break;
-                    }
+            bool sameConnectionStrings = ConnectionStrings.Keys.Count == rhs.ConnectionStrings.Keys.Count;
 
-                    sameDictionaryDatabases = sameDictionaryDatabases && entry.Value.SequenceEqual(rhsValue);
-                    if (!sameDictionaryDatabases)
-                    {
-                        break;
-                    }
-                }
+            foreach (var entry in this.ConnectionStrings)
+            {
+                sameConnectionStrings = sameConnectionStrings && (ConnectionStrings[entry.Key] == rhs.ConnectionStrings[entry.Key]);
             }
 
-            bool sameVariantsDatabases = (SavedVariantsNamesAndConnnectionStrings?.Count ?? 0) == (rhs.SavedVariantsNamesAndConnnectionStrings?.Count ?? 0);
-            if (sameVariantsDatabases && (SavedVariantsNamesAndConnnectionStrings?.Count ?? 0) > 0)
-            {
-                foreach (var entry in SavedVariantsNamesAndConnnectionStrings)
-                {
-                    if (!rhs.SavedVariantsNamesAndConnnectionStrings.TryGetValue(entry.Key, out var rhsValue))
-                    {
-                        sameVariantsDatabases = false;
-                        break;
-                    }
+            return sameTarget && sameNative && sameAPIKeyLocation && sameConnectionStrings;
 
-                    sameVariantsDatabases = sameVariantsDatabases && entry.Value.SequenceEqual(rhsValue);
-                    if (!sameVariantsDatabases)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            return sameTarget && sameNative && sameFileStore && sameDictionaryDir && sameVariantsDir && sameDictionaryDatabases && sameVariantsDatabases && sameAPIKeyLocation;
         }
 
     }

@@ -10,40 +10,6 @@ namespace Infrastructure
 {
     public static class ConfigManager
     {
-
-        public static String FileStoreLocation
-        {
-            get => ConfigFileHandler.Copy.FileStoreLocation;
-            set
-            {
-                Config tmp = ConfigFileHandler.Copy;
-                tmp.FileStoreLocation = value;
-                ConfigFileHandler.UpdateConfig(tmp);
-            }
-        }
-
-        public static String DictionariesDirectory
-        {
-            get => ConfigFileHandler.Copy.DictionariesDirectory;
-            set
-            {
-                Config tmp = ConfigFileHandler.Copy;
-                tmp.DictionariesDirectory = value;
-                ConfigFileHandler.UpdateConfig(tmp);
-            }
-        }
-
-        public static String VariantsDirectory
-        {
-            get => ConfigFileHandler.Copy.VariantsDirectory;
-            set
-            {
-                Config tmp = ConfigFileHandler.Copy;
-                tmp.VariantsDirectory = value;
-                ConfigFileHandler.UpdateConfig(tmp);
-            }
-        }
-
         public static String OpenAI_APIKey
         {
             get => ConfigFileHandler.Copy.OpenAI_APIKeyLocation;
@@ -77,49 +43,27 @@ namespace Infrastructure
             }
         }
 
-        public static Dictionary<LanguageCode, List<Tuple<String, String>>> SavedDictionariesNamesAndConnnectionStrings
+        public static Dictionary<LanguageCode, String> ConnectionStrings
         {
-            get => ConfigFileHandler.Copy.SavedDictionariesNamesAndConnnectionStrings;
+            get => ConfigFileHandler.Copy.ConnectionStrings;
         }
 
-        public static Dictionary<LanguageCode, List<Tuple<String, String>>> SavedVariantsNamesAndConnnectionStrings
-        {
-            get => ConfigFileHandler.Copy.SavedVariantsNamesAndConnnectionStrings;
-        }
-
-        public static void AddDictionaryDetails(LanguageCode lc, Tuple<String,String> details)
+        public static bool AddConnectionString(LanguageCode lc, String connectionString)
         {
             Config tmp = ConfigFileHandler.Copy;
-            if (tmp.SavedDictionariesNamesAndConnnectionStrings is null)
+
+            if (   tmp.ConnectionStrings.ContainsKey(lc) 
+                && tmp.ConnectionStrings[lc] is not null 
+                && tmp.ConnectionStrings[lc] != "")
             {
-                tmp.SavedDictionariesNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
-            }
-            if (tmp.SavedDictionariesNamesAndConnnectionStrings.ContainsKey(lc) is not true)
-            {
-                tmp.SavedDictionariesNamesAndConnnectionStrings[lc] = new List<Tuple<string, string>>();
+                return false;
             }
 
-            tmp.SavedDictionariesNamesAndConnnectionStrings[lc].Add(details);
+            tmp.ConnectionStrings[lc] = connectionString;
 
             ConfigFileHandler.UpdateConfig(tmp);
+
+            return true;
         }
-
-        public static void AddVariantsDetails(LanguageCode lc, Tuple<String, String> details)
-        {
-            Config tmp = ConfigFileHandler.Copy;
-            if (tmp.SavedVariantsNamesAndConnnectionStrings is null)
-            {
-                tmp.SavedVariantsNamesAndConnnectionStrings = new Dictionary<LanguageCode, List<Tuple<string, string>>>();
-            }
-            if (tmp.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc) is not true)
-            {
-                tmp.SavedVariantsNamesAndConnnectionStrings[lc] = new List<Tuple<string, string>>();
-            }
-
-            tmp.SavedVariantsNamesAndConnnectionStrings[lc].Add(details);
-
-            ConfigFileHandler.UpdateConfig(tmp);
-        }
-
     }
 }
