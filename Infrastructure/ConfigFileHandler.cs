@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Infrastructure
 {
@@ -26,6 +27,12 @@ namespace Infrastructure
             config.OpenAI_APIKeyLocation = "APIKeys/OpenAI.txt";
 
             config.ConnectionStrings = new Dictionary<LanguageCode, String>();
+
+            foreach (LanguageCode lc in Enum.GetValues(typeof(LanguageCode)))
+            {
+                string dbFilePath = Path.Combine("store", lc.ToString() + ".db");
+                config.ConnectionStrings.Add(lc, $"Data Source={dbFilePath};");
+            }
 
             config.TargetLanguage = LanguageCode.eng;
             config.NativeLanguage = LanguageCode.eng;

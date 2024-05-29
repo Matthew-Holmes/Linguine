@@ -57,50 +57,14 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void TestAddConnectionStringReturnsTrueIfValid()
+        public void TestReplaceConnectionStringReturnsTrueIfOverridingEmpty()
         {
             LanguageCode lc = LanguageCode.zho;
 
-            bool ret = ConfigManager.AddConnectionString(lc, "conn string");
+            ConfigManager.ReplaceConnectionString(lc, "yi xin db");
 
-            Assert.IsTrue(ret);
+            Assert.AreEqual(ConfigManager.ConnectionStrings[lc], "yi xin db");
         }
-
-        [TestMethod]
-        public void TestAddConnectionStringReturnsFalseIfInvalid()
-        {
-            LanguageCode lc = LanguageCode.zho;
-
-            bool ret = ConfigManager.AddConnectionString(lc, "conn string");
-            bool ret2 = ConfigManager.AddConnectionString(lc, "new conn string");
-
-            Assert.IsTrue(ret);
-            Assert.IsFalse(ret2);
-        }
-
-
-        [TestMethod]
-        public void TestAddConnectionStringReturnsTrueIfOverridingEmpty()
-        {
-            LanguageCode lc = LanguageCode.zho;
-
-            bool ret = ConfigManager.AddConnectionString(lc, "");
-            bool ret2 = ConfigManager.AddConnectionString(lc, "new conn string");
-
-            Assert.IsTrue(ret2);
-        }
-
-        [TestMethod]
-        public void TestAddConnectionString()
-        {
-            LanguageCode lc = LanguageCode.zho;
-
-            bool ret = ConfigManager.AddConnectionString(lc, "conn string");
-            
-            Assert.IsTrue(ConfigManager.ConnectionStrings.ContainsKey(lc));
-            Assert.IsTrue(ConfigManager.ConnectionStrings[lc] == "conn string");
-        }
-
     }
 }
 

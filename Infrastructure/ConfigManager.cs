@@ -48,22 +48,13 @@ namespace Infrastructure
             get => ConfigFileHandler.Copy.ConnectionStrings;
         }
 
-        public static bool AddConnectionString(LanguageCode lc, String connectionString)
+        public static void ReplaceConnectionString(LanguageCode lc, String connectionString)
         {
             Config tmp = ConfigFileHandler.Copy;
-
-            if (   tmp.ConnectionStrings.ContainsKey(lc) 
-                && tmp.ConnectionStrings[lc] is not null 
-                && tmp.ConnectionStrings[lc] != "")
-            {
-                return false;
-            }
 
             tmp.ConnectionStrings[lc] = connectionString;
 
             ConfigFileHandler.UpdateConfig(tmp);
-
-            return true;
         }
     }
 }
