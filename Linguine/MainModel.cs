@@ -15,12 +15,53 @@ namespace Linguine
 {
     public class MainModel
     {
+        public bool StartupComplete { get; private set; }
+        private LinguineDbContext Linguine { get; set; }
+
+
         public MainModel()
         {
             if (!ConfigFileHandler.LoadConfig())
             {
                 // this is the only exception that should be possibly to be thrown during main model construction
                 throw new FileNotFoundException("Couldn't find config");
+            }
+            Task.Run(() => LoadDatabase()); // load in background
+        }
+
+        public void LoadDatabase()
+        {
+            Linguine = new LinguineDbContext(ConfigManager.ConnectionString);
+            Linguine.Database.EnsureCreated();
+            StartupComplete = true;
+        }
+
+        public ExternalDictionaryManager? ExternalDictionaryManager
+        {
+            get 
+            {            
+                if (StartupComplete)
+                {
+                    return new ExternalDictionaryManager(Linguine);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        public VariantsManager? VariantsManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return new VariantsManager(Linguine);
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
@@ -55,6 +96,5 @@ namespace Linguine
 
             return true;
         }
-
     }
 }

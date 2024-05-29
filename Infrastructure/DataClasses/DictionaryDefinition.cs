@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LearningStore
+namespace Infrastructure
 {
     public class DictionaryDefinition
     {
@@ -12,5 +12,6 @@ namespace LearningStore
         public int ID { get; set; }
         public String Word { get; set; }
         public String Definition { get; set; }
+        public String Source { get; set; }
     }
 }
