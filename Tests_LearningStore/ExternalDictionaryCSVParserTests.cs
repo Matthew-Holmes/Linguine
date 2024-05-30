@@ -13,17 +13,34 @@ namespace LearningStoreTests
     [TestClass]
     public class ExternalDictionaryCSVParserTests
     {
+        private const string ConnectionString = $"Data Source=tmp.db;";
+        private LinguineDbContext _db;
+
         private string _csvFilePath;
-        private LanguageCode _testLanguageCode;
         private string _testDictionaryName;
-        private string _databaseFilePath;
+
+        private void SeedData()
+        {
+        _db = new LinguineDbContext(ConnectionString);
+        _db.Database.EnsureCreated();
+        }
 
         [TestInitialize]
         public void SetUp()
         {
-            _testLanguageCode = LanguageCode.eng; 
+            using (var _db = new LinguineDbContext(ConnectionString))
+            {
+                _db.Database.EnsureDeleted(); // use this way as File method doesn't work
+            }
+
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
+            }
+
+            SeedData();
+
             _testDictionaryName = "TestDictionary";
-            _databaseFilePath = "testDatabase.db";
 
             // Create a mock CSV file with test data
             _csvFilePath = CreateMockCSVFile();
@@ -47,30 +64,44 @@ namespace LearningStoreTests
         [TestMethod]
         public void ParseNewDictionaryFromCSV_ValidCSV_Runs()
         {
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(_csvFilePath, _testLanguageCode, _testDictionaryName);
+            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _db);
+
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dictionary, _csvFilePath, _testDictionaryName);
         }
 
         [TestMethod]
-        public void ParseNewDictionaryFromCSV_ValidCSV_CreatesDatabase()
+        public void ParseNewDictionaryFromCSV_ValidCSV_AddsDefinitions()
         {
-            String expectedConnectionString = ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(
-                _csvFilePath, _testLanguageCode, _testDictionaryName);
+            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _db);
 
-            using (ExternalDictionaryContext context = new ExternalDictionaryContext(expectedConnectionString))
-            {
-                var dictionaryEntry0 = context.DictionaryDefinitions.FirstOrDefault(dd => dd.Word == "TestWord0");
-                Assert.IsNotNull(dictionaryEntry0);
-                Assert.AreEqual(dictionaryEntry0.Definition, "TestDefinition0");
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dictionary, _csvFilePath, _testDictionaryName);
 
-                var dictionaryEntry1 = context.DictionaryDefinitions.FirstOrDefault(dd => dd.Word == "TestWord1");
-                Assert.IsNotNull(dictionaryEntry1);
-                Assert.AreEqual(dictionaryEntry1.Definition, "TestDefinition1");
+            Assert.IsTrue(dictionary.Contains("TestWord0"));
+            var dictionaryEntry0 = dictionary.TryGetDefinition("TestWord0").First();
+            Assert.IsNotNull(dictionaryEntry0);
+            Assert.AreEqual(dictionaryEntry0.Definition, "TestDefinition0");
 
-                var dictionaryEntry2 = context.DictionaryDefinitions.FirstOrDefault(dd => dd.Word == "TestWord2");
-                Assert.IsNotNull(dictionaryEntry2);
-                Assert.AreEqual(dictionaryEntry2.Definition, "TestDefinition2");
-            }
-            // Additional assertions to verify database content can be added here
+            Assert.IsTrue(dictionary.Contains("TestWord1"));
+            var dictionaryEntry1 = dictionary.TryGetDefinition("TestWord1").First();
+            Assert.IsNotNull(dictionaryEntry1);
+            Assert.AreEqual(dictionaryEntry1.Definition, "TestDefinition1");
+
+            Assert.IsTrue(dictionary.Contains("TestWord2"));
+            var dictionaryEntry2 = dictionary.TryGetDefinition("TestWord2").First();
+            Assert.IsNotNull(dictionaryEntry2);
+            Assert.AreEqual(dictionaryEntry2.Definition, "TestDefinition2");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void ParseNewDictionaryFromCSV_NameMismatch_ThrowsException()
+        {
+            // Create an empty CSV file
+            string emptyCsvFilePath = CreateEmptyCSVFile();
+
+            ExternalDictionary target = new ExternalDictionary("newDict", _db);
+
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(target, emptyCsvFilePath, "anotherDict");
         }
 
         [TestMethod]
@@ -80,7 +111,9 @@ namespace LearningStoreTests
             // Create an empty CSV file
             string emptyCsvFilePath = CreateEmptyCSVFile();
 
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(emptyCsvFilePath,  _testLanguageCode, _testDictionaryName);
+            ExternalDictionary target = new ExternalDictionary("newDict", _db);
+
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(target, emptyCsvFilePath, "newDict");
         }
 
         [TestMethod]
@@ -90,7 +123,9 @@ namespace LearningStoreTests
             // Create an empty CSV file
             string emptyCsvFilePath = CreateCompletelyEmptyCSVFile();
 
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(emptyCsvFilePath,  _testLanguageCode, _testDictionaryName);
+            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _db);
+
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dictionary, emptyCsvFilePath, _testDictionaryName);
         }
 
         private string CreateCompletelyEmptyCSVFile()
@@ -118,13 +153,12 @@ namespace LearningStoreTests
                 File.Delete(_csvFilePath);
             }
 
-            String connectionString = $"Data Source={_databaseFilePath};";
+            using (var _db = new LinguineDbContext(ConnectionString))
+            {
+                _db.Database.EnsureDeleted(); // use this way as File method doesn't work
+            }
 
-            // Create the database and schema
-            ExternalDictionaryContext context = new ExternalDictionaryContext(connectionString);
-            context.Database.EnsureDeleted();
-
-            if (File.Exists(_databaseFilePath))
+            if (File.Exists("tmp.db"))
             {
                 throw new Exception();
             }

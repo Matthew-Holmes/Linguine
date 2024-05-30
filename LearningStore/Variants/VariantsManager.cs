@@ -7,123 +7,53 @@ using System.Threading.Tasks;
 
 namespace LearningStore
 {
-    public static class VariantsManager
+    public class VariantsManager
     {
-        public static List<String> AvailableVariantsSources(LanguageCode lc)
+        private LinguineDbContext _db;
+
+        public VariantsManager(LinguineDbContext db)
         {
-            if (ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc))
-            {
-                return ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Select(t => t.Item1).ToList();
-            }
-            else
-            {
-                return new List<String>();
-            }
+            _db = db;
         }
 
-        public static Variants? GetVariantsSource(LanguageCode lc, String name)
+        public List<String> AvailableVariantsSources()
         {
-            if (!AvailableVariantsSources(lc).Contains(name))
+            return _db.Variants.Select(v => v.Source)
+                               .Distinct()
+                               .ToList();
+        }
+
+        public Variants? GetVariantsSource(String source)
+        {
+            if (!AvailableVariantsSources().Contains(source))
             {
                 return null;
             }
 
-            String connectionString = ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Where(t => t.Item1 == name).FirstOrDefault().Item2;
-
-            return new Variants(lc, name, connectionString);
+            return new Variants(source, _db);
         }
 
-        public static void AddNewVariantsSourceFromCSV(LanguageCode lc, String name, String csvFileLocation)
+        public void AddNewVariantsSourceFromCSV(String filename, String source)
         {
-            if (AvailableVariantsSources(lc).Contains(name))
+            if (AvailableVariantsSources().Contains(source))
             {
                 throw new InvalidDataException("naming conflict identified, variants adding aborted");
             }
 
-            String connectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(
-                csvFileLocation, lc, name);
+            Variants target = new Variants(source, _db);
 
-            UpdateConfigWithExistingVariantsDatabase(lc, name, connectionString);
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, filename, source);
+
+            VerifyIntegrity(target);
+
         }
 
-        private static void UpdateConfigWithExistingVariantsDatabase(LanguageCode lc, string name, string connectionString)
+        public void VerifyIntegrity(Variants variants)
         {
-            Variants variants = new Variants(lc, name, connectionString); // check it exists
-            variants.Dispose();
-
-            if (ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc))
-            {
-                if (ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc].Any(t => t.Item1 == name))
-                {
-                    throw new Exception("Already an existing source of variants with this name");
-                }
-            }
-
-            ConfigManager.AddVariantsDetails(lc, Tuple.Create(name, connectionString));
+           if (variants.DuplicateEntries())
+           {
+                throw new Exception("Found duplicate rows");
+           }
         }
-
-        public static void VerifyIntegrity()
-        {
-            if (!VerifyNoDuplicateVariantSources())
-            {
-                throw new Exception("Duplicate variant sources found");
-            }
-
-            if (!VerifyVariantSourcesExist())
-            {
-                throw new Exception("Expected variant sources not found");
-            }
-        }
-
-        private static bool VerifyVariantSourcesExist()
-        {
-            foreach (LanguageCode lc in ConfigManager.SavedVariantsNamesAndConnnectionStrings.Keys)
-            {
-                if (!VerifyVariantSourcesExist(lc))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static bool VerifyVariantSourcesExist(LanguageCode lc)
-        {
-
-            if (!ConfigManager.SavedVariantsNamesAndConnnectionStrings.ContainsKey(lc))
-            {
-                return true; // vacuous truth
-            }
-
-            foreach (Tuple<String, String> details in ConfigManager.SavedVariantsNamesAndConnnectionStrings[lc])
-            {
-                try
-                {
-                    Variants variants = new Variants(lc, details.Item1, details.Item2);
-                    variants.Dispose();
-                }
-                catch (Exception e)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool VerifyNoDuplicateVariantSources()
-        {
-            foreach (LanguageCode lc in ConfigManager.SavedVariantsNamesAndConnnectionStrings.Keys)
-            {
-                List<String> names = AvailableVariantsSources(lc);
-                if (names.Distinct().Count() != names.Count())
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
     }
 }

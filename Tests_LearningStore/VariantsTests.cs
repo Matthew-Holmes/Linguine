@@ -11,30 +11,36 @@ namespace LearningStoreTests
     [TestClass]
     public class VariantsTests
     {
-        private string _databaseFilePath = "testVariants.db";
-        private string _connectionString;
-        private VariantsContext _context;
+        private const string ConnectionString = $"Data Source=tmp.db;";
+        private LinguineDbContext _db;
         private Variants _variants;
+
 
         [TestInitialize]
         public void SetUp()
         {
-            // Create a unique file name for the temporary database
-            _connectionString = $"Data Source={_databaseFilePath};";
+            using (var _db = new LinguineDbContext(ConnectionString))
+            {
+                _db.Database.EnsureDeleted();
+            }
 
-            // Create the database and schema
-            _context = new VariantsContext(_connectionString);
-            _context.Database.EnsureCreated();
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
+            }
+
+            _db = new LinguineDbContext(ConnectionString);
+            _db.Database.EnsureCreated();
+
 
             // Add test data
-            _context.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root1" });
-            _context.Variants.Add(new VariantRoot { Variant = "variant2", Root = "root1" });
-            _context.Variants.Add(new VariantRoot { Variant = "variant3", Root = "root2" });
-            _context.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root3" });
-            _context.SaveChanges();
+           _db.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root1", Source = "variants1" });
+           _db.Variants.Add(new VariantRoot { Variant = "variant2", Root = "root1", Source = "variants1" });
+           _db.Variants.Add(new VariantRoot { Variant = "variant3", Root = "root2", Source = "variants1" });
+           _db.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root3", Source = "variants1" });
+           _db.SaveChanges();
 
-            
-            _variants = new Variants(LanguageCode.eng, "test", _connectionString);
+            _variants = new Variants("variants1", _db);
         }
 
         [TestMethod]
@@ -71,25 +77,15 @@ namespace LearningStoreTests
         }
 
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void Constructor_InvalidConnectionString_ThrowsException()
-        {
-            var invalidConnectionString = "Data Source=non_existent.db;";
-            _variants = new Variants(LanguageCode.eng, "TestDictionary", invalidConnectionString);
-        }
-
         [TestCleanup]
         public void CleanUp()
         {
-            _context.Database.EnsureDeleted(); // use this way as File method doesn't work
-            _variants?.Dispose();
-            _context?.Dispose();
+            using (var _db = new LinguineDbContext(ConnectionString))
+            {
+                _db.Database.EnsureDeleted();
+            }
 
-            _variants = null;
-            _context = null;
-
-            if (File.Exists(_databaseFilePath))
+            if (File.Exists("tmp.db"))
             {
                 throw new Exception();
             }

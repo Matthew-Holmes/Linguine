@@ -1,5 +1,6 @@
 ﻿using Infrastructure;
 using LearningStore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,29 @@ namespace LearningStoreTests
     [TestClass]
     public class VariantsManagerTests
     {
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext tc)
+        private const string ConnectionString = $"Data Source=tmp.db;";
+        private LinguineDbContext _db;
+
+        private string dummyDataFile;
+
+        [TestInitialize]
+        public void TestInitialize()
         {
+            _db?.Database.EnsureDeleted();
+            _db?.Dispose();
+
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
+            }
+
+            _db = new LinguineDbContext(ConnectionString);
+            _db.Database.EnsureCreated();
+
             InitializeDummyDatabases();
-            testStartState = ConfigFileHandler.Copy;
+            dummyDataFile = Path.Combine("dummyVariantsData.csv");
         }
 
-        private static Config testStartState;
 
         private static string CreateMockCSVFile()
         {
@@ -34,59 +50,50 @@ namespace LearningStoreTests
             return filePath;
         }
 
-        private static void InitializeDummyDatabases()
+        private void InitializeDummyDatabases()
         {
             String dummyData = CreateMockCSVFile();
 
-            ConfigFileHandler.SetConfigToDefault();
-            ConfigManager.FileStoreLocation = "DummyFileStore";
-            ConfigManager.VariantsDirectory = "DummyVariants";
+            var variants1 = new Variants("EnglishVariants1", _db);
+            var variants2 = new Variants("EnglishVariants2", _db);
 
-            String eng1ConnectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(dummyData, LanguageCode.eng, "EnglishVariants1");
-            String eng2ConnectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(dummyData, LanguageCode.eng, "EnglishVariants2");
-            String zhoConnectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(dummyData, LanguageCode.zho, "ChineseVariants");
-
-            ConfigManager.AddVariantsDetails(LanguageCode.eng, Tuple.Create("English1", eng1ConnectionString));
-            ConfigManager.AddVariantsDetails(LanguageCode.eng, Tuple.Create("English2", eng2ConnectionString));
-            ConfigManager.AddVariantsDetails(LanguageCode.zho, Tuple.Create("Chinese", zhoConnectionString));
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(variants1, dummyData, "EnglishVariants1");
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(variants2, dummyData, "EnglishVariants2");
         }
-
-        // ... (Continuation of VariantsManagerTests class)
 
         [TestMethod]
         public void AvailableVariants_ReturnsCorrectVariantNames()
         {
-            var expected = new List<string> { "English1", "English2" };
-            var result = VariantsManager.AvailableVariantsSources(LanguageCode.eng);
+            var expected = new List<string> { "EnglishVariants1", "EnglishVariants2" };
+
+            var manager = new VariantsManager(_db);
+
+            var result = manager.AvailableVariantsSources();
             CollectionAssert.AreEqual(expected, result);
         }
 
-        [TestMethod]
-        public void AvailableVariants_ReturnsCorrectVariantNamesWhenNone()
-        {
-            var expected = new List<string>();
-            var result = VariantsManager.AvailableVariantsSources(LanguageCode.fra);
-            CollectionAssert.AreEqual(expected, result);
-        }
 
         [TestMethod]
         public void GetVariants_ReturnsVariantsIfExists()
         {
-            string expectedName = "English1";
-            LanguageCode lc = LanguageCode.eng;
-            Variants result = VariantsManager.GetVariantsSource(lc, expectedName);
+            string expectedName = "EnglishVariants1";
+
+            var manager = new VariantsManager(_db);
+
+            var result = manager.GetVariantsSource(expectedName);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(expectedName, result.Name);
+            Assert.AreEqual(expectedName, result.Source);
         }
 
         [TestMethod]
         public void GetVariants_ReturnsNullIfVariantsDoesNotExist()
         {
             string name = "NonExistingVariants";
-            LanguageCode lc = LanguageCode.eng;
+            var manager = new VariantsManager(_db);
 
-            Variants result = VariantsManager.GetVariantsSource(lc, name);
+            var result = manager.GetVariantsSource(name);
+
             Assert.IsNull(result);
         }
 
@@ -94,12 +101,13 @@ namespace LearningStoreTests
         public void AddNewVariantsFromCSV_AddsVariantsSuccessfully()
         {
             string name = "NewVariants";
-            LanguageCode lc = LanguageCode.zho;
             string csvFileLocation = CreateMockCSVFile();
 
-            VariantsManager.AddNewVariantsSourceFromCSV(lc, name, csvFileLocation);
+            var manager = new VariantsManager(_db);
 
-            var variants = VariantsManager.AvailableVariantsSources(lc);
+            manager.AddNewVariantsSourceFromCSV(csvFileLocation, name);
+
+            var variants = manager.AvailableVariantsSources();
             Assert.IsTrue(variants.Contains(name));
         }
 
@@ -107,46 +115,33 @@ namespace LearningStoreTests
         [ExpectedException(typeof(InvalidDataException))]
         public void AddNewVariantsFromCSV_ThrowsExceptionForDuplicateName()
         {
-            string name = "English1"; // Existing name
-            LanguageCode lc = LanguageCode.eng;
+            string name = "EnglishVariants1"; // Existing name
             string csvFileLocation = CreateMockCSVFile();
 
-            VariantsManager.AddNewVariantsSourceFromCSV(lc, name, csvFileLocation);
+            var manager = new VariantsManager(_db);
+
+            manager.AddNewVariantsSourceFromCSV(csvFileLocation, name);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(Exception), "Duplicate variants found")]
-        public void VerifyIntegrity_ThrowsExceptionForDuplicateVariants()
-        {
-            // Add a duplicate variants to a tmp for testing
-            ConfigManager.AddVariantsDetails(LanguageCode.eng, Tuple.Create("English1", "CanBeDifferentConnectionString"));
-
-            VariantsManager.VerifyIntegrity();
-
-            // Assert is handled by ExpectedException
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(Exception), "Expected variant sources not found")]
-        public void VerifyIntegrityWith_ThrowsExceptionForNonexistantVariants()
-        {
-            ConfigManager.AddVariantsDetails(LanguageCode.eng, Tuple.Create("Nonexistant", "doesntmatter"));
-            VariantsManager.VerifyIntegrity();
-
-            // Assert is handled by ExpectedException
-        }
-
+     
         [TestMethod]
         public void VerifyIntegrityWith_PassesForValidConfig()
         {
-            VariantsManager.VerifyIntegrity();
+            var manager = new VariantsManager(_db);
+            manager.VerifyIntegrity(manager.GetVariantsSource("EnglishVariants1"));
         }
+
         [TestCleanup]
         public void Cleanup()
         {
-            if (!ConfigFileHandler.Copy.Equals(testStartState))
+            using (var _db = new LinguineDbContext(ConnectionString))
             {
-                InitializeDummyDatabases();
+                _db.Database.EnsureDeleted(); // use this way as File method doesn't work
+            }
+
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
             }
         }
 
@@ -160,13 +155,6 @@ namespace LearningStoreTests
                 if (File.Exists(csvFilePath))
                 {
                     File.Delete(csvFilePath);
-                }
-
-                string directoryPath = ConfigManager.FileStoreLocation;
-                if (Directory.Exists(directoryPath))
-                {
-                    // Delete all files and subdirectories in the directory
-                    Directory.Delete(directoryPath, true);
                 }
             }
             catch (Exception ex)

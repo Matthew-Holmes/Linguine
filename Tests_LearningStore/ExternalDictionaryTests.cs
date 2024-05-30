@@ -11,32 +11,35 @@ namespace LearningStoreTests
     [TestClass]
     public class ExternalDictionaryTests
     {
-        private string _databaseFilePath = "testExternalDictionary.db";
-        private string _connectionString;
-        private ExternalDictionaryContext _context;
-        private ExternalDictionary _dictionary;
+        private const string ConnectionString = $"Data Source=tmp.db;";
+        private LinguineDbContext _db;
+        //private const string ConnectionString = $"Data Source=:memory:";
+
 
         [TestInitialize]
         public void SetUp()
         {
-            // Create a unique file name for the temporary database
-            _connectionString = $"Data Source={_databaseFilePath};";
+            _db?.Database.EnsureDeleted(); // use this way as File method doesn't work
 
-            // Create the database and schema
-            _context = new ExternalDictionaryContext(_connectionString);
-            _context.Database.EnsureCreated();
+            _db?.Dispose();
 
-            // Add test data
-            _context.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWord", Definition = "TestDefinition" });
-            _context.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition001" });
-            _context.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition002" });
-            _context.SaveChanges();
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
+            }
+
+            _db = new LinguineDbContext(ConnectionString);
+            _db.Database.EnsureCreated();
+            _db.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWord", Definition = "TestDefinition", Source="demo" });
+            _db.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition001", Source = "demo" });
+            _db.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition002", Source = "demo" });
+            _db.SaveChanges();
         }
 
         [TestMethod]
         public void TryGetDefinitions_ExistingWord_ReturnsDefinition()
         {
-            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
+            ExternalDictionary _dictionary = new ExternalDictionary("demo", _db);
             var result = _dictionary.TryGetDefinition("TestWord");
 
             Assert.IsNotNull(result);
@@ -47,7 +50,7 @@ namespace LearningStoreTests
         [TestMethod]
         public void TryGetDefinitions_ExistingWord_ReturnsDefinitions()
         {
-            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
+            ExternalDictionary _dictionary = new ExternalDictionary("demo", _db);
             var result = _dictionary.TryGetDefinition("TestWordManyDef");
 
             Assert.AreEqual("TestDefinition001", result[0].Definition);
@@ -58,7 +61,7 @@ namespace LearningStoreTests
         [TestMethod]
         public void TryGetDefinitions_NonexistingWord_ReturnsEmptyList()
         {
-            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
+            ExternalDictionary _dictionary = new ExternalDictionary("demo", _db);
             var result = _dictionary.TryGetDefinition("NoTestWord");
 
             Assert.AreEqual(result.Count, 0);
@@ -67,7 +70,7 @@ namespace LearningStoreTests
         [TestMethod]
         public void Contains_WordExists_ReturnsTrue()
         {
-            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
+            ExternalDictionary _dictionary = new ExternalDictionary("demo", _db);
             var result = _dictionary.Contains("TestWord");
 
             Assert.IsTrue(result);
@@ -76,31 +79,20 @@ namespace LearningStoreTests
         [TestMethod]
         public void Contains_WordNotExists_ReturnsFalse()
         {
-            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", _connectionString);
+            ExternalDictionary _dictionary = new ExternalDictionary("demo", _db);
             var result = _dictionary.Contains("NoTestWord");
 
             Assert.IsFalse(result);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void Constructor_InvalidConnectionString_ThrowsException()
-        {
-            var invalidConnectionString = "Data Source=non_existent.db;";
-            _dictionary = new ExternalDictionary(LanguageCode.eng, "TestDictionary", invalidConnectionString);
-        }
-
         [TestCleanup]
         public void CleanUp()
         {
-            _context.Database.EnsureDeleted(); // use this way as File method doesn't work
-            _dictionary?.Dispose();
-            _context?.Dispose();
+            _db.Database.EnsureDeleted(); // use this way as File method doesn't work
+           
+            _db.Dispose();
 
-            _dictionary = null;
-            _context = null;
-
-            if (File.Exists(_databaseFilePath))
+            if (File.Exists("tmp.db"))
             {
                 throw new Exception();
             }

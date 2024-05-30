@@ -1,53 +1,81 @@
 ﻿using Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace LearningStore
 {
-    public class ExternalDictionary : IDisposable
+    public class ExternalDictionary
     {
-        public LanguageCode LanguageCode { get; }
-        public String Name { get; }
+        public String Source { get; }
 
-        private readonly ExternalDictionaryContext _context;
+        private LinguineDbContext _db;
 
-        public ExternalDictionary(LanguageCode lc, String name, String connectionString)
+        public ExternalDictionary(String source, LinguineDbContext db)
         {
-            LanguageCode = lc;
-            Name = name;
-
-            _context = new ExternalDictionaryContext(connectionString);
-
-            // Check if the database exists and can be connected to
-            if (!_context.Database.CanConnect())
-            {
-                throw new InvalidOperationException("Cannot connect to the database.");
-            }
-
-            // Check if the database is empty
-            if (!_context.DictionaryDefinitions.Any())
-            {
-                throw new InvalidOperationException("The database is empty.");
-            }
+            Source = source;
+            _db = db;   
         }
 
         public List<DictionaryDefinition> TryGetDefinition(String word)
         {
-            return _context.DictionaryDefinitions.Where(dd => dd.Word == word).ToList();
+            return _db.DictionaryDefinitions.Where(def => def.Source == Source).Where(dd => dd.Word == word).ToList();
         }
 
         public bool Contains(String word)
         {
-            return _context.DictionaryDefinitions.Any(dd => dd.Word == word);
+            return _db.DictionaryDefinitions.Where(def => def.Source == Source).Any(dd => dd.Word == word);
         }
 
-        public void Dispose()
+        internal bool Add(DictionaryDefinition definition, bool save = true)
         {
-            _context.Dispose();
+            // TODO - tests
+            if (definition.Source != Source)
+            {
+                return false;
+            }
+
+            _db.DictionaryDefinitions.Add(definition);
+
+            if (save)
+            {
+                _db.SaveChanges();
+            }
+
+            return true;
         }
+
+        internal bool Add(List<DictionaryDefinition> definitions)
+        {   
+            // TODO - tests
+            if (definitions.Any(def => def.Source != Source))
+            {
+                return false;
+            }
+
+            foreach (var def in definitions)
+            {
+               Add(def, false);
+            }
+
+            _db.SaveChanges();
+
+            return true;
+        }
+
+        public bool DuplicateDefinitions()
+        {
+            return _db.DictionaryDefinitions
+                        .Where(def => def.Source == Source)
+                        .GroupBy(p => new { p.Word, p.Definition })
+                        .Where(p => p.Count() > 1)
+                        .Any();
+        }
+
     }
 
 }

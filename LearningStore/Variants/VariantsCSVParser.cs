@@ -10,42 +10,22 @@ namespace LearningStore
 {
     internal class VariantsCSVParser
     {
-        public static String ParseVariantsFromCSVToSQLiteAndSave(
+        public static void ParseVariantsFromCSVToSQLiteAndSave(
+            Variants target,
             String csvFileLocation,
-            LanguageCode lc,
-            String name)
+            String source)
         {
-            var records = ParseCSV(csvFileLocation);
+            var records = ParseCSV(csvFileLocation, source);
 
             if (records.Count == 0)
             {
                 throw new DataException("record parsing failed, are you sure there are records present?");
             }
 
-            // Construct the path to the database file, creating directory if it doesn't exist
-            string dir = Path.Combine(ConfigManager.FileStoreLocation, ConfigManager.VariantsDirectory, lc.ToString());
-            System.IO.Directory.CreateDirectory(dir);
-
-            string dbFilePath = Path.Combine(dir, name + ".db");
-
-            // Create the connection string for SQLite
-            string connectionString = $"Data Source={dbFilePath};";
-
-            using VariantsContext newContext = new VariantsContext(connectionString);
-
-            newContext.Database.EnsureCreated();
-
-            foreach (var record in records)
-            {
-                newContext.Variants.Add(record);
-            }
-
-            newContext.SaveChanges();
-
-            return connectionString;
+            target.Add(records);
         }
 
-        public static List<VariantRoot> ParseCSV(String filePath)
+        public static List<VariantRoot> ParseCSV(String filePath, String source)
         {
             var variants = new List<VariantRoot>();
 
@@ -66,7 +46,8 @@ namespace LearningStore
                             var variantRoot = new VariantRoot
                             {
                                 Variant = parts[0],
-                                Root = parts[1]
+                                Root = parts[1],
+                                Source = source
                             };
                             variants.Add(variantRoot);
                         }

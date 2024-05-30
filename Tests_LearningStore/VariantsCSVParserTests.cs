@@ -12,16 +12,32 @@ namespace LearningStoreTests
     public class VariantsCSVParserTests
     {
         private string _csvFilePath;
-        private string _connectionString;
         private string _name;
+
+        private const string ConnectionString = $"Data Source=tmp.db;";
+        private LinguineDbContext _db;
+
 
         [TestInitialize]
         public void SetUp()
         {
+            using (var _db = new LinguineDbContext(ConnectionString))
+            {
+                _db.Database.EnsureDeleted(); // use this way as File method doesn't work
+            }
+
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
+            }
+
             _name = "testVariantsForCsv";
 
             // Create a mock CSV file with test data
             _csvFilePath = CreateMockCSVFile();
+
+            _db = new LinguineDbContext(ConnectionString);
+            _db.Database.EnsureCreated();
         }
 
         private string CreateMockCSVFile()
@@ -41,35 +57,31 @@ namespace LearningStoreTests
         [TestMethod]
         public void ParseVariantsFromCSV_ValidCSV_Runs()
         {
-            _connectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(_csvFilePath, LanguageCode.eng, _name);
+            Variants target = new Variants(_name, _db);
+
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, _csvFilePath, _name);
         }
 
         [TestMethod]
         public void ParseVariantsFromCSV_ValidCSV_CreatesDatabase()
         {
-            _connectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(_csvFilePath, LanguageCode.eng, _name);
 
-            using (VariantsContext context = new VariantsContext(_connectionString))
-            {
-                // Check the first entry
-                var variantEntry1 = context.Variants.FirstOrDefault(v => v.Variant == "variant1");
-                Assert.IsNotNull(variantEntry1, "Variant entry 1 should not be null");
-                Assert.AreEqual("root1", variantEntry1.Root, "Variant entry 1 root is incorrect");
+            Variants target = new Variants(_name, _db);
 
-                // Check the second entry
-                var variantEntry2 = context.Variants.FirstOrDefault(v => v.Variant == "variant2");
-                Assert.IsNotNull(variantEntry2, "Variant entry 2 should not be null");
-                Assert.AreEqual("root1", variantEntry2.Root, "Variant entry 2 root is incorrect");
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, _csvFilePath, _name);
 
-                // Check the third entry
-                var variantEntry3 = context.Variants.FirstOrDefault(v => v.Variant == "variant3");
-                Assert.IsNotNull(variantEntry3, "Variant entry 3 should not be null");
-                Assert.AreEqual("root2", variantEntry3.Root, "Variant entry 3 root is incorrect");
+            // Check the first entry
+            var variantEntry1 = target.GetRoots("variant1").FirstOrDefault();
+            Assert.IsNotNull(variantEntry1, "Variant entry 1 should not be null");
+            Assert.AreEqual("root1", variantEntry1, "Variant entry 1 root is incorrect");
 
-                // Check the total number of entries in the database
-                int totalEntries = context.Variants.Count();
-                Assert.AreEqual(3, totalEntries, "The number of entries in the database is incorrect");
-            }
+            var variantEntry2 = target.GetRoots("variant2").FirstOrDefault();
+            Assert.IsNotNull(variantEntry2, "Variant entry 2 should not be null");
+            Assert.AreEqual("root1", variantEntry2, "Variant entry 2 root is incorrect");
+
+            var variantEntry3 = target.GetRoots("variant3").FirstOrDefault();
+            Assert.IsNotNull(variantEntry3, "Variant entry 3 should not be null");
+            Assert.AreEqual("root2", variantEntry3, "Variant entry 3 root is incorrect");
         }
 
 
@@ -80,7 +92,9 @@ namespace LearningStoreTests
             // Create an empty CSV file
             string emptyCsvFilePath = CreateEmptyCSVFile();
 
-            _connectionString = VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(emptyCsvFilePath, LanguageCode.eng, _name);
+            Variants target = new Variants(_name, _db);
+
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, emptyCsvFilePath, _name);
         }
 
         private string CreateEmptyCSVFile()
@@ -102,11 +116,14 @@ namespace LearningStoreTests
 
             // Create the database and schema
 
-            if (_connectionString is not null)
+            using (var _db = new LinguineDbContext(ConnectionString))
             {
-                VariantsContext context = new VariantsContext(_connectionString);
-                context.Database.EnsureDeleted();
-                _connectionString = null;
+                _db.Database.EnsureDeleted(); // use this way as File method doesn't work
+            }
+
+            if (File.Exists("tmp.db"))
+            {
+                throw new Exception();
             }
 
             if (File.Exists("emptyVariants.csv"))

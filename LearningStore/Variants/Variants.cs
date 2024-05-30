@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,33 +10,20 @@ namespace LearningStore
 {
     public class Variants
     {
-        public LanguageCode LanguageCode { get; }
-        public String Name { get; }
+        public String Source { get; }
 
-        private readonly VariantsContext _context;
+        private LinguineDbContext _db;
 
-        public Variants(LanguageCode lc, String name, String ConnectionString)
+        public Variants(String source, LinguineDbContext db)
         {
-            LanguageCode = lc;
-            Name = name;
-
-            _context = new VariantsContext(ConnectionString);
-
-            if (!_context.Database.CanConnect())
-            {
-                throw new InvalidOperationException("Cannot connect to the database.");
-            }
-
-            // Check if the database is empty
-            if (!_context.Variants.Any())
-            {
-                throw new InvalidOperationException("The database is empty.");
-            }
+            Source = source;
+            _db = db;
         }
 
         public IEnumerable<String> GetVariants(String root)
         {
-            return _context.Variants
+            return _db.Variants
+                .Where(v => v.Source == Source)
                 .Where(v => v.Root.Contains(root))
                 .Select(v => v.Variant)
                 .Distinct()
@@ -44,17 +32,57 @@ namespace LearningStore
 
         public IEnumerable<String> GetRoots(String variant)
         {
-            return _context.Variants
+            return _db.Variants
+                .Where(v => v.Source == Source)
                 .Where(v => v.Variant.Contains(variant))
                 .Select(v => v.Root)
                 .Distinct()
                 .ToList();
         }
 
-        public void Dispose()
+        internal bool Add(VariantRoot variantRoot, bool save = true)
         {
-            _context.Dispose();
+            // TODO - test
+            if (variantRoot.Source !=  Source)
+            {
+                return false;
+            }
+
+            _db.Variants.Add(variantRoot);
+
+            if (save)
+            {
+                _db.SaveChanges();
+            }
+
+            return true;
         }
 
+        internal bool Add(List<VariantRoot> variantRoots)
+        {
+            // TODO - test
+            if (variantRoots.Any(v => v.Source != Source))
+            {
+                return false;
+            }
+
+            foreach (var vr in variantRoots)
+            {
+                Add(vr, false);
+            }
+
+            _db.SaveChanges();
+
+            return false;
+        }
+
+        internal bool DuplicateEntries()
+        {
+            return _db.Variants
+                      .Where(def => def.Source == Source)
+                      .GroupBy(p => new { p.Variant, p.Root })
+                      .Where(p => p.Count() > 1)
+                      .Any();
+        }
     }
 }
