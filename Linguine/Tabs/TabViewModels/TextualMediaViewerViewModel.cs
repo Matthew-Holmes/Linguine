@@ -1,7 +1,7 @@
-﻿using Agents.OpenAI;
+﻿//using Agents.OpenAI;
 using ExternalMedia;
 using Infrastructure;
-using LearningExtraction;
+//using LearningExtraction;
 using LearningStore;
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,7 @@ namespace Linguine.Tabs
 {
     internal class TextualMediaViewerViewModel : TabViewModelBase
     {
+        /*
         public ICommand LoadCommand { get; private set; }
         public ICommand DecomposeCommand { get; private set; }
 
@@ -75,16 +76,18 @@ namespace Linguine.Tabs
         private List<int> _correctDefinitionIndex;
 
  
-
+        */
         public TextualMediaViewerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
         {
             Title = "Text Viewer";
-
+            /*
             _loader = new TextualMediaLoader(uiComponents.CanVerify, uiComponents.CanChooseFromList);
 
             LoadCommand = new RelayCommand(() => Load());
             DecomposeCommand = new RelayCommand(() => Decompose());
+            */
         }
+        /*
 
         private async Task Decompose()
         {
@@ -216,5 +219,6 @@ namespace Linguine.Tabs
                 _uiComponents.CanMessage.Show("media loading aborted");
             }
         }
+        */
     }
 }

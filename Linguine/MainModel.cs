@@ -5,10 +5,10 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Agents;
-using Agents.DummyAgents;
+//using Agents;
+//using Agents.DummyAgents;
 using Infrastructure;
-using LearningExtraction;
+//using LearningExtraction;
 using LearningStore;
 
 namespace Linguine
@@ -16,6 +16,9 @@ namespace Linguine
     public class MainModel
     {
         public bool StartupComplete { get; private set; }
+        public event EventHandler Reloaded;
+        public event EventHandler LoadingFailed;
+
         private LinguineDbContext Linguine { get; set; }
 
 
@@ -40,19 +43,19 @@ namespace Linguine
                 if (ConfigManager.DatabaseDirectory != null)
                 {
                     Directory.CreateDirectory(ConfigManager.DatabaseDirectory);
-        }
+                }
 
                 if (Linguine is not null)
-        {
+                {
                     Linguine.SaveChanges();
                     Linguine.Dispose();
                 }
 
-            Linguine = new LinguineDbContext(ConfigManager.ConnectionString);
-            Linguine.Database.EnsureCreated();
-            StartupComplete = true;
+                Linguine = new LinguineDbContext(ConfigManager.ConnectionString);
+                Linguine.Database.EnsureCreated();
+                StartupComplete = true;
                 Reloaded?.Invoke(this, EventArgs.Empty);
-        }
+            }
             catch (Exception e)
             {
                 LoadingFailed.Invoke(this, EventArgs.Empty);
@@ -88,6 +91,7 @@ namespace Linguine
             }
         }
 
+        /*
         public TextDecomposer? TextDecomposer { get; private set; } = null;
         public UnitRooter? UnitRooter { get; private set; } = null;
         public DefinitionResolver? DefinitionResolver { get; private set; } = null;
@@ -119,5 +123,6 @@ namespace Linguine
 
             return true;
         }
+        */
     }
 }

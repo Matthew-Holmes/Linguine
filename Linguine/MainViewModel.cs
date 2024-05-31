@@ -40,7 +40,7 @@ namespace Linguine
             Tabs.CollectionChanged += Tabs_CollectionChanged;
 
             OpenHomeTabCommand               = new RelayCommand(() => Add(              new HomeViewModel(_UIcomponents, _model)));
-            OpenTextualMediaViewerTabCommand = new RelayCommand(() => Add(new TextualMediaViewerViewModel(_UIcomponents, _model)));
+            //OpenTextualMediaViewerTabCommand = new RelayCommand(() => Add(new TextualMediaViewerViewModel(_UIcomponents, _model)));
             OpenConfigManagerTabCommand      = new RelayCommand(() => AddUniquely<ConfigManagerViewModel>(_UIcomponents, _model));
         }
 

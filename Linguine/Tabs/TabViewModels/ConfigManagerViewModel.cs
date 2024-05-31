@@ -34,7 +34,7 @@ namespace Linguine.Tabs
             get => _targetLanguageIndex;
             set
             {
-                if (value == -1)
+                if (value == -1 || value == _targetLanguageIndex)
                 {
                     // wpf likes trying to set this to -1 when the options are updating
                     return;
@@ -44,6 +44,8 @@ namespace Linguine.Tabs
                 _targetLanguageIndex = value;
 
                 OnPropertyChanged(nameof(TargetLanguage));
+
+                _mainModel.Reload();
             }
         }
 
@@ -94,17 +96,15 @@ namespace Linguine.Tabs
 
         #region dictionary loading
         public List<String> TargetLanguageDictionaries { get; private set; }
-        public List<String> NativeLanguageDictionaries { get; private set; }
 
-        public ICommand AddNewNativeDictionaryCommand { get; private set; }
         public ICommand AddNewTargetDictionaryCommand { get; private set; }
 
         private void SetupDictionarySelection()
         {
             RefreshAvailableDictionaries();
-            ConfigFileHandler.ConfigUpdated += RefreshAvailableDictionaries;
 
-            AddNewNativeDictionaryCommand = new RelayCommand(() => AddNewNativeDictionary());
+            _mainModel.Reloaded += (s,e) => RefreshAvailableDictionaries();
+
             AddNewTargetDictionaryCommand = new RelayCommand(() => AddNewTargetDictionary());
         }
 
@@ -112,19 +112,11 @@ namespace Linguine.Tabs
         {
             if (_uiComponents.CanVerify.AskYesNo($"add a new {TargetLanguage} dictionary for target language definitions?"))
             {
-                AddNewDictionary(ConfigManager.TargetLanguage);
+                AddNewDictionary();
             }
         }
 
-        private void AddNewNativeDictionary()
-        {
-            if (_uiComponents.CanVerify.AskYesNo($"add a new {NativeLanguage} dictionary for native language definitions?"))
-            {
-                AddNewDictionary(ConfigManager.NativeLanguage);
-            }
-        }
-
-        private void AddNewDictionary(LanguageCode lc)
+        private void AddNewDictionary()
         {
             String name;
             String filename;
@@ -143,13 +135,23 @@ namespace Linguine.Tabs
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }
 
-            try
+            ExternalDictionaryManager? manager = _mainModel.ExternalDictionaryManager;
+
+            if (manager is null)
             {
-                ExternalDictionaryManager.AddNewDictionaryFromCSV(lc, name, filename);
+                _uiComponents.CanMessage.Show("Please wait for dictionary management to load");
+                return;
             }
-            catch (Exception e)
+            else
             {
-                _uiComponents.CanMessage.Show(e.Message);
+                try
+                {
+                    manager.AddNewDictionaryFromCSV(filename, name);
+                }
+                catch (Exception e)
+                {
+                    _uiComponents.CanMessage.Show(e.Message);
+                }
             }
 
             RefreshAvailableDictionaries();
@@ -157,28 +159,22 @@ namespace Linguine.Tabs
 
         private void RefreshAvailableDictionaries()
         {
-            TargetLanguageDictionaries = ExternalDictionaryManager.AvailableDictionaries(ConfigManager.TargetLanguage);
-            NativeLanguageDictionaries = ExternalDictionaryManager.AvailableDictionaries(ConfigManager.NativeLanguage);
+            TargetLanguageDictionaries = _mainModel.ExternalDictionaryManager?.AvailableDictionaries() ?? new List<String>();
 
             OnPropertyChanged(nameof(TargetLanguageDictionaries));
-            OnPropertyChanged(nameof(NativeLanguageDictionaries));
         }
 
         #endregion
 
         #region variants loading
         public List<String> TargetLanguageVariantSources { get; private set; }
-        public List<String> NativeLanguageVariantSources { get; private set; }
-
-        public ICommand AddNewNativeVariantsSourceCommand { get; private set; }
         public ICommand AddNewTargetVariantsSourceCommand { get; private set; }
 
         private void SetupVariantsSelection()
         {
             RefreshAvailableVariantsSources();
-            ConfigFileHandler.ConfigUpdated += RefreshAvailableVariantsSources;
+            _mainModel.Reloaded += (s, e) => RefreshAvailableVariantsSources();
 
-            AddNewNativeVariantsSourceCommand = new RelayCommand(() => AddNewNativeVariantsSource());
             AddNewTargetVariantsSourceCommand = new RelayCommand(() => AddNewTargetVariantsSource());
         }
 
@@ -186,19 +182,11 @@ namespace Linguine.Tabs
         {
             if (_uiComponents.CanVerify.AskYesNo($"add a new {TargetLanguage} variants source for variant/root mapping?"))
             {
-                AddNewVariantsSource(ConfigManager.TargetLanguage);
+                AddNewVariantsSource();
             }
         }
 
-        private void AddNewNativeVariantsSource()
-        {
-            if (_uiComponents.CanVerify.AskYesNo($"add a new {NativeLanguage} variants source for variant/root mapping?"))
-            {
-                AddNewVariantsSource(ConfigManager.NativeLanguage);
-            }
-        }
-
-        private void AddNewVariantsSource(LanguageCode lc)
+        private void AddNewVariantsSource()
         {
             String name;
             String filename;
@@ -217,25 +205,30 @@ namespace Linguine.Tabs
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }
 
-            try
-            {
-                VariantsManager.AddNewVariantsSourceFromCSV(lc, name, filename);
-            }
-            catch (Exception e)
-            {
-                _uiComponents.CanMessage.Show(e.Message);
-            }
+            VariantsManager? manager = _mainModel.VariantsManager;
 
+            if (manager is null)
+            {
+                _uiComponents.CanMessage.Show("please wait for variabts manager to load");
+            }
+            else
+            {
+                try
+                {
+                    manager.AddNewVariantsSourceFromCSV(filename, name);
+                }
+                catch (Exception e)
+                {
+                    _uiComponents.CanMessage.Show(e.Message);
+                }
+            }
             RefreshAvailableVariantsSources();
         }
 
         private void RefreshAvailableVariantsSources()
         {
-            TargetLanguageVariantSources = VariantsManager.AvailableVariantsSources(ConfigManager.TargetLanguage);
-            NativeLanguageVariantSources = VariantsManager.AvailableVariantsSources(ConfigManager.NativeLanguage);
-
+            TargetLanguageVariantSources = _mainModel.VariantsManager?.AvailableVariantsSources() ?? new List<String>();
             OnPropertyChanged(nameof(TargetLanguageVariantSources));
-            OnPropertyChanged(nameof(NativeLanguageVariantSources));
         }
         #endregion
 
