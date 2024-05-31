@@ -66,6 +66,86 @@ namespace Tests_Infrastructure
 
             Assert.AreEqual(ConfigManager.ConnectionString, "yi xin db");
         }
+
+        [TestMethod]
+        public void GetDatabaseSubdirectory_ValidConnectionString_ReturnsDirectory()
+        {
+            // Arrange
+            string connectionString = "data source=C:\\MyDatabase\\mydatabase.db";
+
+            // Act
+            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+
+            // Assert
+            Assert.AreEqual("C:\\MyDatabase", result);
+        }
+
+        [TestMethod]
+        public void GetDatabaseSubdirectory_InvalidConnectionString_ReturnsNull()
+        {
+            // Arrange
+            string connectionString = "invalid connection string";
+
+            // Act
+            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void GetDatabaseSubdirectory_ConnectionStringWithoutDataSourceKey_ReturnsNull()
+        {
+            // Arrange
+            string connectionString = "some other key=value";
+
+            // Act
+            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void GetDatabaseSubdirectory_NullConnectionString_ReturnsNull()
+        {
+            // Arrange
+            string connectionString = null;
+
+            // Act
+            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void GetDatabaseSubdirectory_EmptyConnectionString_ReturnsNull()
+        {
+            // Arrange
+            string connectionString = "";
+
+            // Act
+            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void GetDatabaseSubdirectory_ValidRelativeFilePath_ReturnsDirectory()
+        {
+            // Arrange
+            string relativePath = "MyDatabase\\mydatabase.db";
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string connectionString = $"data source={relativePath}";
+
+            // Act
+            string result =ConfigManager.GetDatabaseSubdirectory(connectionString);
+
+            // Assert
+            Assert.AreEqual("MyDatabase", result);
+        }
     }
 }
 

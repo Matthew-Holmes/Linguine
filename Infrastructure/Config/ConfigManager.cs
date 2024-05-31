@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -47,6 +48,11 @@ namespace Infrastructure
         {
             get => ConnectionStrings[TargetLanguage];
         }
+        
+        public static String DatabaseDirectory
+        {
+            get => GetDatabaseSubdirectory(ConnectionString);
+        }
 
         private static Dictionary<LanguageCode, String> ConnectionStrings
         {
@@ -60,6 +66,28 @@ namespace Infrastructure
             tmp.ConnectionStrings[lc] = connectionString;
 
             ConfigFileHandler.UpdateConfig(tmp);
+        }
+
+        public static string GetDatabaseSubdirectory(string connectionString)
+        {
+            try
+            {
+                DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+                builder.ConnectionString = connectionString;
+
+                if (builder.ContainsKey("data source"))
+                {
+                    string filePath = builder["data source"].ToString();
+                    return Path.GetDirectoryName(filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+
+            // Return null if database is not in a subdirectory or any error occurs
+            return null;
         }
     }
 }
