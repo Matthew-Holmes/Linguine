@@ -62,6 +62,26 @@ namespace Linguine
             }
         }
 
+        internal bool StartNewTextualMediaSession(string selectedText)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TextualMediaManager? TextualMediaManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return new TextualMediaManager(Linguine);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public ExternalDictionaryManager? ExternalDictionaryManager
         {
             get 
