@@ -26,14 +26,37 @@ namespace Linguine
                 // this is the only exception that should be possibly to be thrown during main model construction
                 throw new FileNotFoundException("Couldn't find config");
             }
-            Task.Run(() => LoadDatabase()); // load in background
+
+            Task.Run(() => Reload()); // load in background
+            
         }
 
-        public void LoadDatabase()
+        public void Reload()
         {
+            try
+            {
+                StartupComplete = false;
+
+                if (ConfigManager.DatabaseDirectory != null)
+                {
+                    Directory.CreateDirectory(ConfigManager.DatabaseDirectory);
+        }
+
+                if (Linguine is not null)
+        {
+                    Linguine.SaveChanges();
+                    Linguine.Dispose();
+                }
+
             Linguine = new LinguineDbContext(ConfigManager.ConnectionString);
             Linguine.Database.EnsureCreated();
             StartupComplete = true;
+                Reloaded?.Invoke(this, EventArgs.Empty);
+        }
+            catch (Exception e)
+            {
+                LoadingFailed.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public ExternalDictionaryManager? ExternalDictionaryManager

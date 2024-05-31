@@ -29,6 +29,8 @@ namespace Linguine
             _UIcomponents = uiComponents;
             _model = model;
 
+            model.LoadingFailed += (s,e) => uiComponents.CanMessage.Show("database loading failed");
+
             SetupTabs();
         }
 
