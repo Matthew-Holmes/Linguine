@@ -33,7 +33,6 @@ namespace LearningStore
 
         internal bool Add(DictionaryDefinition definition, bool save = true)
         {
-            // TODO - tests
             if (definition.Source != Source)
             {
                 return false;
@@ -51,7 +50,6 @@ namespace LearningStore
 
         internal bool Add(List<DictionaryDefinition> definitions)
         {   
-            // TODO - tests
             if (definitions.Any(def => def.Source != Source))
             {
                 return false;
