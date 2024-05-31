@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Agents;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure;
 
 namespace LearningExtraction
 {
@@ -25,12 +26,15 @@ namespace LearningExtraction
             if (textSource.Text.Length > MaxVolumeToProcess)
             {
                 // TODO - how to ensure that these will be valid values??
-                List<String> windows = textSource.Windowed(MaxVolumeToProcess, JoinCharacterCount, PaddingCharacterCount);
+                List<String> windows = TextualMediaHelper.Windowed(textSource, MaxVolumeToProcess, JoinCharacterCount, PaddingCharacterCount);
 
                 // Asynchronously decompose each window
                 var decompositionTasks = windows.Select(window =>
-                    DecomposeText(new TextualMedia(window, textSource.LanguageCode, textSource.Description),
-                        mustInject, mustBiject));
+                    DecomposeText(new TextualMedia { 
+                                    Text = window,
+                                    Description = textSource.Description },
+                                  mustInject,
+                                  mustBiject));
 
                 // Wait for all decompositions to complete
                 TextDecomposition[] partialDecompositions = await Task.WhenAll(decompositionTasks);

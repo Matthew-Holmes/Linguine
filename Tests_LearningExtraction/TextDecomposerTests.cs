@@ -40,7 +40,7 @@ namespace Tests_LearningExtraction
             var decomposer = new TextDecomposer(); // Set a max volume to process that is larger than the text
             decomposer.StandardAgent = agent;
             decomposer.MaxVolumeToProcess = 10;
-            var textSource = new TextualMedia("Hello", LanguageCode.eng);
+            var textSource = new TextualMedia { Text = "Hello" };
 
             // Act
             var result = decomposer.DecomposeText(textSource).Result;
@@ -63,7 +63,7 @@ namespace Tests_LearningExtraction
             decomposer.MaxVolumeToProcess = 50;
             decomposer.JoinCharacterCount = 10;
             decomposer.PaddingCharacterCount = 10;
-            var textSource = new TextualMedia("This is a longer text for testing purposes, lorem ipsum dolor est I don't know the rest", LanguageCode.fra);
+            var textSource = new TextualMedia { Text = "This is a longer text for testing purposes, lorem ipsum dolor est I don't know the rest" };
 
             // Act
             var result = decomposer.DecomposeText(textSource).Result;
@@ -88,7 +88,7 @@ namespace Tests_LearningExtraction
                 decomposer.FallbackAgent = agent;
                 decomposer.MaxVolumeToProcess = 100;
 
-                var textSource = new TextualMedia("This is a longer text for testing biject requirements", LanguageCode.eng);
+                var textSource = new TextualMedia {Text = "This is a longer text for testing biject requirements" };
 
                 // Act
                 decomposer.DecomposeText(textSource, mustBiject: true).Wait();
@@ -124,7 +124,7 @@ namespace Tests_LearningExtraction
                 decomposer.FallbackAgent = new WontlInjectAgent();
                 decomposer.MaxVolumeToProcess = 500;
 
-                var textSource = new TextualMedia("This text is not expected to inject properly", LanguageCode.eng);
+                var textSource = new TextualMedia { Text = "This text is not expected to inject properly" };
 
                 decomposer.DecomposeText(textSource, mustBiject: true).Wait();
                 Assert.Fail("Expected an invalid decomposition exception");
@@ -156,7 +156,7 @@ namespace Tests_LearningExtraction
             decomposer.FallbackAgent = new WhitespaceDecompositionAgent();
             decomposer.MaxVolumeToProcess = 500;
 
-            var textSource = new TextualMedia("This text is not expected to inject properly first time", LanguageCode.eng);
+            var textSource = new TextualMedia { Text = "This text is not expected to inject properly first time" };
 
             decomposer.DecomposeText(textSource).Wait();
         }

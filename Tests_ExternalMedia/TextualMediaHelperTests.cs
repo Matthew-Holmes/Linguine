@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 namespace Tests_ExternalMedia
 {
     [TestClass]
-    public class TextualMediaTests
+    public class TextualMediaHelperTests
     {
         [TestMethod]
         public void Windowed_BelowWindowingThreshold_ReturnsSingleElementList()
         {
-            TextualMedia concise = new TextualMedia("short", LanguageCode.eng);
+            TextualMedia concise = new TextualMedia { Text = "short" };
 
-            List<String> windowed = concise.Windowed(100, 10, 10);
+            List<String> windowed = TextualMediaHelper.Windowed(concise, 100, 10, 10);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(1, windowed.Count);
@@ -26,9 +26,9 @@ namespace Tests_ExternalMedia
         [TestMethod]
         public void Windowed_NoJoinNoPadding_ReturnsWindows()
         {
-            TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghij" };
 
-            List<String> windowed = testText.Windowed(5, 0, 0);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 5, 0, 0);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(4, windowed.Count);
@@ -40,9 +40,9 @@ namespace Tests_ExternalMedia
 
         public void Windowed_NoJoinNoPaddingNotDivisible_ReturnsWindows()
         {
-            TextualMedia testText = new TextualMedia("1234567890abcdefghijend", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghijend" };
 
-            List<String> windowed = testText.Windowed(5, 0, 0);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 5, 0, 0);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(5, windowed.Count);
@@ -56,9 +56,9 @@ namespace Tests_ExternalMedia
         [TestMethod]
         public void Windowed_JoinNoPadding_ReturnsWindows()
         {
-            TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghij" };
 
-            List<String> windowed = testText.Windowed(8, 2, 0);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 8, 2, 0);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(4, windowed.Count);       /* left core right*/
@@ -72,9 +72,9 @@ namespace Tests_ExternalMedia
         [TestMethod]
         public void Windowed_PaddingNoJoin_ReturnsWindows()
         {
-            TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghij" };
 
-            List<String> windowed = testText.Windowed(8, 0, 2);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 8, 0, 2);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(5, windowed.Count);       /* left core right*/
@@ -88,9 +88,9 @@ namespace Tests_ExternalMedia
         [TestMethod]
         public void Windowed_PaddingNoJoinNotDivisible_ReturnsWindows()
         {
-            TextualMedia testText = new TextualMedia("1234567890abcdefghijk", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghijk" };
 
-            List<String> windowed = testText.Windowed(8, 0, 2);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 8, 0, 2);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(6, windowed.Count);       /* left core right*/
@@ -105,9 +105,9 @@ namespace Tests_ExternalMedia
         [TestMethod]
         public void Windowed_JoinAndPadding_ReturnsWindows()
         {
-            TextualMedia testText = new TextualMedia("1234567890abcdefghijkl", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghijkl" };
 
-            List<String> windowed = testText.Windowed(13, 2, 3);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 13, 2, 3);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(5, windowed.Count);            /* lp  lj  core rj  rp  */
@@ -124,9 +124,9 @@ namespace Tests_ExternalMedia
             // don't produce a final term since joins are expected to be entirely processed
             // this behaviour is the most nuanced
 
-            TextualMedia testText = new TextualMedia("1234567890abcdefghij", LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = "1234567890abcdefghij" };
 
-            List<String> windowed = testText.Windowed(13, 2, 3);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 13, 2, 3);
 
             Assert.IsNotNull(windowed);
             Assert.AreEqual(4, windowed.Count);            /* lp  lj  core rj  rp  */
@@ -140,113 +140,97 @@ namespace Tests_ExternalMedia
         [TestMethod]
         public void Windowed_WidePad_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(110, 0, 50);
+            List<String> windowed1 = TextualMediaHelper.Windowed(testText, 100, 0, 0);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 110, 0, 50);
         }
 
         [TestMethod]
         public void Windowed_RelativelyWidePad_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(50, 0, 20);
+            List<String> windowed1 = TextualMediaHelper.Windowed(testText, 100, 0, 0);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 50, 0, 20);
         }
 
         [TestMethod]
         public void Windowed_VeryWidePad_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(410, 0, 200);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 410, 0, 200);
         }
 
             [TestMethod]
         public void Windowed_VeryWideJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(410, 200, 0);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 410, 200, 0);
         }
 
         public void Windowed_WideJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(110, 50, 0);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 110, 50, 0);
         }
 
         public void Windowed_RelativelyWideJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(50, 20, 0);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 50, 20, 0);
         }
 
         [TestMethod]
         public void Windowed_WideCore_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(1000, 0, 0);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 1000, 0, 0);
         }
 
         [TestMethod]
         public void Windowed_WidePadAndJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(210, 50, 50);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 210, 50, 50);
         }
 
         [TestMethod]
         public void Windowed_RelativelyWidePadAndJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(100, 0, 0);
-
-            windowed = test.Windowed(90, 20, 20);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 90, 20, 20);
         }
 
         [TestMethod]
         public void Windowed_VeryWidePadAndJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(810, 200, 200);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 810, 200, 200);
         }
 
         [TestMethod]
         public void Windowed_QuiteWidePadAndJoin_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(50, 10, 10);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 50, 10, 10);
         }
 
         [TestMethod]
         public void Windowed_EmptyCoreButHasJoins_NoThrow()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(40, 10, 10);
+            List<String> windowed2 = TextualMediaHelper.Windowed(testText, 40, 10, 10);
         }
 
         #endregion
@@ -255,36 +239,37 @@ namespace Tests_ExternalMedia
         [ExpectedException(typeof(ArgumentException))]
         public void Windowed_NegativeValueForWindowChars_Throws()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
 
-            List<String> windowed = test.Windowed(-1, 10, 10);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
+
+            List<String> windowed = TextualMediaHelper.Windowed(testText, -1, 10, 10);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Windowed_NegativeValueForJoinChars_Throws()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(50, -1, 10);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 50, -1, 10);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Windowed_NegativeValueForPadChars_Throws()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(50, 10, -1);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 50, 10, -1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Windowed_PaddingButNothingInside_Throws()
         {
-            TextualMedia test = new TextualMedia(new String('c', 100), LanguageCode.eng);
+            TextualMedia testText = new TextualMedia { Text = new String('c', 100) };
 
-            List<String> windowed = test.Windowed(10, 0, 10);
+            List<String> windowed = TextualMediaHelper.Windowed(testText, 10, 0, 10);
         }
 
     }

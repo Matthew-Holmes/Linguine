@@ -9,23 +9,23 @@ namespace ExternalMedia
     {
         private ICanVerify _verifiesWithUser;
         private ICanChooseFromList _userChoosesFromList;
+        private ICanGetText _getsTextFromUser;
 
-        public TextualMediaLoader(ICanVerify verifiesWithUser, ICanChooseFromList userChoosesFromList)
+        public TextualMediaLoader(ICanVerify verifiesWithUser, ICanChooseFromList userChoosesFromList, ICanGetText canGetText)
         {
             _verifiesWithUser = verifiesWithUser;
             _userChoosesFromList = userChoosesFromList;
+            _getsTextFromUser = canGetText;
         }
 
-        public TextualMedia LoadFromFile(String path, LanguageCode lc)
+        public TextualMedia LoadFromFile(String path)
         {
-            return LoadFromString(ReadStringFromFile(path), lc);
+            String text = ReadStringFromFile(path);
+            String description = _getsTextFromUser.GetResponse("please write a short description of the text loaded");
+
+            return new TextualMedia { Description  = description, Text = text };
         }
 
-        private TextualMedia LoadFromString(String rawText, LanguageCode lc)
-        {
-            TextualMedia textualMedia = new TextualMedia(rawText, lc);
-            return textualMedia;
-        }
 
 
         private String ReadStringFromFile(String path)

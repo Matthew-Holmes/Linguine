@@ -8,35 +8,10 @@ using System.Threading.Tasks;
 
 namespace ExternalMedia
 {
-    public class TextualMedia
+    public static class TextualMediaHelper
     {
-        String _text;
-        String _description;
-        LanguageCode _languageCode;
-
-        public TextualMedia(string text, LanguageCode lc, string description = "")
-        {
-            _text = text;
-            _description = description;
-            _languageCode = lc;
-        }
-
-        public String Text
-        {
-            get => _text;
-        }
-
-        public String Description
-        {
-            get => _description;
-        }
-
-        public LanguageCode LanguageCode
-        {
-            get => _languageCode;
-        }
-
-        public List<String> Windowed(int windowWidth, int joinChars, int padChars)
+      
+        public static List<String> Windowed(TextualMedia tm, int windowWidth, int joinChars, int padChars)
         {
             // chunks up the Text into overlapping windows
             // joinChars is the number of overlap characters
@@ -45,7 +20,7 @@ namespace ExternalMedia
             // since include the start and end of the text
             // and thus don't need padding/joins there
 
-            return Window(Text, windowWidth, joinChars, padChars);
+            return Window(tm.Text, windowWidth, joinChars, padChars);
         }
 
         public static List<String> Window(String parent, int windowWidth, int joinChars, int padChars)
@@ -106,7 +81,5 @@ namespace ExternalMedia
 
             return ret;
         }
-
-
     }
 }
