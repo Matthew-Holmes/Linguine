@@ -21,12 +21,20 @@ namespace ExternalMedia
         public TextualMedia LoadFromFile(String path)
         {
             String text = ReadStringFromFile(path);
-            String description = _getsTextFromUser.GetResponse("please write a short description of the text loaded");
 
-            return new TextualMedia { Description  = description, Text = text };
+            String name = GetTextName(path); 
+
+            String description = _getsTextFromUser.GetResponse("please write a short description of the text loaded");
+            
+
+            return new TextualMedia { Description  = description, Text = text, Name = name };
         }
 
-
+        private string GetTextName(String filename)
+        {
+            // TODO - suggest a name based on the filename
+            return _getsTextFromUser.GetResponse("what would you like to name this media?");
+        }
 
         private String ReadStringFromFile(String path)
         {
