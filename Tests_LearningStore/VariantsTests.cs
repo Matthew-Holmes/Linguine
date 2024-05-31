@@ -76,6 +76,165 @@ namespace LearningStoreTests
             Assert.AreEqual(0, result.Count);
         }
 
+        [TestMethod]
+        public void Add_ValidVariantNewRoot_ReturnsTrue()
+        {
+            var variantRoot = new VariantRoot
+            {
+                Root = "root4",
+                Variant = "variant4",
+                Source = "variants1"
+            };
+
+            var result = _variants.Add(variantRoot);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Add_ValidVariantNewRoot_Adds()
+        {
+            var variantRoot = new VariantRoot
+            {
+                Root = "root4",
+                Variant = "variant4",
+                Source = "variants1"
+            };
+
+            var result = _variants.Add(variantRoot);
+
+            Assert.IsTrue(result);
+
+            Assert.AreEqual(_variants.GetRoots("variant4").FirstOrDefault(), "root4");
+        }
+
+        [TestMethod]
+        public void Add_ValidVariantExistingRoot_ReturnsTrue()
+        {
+            var variantRoot = new VariantRoot
+            {
+                Root = "root1",
+                Variant = "variant4",
+                Source = "variants1"
+            };
+
+            var result = _variants.Add(variantRoot);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Add_ValidVariantExistingRoot_Adds()
+        {
+            var variantRoot = new VariantRoot
+            {
+                Root = "root1",
+                Variant = "variant4",
+                Source = "variants1"
+            };
+
+            var result = _variants.Add(variantRoot);
+
+            Assert.IsTrue(result);
+
+            Assert.IsTrue(_variants.GetRoots("variant4").Contains("root1"));
+        }
+
+        [TestMethod]
+        public void Add_InvalidSourceVariantRoot_ReturnsFalse()
+        {
+            var variantRoot = new VariantRoot
+            {
+                Root = "root4",
+                Variant = "variant4",
+                Source = "InvalidSource"
+            };
+
+            var result = _variants.Add(variantRoot);
+
+            Assert.IsFalse(result);
+            Assert.IsFalse(_variants.GetRoots("variant4").Any());
+        }
+
+        [TestMethod]
+        public void Add_ValidVariantRootsList_ReturnsTrue()
+        {
+            var variantRoots = new List<VariantRoot>
+            {
+                new VariantRoot { Root = "root4", Variant = "variant4", Source = "variants1" },
+                new VariantRoot { Root = "root4", Variant = "variant5", Source = "variants1" }
+            };
+
+            var result = _variants.Add(variantRoots);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(2, _variants.GetVariants("root4").Count());
+            Assert.IsTrue(_variants.GetVariants("root4").Contains("variant4"));
+            Assert.IsTrue(_variants.GetVariants("root4").Contains("variant5"));
+        }
+
+        [TestMethod]
+        public void Add_InvalidSourceVariantRootsList_ReturnsFalse()
+        {
+            var variantRoots = new List<VariantRoot>
+            {
+                new VariantRoot { Root = "root4", Variant = "variant4", Source = "variants1"},
+                new VariantRoot { Root = "root4", Variant = "variant5", Source = "InvalidSource" }
+            };
+
+            var result = _variants.Add(variantRoots);
+
+            Assert.IsFalse(result);
+            Assert.IsFalse(_variants.GetVariants("root4").Contains("variant4"));
+            Assert.IsFalse(_variants.GetVariants("root4").Contains("variant5"));
+        }
+
+        [TestMethod]
+        public void DuplicateEntries_NoDuplicates_ReturnsFalse()
+        {
+            var result = _variants.DuplicateEntries();
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void DuplicateEntries_HasDuplicates_ReturnsTrue()
+        {
+            var variantRoots = new List<VariantRoot>
+            {
+                new VariantRoot { Root = "root1", Variant = "variant1", Source = "variants1" },
+                new VariantRoot { Root = "root1", Variant = "variant1", Source = "variants1" }
+            };
+
+            _variants.Add(variantRoots);
+
+            var result = _variants.DuplicateEntries();
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void DuplicateEntries_DifferentSources_ReturnsFalse()
+        {
+            var variantRoots = new List<VariantRoot>
+            {
+                new VariantRoot { Root = "root1", Variant = "variant1", Source = "variants2" },
+                new VariantRoot { Root = "root1", Variant = "variant2", Source = "variants2" }
+            };
+
+            Variants variants2 = new Variants("variants2", _db);
+
+
+            var tmp = variants2.Add(variantRoots);
+
+            Assert.IsTrue(tmp);
+
+            var result2 = variants2.DuplicateEntries();
+            var result = _variants.DuplicateEntries();
+
+            Assert.IsFalse(result2);
+            Assert.IsFalse(result);
+        }
 
         [TestCleanup]
         public void CleanUp()

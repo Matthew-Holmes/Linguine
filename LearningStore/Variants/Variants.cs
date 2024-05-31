@@ -73,13 +73,14 @@ namespace LearningStore
 
             _db.SaveChanges();
 
-            return false;
+            return true;
         }
 
         internal bool DuplicateEntries()
         {
+            // TODO - test
             return _db.Variants
-                      .Where(def => def.Source == Source)
+                      .Where(v => v.Source == Source)
                       .GroupBy(p => new { p.Variant, p.Root })
                       .Where(p => p.Count() > 1)
                       .Any();
