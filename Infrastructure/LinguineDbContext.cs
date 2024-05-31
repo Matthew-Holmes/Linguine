@@ -1,3 +1,4 @@
+using LearningExtraction;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace Infrastructure
         // Tables
         public DbSet<DictionaryDefinition> DictionaryDefinitions { get; set; }
         public DbSet<VariantRoot> Variants { get; set; }
-
+        public DbSet<TextualMedia> TextualMedia { get; set; }
 
         public LinguineDbContext(String connectionString)
         {
@@ -36,6 +37,10 @@ namespace Infrastructure
                 .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
 
             modelBuilder.Entity<VariantRoot>()
+                .HasKey(e => e.DatabasePrimaryKey)
+                .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
+
+            modelBuilder.Entity<TextualMedia>()
                 .HasKey(e => e.DatabasePrimaryKey)
                 .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
 
