@@ -40,7 +40,7 @@ namespace Linguine
             Tabs.CollectionChanged += Tabs_CollectionChanged;
 
             OpenHomeTabCommand               = new RelayCommand(() => Add(              new HomeViewModel(_UIcomponents, _model)));
-            //OpenTextualMediaViewerTabCommand = new RelayCommand(() => Add(new TextualMediaViewerViewModel(_UIcomponents, _model)));
+            OpenTextualMediaViewerTabCommand = new RelayCommand(() => Add(new TextualMediaLaunchpadViewModel(_UIcomponents, _model, this)));
             OpenConfigManagerTabCommand      = new RelayCommand(() => AddUniquely<ConfigManagerViewModel>(_UIcomponents, _model));
         }
 
@@ -105,6 +105,11 @@ namespace Linguine
                     newTab.TabClosed += OnTabClosed;
                 }
             }
+        }
+
+        internal void CloseThisAndSwitchToLatestSession(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }
