@@ -30,7 +30,7 @@ namespace Infrastructure
 
             foreach (LanguageCode lc in Enum.GetValues(typeof(LanguageCode)))
             {
-                string dbFilePath = Path.Combine("store", lc.ToString() + ".db");
+                string dbFilePath = Path.Combine("Store", lc.ToString() + ".db");
                 config.ConnectionStrings.Add(lc, $"Data Source={dbFilePath};");
             }
 
