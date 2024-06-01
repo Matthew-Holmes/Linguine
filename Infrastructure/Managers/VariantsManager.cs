@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Infrastructure.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,13 +8,10 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class VariantsManager
+    public class VariantsManager : ManagerBase
     {
-        private LinguineDataHandler _db;
-
-        public VariantsManager(LinguineDataHandler db)
+        public VariantsManager(LinguineDataHandler db) : base(db)
         {
-            _db = db;
         }
 
         public List<String> AvailableVariantsSources()

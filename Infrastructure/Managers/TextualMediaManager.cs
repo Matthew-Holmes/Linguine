@@ -1,15 +1,12 @@
 ﻿using Infrastructure;
+using Infrastructure.Managers;
 
 namespace Linguine
 {
-    public class TextualMediaManager
+    public class TextualMediaManager : ManagerBase
     {
-        // TODO - tests
-        private LinguineDataHandler _db;
-
-        public TextualMediaManager(LinguineDataHandler linguine)
+        public TextualMediaManager(LinguineDataHandler db) : base(db)
         {
-            _db = linguine;
         }
 
         public void Add(TextualMedia tm)

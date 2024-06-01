@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Infrastructure.Managers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,15 +11,10 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class ExternalDictionaryManager
+    public class ExternalDictionaryManager : ManagerBase
     {
-        private LinguineDataHandler _db;
-
-        // manages the parsing of new dictionaries from .csv
-        // queries and updates the config, can ensure integrity of config with stored databases
-
-        public ExternalDictionaryManager(LinguineDataHandler db) {
-            _db = db;
+        public ExternalDictionaryManager(LinguineDataHandler db) : base(db)
+        {
         }
 
         public List<String> AvailableDictionaries()
