@@ -10,6 +10,7 @@
                 <ResourceDictionary Source="Tabs/WPF/TabViews/HomeTabTemplate.xaml"/>
                 <ResourceDictionary Source="Tabs/WPF/TabViews/ConfigManagerTabTemplate.xaml"/>
                 <ResourceDictionary Source="Tabs/WPF/TabViews/TextualMediaViewerTabTemplate.xaml"/>
+                <ResourceDictionary Source="Tabs/WPF/TabViews/TextualMediaLaunchpadTabTemplate.xaml"/>
                 <!-- Add other Resource Dictionaries as needed -->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

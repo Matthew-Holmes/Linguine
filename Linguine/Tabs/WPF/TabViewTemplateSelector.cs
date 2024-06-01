@@ -16,9 +16,13 @@ namespace Linguine.Tabs.WPF
             if (item is Tabs.HomeViewModel)
                 return element.FindResource("HomeTabTemplate") as DataTemplate;
 
+            if (item is Tabs.TextualMediaLaunchpadViewModel)
+                return element.FindResource("TextualMediaLaunchpadTabTemplate") as DataTemplate;
+
             if (item is Tabs.TextualMediaViewerViewModel)
                 return element.FindResource("TextualMediaViewerTabTemplate") as DataTemplate;
             return null;
+
             throw new NotImplementedException();
         }
     }
