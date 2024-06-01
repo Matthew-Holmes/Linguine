@@ -20,6 +20,7 @@ namespace Linguine
             }
 
             _db.TextualMedia.Add(tm);
+            _db.SaveChanges();
         }
 
         public List<String> AvailableTextualMediaNames()
