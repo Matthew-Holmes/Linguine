@@ -124,24 +124,24 @@ namespace Linguine.Tabs
             if (manager.AvailableTextualMediaNames().Contains(tm.Name))
             {
                 _uiComponents.CanMessage.Show("Already have a text of this name!");
-                return false;
+                return true;
             }
 
             if (manager.HaveMediaWithSameDescription(tm.Description))
             {
                 if (!_uiComponents.CanVerify.AskYesNo("already have a text matching this description, proceed?"))
                 {
-                    return false;
+                    return true;
                 }
             }
 
             if (manager.HaveMediaWithSameContent(tm.Text))
             {
                 _uiComponents.CanMessage.Show("already have media with exact same content, aborting!");
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         private void BrowseAll()
