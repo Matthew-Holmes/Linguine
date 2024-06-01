@@ -62,6 +62,8 @@ namespace Linguine.Tabs
         {
             _mainViewModel = mainViewModel; // so we can ask it to close this once done
 
+            _mainModel.Reloaded += (s, e) => OnPropertyChanged(nameof(AvailableTexts));
+
             _loader = new TextualMediaLoader(uiComponents.CanVerify, uiComponents.CanChooseFromList, uiComponents.CanGetText);
 
             Title = "Select Text";
