@@ -41,17 +41,17 @@ namespace Linguine.Tabs
             {
                 _selectedTextName = value;
                 OnPropertyChanged(nameof(SelectedTextName));
-                ShowNewSessionButton = true;
+                ShowSessions = true;
             }
         }
 
-        public bool ShowNewSessionButton
+        public bool ShowSessions
         {
             get => _showNewSessionButton;
             set
             {
                 _showNewSessionButton = value;
-                OnPropertyChanged(nameof(ShowNewSessionButton));
+                OnPropertyChanged(nameof(ShowSessions));
             }
         }
 
@@ -114,7 +114,7 @@ namespace Linguine.Tabs
             }
             catch (Exception e)
             {
-                _uiComponents.CanMessage.Show("media loading aborted");
+                _uiComponents.CanMessage.Show($"Media loading aborted: {e.Message}");
                 return;
             }
         }
