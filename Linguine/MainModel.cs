@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 //using Agents.DummyAgents;
 using Infrastructure;
 //using LearningExtraction;
-using LearningStore;
 
 namespace Linguine
 {
@@ -19,7 +18,7 @@ namespace Linguine
         public event EventHandler Reloaded;
         public event EventHandler LoadingFailed;
 
-        private LinguineDbContext Linguine { get; set; }
+        private LinguineDataHandler Linguine { get; set; }
 
 
         public MainModel()
@@ -51,7 +50,7 @@ namespace Linguine
                     Linguine.Dispose();
                 }
 
-                Linguine = new LinguineDbContext(ConfigManager.ConnectionString);
+                Linguine = new LinguineDataHandler(ConfigManager.ConnectionString);
                 Linguine.Database.EnsureCreated();
                 StartupComplete = true;
                 Reloaded?.Invoke(this, EventArgs.Empty);

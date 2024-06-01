@@ -7,15 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace LearningStore
+namespace Infrastructure
 {
     public class ExternalDictionary
     {
         public String Source { get; }
 
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
 
-        public ExternalDictionary(String source, LinguineDbContext db)
+        public ExternalDictionary(String source, LinguineDataHandler db)
         {
             Source = source;
             _db = db;   

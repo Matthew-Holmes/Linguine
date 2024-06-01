@@ -6,15 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LearningStore
+namespace Infrastructure
 {
     public class Variants
     {
         public String Source { get; }
 
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
 
-        public Variants(String source, LinguineDbContext db)
+        public Variants(String source, LinguineDataHandler db)
         {
             Source = source;
             _db = db;

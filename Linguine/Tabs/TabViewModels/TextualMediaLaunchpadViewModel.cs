@@ -18,7 +18,7 @@ namespace Linguine.Tabs
     internal class TextualMediaLaunchpadViewModel : TabViewModelBase
     {
         private MainViewModel _mainViewModel;
-        private TextualMediaLoader _loader;
+        private TextualMediaImporter _loader;
 
         private bool _showNewSessionButton = false;
         private string _selectedTextName;
@@ -64,7 +64,7 @@ namespace Linguine.Tabs
 
             _mainModel.Reloaded += (s, e) => OnPropertyChanged(nameof(AvailableTexts));
 
-            _loader = new TextualMediaLoader(uiComponents.CanVerify, uiComponents.CanChooseFromList, uiComponents.CanGetText);
+            _loader = new TextualMediaImporter(uiComponents.CanVerify, uiComponents.CanChooseFromList, uiComponents.CanGetText);
 
             Title = "Select Text";
 
@@ -90,7 +90,7 @@ namespace Linguine.Tabs
 
             try
             {
-                TextualMedia tm = _loader.LoadFromFile(filename);
+                TextualMedia tm = _loader.ImportFromFile(filename);
 
                 var manager = _mainModel.TextualMediaManager;
 

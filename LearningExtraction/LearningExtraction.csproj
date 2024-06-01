@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Agents\Agents.csproj" />
     <ProjectReference Include="..\ExternalMedia\ExternalMedia.csproj" />
-    <ProjectReference Include="..\LearningStore\LearningStore.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

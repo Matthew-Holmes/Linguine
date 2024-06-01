@@ -5,9 +5,9 @@ namespace Linguine
     public class TextualMediaManager
     {
         // TODO - tests
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
 
-        public TextualMediaManager(LinguineDbContext linguine)
+        public TextualMediaManager(LinguineDataHandler linguine)
         {
             _db = linguine;
         }

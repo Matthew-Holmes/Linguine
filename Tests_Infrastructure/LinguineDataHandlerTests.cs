@@ -12,14 +12,14 @@ namespace Tests_Infrastructure
 {
 
     [TestClass]
-    public class LinguineDbContextTests
+    public class LinguineDataHandlerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
         //private const string ConnectionString = $"Data Source=:memory:";
 
         private void SeedData()
         {
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 context.Database.EnsureCreated();
             }
@@ -28,7 +28,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void CanInstantiateLinguineDbContext()
         {
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 Assert.IsNotNull(context);
             }
@@ -39,13 +39,13 @@ namespace Tests_Infrastructure
         {
             SeedData();
 
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 context.DictionaryDefinitions.Add(new DictionaryDefinition { DatabasePrimaryKey = 1, Word = "word", Definition = "def", Source = "dict", ID = 1});
                 context.SaveChanges();
             }
 
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 var entry = context.DictionaryDefinitions.Find(1);
                 Assert.IsNotNull(entry);
@@ -58,13 +58,13 @@ namespace Tests_Infrastructure
         {
             SeedData();
 
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 context.Variants.Add(new VariantRoot { DatabasePrimaryKey = 1, Variant = "Can't", Root = "can not", Source = "roots" });
                 context.SaveChanges();
             }
 
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 var entry = context.Variants.Find(1);
                 Assert.IsNotNull(entry);
@@ -75,7 +75,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void OnModelCreating_ConfiguresModelCorrectly()
         {
-            using (var context = new LinguineDbContext(ConnectionString))
+            using (var context = new LinguineDataHandler(ConnectionString))
             {
                 var model = context.Model;
 
@@ -95,7 +95,7 @@ namespace Tests_Infrastructure
         [TestCleanup]
         public void CleanUp()
         {
-            using (var _db = new LinguineDbContext(ConnectionString))
+            using (var _db = new LinguineDataHandler(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }

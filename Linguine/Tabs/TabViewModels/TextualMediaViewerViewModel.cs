@@ -2,7 +2,6 @@
 using ExternalMedia;
 using Infrastructure;
 //using LearningExtraction;
-using LearningStore;
 using System;
 using System.Collections.Generic;
 using System.Linq;

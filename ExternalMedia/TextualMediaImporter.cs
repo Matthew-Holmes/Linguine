@@ -5,20 +5,20 @@ using UserInputInterfaces;
 
 namespace ExternalMedia
 {
-    public class TextualMediaLoader
+    public class TextualMediaImporter
     {
         private ICanVerify _verifiesWithUser;
         private ICanChooseFromList _userChoosesFromList;
         private ICanGetText _getsTextFromUser;
 
-        public TextualMediaLoader(ICanVerify verifiesWithUser, ICanChooseFromList userChoosesFromList, ICanGetText canGetText)
+        public TextualMediaImporter(ICanVerify verifiesWithUser, ICanChooseFromList userChoosesFromList, ICanGetText canGetText)
         {
             _verifiesWithUser = verifiesWithUser;
             _userChoosesFromList = userChoosesFromList;
             _getsTextFromUser = canGetText;
         }
 
-        public TextualMedia LoadFromFile(String path)
+        public TextualMedia ImportFromFile(String path)
         {
             String text = ReadStringFromFile(path);
 

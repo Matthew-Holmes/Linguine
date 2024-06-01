@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LearningStore
+namespace Infrastructure
 {
     public class VariantsManager
     {
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
 
-        public VariantsManager(LinguineDbContext db)
+        public VariantsManager(LinguineDataHandler db)
         {
             _db = db;
         }

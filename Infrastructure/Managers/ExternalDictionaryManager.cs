@@ -1,5 +1,4 @@
-﻿using CsvHelper;
-using Infrastructure;
+﻿using Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,16 +8,16 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LearningStore
+namespace Infrastructure
 {
     public class ExternalDictionaryManager
     {
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
 
         // manages the parsing of new dictionaries from .csv
         // queries and updates the config, can ensure integrity of config with stored databases
 
-        public ExternalDictionaryManager(LinguineDbContext db) {
+        public ExternalDictionaryManager(LinguineDataHandler db) {
             _db = db;
         }
 

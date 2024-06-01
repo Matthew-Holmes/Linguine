@@ -1,5 +1,4 @@
 ﻿using Infrastructure;
-using LearningStore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -8,27 +7,27 @@ using System.Data;
 using System.IO;
 using System.Text;
 
-namespace LearningStoreTests
+namespace Tests_Infrastructure
 {
     [TestClass]
     public class ExternalDictionaryCSVParserTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
 
         private string _csvFilePath;
         private string _testDictionaryName;
 
         private void SeedData()
         {
-        _db = new LinguineDbContext(ConnectionString);
+        _db = new LinguineDataHandler(ConnectionString);
         _db.Database.EnsureCreated();
         }
 
         [TestInitialize]
         public void SetUp()
         {
-            using (var _db = new LinguineDbContext(ConnectionString))
+            using (var _db = new LinguineDataHandler(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }
@@ -153,7 +152,7 @@ namespace LearningStoreTests
                 File.Delete(_csvFilePath);
             }
 
-            using (var _db = new LinguineDbContext(ConnectionString))
+            using (var _db = new LinguineDataHandler(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }

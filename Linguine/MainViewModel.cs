@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UserInputInterfaces;
 using ExternalMedia;
-using LearningStore;
 using Infrastructure;
 using Linguine.Tabs;
 using System.Collections.ObjectModel;

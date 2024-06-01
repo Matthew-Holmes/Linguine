@@ -1,25 +1,24 @@
 ﻿using Infrastructure;
-using LearningStore;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 
-namespace LearningStoreTests
+namespace Tests_Infrastructure
 {
     [TestClass]
     public class VariantsTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDataHandler _db;
         private Variants _variants;
 
 
         [TestInitialize]
         public void SetUp()
         {
-            using (var _db = new LinguineDbContext(ConnectionString))
+            using (var _db = new LinguineDataHandler(ConnectionString))
             {
                 _db.Database.EnsureDeleted();
             }
@@ -29,7 +28,7 @@ namespace LearningStoreTests
                 throw new Exception();
             }
 
-            _db = new LinguineDbContext(ConnectionString);
+            _db = new LinguineDataHandler(ConnectionString);
             _db.Database.EnsureCreated();
 
 
@@ -239,7 +238,7 @@ namespace LearningStoreTests
         [TestCleanup]
         public void CleanUp()
         {
-            using (var _db = new LinguineDbContext(ConnectionString))
+            using (var _db = new LinguineDataHandler(ConnectionString))
             {
                 _db.Database.EnsureDeleted();
             }
