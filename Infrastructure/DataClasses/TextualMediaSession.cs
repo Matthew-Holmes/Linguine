@@ -12,5 +12,6 @@ namespace Infrastructure
         public TextualMedia TextualMedia { get; set; }
         public int Cursor { get; set; }
         public bool Active { get; set; }
+        public DateTime LastActive{ get; set; }
     }
 }

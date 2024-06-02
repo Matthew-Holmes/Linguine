@@ -1,5 +1,6 @@
 ﻿using ExternalMedia;
 using Infrastructure;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,12 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using UserInputInterfaces;
 
 namespace Linguine.Tabs
 {
-    
+
     internal class TextualMediaLaunchpadViewModel : TabViewModelBase
     {
         private MainViewModel _mainViewModel;
@@ -22,6 +24,8 @@ namespace Linguine.Tabs
 
         private bool _showNewSessionButton = false;
         private string _selectedTextName;
+        private List<string> _availableSessions;
+        private List<Tuple<bool, decimal>> _sessionInfo;
 
         public ICommand ImportNewCommand { get; private set; }
         public ICommand NewSessionCommand { get; private set; }
@@ -30,7 +34,7 @@ namespace Linguine.Tabs
         {
             get
             {
-               return _mainModel.TextualMediaManager?.AvailableTextualMediaNames() ?? new List<String>();
+                return _mainModel.AvailableTextualMediaNames ?? new List<String>();
             }
         }
 
@@ -40,6 +44,7 @@ namespace Linguine.Tabs
             set
             {
                 _selectedTextName = value;
+                LoadSessionsFor(value);
                 OnPropertyChanged(nameof(SelectedTextName));
                 ShowSessions = true;
             }
@@ -52,8 +57,91 @@ namespace Linguine.Tabs
             {
                 _showNewSessionButton = value;
                 OnPropertyChanged(nameof(ShowSessions));
+
             }
         }
+
+        private List<Tuple<bool, decimal>> SessionInfo
+        { 
+            get => _sessionInfo;
+            set
+            {
+                AvailableSessions = BuildSessionStrings(SelectedTextName, value);
+                _sessionInfo = value;
+            }
+        }
+
+        public List<String> AvailableSessions
+        {
+            get => _availableSessions;
+            set
+            {
+                _availableSessions = value;
+                OnPropertyChanged(nameof(AvailableSessions));
+            }
+        }
+
+        public String SelectedSession
+        {
+            set
+            {
+                int index = AvailableSessions.IndexOf(value);
+
+                if (index == -1)
+                {
+                    _uiComponents.CanMessage.Show("something went wrong!");
+                    return;
+                }
+
+                decimal progress = SessionInfo[index].Item2;
+
+                bool success = _mainModel.ActivateExistingSessionFor(SelectedTextName, progress);
+
+                if (!success)
+                {
+                    _uiComponents.CanMessage.Show("activating session failed!");
+                    return;
+                }
+
+                _mainViewModel.CloseThisAndSwitchToLatestSession(this);
+            }
+        }
+
+        private void LoadSessionsFor(string name)
+        {
+            var info = _mainModel.GetSessionInfoByName(name);
+
+            if (info is null)
+            {
+                _uiComponents.CanMessage.Show("$failed to load sessions for {name}");
+            }
+            else
+            {
+                SessionInfo = info; 
+            }
+        }
+
+        private List<String> BuildSessionStrings(String name, List<Tuple<bool, decimal>> info)
+        {
+            // need to decide whether to show active sessions, or just inactive ones
+
+            List<String> ret = new List<String>();
+
+            foreach(var sessionInfo in info)
+            {
+                StringBuilder builder = new StringBuilder(name);
+                builder.Append(" | ");
+                builder.Append(sessionInfo.Item2.ToString());
+                builder.Append('%');
+
+                ret.Add(builder.ToString());
+            }
+
+            return ret;
+        }
+
+
+
 
         public TextualMediaLaunchpadViewModel(
             UIComponents uiComponents,

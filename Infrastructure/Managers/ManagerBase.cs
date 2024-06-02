@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Managers
-{
+namespace Infrastructure
+{ 
     public class ManagerBase
     {
         protected LinguineDataHandler _db;

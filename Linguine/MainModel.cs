@@ -8,17 +8,102 @@ using System.Threading.Tasks;
 //using Agents;
 //using Agents.DummyAgents;
 using Infrastructure;
+using UserInputInterfaces;
 //using LearningExtraction;
 
 namespace Linguine
 {
     public class MainModel
     {
+        #region managers
+        private TextualMediaManager? _textualMediaManager;
+        private ExternalDictionaryManager? _externalDictionaryManager;
+        private VariantsManager? _variantsManager;
+        private TextualMediaSessionManager? _textualMediaSessionManager;
+
+        private void LoadManagers()
+        {
+            _externalDictionaryManager = new ExternalDictionaryManager(Linguine);
+            _textualMediaManager = new TextualMediaManager(Linguine);
+            _textualMediaSessionManager = new TextualMediaSessionManager(Linguine);
+            _variantsManager = new VariantsManager(Linguine);
+        }
+
+        public TextualMediaManager? TextualMediaManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return _textualMediaManager;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public ExternalDictionaryManager? ExternalDictionaryManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return _externalDictionaryManager;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        public VariantsManager? VariantsManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return _variantsManager;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        private TextualMediaSessionManager? TextualMediaSessionManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return _textualMediaSessionManager;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        #endregion
+
         public bool StartupComplete { get; private set; }
+
+
         public event EventHandler Reloaded;
         public event EventHandler LoadingFailed;
 
+
+        public event EventHandler SessionsChanged;
+
         private LinguineDataHandler Linguine { get; set; }
+
+        public List<TextualMediaSession> ActiveSessions 
+        {
+            get => TextualMediaSessionManager?.ActiveSessions() ?? new List<TextualMediaSession>();
+        }
 
 
         public MainModel()
@@ -52,6 +137,9 @@ namespace Linguine
 
                 Linguine = new LinguineDataHandler(ConfigManager.ConnectionString);
                 Linguine.Database.EnsureCreated();
+
+                LoadManagers();
+
                 StartupComplete = true;
                 Reloaded?.Invoke(this, EventArgs.Empty);
             }
@@ -61,53 +149,59 @@ namespace Linguine
             }
         }
 
+        public List<string>? AvailableTextualMediaNames
+        {
+            get => _textualMediaManager?.AvailableTextualMediaNames() ?? null;
+        }
+
+
         internal bool StartNewTextualMediaSession(string selectedText)
         {
-            throw new NotImplementedException();
+            var tm = TextualMediaManager?.GetByName(selectedText) ?? null;
+
+            if (tm is null)
+            {
+                return false;
+            }
+
+            if(TextualMediaSessionManager?.NewSession(tm) ?? false)
+            {
+                SessionsChanged?.Invoke(this, EventArgs.Empty);
+                return true;
+            }
+
+            return false;
         }
 
-        public TextualMediaManager? TextualMediaManager
+        internal void CloseSession(TextualMediaSession session)
         {
-            get
-            {
-                if (StartupComplete)
-                {
-                    return new TextualMediaManager(Linguine);
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            TextualMediaSessionManager?.CloseSession(session); // not the end of the world if we don't have it, 
         }
 
-        public ExternalDictionaryManager? ExternalDictionaryManager
+        internal List<Tuple<bool,decimal>>? GetSessionInfoByName(string name)
         {
-            get 
-            {            
-                if (StartupComplete)
-                {
-                    return new ExternalDictionaryManager(Linguine);
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            TextualMedia? tm = TextualMediaManager?.GetByName(name) ?? null;
+
+            if (tm is null) { return null; }
+
+            return TextualMediaSessionManager?.SessionInfo(tm) ?? null;
         }
-        public VariantsManager? VariantsManager
+
+        internal bool ActivateExistingSessionFor(string selectedTextName, decimal progress)
         {
-            get
+            TextualMedia? tm = TextualMediaManager?.GetByName(selectedTextName) ?? null;
+
+            if (tm is null) { return false; }
+
+            bool b = TextualMediaSessionManager?.ActivateExistingSession(tm, progress) ?? false;
+
+            if (b)
             {
-                if (StartupComplete)
-                {
-                    return new VariantsManager(Linguine);
-                }
-                else
-                {
-                    return null;
-                }
+                SessionsChanged?.Invoke(this, EventArgs.Empty);
             }
+
+            return b;
+
         }
 
         /*

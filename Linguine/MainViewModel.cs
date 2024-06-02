@@ -29,8 +29,37 @@ namespace Linguine
             _model = model;
 
             model.LoadingFailed += (s,e) => uiComponents.CanMessage.Show("database loading failed");
+            model.SessionsChanged += (s, e) => TurnSessionsToTabs();
 
             SetupTabs();
+        }
+
+        private void TurnSessionsToTabs()
+        {
+            List<TextualMediaViewerViewModel> existingTabs = Tabs
+                .Where(t => t.GetType() == typeof(TextualMediaViewerViewModel))
+                .Cast<TextualMediaViewerViewModel>()
+                .ToList(); 
+
+            var sessions = _model.ActiveSessions;
+
+            // close non-existent tabs
+            foreach (TextualMediaViewerViewModel tab in existingTabs)
+            {
+                if (!sessions.Contains(tab.Session))
+                {
+                    tab.CloseCommmand.Execute(this); // deactivates in the session database
+                }
+            }
+
+            var existingSessions = existingTabs.Select(t => t.Session);
+
+            foreach(TextualMediaSession session in sessions)
+            {
+                if (!existingSessions.Contains(session)) ;
+                Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model));   
+            }
+
         }
 
         private void SetupTabs()
@@ -108,7 +137,24 @@ namespace Linguine
 
         internal void CloseThisAndSwitchToLatestSession(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
         {
-            throw new NotImplementedException();
+            Tabs.Remove(textualMediaLaunchpadViewModel);
+
+            List<TextualMediaViewerViewModel> existingSessionTabs = Tabs
+               .Where(t => t.GetType() == typeof(TextualMediaViewerViewModel))
+               .Cast<TextualMediaViewerViewModel>()
+               .ToList();
+
+            var latest = existingSessionTabs.OrderByDescending(t => t.Session.LastActive)
+                .FirstOrDefault();
+
+            if (latest is not null)
+            {
+                SelectedTab = latest;
+            }
+            else
+            {
+                _UIcomponents.CanMessage.Show("Switching to latest session failed!");
+            }
         }
         #endregion
     }
