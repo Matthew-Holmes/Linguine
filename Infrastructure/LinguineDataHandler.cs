@@ -34,20 +34,41 @@ namespace Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DictionaryDefinition>()
-                .HasKey(e => e.DatabasePrimaryKey)
-                .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
+                .HasKey(e => e.DatabasePrimaryKey);
+
+            modelBuilder.Entity<DictionaryDefinition>()
+                .Property(e => e.DatabasePrimaryKey)
+                .ValueGeneratedOnAdd();
+
 
             modelBuilder.Entity<VariantRoot>()
-                .HasKey(e => e.DatabasePrimaryKey)
-                .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
+                .HasKey(e => e.DatabasePrimaryKey);
+
+            modelBuilder.Entity<VariantRoot>()
+                .Property(e => e.DatabasePrimaryKey)
+                .ValueGeneratedOnAdd();
+
 
             modelBuilder.Entity<TextualMedia>()
-                .HasKey(e => e.DatabasePrimaryKey)
-                .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
+                .HasKey(e => e.DatabasePrimaryKey);
+
+            modelBuilder.Entity<TextualMedia>()
+                .Property(e => e.DatabasePrimaryKey)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<TextualMediaSession>()
-                .HasKey(e => e.DatabasePrimaryKey)
-                .HasAnnotation("DatabaseGenerated", DatabaseGeneratedOption.None);
+                .HasKey(e => e.DatabasePrimaryKey);
+
+            modelBuilder.Entity<TextualMediaSession>()
+                .Property(e => e.DatabasePrimaryKey)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<TextualMediaSession>()
+                .HasOne(e => e.TextualMedia)
+                .WithMany()
+                .HasForeignKey(e => e.TextualMediaKey);
+
+
 
             // Other configurations...
         }

@@ -7,74 +7,31 @@
             <local:HighlightConverter x:Key="HighlightConverter"/>
         </DataTemplate.Resources>
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <!-- For TextBlock -->
-                    <RowDefinition Height="*"/>
-                    <!-- For ListBox, takes remaining space -->
-                </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="{Binding TextViewWindow}"/>
 
-                <TextBlock Text="{Binding RawText}" TextWrapping="Wrap" Grid.Row="0"/>
-                
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <ListBox ItemsSource="{Binding DiscoveredUnitsRaw}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="0"/>
-                    <ListBox ItemsSource="{Binding DiscoveredUnitsRooted}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="1"/>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- to Store the definitions -->
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" Grid.Column="2">
-                        <ItemsControl ItemsSource="{Binding PossibleDefinitionStringsForRooted}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                        <ListBox ItemsSource="{Binding}">
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border BorderBrush="Black" BorderThickness="1" Margin="5">
-                                                        <TextBlock Text="{Binding Item1}" TextWrapping="Wrap" MaxWidth="200" Margin="5" 
-                                                                   Background="{Binding Item2, Converter={StaticResource HighlightConverter}}"/>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-                                    </ScrollViewer>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                <Button Grid.Column="0" Margin="10" Content="&lt;&lt;" Command="{Binding BigStepLeftCommand}"/>
+                <Button Grid.Column="1" Margin="10" Content="&lt;" Command="{Binding StepLeftCommand}"/>
+                <Button Grid.Column="3" Margin="10" Content=">"  Command="{Binding StepRightCommand}"/>
+                <Button Grid.Column="4" Margin="10" Content=">>" Command="{Binding BigStepRightCommand}"/>
 
-                </Grid>
             </Grid>
 
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
 
-                <Button Content="Load" Command="{Binding LoadCommand}" Grid.Row="0"/>
-                <Button Content="Decompose" Command="{Binding DecomposeCommand}" Grid.Row="1"/>
-            </Grid>
-          
+
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

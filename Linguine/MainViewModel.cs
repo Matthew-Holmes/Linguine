@@ -39,25 +39,27 @@ namespace Linguine
             List<TextualMediaViewerViewModel> existingTabs = Tabs
                 .Where(t => t.GetType() == typeof(TextualMediaViewerViewModel))
                 .Cast<TextualMediaViewerViewModel>()
-                .ToList(); 
+                .ToList();
 
-            var sessions = _model.ActiveSessions;
+            var sessions = _model.ActiveSessionsIDs;
 
             // close non-existent tabs
             foreach (TextualMediaViewerViewModel tab in existingTabs)
             {
-                if (!sessions.Contains(tab.Session))
+                if (!sessions.Contains(tab.SessionID))
                 {
                     tab.CloseCommmand.Execute(this); // deactivates in the session database
                 }
             }
 
-            var existingSessions = existingTabs.Select(t => t.Session);
+            var existingSessions = existingTabs.Select(t => t.SessionID);
 
-            foreach(TextualMediaSession session in sessions)
+            foreach(int session in sessions)
             {
-                if (!existingSessions.Contains(session)) ;
-                Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model));   
+                if (!existingSessions.Contains(session))
+                {
+                    Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model));
+                }
             }
 
         }
@@ -144,7 +146,7 @@ namespace Linguine
                .Cast<TextualMediaViewerViewModel>()
                .ToList();
 
-            var latest = existingSessionTabs.OrderByDescending(t => t.Session.LastActive)
+            var latest = existingSessionTabs.OrderByDescending(t => _model.WhenLastActive(t.SessionID))
                 .FirstOrDefault();
 
             if (latest is not null)

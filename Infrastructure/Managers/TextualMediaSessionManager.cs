@@ -66,6 +66,8 @@ namespace Infrastructure
         {
             // returns if active and progress percentage
 
+            TidySessionsFor(tm);
+
             List<TextualMediaSession> sessions = Sessions(tm);
 
             List<bool> activities = sessions.Select(s => s.Active).ToList();   
