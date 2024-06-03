@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 namespace LearningExtraction
@@ -14,11 +15,16 @@ namespace LearningExtraction
         // a piece of text decomposed into units
         // a null value for Units means no further decomposition - an 'atom'
 
+        [JsonProperty("T")]
         public String Total { get; private set; }
 
+        [JsonProperty("D")]
         public List<TextDecomposition>? Decomposition { get; private set; }
 
+        [JsonIgnore]
         public List<String> Units => Decomposition.Select(x => x.Total).ToList();
+
+        [JsonIgnore]
         public String NewLinedUnitsString => String.Join('\n', Units);
 
         public TextDecomposition(String total, List<TextDecomposition>? decomposition)

@@ -2,6 +2,8 @@
 using LearningExtraction;
 using ExternalMedia; // Assuming this namespace contains the definition of TextUnit
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using System;
 
 namespace Tests_LearningExtraction
 {
@@ -351,6 +353,139 @@ namespace Tests_LearningExtraction
             Assert.AreEqual(original.Decomposition[1].Decomposition[1].Total, copy.Decomposition[1].Decomposition[1].Total);
             Assert.IsNull(copy.Decomposition[1].Decomposition[1].Decomposition); // Ensure "ld" is a leaf
         }
+
+        [TestMethod]
+        public void JSONSerialize_NestedDecompositionRuns()
+        {
+            // Arrange
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), new List<TextDecomposition>
+                {
+                    new TextDecomposition(new String("wor"), null), // Breaking down "world" into "wor"...
+                    new TextDecomposition(new String("ld"), null)  // ...and "ld"
+                });
+            var td = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
+
+            // keeps the string length minimal
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
+            string json = JsonConvert.SerializeObject(td, settings);
+
+        }
+
+        [TestMethod]
+        public void JSONDeSerialize_NestedDecompositionRuns()
+        {
+            // Arrange
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), new List<TextDecomposition>
+                {
+                    new TextDecomposition(new String("wor"), null), // Breaking down "world" into "wor"...
+                    new TextDecomposition(new String("ld"), null)  // ...and "ld"
+                });
+            var td = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
+
+            // keeps the string length minimal
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
+            string json = JsonConvert.SerializeObject(td, settings);
+
+            TextDecomposition? tdBack = JsonConvert.DeserializeObject<TextDecomposition>(json, settings);
+
+        }
+
+        [TestMethod]
+        public void JSONDeSerialize_NestedDecompositionIsNotNull()
+        {
+            // Arrange
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), new List<TextDecomposition>
+                {
+                    new TextDecomposition(new String("wor"), null), // Breaking down "world" into "wor"...
+                    new TextDecomposition(new String("ld"), null)  // ...and "ld"
+                });
+            var td = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
+
+            // keeps the string length minimal
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
+            string json = JsonConvert.SerializeObject(td, settings);
+
+            TextDecomposition? tdBack = JsonConvert.DeserializeObject<TextDecomposition>(json, settings);
+
+            Assert.IsNotNull(tdBack);
+
+        }
+
+
+        [TestMethod]
+        public void JSONDeSerialize_NestedDecompositionHasSameDecomposition()
+        {
+            // Arrange
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), new List<TextDecomposition>
+                {
+                    new TextDecomposition(new String("wor"), null), // Breaking down "world" into "wor"...
+                    new TextDecomposition(new String("ld"), null)  // ...and "ld"
+                });
+            var original = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
+
+            // keeps the string length minimal
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
+            string json = JsonConvert.SerializeObject(original, settings);
+
+            TextDecomposition? copy = JsonConvert.DeserializeObject<TextDecomposition>(json, settings);
+
+            Assert.IsNotNull(copy);
+
+            // same checks as the test for copy
+            // Assert
+            Assert.AreNotSame(original, copy);
+            Assert.AreEqual(original.Total, copy.Total);
+            Assert.AreEqual(original.Decomposition.Count, copy.Decomposition.Count);
+
+            // Check recursively for nested units
+            Assert.AreNotSame(original.Decomposition[0], copy.Decomposition[0]);
+            Assert.AreEqual(original.Decomposition[0].Total, copy.Decomposition[0].Total);
+            Assert.IsNull(copy.Decomposition[0].Decomposition); // Ensure "hello" is a leaf
+
+            Assert.AreNotSame(original.Decomposition[1], copy.Decomposition[1]);
+            Assert.AreEqual(original.Decomposition[1].Total, copy.Decomposition[1].Total);
+            Assert.IsNotNull(copy.Decomposition[1].Decomposition); // Ensure "world" has nested units
+            Assert.AreEqual(original.Decomposition[1].Decomposition.Count, copy.Decomposition[1].Decomposition.Count);
+
+            // Check recursively for nested units of "world"
+            Assert.AreNotSame(original.Decomposition[1].Decomposition[0], copy.Decomposition[1].Decomposition[0]);
+            Assert.AreEqual(original.Decomposition[1].Decomposition[0].Total, copy.Decomposition[1].Decomposition[0].Total);
+            Assert.IsNull(copy.Decomposition[1].Decomposition[0].Decomposition); // Ensure "wor" is a leaf
+
+            Assert.AreNotSame(original.Decomposition[1].Decomposition[1], copy.Decomposition[1].Decomposition[1]);
+            Assert.AreEqual(original.Decomposition[1].Decomposition[1].Total, copy.Decomposition[1].Decomposition[1].Total);
+            Assert.IsNull(copy.Decomposition[1].Decomposition[1].Decomposition); // Ensure "ld" is a leaf
+
+        }
+
 
     }
 }
