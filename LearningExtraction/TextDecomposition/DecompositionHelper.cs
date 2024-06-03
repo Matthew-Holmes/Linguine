@@ -96,9 +96,9 @@ namespace LearningExtraction
             int consumed = 0;
             List<int> ret = new List<int>();
 
-            foreach (TextUnit unit in injective.Units)
+            foreach (String unit in injective.Units)
             {
-                int pos = injective.Total.Text.Substring(consumed).IndexOf(unit.Text);
+                int pos = injective.Total.Substring(consumed).IndexOf(unit);
                 ret.Add(consumed + pos);
 
                 consumed += pos;
@@ -117,7 +117,7 @@ namespace LearningExtraction
             List<String> ret = new List<String>();
 
             List<int> unitLocations = GetUnitLocations(injective);
-            unitLocations.Add(injective.Total.Text.Length); // off the end location
+            unitLocations.Add(injective.Total.Length); // off the end location
 
             int lhsUnit = 0;
             int rhsUnit = Math.Min(RHSContextUnits, injective.Units.Count);
@@ -140,7 +140,7 @@ namespace LearningExtraction
 
                 // get the substring forming the context
                 int len = unitLocations[rhsUnit + 1] - unitLocations[lhsUnit];
-                String toAdd = injective.Total.Text.Substring(unitLocations[lhsUnit], len);
+                String toAdd = injective.Total.Substring(unitLocations[lhsUnit], len);
 
                 // ensure meets the max character constraints
                 lhsTmp = lhsUnit;
@@ -156,7 +156,7 @@ namespace LearningExtraction
                     }
 
                     int lenTmp = unitLocations[rhsTmp+1] - unitLocations[lhsTmp];
-                    toAdd = injective.Total.Text.Substring(unitLocations[lhsTmp], lenTmp);
+                    toAdd = injective.Total.Substring(unitLocations[lhsTmp], lenTmp);
 
                     if (toAdd.Length <= MaxChars) { break; }
 
@@ -167,7 +167,7 @@ namespace LearningExtraction
                     }
 
                     lenTmp = unitLocations[rhsTmp + 1] - unitLocations[lhsTmp];
-                    toAdd = injective.Total.Text.Substring(unitLocations[lhsTmp], lenTmp);
+                    toAdd = injective.Total.Substring(unitLocations[lhsTmp], lenTmp);
                 }
 
                 if (toAdd.Length > MaxChars)

@@ -12,10 +12,10 @@ namespace Tests_LearningExtraction
         public void Constructor_InitializesPropertiesCorrectly()
         {
             // Arrange
-            TextUnit total = new TextUnit("Parent text");
+            String total = new String("Parent text");
             List<TextDecomposition> units = new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("Child text"), null)
+                new TextDecomposition(new String("Child text"), null)
             };
 
             // Act
@@ -37,11 +37,11 @@ namespace Tests_LearningExtraction
             TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
 
             // Assert
-            Assert.AreEqual(parent, decomposition.Total.Text); // Assuming TextUnit has a Content property
+            Assert.AreEqual(parent, decomposition.Total); // Assuming TextUnit has a Content property
             Assert.IsNotNull(decomposition.Decomposition);
             Assert.AreEqual(2, decomposition.Decomposition.Count);
-            Assert.AreEqual("Child text 1", decomposition.Decomposition[0].Total.Text);
-            Assert.AreEqual("Child text 2", decomposition.Decomposition[1].Total.Text);
+            Assert.AreEqual("Child text 1", decomposition.Decomposition[0].Total);
+            Assert.AreEqual("Child text 2", decomposition.Decomposition[1].Total);
         }
 
         [TestMethod]
@@ -52,7 +52,7 @@ namespace Tests_LearningExtraction
 
             TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
 
-            Assert.AreEqual(parent, decomposition.Total.Text);
+            Assert.AreEqual(parent, decomposition.Total);
             Assert.IsNull(decomposition.Decomposition);
         }
 
@@ -64,7 +64,7 @@ namespace Tests_LearningExtraction
 
             TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
 
-            Assert.AreEqual(parent, decomposition.Total.Text);
+            Assert.AreEqual(parent, decomposition.Total);
             Assert.IsNull(decomposition.Decomposition);
         }
 
@@ -72,9 +72,9 @@ namespace Tests_LearningExtraction
         public void TestInjects_WithDirectSubstrings_ShouldReturnTrue()
         {
             // Arrange
-            var parent = new TextUnit("hello world");
-            var child1 = new TextDecomposition(new TextUnit("hello"), null);
-            var child2 = new TextDecomposition(new TextUnit(" world"), null);
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), null);
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
             // Act
@@ -88,9 +88,9 @@ namespace Tests_LearningExtraction
         public void TestInjects_WithIndirectSubstrings_ShouldReturnTrue()
         {
             // Arrange
-            var parent = new TextUnit("hello world");
-            var child1 = new TextDecomposition(new TextUnit("ello"), null);
-            var child2 = new TextDecomposition(new TextUnit("world"), null);
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("ello"), null);
+            var child2 = new TextDecomposition(new String("world"), null);
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
             // Act
@@ -104,8 +104,8 @@ namespace Tests_LearningExtraction
         public void TestInjects_WithNonSubstrings_ShouldReturnFalse()
         {
             // Arrange
-            var parent = new TextUnit("hello world");
-            var child = new TextDecomposition(new TextUnit("universe"), null);
+            var parent = new String("hello world");
+            var child = new TextDecomposition(new String("universe"), null);
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child });
 
             // Act
@@ -119,8 +119,8 @@ namespace Tests_LearningExtraction
         public void TestBijects_WithExactMatch_ShouldReturnTrue()
         {
             // Arrange
-            var parent = new TextUnit("hello");
-            var child = new TextDecomposition(new TextUnit("hello"), null);
+            var parent = new String("hello");
+            var child = new TextDecomposition(new String("hello"), null);
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child });
 
             // Act
@@ -134,8 +134,8 @@ namespace Tests_LearningExtraction
         public void TestBijects_WithMismatch_ShouldReturnFalse()
         {
             // Arrange
-            var parent = new TextUnit("hello world");
-            var child = new TextDecomposition(new TextUnit("hello"), null);
+            var parent = new String("hello world");
+            var child = new TextDecomposition(new String("hello"), null);
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child });
 
             // Act
@@ -149,12 +149,12 @@ namespace Tests_LearningExtraction
         public void TestFlattened_WithNestedUnits_ShouldReturnFlatList()
         {
             // Arrange
-            var parent = new TextUnit("hello world");
-            var child1 = new TextDecomposition(new TextUnit("hello"), null);
-            var child2 = new TextDecomposition(new TextUnit(" world"), new List<TextDecomposition>
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("wor"), null), // Breaking down "world" into "wor"...
-                new TextDecomposition(new TextUnit("ld"), null)  // ...and "ld"
+                new TextDecomposition(new String("wor"), null), // Breaking down "world" into "wor"...
+                new TextDecomposition(new String("ld"), null)  // ...and "ld"
             });
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
@@ -172,12 +172,12 @@ namespace Tests_LearningExtraction
         public void TestInjects_WithNestedDecompositions_ShouldReturnTrue()
         {
             // Arrange
-            var parent = new TextUnit("I like ice cream");
-            var child1 = new TextDecomposition(new TextUnit("I like "), null);
-            var child2 = new TextDecomposition(new TextUnit("ice cream"), new List<TextDecomposition>
+            var parent = new String("I like ice cream");
+            var child1 = new TextDecomposition(new String("I like "), null);
+            var child2 = new TextDecomposition(new String("ice cream"), new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("ice"), null),
-                new TextDecomposition(new TextUnit("cream"), null)
+                new TextDecomposition(new String("ice"), null),
+                new TextDecomposition(new String("cream"), null)
             });
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
@@ -192,12 +192,12 @@ namespace Tests_LearningExtraction
         public void TestBijects_WithNestedDecompositions_ShouldReturnTrue()
         {
             // Arrange
-            var parent = new TextUnit("I like ice cream");
-            var child1 = new TextDecomposition(new TextUnit("I like "), null);
-            var child2 = new TextDecomposition(new TextUnit("ice cream"), new List<TextDecomposition>
+            var parent = new String("I like ice cream");
+            var child1 = new TextDecomposition(new String("I like "), null);
+            var child2 = new TextDecomposition(new String("ice cream"), new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("ice"), null),
-                new TextDecomposition(new TextUnit(" cream"), null)
+                new TextDecomposition(new String("ice"), null),
+                new TextDecomposition(new String(" cream"), null)
             });
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
@@ -212,13 +212,13 @@ namespace Tests_LearningExtraction
         public void TestBijects_WithOverlappingNestedDecompositions_ShouldReturnFalse()
         {
             // Arrange
-            var parent = new TextUnit("I like ice cream");
+            var parent = new String("I like ice cream");
             // Intentionally creating an overlap where "ice" is included in both child1 and child2
-            var child1 = new TextDecomposition(new TextUnit("I like ice"), null);
-            var child2 = new TextDecomposition(new TextUnit("ice cream"), new List<TextDecomposition>
+            var child1 = new TextDecomposition(new String("I like ice"), null);
+            var child2 = new TextDecomposition(new String("ice cream"), new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("ice"), null),
-                new TextDecomposition(new TextUnit(" cream"), null)
+                new TextDecomposition(new String("ice"), null),
+                new TextDecomposition(new String(" cream"), null)
             });
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
@@ -233,13 +233,13 @@ namespace Tests_LearningExtraction
         public void TestInjects_WithOverlappingNestedDecompositions_ShouldReturnFalse()
         {
             // Arrange
-            var parent = new TextUnit("I like ice cream");
+            var parent = new String("I like ice cream");
             // Intentionally creating an overlap where "ice" is included in both child1 and child2
-            var child1 = new TextDecomposition(new TextUnit("I like ice"), null);
-            var child2 = new TextDecomposition(new TextUnit("ice cream"), new List<TextDecomposition>
+            var child1 = new TextDecomposition(new String("I like ice"), null);
+            var child2 = new TextDecomposition(new String("ice cream"), new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("ice"), null),
-                new TextDecomposition(new TextUnit(" cream"), null)
+                new TextDecomposition(new String("ice"), null),
+                new TextDecomposition(new String(" cream"), null)
             });
             var decomposition = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
@@ -254,11 +254,11 @@ namespace Tests_LearningExtraction
         public void Copy_ReturnsNewInstanceWithSameTotalAndUnits()
         {
             // Arrange
-            TextUnit total = new TextUnit("Unit1Unit2");
+            String total = new String("Unit1Unit2");
             List<TextDecomposition> units = new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("Unit1"), null),
-                new TextDecomposition(new TextUnit("Unit2"), null)
+                new TextDecomposition(new String("Unit1"), null),
+                new TextDecomposition(new String("Unit2"), null)
             };
             TextDecomposition original = new TextDecomposition(total, units);
 
@@ -267,11 +267,11 @@ namespace Tests_LearningExtraction
 
             // Assert
             Assert.AreNotSame(original, copy);
-            Assert.AreEqual(original.Total.Text, copy.Total.Text);
+            Assert.AreEqual(original.Total, copy.Total);
             Assert.AreEqual(original.Decomposition.Count, copy.Decomposition.Count);
             for (int i = 0; i < original.Decomposition.Count; i++)
             {
-                Assert.AreEqual(original.Decomposition[i].Total.Text, copy.Decomposition[i].Total.Text);
+                Assert.AreEqual(original.Decomposition[i].Total, copy.Decomposition[i].Total);
             }
         }
 
@@ -279,11 +279,11 @@ namespace Tests_LearningExtraction
         public void Copy_ReturnsNewInstanceWithIndependentUnits()
         {
             // Arrange
-            TextUnit total = new TextUnit("Unit1Unit2");
+            String total = new String("Unit1Unit2");
             List<TextDecomposition> units = new List<TextDecomposition>
             {
-                new TextDecomposition(new TextUnit("Unit1"), null),
-                new TextDecomposition(new TextUnit("Unit2"), null)
+                new TextDecomposition(new String("Unit1"), null),
+                new TextDecomposition(new String("Unit2"), null)
             };
             TextDecomposition original = new TextDecomposition(total, units);
 
@@ -291,17 +291,17 @@ namespace Tests_LearningExtraction
             TextDecomposition copy = original.Copy();
 
             // Modify the units in the original
-            original.Decomposition[0] = new TextDecomposition(new TextUnit("Modified"), null);
+            original.Decomposition[0] = new TextDecomposition(new String("Modified"), null);
 
             // Assert
-            Assert.AreNotEqual(original.Decomposition[0].Total.Text, copy.Decomposition[0].Total.Text);
+            Assert.AreNotEqual(original.Decomposition[0].Total, copy.Decomposition[0].Total);
         }
 
         [TestMethod]
         public void Copy_ReturnsCopyWhenLeaf()
         {
             // Arrange
-            TextUnit total = new TextUnit("Test");
+            String total = new String("Test");
             TextDecomposition original = new TextDecomposition(total, null);
 
             // Act
@@ -315,12 +315,12 @@ namespace Tests_LearningExtraction
         public void Copy_ReturnsNewInstanceWithRecursiveUnits()
         {
             // Arrange
-            var parent = new TextUnit("hello world");
-            var child1 = new TextDecomposition(new TextUnit("hello"), null);
-            var child2 = new TextDecomposition(new TextUnit(" world"), new List<TextDecomposition>
+            var parent = new String("hello world");
+            var child1 = new TextDecomposition(new String("hello"), null);
+            var child2 = new TextDecomposition(new String(" world"), new List<TextDecomposition>
                 {
-                    new TextDecomposition(new TextUnit("wor"), null), // Breaking down "world" into "wor"...
-                    new TextDecomposition(new TextUnit("ld"), null)  // ...and "ld"
+                    new TextDecomposition(new String("wor"), null), // Breaking down "world" into "wor"...
+                    new TextDecomposition(new String("ld"), null)  // ...and "ld"
                 });
             var original = new TextDecomposition(parent, new List<TextDecomposition> { child1, child2 });
 
@@ -329,26 +329,26 @@ namespace Tests_LearningExtraction
 
             // Assert
             Assert.AreNotSame(original, copy);
-            Assert.AreEqual(original.Total.Text, copy.Total.Text);
+            Assert.AreEqual(original.Total, copy.Total);
             Assert.AreEqual(original.Decomposition.Count, copy.Decomposition.Count);
 
             // Check recursively for nested units
             Assert.AreNotSame(original.Decomposition[0], copy.Decomposition[0]);
-            Assert.AreEqual(original.Decomposition[0].Total.Text, copy.Decomposition[0].Total.Text);
+            Assert.AreEqual(original.Decomposition[0].Total, copy.Decomposition[0].Total);
             Assert.IsNull(copy.Decomposition[0].Decomposition); // Ensure "hello" is a leaf
 
             Assert.AreNotSame(original.Decomposition[1], copy.Decomposition[1]);
-            Assert.AreEqual(original.Decomposition[1].Total.Text, copy.Decomposition[1].Total.Text);
+            Assert.AreEqual(original.Decomposition[1].Total, copy.Decomposition[1].Total);
             Assert.IsNotNull(copy.Decomposition[1].Decomposition); // Ensure "world" has nested units
             Assert.AreEqual(original.Decomposition[1].Decomposition.Count, copy.Decomposition[1].Decomposition.Count);
 
             // Check recursively for nested units of "world"
             Assert.AreNotSame(original.Decomposition[1].Decomposition[0], copy.Decomposition[1].Decomposition[0]);
-            Assert.AreEqual(original.Decomposition[1].Decomposition[0].Total.Text, copy.Decomposition[1].Decomposition[0].Total.Text);
+            Assert.AreEqual(original.Decomposition[1].Decomposition[0].Total, copy.Decomposition[1].Decomposition[0].Total);
             Assert.IsNull(copy.Decomposition[1].Decomposition[0].Decomposition); // Ensure "wor" is a leaf
 
             Assert.AreNotSame(original.Decomposition[1].Decomposition[1], copy.Decomposition[1].Decomposition[1]);
-            Assert.AreEqual(original.Decomposition[1].Decomposition[1].Total.Text, copy.Decomposition[1].Decomposition[1].Total.Text);
+            Assert.AreEqual(original.Decomposition[1].Decomposition[1].Total, copy.Decomposition[1].Decomposition[1].Total);
             Assert.IsNull(copy.Decomposition[1].Decomposition[1].Decomposition); // Ensure "ld" is a leaf
         }
 

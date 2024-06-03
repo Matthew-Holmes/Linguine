@@ -101,22 +101,22 @@ namespace LearningExtraction
             // remove the overlap regions from the lhs to avoid double inclusion
             for (int i = 0; i != numberOfUnitsOverlap; i++)
             {
-                String toRemove = lhs.Decomposition.Last().Total.Text;
-                int removeIndex = lhs.Total.Text.LastIndexOf(toRemove);
+                String toRemove = lhs.Decomposition.Last().Total;
+                int removeIndex = lhs.Total.LastIndexOf(toRemove);
 
                 lhs.Decomposition.Remove(lhs.Decomposition.Last());
                 
                 lhs = new TextDecomposition(
-                    new TextUnit(lhs.Total.Text.Substring(0, removeIndex)), lhs.Decomposition);
+                    new String(lhs.Total.Substring(0, removeIndex)), lhs.Decomposition);
             }
 
             // combine the first and second
-            TextDecomposition both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Decomposition);
+            TextDecomposition both = new TextDecomposition(new String(parent.Text), lhs.Copy().Decomposition);
             both.Decomposition.AddRange(rhs.Copy().Decomposition);
 
             for (int i = 1; mustInject && !both.Injects(); i++)
             {
-                both = new TextDecomposition(new TextUnit(parent.Text), lhs.Copy().Decomposition);
+                both = new TextDecomposition(new String(parent.Text), lhs.Copy().Decomposition);
                 both.Decomposition.AddRange(rhs.Copy().Decomposition.Skip(i));
 
                 if (i == rhs.Decomposition.Count)
@@ -148,7 +148,7 @@ namespace LearningExtraction
                 bool overlap = true;
                 for (int j = 0; j != i; j++)
                 {
-                    overlap = overlap && lhs[lhs.Count - i + j].Total.Text == rhs[j].Total.Text;
+                    overlap = overlap && lhs[lhs.Count - i + j].Total == rhs[j].Total;
                 }
                 if (overlap)
                 {
@@ -167,16 +167,16 @@ namespace LearningExtraction
             // removes all we can from the RHS padding section
             // guarantees retention of all non-padding text
 
-            String remaining = new String(td.Total.Text);
+            String remaining = new String(td.Total);
             List<TextDecomposition> remainingUnits = new List<TextDecomposition>(td.Decomposition);
 
             while (remainingUnits.Count > 0)
             {
-                TextUnit unit = remainingUnits.Last().Total;
+                String unit = remainingUnits.Last().Total;
 
-                int lastIndex = remaining.LastIndexOf(unit.Text);
+                int lastIndex = remaining.LastIndexOf(unit);
 
-                if (td.Total.Text.Length - lastIndex > paddingCharacterCount)
+                if (td.Total.Length - lastIndex > paddingCharacterCount)
                 {
                     // would remove characters not in the padding
                     break;
@@ -188,7 +188,7 @@ namespace LearningExtraction
                 }
             }
 
-            return new TextDecomposition(new TextUnit(remaining), remainingUnits);
+            return new TextDecomposition(new String(remaining), remainingUnits);
         }
 
         private TextDecomposition StripStartPadding(TextDecomposition td, int paddingCharacterCount)
@@ -196,15 +196,15 @@ namespace LearningExtraction
             // removes all we can from the LHS padding section
             // guarantees retention of all non-padding text
 
-            String remaining = new String(td.Total.Text);
+            String remaining = new String(td.Total);
             int removed = 0;
             List<TextDecomposition> remainingUnits = new List<TextDecomposition>(td.Decomposition);
 
             while (remainingUnits.Count > 1)
             {
-                TextUnit unit = remainingUnits[1].Total;
+                String unit = remainingUnits[1].Total;
 
-                int firstIndex = remaining.IndexOf(unit.Text);
+                int firstIndex = remaining.IndexOf(unit);
 
                 if (firstIndex + removed > paddingCharacterCount)
                 {
@@ -219,7 +219,7 @@ namespace LearningExtraction
                 }
             }
 
-            return new TextDecomposition(new TextUnit(remaining), remainingUnits);
+            return new TextDecomposition(new String(remaining), remainingUnits);
         }
 
         public TextDecomposer()

@@ -26,7 +26,7 @@ namespace LearningExtraction
         
         public List<List<DictionaryDefinition>> GetPossibleDefinitions(TextDecomposition td)
         {
-            return td.Units.Select(u => Dictionary.TryGetDefinition(u.Text)).ToList();
+            return td.Units.Select(u => Dictionary.TryGetDefinition(u)).ToList();
         }
 
         public async Task<List<int>> IdentifyCorrectDefinitions(
@@ -44,7 +44,7 @@ namespace LearningExtraction
                     throw new ArgumentException("non-injective decomposition used, please provide an injective one");
                 }
 
-                if (td.Units.Count != injective.Units.Count || td.Total.Text != injective.Total.Text)
+                if (td.Units.Count != injective.Units.Count || td.Total != injective.Total)
                 {
                     throw new ArgumentException("provided injective decomposition does not biject with provided decomposition");
                 }
@@ -125,7 +125,7 @@ namespace LearningExtraction
                 StringBuilder builder = new StringBuilder();
 
                 builder.Append("Word: ");
-                builder.Append(td.Units[i].Text);
+                builder.Append(td.Units[i]);
                 builder.AppendLine();
 
                 builder.Append("Context: ");

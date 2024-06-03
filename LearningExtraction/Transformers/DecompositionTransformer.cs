@@ -16,11 +16,11 @@ namespace LearningExtraction
 
             // applies windowing if the prompt would be too big
 
-            String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total.Text));
+            String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total));
 
             String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines); // agent best at identifying lower --> upper, not the other way around
 
-            return TextDecomposition.FromNewLinedString(source.Total.Text, response);
+            return TextDecomposition.FromNewLinedString(source.Total, response);
         }
 
         private static async Task<String> GetCombinedResponses(AgentBase agent, string prompt, int maxCharsToProcess, int joinLines)

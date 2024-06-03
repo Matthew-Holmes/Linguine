@@ -18,11 +18,11 @@ namespace LearningExtraction
 
             // ensures that as many lines of response as in prompt
 
-            String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total.Text));
+            String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total));
 
             String response = await GetResponse(agent, prompt, maxCharsToProcess, joinLines, retry); // agent best at identifying lower --> upper, not the other way around
 
-            return TextDecomposition.FromNewLinedString(source.Total.Text, response);
+            return TextDecomposition.FromNewLinedString(source.Total, response);
         }
 
         private static bool Bijects(String prompt, String response)

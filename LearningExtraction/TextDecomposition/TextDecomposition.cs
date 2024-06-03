@@ -14,14 +14,14 @@ namespace LearningExtraction
         // a piece of text decomposed into units
         // a null value for Units means no further decomposition - an 'atom'
 
-        public TextUnit Total { get; private set; }
+        public String Total { get; private set; }
 
         public List<TextDecomposition>? Decomposition { get; private set; }
 
-        public List<TextUnit> Units => Decomposition.Select(x => x.Total).ToList();
-        public String NewLinedUnitsString => String.Join('\n', Units.Select(u => u.Text));
+        public List<String> Units => Decomposition.Select(x => x.Total).ToList();
+        public String NewLinedUnitsString => String.Join('\n', Units);
 
-        public TextDecomposition(TextUnit total, List<TextDecomposition>? decomposition)
+        public TextDecomposition(String total, List<TextDecomposition>? decomposition)
         {
             Total = total;
             Decomposition = decomposition;
@@ -29,9 +29,7 @@ namespace LearningExtraction
 
         public TextDecomposition Copy()
         {
-            TextUnit totalCopy = new TextUnit(new String(this.Total.Text));
-
-            return new TextDecomposition(totalCopy, Decomposition?.Select(unit => unit.Copy()).ToList() ?? null);
+            return new TextDecomposition(this.Total, Decomposition?.Select(unit => unit.Copy()).ToList() ?? null);
         }
 
         public bool Injects()
@@ -44,11 +42,11 @@ namespace LearningExtraction
                 return true; // base case, leaf
             }
 
-            String remaining = new String(Total.Text);
+            String remaining = Total;
 
             foreach (TextDecomposition unit in Decomposition)
             {
-                String toFind = unit.Total.Text;
+                String toFind = unit.Total;
                 if (!remaining.Contains(toFind) || !unit.Injects(/*recursion*/))
                 {
                     return false;
@@ -73,8 +71,8 @@ namespace LearningExtraction
             // if every tree level injects, then any surplus Total would have to propagate up
             // therefore can apply the pigeonhole principle
 
-            int count = Decomposition.Sum(td => td.Total.Text.Length);
-            return count == Total.Text.Length && Injects();
+            int count = Decomposition.Sum(td => td.Total.Length);
+            return count == Total.Length && Injects();
         }
 
         public TextDecomposition Flattened()
@@ -106,12 +104,12 @@ namespace LearningExtraction
 
         internal static TextDecomposition FromNewLinedString(String parent, String newLinedDecomposition)
         {
-            TextUnit total = new TextUnit(parent);
+            String total = parent;
             List<TextDecomposition> decomposition = new List<TextDecomposition>();
 
             foreach (String substring in newLinedDecomposition.Split('\n', StringSplitOptions.RemoveEmptyEntries))
             {
-                TextUnit unit = new TextUnit(substring);
+                String unit = new String(substring);
                 decomposition.Add(new TextDecomposition(unit, null)); // leaves
             }
 
@@ -119,7 +117,7 @@ namespace LearningExtraction
             {
                 return new TextDecomposition(total, null); // is a leaf
             }
-            else if (decomposition.Count == 1 && decomposition.First().Total.Text == parent)
+            else if (decomposition.Count == 1 && decomposition.First().Total == parent)
             {
                 return new TextDecomposition(total, null); // single element newLinedDecomposition bijects, is a leaf
             }

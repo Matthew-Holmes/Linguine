@@ -6,13 +6,8 @@ using System.Threading.Tasks;
 
 namespace LearningExtraction
 {
-    public class TextUnit
+    // represent
+    internal class Statement
     {
-        public String Text { get; private set; }
-
-        public TextUnit(String text)
-        {
-            Text = text;
-        }
     }
 }

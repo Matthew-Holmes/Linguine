@@ -47,7 +47,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(source.Total.Text, "Hello Bob");
+            Assert.AreEqual(source.Total, "Hello Bob");
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(result.Total.Text, "Hello Bob");
+            Assert.AreEqual(result.Total, "Hello Bob");
         }
 
         [TestMethod]
@@ -75,8 +75,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(source.Decomposition[0].Total.Text, "Hello");
-            Assert.AreEqual(source.Decomposition[1].Total.Text, "Bob");
+            Assert.AreEqual(source.Decomposition[0].Total, "Hello");
+            Assert.AreEqual(source.Decomposition[1].Total, "Bob");
         }
 
         [TestMethod]
@@ -148,8 +148,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(result.Decomposition[0].Total.Text, "hello");
-            Assert.AreEqual(result.Decomposition[1].Total.Text, "bob");
+            Assert.AreEqual(result.Decomposition[0].Total, "hello");
+            Assert.AreEqual(result.Decomposition[1].Total, "bob");
         }
 
         [TestMethod]
@@ -221,7 +221,7 @@ namespace Tests_LearningExtraction
 
             for (int i = 0; i != 100; i++)
             {
-                Assert.AreEqual(result.Decomposition[i].Total.Text, "word");
+                Assert.AreEqual(result.Decomposition[i].Total, "word");
             }
         }
 
@@ -242,7 +242,7 @@ namespace Tests_LearningExtraction
 
             for (int i = 0; i != 100; i++)
             {
-                Assert.AreEqual(source.Decomposition[i].Total.Text, "Word");
+                Assert.AreEqual(source.Decomposition[i].Total, "Word");
             }
         }
 
@@ -303,7 +303,7 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(source.Total.Text, longText);
+            Assert.AreEqual(source.Total, longText);
         }
 
         [TestMethod]
@@ -321,7 +321,8 @@ namespace Tests_LearningExtraction
 
             var result = normaliser.NormaliseCases(source).Result;
 
-            Assert.AreEqual(result.Total.Text, longText);
+            Assert.AreEqual(result.Total, longText);
+            Assert.AreEqual(result.Total, longText);
         }
 
         [TestMethod]

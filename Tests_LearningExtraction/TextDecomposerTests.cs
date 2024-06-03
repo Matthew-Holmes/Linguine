@@ -48,7 +48,7 @@ namespace Tests_LearningExtraction
             // Assert
             Assert.IsNotNull(result);
             Assert.IsNull(result.Decomposition); // should be a leaf
-            Assert.IsTrue(result.Total.Text == "Hello");
+            Assert.IsTrue(result.Total == "Hello");
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace Tests_LearningExtraction
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(textSource.Text, result.Total.Text);
+            Assert.AreEqual(textSource.Text, result.Total);
             Assert.IsTrue(result.Decomposition != null && result.Decomposition.Count > 0); // Ensure decomposition happened
             Assert.IsTrue(result.Injects()); // Check if the decomposition correctly injects
         }
