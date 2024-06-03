@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using Infrastructure;
 
 namespace LearningExtraction
 {
@@ -17,6 +18,9 @@ namespace LearningExtraction
 
         [JsonProperty("T")]
         public String Total { get; private set; }
+
+        [JsonIgnore]
+        public DictionaryDefinition? Definition { get; private set; }
 
         [JsonProperty("D")]
         public List<TextDecomposition>? Decomposition { get; private set; }
