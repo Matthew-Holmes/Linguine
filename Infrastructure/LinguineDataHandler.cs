@@ -1,3 +1,4 @@
+using Infrastructure.DataClasses;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ namespace Infrastructure
         public DbSet<VariantRoot> Variants { get; set; }
         public DbSet<TextualMedia> TextualMedia { get; set; }
         public DbSet<TextualMediaSession> TextualMediaSessions { get; set; }
+
+        public DbSet<StatementDefinitionNode> StatementDefinitions { get; set; }
 
 
         public LinguineDataHandler(String connectionString)

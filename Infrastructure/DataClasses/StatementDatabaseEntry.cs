@@ -30,7 +30,5 @@ namespace Infrastructure.DataClasses
         // compressed TextDecompositions
         public String HeadlessInjectiveDecompositionJSON { get; set; }
         public String HeadlessRootedDecompositionJSON { get; set; }
-        public int DefinitionTreeRootKey { get; set; }  
-        public DefinitionTreeNode DefinitionTreeRoot { get; set; }
     }
 }

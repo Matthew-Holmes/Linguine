@@ -20,7 +20,7 @@ namespace LearningExtraction
         public String Total { get; private set; }
 
         [JsonIgnore]
-        public DictionaryDefinition? Definition { get; private set; }
+        public DictionaryDefinition? Definition { get; set; }
 
         [JsonProperty("D")]
         public List<TextDecomposition>? Decomposition { get; private set; }
