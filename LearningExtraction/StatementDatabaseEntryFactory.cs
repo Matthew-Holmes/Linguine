@@ -32,14 +32,17 @@ namespace LearningExtraction
             {
                 StatementDatabaseEntry toAdd = new StatementDatabaseEntry();
 
-                toAdd.Previous = ret.Last()?.Item1 ?? null;
+                toAdd.Previous = ret.Count > 0 ? ret.Last().Item1 : null;
                 toAdd.FirstCharIndex = statement.FirstCharIndex;
                 toAdd.LastCharIndex = statement.LastCharIndex;
+                toAdd.Parent = statement.Parent;
 
                 if (previous is null)
                 {
                     // at the start
                     toAdd.ContextCheckpoint = statement.StatementContext;
+                    toAdd.ContextDeltaRemovalsDescendingIndex = new List<int>();
+                    toAdd.ContextDeltaInsertionsDescendingIndex = new List<Tuple<int, string>>();
                 }
                 else
                 {
@@ -56,6 +59,8 @@ namespace LearningExtraction
                 List<StatementDefinitionNode> defNodes = MakeDefinitionNodes(headlessRooted, toAdd);
 
                 ret.Add(Tuple.Create(toAdd, defNodes));
+
+                previous = statement;
             }
             return ret;
         }
