@@ -56,7 +56,7 @@ namespace LearningExtraction
                 toAdd.HeadlessInjectiveDecompositionJSON = JsonConvert.SerializeObject(headlessInjective, settings);
                 toAdd.HeadlessRootedDecompositionJSON    = JsonConvert.SerializeObject(headlessRooted, settings);
 
-                List<StatementDefinitionNode> defNodes = MakeDefinitionNodes(headlessRooted, toAdd);
+                List<StatementDefinitionNode> defNodes = MakeDefinitionNodes(statement.RootedDecomposition, toAdd);
 
                 ret.Add(Tuple.Create(toAdd, defNodes));
 

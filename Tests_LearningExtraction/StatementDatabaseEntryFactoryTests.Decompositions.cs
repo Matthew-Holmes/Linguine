@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Infrastructure.DataClasses;
 using LearningExtraction;
 using Newtonsoft.Json;
 using System;
@@ -12,6 +13,8 @@ namespace Tests_LearningExtraction
     // [TestClass] - don't need as other partial class file has this attribute
     public partial class StatementDatabaseEntryFactoryTests
     {
+        // NOTE - text decompositions that are leaves are not the standard use case
+        // but include this case as it simple
         [TestMethod]
         public void FromStatement_DecompIsLeaf_Runs()
         {
@@ -114,6 +117,112 @@ namespace Tests_LearningExtraction
 
             Assert.AreEqual(injectiveOut.Decomposition, null);
             Assert.AreEqual(rootedOut.Decomposition, null);
+        }
+
+        [TestMethod]
+        public void FromStatement_DecompIsLeaf_WithDefinition_Runs()
+        {
+            TextualMedia parentText = new TextualMedia();
+            parentText.Text = "word, another word";
+
+            TextDecomposition injective = new TextDecomposition("word", null);
+            TextDecomposition rooted = new TextDecomposition("word", null);
+
+            rooted.Definition = new DictionaryDefinition
+            {
+                Word = "word",
+                Definition = "a distinct or meaningful part of speech or writing",
+                Source = "Made up test definitions"
+            };
+
+            Statement statement = new Statement(parentText, 0, 3, "word", new List<string>(), injective, rooted);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
+        }
+
+        [TestMethod]
+        public void FromStatement_DecompIsLeaf_WithDefinition_OneInResult()
+        {
+            TextualMedia parentText = new TextualMedia();
+            parentText.Text = "word, another word";
+
+            TextDecomposition injective = new TextDecomposition("word", null);
+            TextDecomposition rooted = new TextDecomposition("word", null);
+
+            rooted.Definition = new DictionaryDefinition
+            {
+                Word = "word",
+                Definition = "a distinct or meaningful part of speech or writing",
+                Source = "Made up test definitions"
+            };
+
+            Statement statement = new Statement(parentText, 0, 3, "word", new List<string>(), injective, rooted);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
+            var defs = ret[0].Item2;
+
+            Assert.AreEqual(defs.Count, 1);
+        }
+
+        [TestMethod]
+        public void FromStatement_DecompIsLeaf_WithDefinition_ResultPropertiesMatch()
+        {
+            TextualMedia parentText = new TextualMedia();
+            parentText.Text = "word, another word";
+
+            TextDecomposition injective = new TextDecomposition("word", null);
+            TextDecomposition rooted = new TextDecomposition("word", null);
+
+            rooted.Definition = new DictionaryDefinition
+            {
+                Word = "word",
+                Definition = "a distinct or meaningful part of speech or writing",
+                Source = "Made up test definitions"
+            };
+
+            Statement statement = new Statement(parentText, 0, 3, "word", new List<string>(), injective, rooted);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
+            var defs = ret[0].Item2;
+
+            Assert.AreEqual(defs.Count, 1);
+
+            StatementDefinitionNode node = defs[0];
+
+            Assert.IsNotNull(node);
+            Assert.AreEqual(node.DictionaryDefinition.Source, "Made up test definitions");
+            Assert.AreEqual(node.DictionaryDefinition.Word, "word");
+            Assert.AreEqual(node.DictionaryDefinition.Definition, "a distinct or meaningful part of speech or writing");
+        }
+
+        [TestMethod]
+        public void FromStatement_DecompIsLeaf_WithDefinition_ResultCorrectLocationInTree()
+        {
+            TextualMedia parentText = new TextualMedia();
+            parentText.Text = "word, another word";
+
+            TextDecomposition injective = new TextDecomposition("word", null);
+            TextDecomposition rooted = new TextDecomposition("word", null);
+
+            rooted.Definition = new DictionaryDefinition
+            {
+                Word = "word",
+                Definition = "a distinct or meaningful part of speech or writing",
+                Source = "Made up test definitions"
+            };
+
+            Statement statement = new Statement(parentText, 0, 3, "word", new List<string>(), injective, rooted);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
+            var defs = ret[0].Item2;
+
+            Assert.AreEqual(defs.Count, 1);
+
+            StatementDefinitionNode node = defs[0];
+
+            Assert.IsNotNull(node);
+            Assert.AreEqual(node.IndexAtCurrentLevel, 0);
+            Assert.AreEqual(node.CurrentLevel, 0);
         }
 
 
