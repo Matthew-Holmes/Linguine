@@ -114,8 +114,9 @@ namespace LearningExtraction
                 // try to move down first
                 if (branch[level].Decomposition is not null && branch[level].Decomposition.Count != 0)
                 {
-                    if (branch.Count < level + 1)
+                    if (level == branch.Count - 1)
                     {
+                        // at the tip of the branch
                         branch.Add(null);
                         traversed.Add(0);
                         localPtrs.Add(0);
@@ -127,16 +128,18 @@ namespace LearningExtraction
                     continue;
                 }
 
-                // try to move right
-                if (localPtrs[level] < branch[localPtrs[level]].Decomposition.Count - 1)
+                // can't move down, so step right at lowest possible level up the branch
+                while (level != 0)
                 {
-                    localPtrs[level]++; traversed[level]++;
-                    branch[level] = branch[level - 1].Decomposition[localPtrs[level]];
-                    continue;
+                    // try to step right
+                    if (localPtrs[level] < branch[level - 1].Decomposition.Count - 1)
+                    {
+                        localPtrs[level]++; traversed[level]++;
+                        branch[level] = branch[level - 1].Decomposition[localPtrs[level]];
+                        break;
+                    }
+                    level--; // couldn't so go up the branch
                 }
-
-                // can't move down or right, so go up a level
-                level--;
             }
 
             return ret;
