@@ -70,6 +70,8 @@ namespace LearningExtraction
 
         private static void AddDefinitions(TextDecomposition rootedDecomp, List<StatementDefinitionNode> statementDefinitionNodes)
         {
+            if (statementDefinitionNodes.Count == 0) { return;}
+
             List<List<int>> indicesByLevel = new List<List<int>>();
             List<Queue<StatementDefinitionNode>> nodesByLevel = new List<Queue<StatementDefinitionNode>>();
 
