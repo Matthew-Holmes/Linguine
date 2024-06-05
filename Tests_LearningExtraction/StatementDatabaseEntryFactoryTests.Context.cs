@@ -2173,5 +2173,295 @@ namespace Tests_LearningExtraction
         }
 
 
+        [TestMethod]
+        public void FromStatement_MultipleStatementsNoDecompositionContextChanges_WithPrevious_Runs()
+        {
+            TextualMedia parentText = new TextualMedia();
+            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
+            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            parentText.Text = "no decomposition, but now there are multiple statements, such as this, this one, and this";
+
+            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
+            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
+
+            Statement statement1 = new Statement(
+                parentText, 0, 15,
+                "no decomposition",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective1, rooted1);
+
+            TextDecomposition injective2 = new TextDecomposition("but now there are multiple statements", null);
+            TextDecomposition rooted2 = new TextDecomposition("but now there are multiple statements", null);
+
+            Statement statement2 = new Statement(
+                parentText, 18, 49,
+                "but now there are multiple statements",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective2, rooted2);
+
+            TextDecomposition injective3 = new TextDecomposition("such as this", null);
+            TextDecomposition rooted3 = new TextDecomposition("such as this", null);
+
+            Statement statement3 = new Statement(
+                parentText, 57, 68,
+                "such as this",
+                new List<string>
+                    {
+                        "in testing code",
+                        "now testing changing context",
+                        "trailing off",
+                    },
+                injective3, rooted3);
+
+            TextDecomposition injective4 = new TextDecomposition("this one", null);
+            TextDecomposition rooted4 = new TextDecomposition("this one", null);
+
+            Statement statement4 = new Statement(
+                parentText, 71, 78,
+                "this one",
+                new List<string>
+                    {
+                        "inside a test statement",
+                        "testing changing context",
+                        "trailing off",
+                        "near the end",
+                    },
+                injective4, rooted4);
+
+            TextDecomposition injective5 = new TextDecomposition("and this", null);
+            TextDecomposition rooted5 = new TextDecomposition("and this", null);
+
+            Statement statement5 = new Statement(
+                parentText, 81, 88,
+                "and this",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1);
+        }
+
+
+        [TestMethod]
+        public void FromStatement_MultipleStatementsNoDecompositionContextChanges_WithPrevious_NoCheckpoints()
+        {
+            TextualMedia parentText = new TextualMedia();
+            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
+            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            parentText.Text = "no decomposition, but now there are multiple statements, such as this, this one, and this";
+
+            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
+            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
+
+            Statement statement1 = new Statement(
+                parentText, 0, 15,
+                "no decomposition",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective1, rooted1);
+
+            TextDecomposition injective2 = new TextDecomposition("but now there are multiple statements", null);
+            TextDecomposition rooted2 = new TextDecomposition("but now there are multiple statements", null);
+
+            Statement statement2 = new Statement(
+                parentText, 18, 49,
+                "but now there are multiple statements",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective2, rooted2);
+
+            TextDecomposition injective3 = new TextDecomposition("such as this", null);
+            TextDecomposition rooted3 = new TextDecomposition("such as this", null);
+
+            Statement statement3 = new Statement(
+                parentText, 57, 68,
+                "such as this",
+                new List<string>
+                    {
+                        "in testing code",
+                        "now testing changing context",
+                        "trailing off",
+                    },
+                injective3, rooted3);
+
+            TextDecomposition injective4 = new TextDecomposition("this one", null);
+            TextDecomposition rooted4 = new TextDecomposition("this one", null);
+
+            Statement statement4 = new Statement(
+                parentText, 71, 78,
+                "this one",
+                new List<string>
+                    {
+                        "inside a test statement",
+                        "testing changing context",
+                        "trailing off",
+                        "near the end",
+                    },
+                injective4, rooted4);
+
+            TextDecomposition injective5 = new TextDecomposition("and this", null);
+            TextDecomposition rooted5 = new TextDecomposition("and this", null);
+
+            Statement statement5 = new Statement(
+                parentText, 81, 88,
+                "and this",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1);
+
+            var entry1 = ret[0].Item1;
+            var entry2 = ret[1].Item1;
+            var entry3 = ret[2].Item1;
+            var entry4 = ret[3].Item1;
+
+            Assert.IsNull(entry1.ContextCheckpoint);
+            Assert.IsNull(entry2.ContextCheckpoint);
+            Assert.IsNull(entry3.ContextCheckpoint);
+            Assert.IsNull(entry4.ContextCheckpoint);
+        }
+
+        [TestMethod]
+        public void FromStatement_MultipleStatementsNoDecompositionContextChanges_WithPrevious_CorrectDeltas()
+        {
+            TextualMedia parentText = new TextualMedia();
+            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
+            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            parentText.Text = "no decomposition, but now there are multiple statements, such as this, this one, and this";
+
+            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
+            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
+
+            Statement statement1 = new Statement(
+                parentText, 0, 15,
+                "no decomposition",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective1, rooted1);
+
+            TextDecomposition injective2 = new TextDecomposition("but now there are multiple statements", null);
+            TextDecomposition rooted2 = new TextDecomposition("but now there are multiple statements", null);
+
+            Statement statement2 = new Statement(
+                parentText, 18, 49,
+                "but now there are multiple statements",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective2, rooted2);
+
+            TextDecomposition injective3 = new TextDecomposition("such as this", null);
+            TextDecomposition rooted3 = new TextDecomposition("such as this", null);
+
+            Statement statement3 = new Statement(
+                parentText, 57, 68,
+                "such as this",
+                new List<string>
+                    {
+                        "in testing code",
+                        "now testing changing context",
+                        "trailing off",
+                    },
+                injective3, rooted3);
+
+            TextDecomposition injective4 = new TextDecomposition("this one", null);
+            TextDecomposition rooted4 = new TextDecomposition("this one", null);
+
+            Statement statement4 = new Statement(
+                parentText, 71, 78,
+                "this one",
+                new List<string>
+                    {
+                        "inside a test statement",
+                        "testing changing context",
+                        "trailing off",
+                        "near the end",
+                    },
+                injective4, rooted4);
+
+            TextDecomposition injective5 = new TextDecomposition("and this", null);
+            TextDecomposition rooted5 = new TextDecomposition("and this", null);
+
+            Statement statement5 = new Statement(
+                parentText, 81, 88,
+                "and this",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1);
+
+            var entry1 = ret[0].Item1;
+            var entry2 = ret[1].Item1;
+            var entry3 = ret[2].Item1;
+            var entry4 = ret[3].Item1;
+
+            var insertions1 = entry1.ContextDeltaInsertionsDescendingIndex;
+            var insertions2 = entry2.ContextDeltaInsertionsDescendingIndex;
+            var insertions3 = entry3.ContextDeltaInsertionsDescendingIndex;
+            var insertions4 = entry4.ContextDeltaInsertionsDescendingIndex;
+
+            var removals1 = entry1.ContextDeltaRemovalsDescendingIndex;
+            var removals2 = entry2.ContextDeltaRemovalsDescendingIndex;
+            var removals3 = entry3.ContextDeltaRemovalsDescendingIndex;
+            var removals4 = entry4.ContextDeltaRemovalsDescendingIndex;
+
+            Assert.AreEqual(insertions1.Count, 0);
+            Assert.AreEqual(removals1.Count, 0);
+
+            Assert.AreEqual(removals2.Count, 1);
+            Assert.AreEqual(removals2[0], 1);
+            Assert.AreEqual(insertions2.Count, 2);
+            Assert.AreEqual(insertions2[0].Item1, 1);
+            Assert.AreEqual(insertions2[0].Item2, "trailing off");
+            Assert.AreEqual(insertions2[1].Item1, 1);
+            Assert.AreEqual(insertions2[1].Item2, "now testing changing context");
+
+
+            Assert.AreEqual(removals3.Count, 2);
+            Assert.AreEqual(removals3[0], 1);
+            Assert.AreEqual(removals3[1], 0);
+            Assert.AreEqual(insertions3.Count, 3);
+            Assert.AreEqual(insertions3[0].Item1, 1);
+            Assert.AreEqual(insertions3[0].Item2, "near the end");
+            Assert.AreEqual(insertions3[1].Item1, 0);
+            Assert.AreEqual(insertions3[1].Item2, "testing changing context");
+            Assert.AreEqual(insertions3[2].Item1, 0);
+            Assert.AreEqual(insertions3[2].Item2, "inside a test statement");
+
+            Assert.AreEqual(insertions4.Count, 0);
+            Assert.AreEqual(removals4.Count, 4);
+            Assert.AreEqual(removals4[0], 3);
+            Assert.AreEqual(removals4[1], 2);
+            Assert.AreEqual(removals4[2], 1);
+            Assert.AreEqual(removals4[3], 0);
+        }
+
     }
 }
