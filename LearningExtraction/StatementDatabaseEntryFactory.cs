@@ -155,7 +155,7 @@ namespace LearningExtraction
                 tmp.RemoveAt(x);
             }
 
-            int diff = statement.StatementContext.Count - previous.StatementContext.Count;
+            int diff = statement.StatementContext.Count - tmp.Count;
             int applied = 0;
 
             for (int i = statement.StatementContext.Count - 1; i >= 0; i--)

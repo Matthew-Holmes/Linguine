@@ -1835,5 +1835,54 @@ namespace Tests_LearningExtraction
 
         }
 
+        [TestMethod]
+        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextSwapsLastOne_CorrectDeltas()
+        {
+            TextualMedia parentText = new TextualMedia();
+            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
+            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            parentText.Text = "no decomposition, and now something unrelated";
+
+            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
+            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
+
+            Statement statement1 = new Statement(
+                parentText, 0, 15,
+                "no decomposition",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective1, rooted1);
+
+            TextDecomposition injective2 = new TextDecomposition("and now something unrelated", null);
+            TextDecomposition rooted2 = new TextDecomposition("and now something unrelated", null);
+
+            Statement statement2 = new Statement(
+                parentText, 18, 44,
+                "and now something unrelated",
+                new List<string>
+                {
+                    "in testing code",
+                    "testing context changing"
+                },
+                injective2, rooted2);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement1, statement2 }, null);
+
+            var entry2 = ret[1].Item1;
+
+            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex.Count, 1);
+            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex[0], 1);
+
+            Assert.AreEqual(entry2.ContextDeltaInsertionsDescendingIndex.Count, 1);
+            Assert.AreEqual(entry2.ContextDeltaInsertionsDescendingIndex[0].Item1, 1);
+            Assert.AreEqual(entry2.ContextDeltaInsertionsDescendingIndex[0].Item2, "testing context changing");
+
+        }
+
+
     }
 }
