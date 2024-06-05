@@ -155,11 +155,16 @@ namespace LearningExtraction
                 tmp.RemoveAt(x);
             }
 
+            int diff = statement.StatementContext.Count - previous.StatementContext.Count;
+            int applied = 0;
+
             for (int i = statement.StatementContext.Count - 1; i >= 0; i--)
             {
                 if (!previous.StatementContext.Contains(statement.StatementContext[i]))
                 {
-                    ret.Add(Tuple.Create(i, statement.StatementContext[i]));
+                    int pos = i - (diff - 1) + applied;
+                    ret.Add(Tuple.Create(pos, statement.StatementContext[i]));
+                    applied++;
                 }
             }
 
