@@ -137,8 +137,18 @@ namespace LearningExtraction
                     continue;
                 }
 
-                // can't move down or right, so go up a level
-                level--;
+                // can't move down, so step right at lowest possible level up the branch
+                while (level != 0)
+                {
+                    // try to step right
+                    if (localPtrs[level] < branch[level - 1].Decomposition.Count - 1)
+                    {
+                        localPtrs[level]++;
+                        branch[level] = branch[level - 1].Decomposition[localPtrs[level]];
+                        break;
+                    }
+                    level--; // couldn't so go up the branch
+                }
             }
         }
 
