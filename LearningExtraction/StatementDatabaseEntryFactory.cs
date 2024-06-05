@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security;
 using System.Text;
@@ -11,7 +12,7 @@ namespace LearningExtraction
 {
     public static class StatementDatabaseEntryFactory
     {
-        public static List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> FromStatements(List<Statement> statements, Statement? previous)
+        public static List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> FromStatements(List<Statement> statements, Statement? previous, StatementDatabaseEntry? previousEntry = null)
         {
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> ret 
                 = new List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>>();
@@ -19,6 +20,11 @@ namespace LearningExtraction
             if (statements.Select(s => s.Parent).Distinct().Count() > 1)
             {
                 throw new ArgumentException("multiple textual medias used!");
+            }
+
+            if (previous is not null && previousEntry is null)
+            {
+                throw new ArgumentException("if providing a previous statement, must provide the previous entry too");
             }
 
             Statement? prev = previous;
@@ -32,7 +38,7 @@ namespace LearningExtraction
             {
                 StatementDatabaseEntry toAdd = new StatementDatabaseEntry();
 
-                toAdd.Previous = ret.Count > 0 ? ret.Last().Item1 : null;
+                toAdd.Previous = ret.Count > 0 ? ret.Last().Item1 : previousEntry;
                 toAdd.FirstCharIndex = statement.FirstCharIndex;
                 toAdd.LastCharIndex = statement.LastCharIndex;
                 toAdd.Parent = statement.Parent;

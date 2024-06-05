@@ -2248,8 +2248,10 @@ namespace Tests_LearningExtraction
                 },
                 injective5, rooted5);
 
+            StatementDatabaseEntry previousEntry = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement1 }, null)[0].Item1; // begin the chain
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1);
+                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1, previousEntry);
         }
 
 
@@ -2327,8 +2329,10 @@ namespace Tests_LearningExtraction
                 },
                 injective5, rooted5);
 
+            StatementDatabaseEntry previousEntry = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement1 }, null)[0].Item1; // begin the chain
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1);
+                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1, previousEntry);
 
             var entry1 = ret[0].Item1;
             var entry2 = ret[1].Item1;
@@ -2415,8 +2419,11 @@ namespace Tests_LearningExtraction
                 },
                 injective5, rooted5);
 
+
+            StatementDatabaseEntry previousEntry = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement1 }, null)[0].Item1; // begin the chain
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1);
+                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1, previousEntry);
 
             var entry1 = ret[0].Item1;
             var entry2 = ret[1].Item1;
