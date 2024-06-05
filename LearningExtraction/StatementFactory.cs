@@ -187,6 +187,10 @@ namespace LearningExtraction
 
                 // replay the changes
                 
+                foreach(int x in info.Item1.ContextDeltaRemovalsDescendingIndex)
+                {
+                    toAdd.RemoveAt(x);
+                }
 
                 foreach(Tuple<int, String> t in info.Item1.ContextDeltaInsertionsDescendingIndex)
                 {
