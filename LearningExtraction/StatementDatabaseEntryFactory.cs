@@ -118,7 +118,7 @@ namespace LearningExtraction
                     {
                         // at the tip of the branch
                         branch.Add(null);
-                        traversed.Add(0);
+                        traversed.Add(-1);
                         localPtrs.Add(0);
                     }
 
