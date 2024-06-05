@@ -14,7 +14,7 @@ namespace Tests_LearningExtraction
     public partial class StatementDatabaseEntryFactoryTests
     {
         [TestMethod]
-        public void FromStatement_NoPreviousNoDecompositionNoContext_Runs()
+        public void FromStatement_NoContext_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -28,7 +28,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_NoPreviousNoDecompositionNoContext_CopiesRequiredData()
+        public void FromStatement_NoContext_CopiesRequiredData()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -50,7 +50,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_NoPreviousNoDecompositionNoContext_EmptyPropertiesAreEmpty()
+        public void FromStatement_NoContext_EmptyPropertiesAreEmpty()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -76,7 +76,7 @@ namespace Tests_LearningExtraction
             Assert.IsNull(entry.Previous);
         }
 
-        public void FromStatement_NoPreviousNoDecompositionWithContext_Runs()
+        public void FromStatement_WithContext_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -98,7 +98,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_NoPreviousNoDecompositionWithContext_SetsContextCheckpoint()
+        public void FromStatement_WithContext_SetsContextCheckpoint()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -128,7 +128,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_NoPreviousNoDecompositionWithContext_NoDeltas()
+        public void FromStatement_WithContext_NoDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -155,7 +155,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_NoPreviousNoDecompositionWithContext_EmptyPropertiesAreEmpty()
+        public void FromStatement_WithContext_EmptyPropertiesAreEmpty()
         {
             TextualMedia parentText = new TextualMedia();
             parentText.Text = "no decomposition";
@@ -183,7 +183,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionWithoutContextChanging_Runs()
+        public void FromStatement_TwoStatementsNoDecompositionWithoutContextChanging_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------00000000001111111111222222222233333333334444444444
@@ -222,7 +222,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionWithoutContextChanging_FirstHasCheckpoint()
+        public void FromStatement_TwoStatementsNoDecompositionWithoutContextChanging_FirstHasCheckpoint()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------00000000001111111111222222222233333333334444444444
@@ -266,7 +266,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionWithoutContextChanging_FirstHasNoDeltas()
+        public void FromStatement_TwoStatementsNoDecompositionWithoutContextChanging_FirstHasNoDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------00000000001111111111222222222233333333334444444444
@@ -308,7 +308,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionWithoutContextChanging_SecondHasNoCheckpoint()
+        public void FromStatement_TwoStatementsNoDecompositionWithoutContextChanging_SecondHasNoCheckpoint()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------00000000001111111111222222222233333333334444444444
@@ -349,7 +349,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionWithoutContextChanging_SecondHasNoDeltas()
+        public void FromStatement_TwoStatementsNoDecompositionWithoutContextChanging_SecondHasNoDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------00000000001111111111222222222233333333334444444444
@@ -391,7 +391,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionWithoutContextChanging_Runs()
+        public void FromStatement_MultipleStatementsNoDecompositionWithoutContextChanging_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -468,7 +468,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionWithoutContextChanging_FirstHasCheckpoint()
+        public void FromStatement_MultipleStatementsNoDecompositionWithoutContextChanging_FirstHasCheckpoint()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -552,7 +552,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionWithoutContextChanging_NoDeltas()
+        public void FromStatement_MultipleStatementsNoDecompositionWithoutContextChanging_NoDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -644,7 +644,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_Runs()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -680,7 +680,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_FirstCheckpoints()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_FirstCheckpoints()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -723,7 +723,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_SecondNoCheckpoints()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_SecondNoCheckpoints()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -764,7 +764,7 @@ namespace Tests_LearningExtraction
 
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_SecondTwoRemovals()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_SecondTwoRemovals()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -805,7 +805,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_RemovalsDescending()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_RemovalsDescending()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -852,7 +852,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_RemovalsCorrect()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_RemovalsCorrect()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -895,7 +895,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesAllGone_NoInsertions()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_NoInsertions()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -935,7 +935,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesLastOneGone_Runs()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesLastOneGone_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -975,7 +975,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesLastOneGone_FirstCheckpoint()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesLastOneGone_FirstCheckpoint()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1019,7 +1019,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesLastOneGone_SecondNoCheckpoint()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesLastOneGone_SecondNoCheckpoint()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1060,7 +1060,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesLastOneGone_RemovalsCorrect()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesLastOneGone_RemovalsCorrect()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1103,7 +1103,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextChangesFirstOneGone_RemovalsCorrect()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesFirstOneGone_RemovalsCorrect()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1146,7 +1146,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextChangesDestructivelyA_CorrectCheckpoints()
+        public void FromStatement_MultipleStatementsNoDecompositionContextChangesDestructivelyA_CorrectCheckpoints()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1235,7 +1235,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextChangesDestructivelyA_CorrectRemovals()
+        public void FromStatement_MultipleStatementsNoDecompositionContextChangesDestructivelyA_CorrectRemovals()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1331,7 +1331,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextChangesDestructivelyB_CorrectRemovals()
+        public void FromStatement_MultipleStatementsNoDecompositionContextChangesDestructivelyB_CorrectRemovals()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1427,7 +1427,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextInsertions_Runs()
+        public void FromStatement_MultipleStatementsNoDecompositionContextInsertions_Runs()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1517,7 +1517,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextInsertions_CorrectCheckpoints()
+        public void FromStatement_MultipleStatementsNoDecompositionContextInsertions_CorrectCheckpoints()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1616,7 +1616,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextInsertions_CorrectInsertions()
+        public void FromStatement_MultipleStatementsNoDecompositionContextInsertions_CorrectInsertions()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1721,7 +1721,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextIntraInsertions_CorrectInsertions()
+        public void FromStatement_MultipleStatementsNoDecompositionContextIntraInsertions_CorrectInsertions()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1836,7 +1836,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextSwapsLastOne_CorrectDeltas()
+        public void FromStatement_TwoStatementsNoDecompositionContextSwapsLastOne_CorrectDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1884,7 +1884,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextSwapsFirstOne_CorrectDeltas()
+        public void FromStatement_TwoStatementsNoDecompositionContextSwapsFirstOne_CorrectDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1932,7 +1932,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextSwapsMiddleOne_CorrectDeltas()
+        public void FromStatement_TwoStatementsNoDecompositionContextSwapsMiddleOne_CorrectDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -1983,7 +1983,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoPreviousNoDecompositionContextSwapsAll_CorrectDeltas()
+        public void FromStatement_TwoStatementsNoDecompositionContextSwapsAll_CorrectDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -2044,7 +2044,7 @@ namespace Tests_LearningExtraction
         }
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoPreviousNoDecompositionContextChanges_CorrectDeltas()
+        public void FromStatement_MultipleStatementsNoDecompositionContextChanges_CorrectDeltas()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
