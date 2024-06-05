@@ -1,5 +1,4 @@
 ﻿using Infrastructure;
-using Infrastructure.DataClasses;
 using LearningExtraction;
 using System;
 using System.Collections.Generic;
@@ -1311,6 +1310,8 @@ namespace Tests_LearningExtraction
             var entry3 = ret[2].Item1;
             var entry4 = ret[3].Item1;
             var entry5 = ret[4].Item1;
+
+            //StatementDatabaseEntry
 
             var removals1 = entry1.ContextDeltaRemovalsDescendingIndex;
             var removals2 = entry2.ContextDeltaRemovalsDescendingIndex;

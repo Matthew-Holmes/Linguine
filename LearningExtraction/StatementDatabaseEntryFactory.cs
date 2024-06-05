@@ -1,4 +1,4 @@
-﻿using Infrastructure.DataClasses;
+﻿using Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

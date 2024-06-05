@@ -1,5 +1,4 @@
 ﻿using Infrastructure;
-using Infrastructure.DataClasses;
 using LearningExtraction;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;

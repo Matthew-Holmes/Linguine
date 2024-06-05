@@ -1,5 +1,4 @@
 ﻿using Infrastructure;
-using Infrastructure.DataClasses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Azure;

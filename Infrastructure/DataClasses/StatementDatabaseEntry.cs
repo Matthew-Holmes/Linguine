@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.DataClasses
+namespace Infrastructure
 {
     public class StatementDatabaseEntry
     {

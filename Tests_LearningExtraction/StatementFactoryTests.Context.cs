@@ -29,7 +29,7 @@ namespace Tests_LearningExtraction
             var reret = StatementFactory.FromDatabaseEntries(ret);
         }
 
-        /*
+        
 
         [TestMethod]
         public void FromDatabaseEntries_NoContext_CopiesRequiredData()
@@ -51,7 +51,11 @@ namespace Tests_LearningExtraction
             Assert.AreEqual(entry.Parent, parentText);
             Assert.AreEqual(entry.FirstCharIndex, 0);
             Assert.AreEqual(entry.LastCharIndex, 15);
+
+            var reret = StatementFactory.FromDatabaseEntries(ret.ToList());
         }
+
+        /*
 
         [TestMethod]
         public void FromDatabaseEntries_NoContext_EmptyPropertiesAreEmpty()
