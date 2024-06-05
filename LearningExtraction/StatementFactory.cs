@@ -18,17 +18,16 @@ namespace LearningExtraction
     internal static class StatementFactory
     {
         public static List<Statement> FromDatabaseEntries(
-            List<StatementDatabaseEntry> databaseEntries,
-            List<List<StatementDefinitionNode>> definitions)
+            List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> entries)
         {
-            if (databaseEntries.Count == 0)
+            if (entries.Count == 0)
             {
                 return new List<Statement>();
             }
 
-            Verify(databaseEntries, definitions);
+            Verify(entries);
 
-            List<List<String>> contexts = BuildContexts(databaseEntries);
+            List<List<String>> contexts = BuildContexts(entries);
 
             JsonSerializerSettings settings = new JsonSerializerSettings
             {
@@ -39,7 +38,7 @@ namespace LearningExtraction
 
             for(int i = 0; i < contexts.Count; i++)
             {
-                StatementDatabaseEntry entry = databaseEntries[i];
+                StatementDatabaseEntry entry = entries[i].Item1;
 
                 String statement = entry.Parent.Text.Substring(
                     entry.FirstCharIndex,
@@ -59,7 +58,7 @@ namespace LearningExtraction
                 TextDecomposition injectiveDecomp = new TextDecomposition(statement, injectiveDecompTmp.Decomposition);
                 TextDecomposition rootedDecomp    = new TextDecomposition(statement, rootedDecompTmp.Decomposition);
 
-                AddDefinitions(rootedDecomp, definitions[i]);
+                AddDefinitions(rootedDecomp, entries[i].Item2);
 
                 Statement toAdd = new Statement(entry.Parent, entry.FirstCharIndex, entry.LastCharIndex, statement, contexts[i], injectiveDecomp, rootedDecomp);
 
@@ -153,37 +152,32 @@ namespace LearningExtraction
         }
 
 
-        private static void Verify(List<StatementDatabaseEntry> databaseEntries,
-            List<List<StatementDefinitionNode>> definitions)
+        private static void Verify(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> entries)
         {
-            bool listIncludesFirstStatement = databaseEntries.First().Previous is null;
-            bool firstStatementHasContextCheckpoint = databaseEntries.First().ContextCheckpoint != null;
+            bool listIncludesFirstStatement = entries.First().Item1.Previous is null;
+            bool firstStatementHasContextCheckpoint = entries.First().Item1.ContextCheckpoint != null;
 
             if (!listIncludesFirstStatement || !firstStatementHasContextCheckpoint)
             {
                 throw new ArgumentException("can't resolve contexts without a checkpoint!");
             }
-
-            if (databaseEntries.Count != definitions.Count)
-            {
-                throw new ArgumentException("number of definition sets don't match number of database entries");
-            }
         }
 
-        private static List<List<String>> BuildContexts(List<StatementDatabaseEntry> databaseEntries)
+        private static List<List<String>> BuildContexts(
+            List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> entries)
         {
             List<List<String>> contexts = new List<List<String>>();
 
-            List<String> initialContext = databaseEntries.First().ContextCheckpoint ?? new List<String>();
+            List<String> initialContext = entries.First().Item1.ContextCheckpoint ?? new List<String>();
             contexts.Add(initialContext);
 
-            foreach (StatementDatabaseEntry databaseEntry in databaseEntries.Skip(1))
+            foreach (Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> info in entries.Skip(1))
             {
-                if (!IsDescending(databaseEntry.ContextDeltaRemovalsDescendingIndex))
+                if (!IsDescending(info.Item1.ContextDeltaRemovalsDescendingIndex))
                 {
                     throw new ArgumentException("Invalid removal delta indices");
                 }
-                if (!IsDescending(databaseEntry.ContextDeltaInsertionsDescendingIndex.Select(t => t.Item1).ToList()))
+                if (!IsDescending(info.Item1.ContextDeltaInsertionsDescendingIndex.Select(t => t.Item1).ToList()))
                 {
                     throw new ArgumentException("Invalid insertion delta indices");
                 }
@@ -193,7 +187,7 @@ namespace LearningExtraction
                 // replay the changes
                 
 
-                foreach(Tuple<int, String> t in databaseEntry.ContextDeltaInsertionsDescendingIndex)
+                foreach(Tuple<int, String> t in info.Item1.ContextDeltaInsertionsDescendingIndex)
                 {
                     toAdd.Insert(t.Item1, t.Item2);
                 }
