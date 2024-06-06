@@ -12,7 +12,7 @@ namespace LearningExtraction
 {
     public static class StatementDatabaseEntryFactory
     {
-        public static List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> FromStatements(List<Statement> statements, Statement? previous, StatementDatabaseEntry? previousEntry = null)
+        public static List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> FromStatements(List<Statement> statements, Statement? previous, StatementDatabaseEntry? previousEntry = null, int contextualiseEvery = 50)
         {
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> ret 
                 = new List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>>();
@@ -34,8 +34,12 @@ namespace LearningExtraction
                 NullValueHandling = NullValueHandling.Ignore
             };
 
+            int cnt = 0;
+
             foreach (Statement statement in statements)
             {
+                cnt++;
+
                 StatementDatabaseEntry toAdd = new StatementDatabaseEntry();
 
                 toAdd.Previous = ret.Count > 0 ? ret.Last().Item1 : previousEntry;
@@ -43,7 +47,7 @@ namespace LearningExtraction
                 toAdd.LastCharIndex = statement.LastCharIndex;
                 toAdd.Parent = statement.Parent;
 
-                if (previous is null)
+                if (previous is null || cnt % contextualiseEvery == 0)
                 {
                     // at the start
                     toAdd.ContextCheckpoint = statement.StatementContext;

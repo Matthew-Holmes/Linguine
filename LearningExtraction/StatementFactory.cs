@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace LearningExtraction
 {
-    internal static class StatementFactory
+    public static class StatementFactory
     {
         public static List<Statement> FromDatabaseEntries(
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> entries)
@@ -166,6 +166,11 @@ namespace LearningExtraction
 
             foreach (Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> info in entries.Skip(1))
             {
+                if (info.Item1.ContextCheckpoint is not null)
+                {
+                    contexts.Add(info.Item1.ContextCheckpoint); continue;
+                }
+
                 if (!IsDescending(info.Item1.ContextDeltaRemovalsDescendingIndex))
                 {
                     throw new ArgumentException("Invalid removal delta indices");
