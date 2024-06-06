@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ExternalMedia\ExternalMedia.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\LearningExtraction\LearningExtraction.csproj" />
     <ProjectReference Include="..\UserInputInterfaces\UserInputInterfaces.csproj" />
   </ItemGroup>
 
