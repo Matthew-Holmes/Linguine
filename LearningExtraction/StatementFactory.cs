@@ -106,9 +106,10 @@ namespace LearningExtraction
 
             if (indicesByLevel.Count == 1)
             {
-                return;
+                return; // means that there must be a level below this
             }
 
+            branch[1] = rootedDecomp.Decomposition.FirstOrDefault();
             level++; ptrs[1] = 0;
 
             while (level != 0)
@@ -128,22 +129,13 @@ namespace LearningExtraction
                     continue;
                 }
 
-                // try to move right
-                localPtrs[level]++;
-                if (branch[level-1].Decomposition.Count < localPtrs[level])
-                {
-                    ptrs[level]++;
-                    branch[level] = branch[level - 1].Decomposition[localPtrs[level]];
-                    continue;
-                }
-
                 // can't move down, so step right at lowest possible level up the branch
                 while (level != 0)
                 {
                     // try to step right
                     if (localPtrs[level] < branch[level - 1].Decomposition.Count - 1)
                     {
-                        localPtrs[level]++;
+                        localPtrs[level]++; ptrs[level]++;
                         branch[level] = branch[level - 1].Decomposition[localPtrs[level]];
                         break;
                     }
