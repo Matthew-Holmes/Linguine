@@ -76,6 +76,11 @@ namespace Linguine
             return b;
         }
 
+        internal int GetCursor(int sessionID)
+        {
+            return GetSessionFromID(sessionID)?.Cursor ?? 0;
+        }
+
         internal bool CursorMoved(int sessionID, int newCursor)
         {
             var session = GetSessionFromID(sessionID);

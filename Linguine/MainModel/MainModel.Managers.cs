@@ -13,6 +13,7 @@ namespace Linguine
         private ExternalDictionaryManager? _externalDictionaryManager;
         private VariantsManager? _variantsManager;
         private TextualMediaSessionManager? _textualMediaSessionManager;
+        private StatementDatabaseEntryManager? _statementDatabaseEntryManager;
 
         private void LoadManagers()
         {
@@ -20,6 +21,7 @@ namespace Linguine
             _textualMediaManager = new TextualMediaManager(Linguine);
             _textualMediaSessionManager = new TextualMediaSessionManager(Linguine);
             _variantsManager = new VariantsManager(Linguine);
+            _statementDatabaseEntryManager = new StatementDatabaseEntryManager(Linguine);
         }
 
         public TextualMediaManager? TextualMediaManager
@@ -73,6 +75,21 @@ namespace Linguine
                 if (StartupComplete)
                 {
                     return _textualMediaSessionManager;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        private StatementDatabaseEntryManager? StatementDatabaseEntryManager
+        {
+            get
+            {
+                if (StartupComplete)
+                {
+                    return _statementDatabaseEntryManager;
                 }
                 else
                 {

@@ -68,10 +68,7 @@ namespace Linguine
             }
         }
 
-        internal int GetCursor(int sessionID)
-        {
-            return GetSessionFromID(sessionID)?.Cursor ?? 0;
-        }
+
 
 
 
