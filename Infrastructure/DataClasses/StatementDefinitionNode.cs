@@ -19,6 +19,6 @@ namespace Infrastructure
         public DictionaryDefinition? DictionaryDefinition { get; set; } // null if no definition here
 
         public int StatementKey { get; set; }
-        public StatementDatabaseEntry? StatementDatabaseEntry { get; set; }
+        public StatementDatabaseEntry StatementDatabaseEntry { get; set; }
     }
 }
