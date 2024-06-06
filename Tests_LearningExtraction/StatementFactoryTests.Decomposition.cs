@@ -262,7 +262,7 @@ namespace Tests_LearningExtraction
             Assert.AreEqual(reret[0].RootedDecomposition.Decomposition[3].Definition.Word, "decomposition");
         }
 
-       /*
+       
       
 
         [TestMethod]
@@ -319,6 +319,8 @@ namespace Tests_LearningExtraction
             var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
             var reret = StatementFactory.FromDatabaseEntries(ret);
         }
+
+        
 
         [TestMethod]
         public void FromDatabaseEntries_DecompHasMultipleLevels_DecompReturns()
@@ -380,152 +382,10 @@ namespace Tests_LearningExtraction
             Assert.AreEqual(reret[0].InjectiveDecomposition.Flattened().Units.Count, injective.Flattened().Units.Count());
             Assert.AreEqual(reret[0].RootedDecomposition.Flattened().Units.Count, rooted.Flattened().Units.Count());
         }
-        /*
+        
 
-        [TestMethod]
-        public void FromDatabaseEntries_DecompHasMultipleLevels_JSONsAreHeadless()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------0000000000111111111122222222223333333333
-            //-----------------0123456789012345678901234567890123456789
-            parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
-
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
-                "brother-in-law", "brother\nin\nlaw");
-
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
-                "doesn't", "does\nn't");
-
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
-                "hot dogs", "hot\ndogs");
-
-            TextDecomposition injective = new TextDecomposition(parentText.Text,
-                new List<TextDecomposition>
-                {
-                    new TextDecomposition("My", null),
-                    injectiveA,
-                    injectiveB,
-                    new TextDecomposition("like", null),
-                    injectiveC
-                });
-
-
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
-               "brother-in-law", "brother\nin\nlaw");
-
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
-                "doesn't", "does\nnot");
-
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
-                "hot dog", "hot\ndog");
-
-            TextDecomposition rooted = new TextDecomposition(parentText.Text,
-                new List<TextDecomposition>
-                {
-                    new TextDecomposition("my", null),
-                    rootedA,
-                    rootedB,
-                    new TextDecomposition("like", null),
-                    rootedC
-                });
-
-
-
-            Statement statement = new Statement(parentText, 0, 38, "My brother-in-law doesn't like hot dogs", new List<string>(), injective, rooted);
-
-            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
-            var entry = ret[0].Item1;
-
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
-            TextDecomposition? injectiveOut = JsonConvert.DeserializeObject<TextDecomposition>(entry.HeadlessInjectiveDecompositionJSON, settings);
-
-            TextDecomposition? rootedOut = JsonConvert.DeserializeObject<TextDecomposition>(entry.HeadlessRootedDecompositionJSON, settings);
-
-            Assert.IsNotNull(injectiveOut);
-            Assert.IsNotNull(rootedOut);
-            Assert.AreEqual(injectiveOut.Total, "");
-            Assert.AreEqual(rootedOut.Total, "");
-        }
-
-        [TestMethod]
-        public void FromDatabaseEntries_DecompHasMultipleLevels_JSONsMatchOtherThanTotal()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------0000000000111111111122222222223333333333
-            //-----------------0123456789012345678901234567890123456789
-            parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
-
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
-                "brother-in-law", "brother\nin\nlaw");
-
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
-                "doesn't", "does\nn't");
-
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
-                "hot dogs", "hot\ndogs");
-
-            TextDecomposition injective = new TextDecomposition(parentText.Text,
-                new List<TextDecomposition>
-                {
-                    new TextDecomposition("My", null),
-                    injectiveA,
-                    injectiveB,
-                    new TextDecomposition("like", null),
-                    injectiveC
-                });
-
-
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
-               "brother-in-law", "brother\nin\nlaw");
-
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
-                "doesn't", "does\nnot");
-
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
-                "hot dog", "hot\ndog");
-
-            TextDecomposition rooted = new TextDecomposition(parentText.Text,
-                new List<TextDecomposition>
-                {
-                    new TextDecomposition("my", null),
-                    rootedA,
-                    rootedB,
-                    new TextDecomposition("like", null),
-                    rootedC
-                });
-
-
-
-            Statement statement = new Statement(parentText, 0, 38, "My brother-in-law doesn't like hot dogs", new List<string>(), injective, rooted);
-
-            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
-            var entry = ret[0].Item1;
-
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
-            TextDecomposition? injectiveOut = JsonConvert.DeserializeObject<TextDecomposition>(entry.HeadlessInjectiveDecompositionJSON, settings);
-
-            TextDecomposition? rootedOut = JsonConvert.DeserializeObject<TextDecomposition>(entry.HeadlessRootedDecompositionJSON, settings);
-
-            Assert.IsNotNull(injectiveOut);
-            Assert.IsNotNull(rootedOut);
-            Assert.AreEqual(injectiveOut.Decomposition.Count, 5);
-            Assert.AreEqual(rootedOut.Decomposition.Count, 5);
-
-            Assert.AreEqual(injectiveOut.Decomposition[1].Decomposition.Count, 3);
-            Assert.AreEqual(rootedOut.Decomposition[1].Decomposition.Count, 3);
-
-            Assert.AreEqual(injectiveOut.Decomposition[1].Decomposition[0].Total, "brother");
-            Assert.AreEqual(rootedOut.Decomposition[1].Decomposition[0].Total, "brother");
-        }
-
+     
+      
         [TestMethod]
         public void FromDatabaseEntries_DecompHasMultipleLevelsWithDefinitions_Runs()
         {
@@ -618,12 +478,12 @@ namespace Tests_LearningExtraction
             Statement statement = new Statement(parentText, 0, 38, "My brother-in-law doesn't like hot dogs", new List<string>(), injective, rooted);
 
             var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
-            var defs = ret[0].Item2;
+            var reret = StatementFactory.FromDatabaseEntries(ret);
         }
 
 
         [TestMethod]
-        public void FromDatabaseEntries_DecompHasMultipleLevelsWithDefinitions_CorrectNumberReturned()
+        public void FromDatabaseEntries_DecompHasMultipleLevelsWithDefinitions_DefinitionsAdded()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------0000000000111111111122222222223333333333
@@ -714,137 +574,30 @@ namespace Tests_LearningExtraction
             Statement statement = new Statement(parentText, 0, 38, "My brother-in-law doesn't like hot dogs", new List<string>(), injective, rooted);
 
             var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
-            var defs = ret[0].Item2;
-
-            Assert.AreEqual(defs.Count, 6);
-        }
-
-        [TestMethod]
-        public void FromDatabaseEntries_DecompHasMultipleLevelsWithDefinitions_CorrectIndices()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------0000000000111111111122222222223333333333
-            //-----------------0123456789012345678901234567890123456789
-            parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
-
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
-                "brother-in-law", "brother\nin\nlaw");
-
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
-                "doesn't", "does\nn't");
-
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
-                "hot dogs", "hot\ndogs");
-
-            TextDecomposition injective = new TextDecomposition(parentText.Text,
-                new List<TextDecomposition>
-                {
-                    new TextDecomposition("My", null),
-                    injectiveA,
-                    injectiveB,
-                    new TextDecomposition("like", null),
-                    injectiveC
-                });
-
-
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
-               "brother-in-law", "brother\nin\nlaw");
-
-            rootedA.Definition = new DictionaryDefinition
-            {
-                Word = "brother-in-law",
-                Definition = "spouses male sibling, or siblings husband",
-                Source = "definitions I made up"
-            };
-
-            rootedA.Decomposition[0].Definition = new DictionaryDefinition
-            {
-                Word = "brother",
-                Definition = "male sibling",
-                Source = "definitions I made up"
-            };
-
-            rootedA.Decomposition[2].Definition = new DictionaryDefinition
-            {
-                Word = "law",
-                Definition = "a system of rules backed up by a court or authority",
-                Source = "definitions I made up"
-            };
-
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
-                "doesn't", "does\nnot");
-
-            rootedB.Decomposition[1].Definition = new DictionaryDefinition
-            {
-                Word = "not",
-                Definition = "word indicating negation",
-                Source = "definitions I made up"
-            };
-
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
-                "hot dog", "hot\ndog");
-
-            rootedC.Decomposition[0].Definition = new DictionaryDefinition
-            {
-                Word = "hot",
-                Definition = "high in temperature",
-                Source = "definitions I made up"
-            };
-
-            TextDecomposition rooted = new TextDecomposition(parentText.Text,
-                new List<TextDecomposition>
-                {
-                    new TextDecomposition("my", null),
-                    rootedA,
-                    rootedB,
-                    new TextDecomposition("like", null),
-                    rootedC
-                });
-
-            rooted.Decomposition[3].Definition = new DictionaryDefinition
-            {
-                Word = "like",
-                Definition = "have positive feelings for",
-                Source = "definitions I made up"
-            };
+            var reret = StatementFactory.FromDatabaseEntries(ret);
 
             // my brother-in-law doesn't like hot dogs    level 0
             //  *          |         |     *      |       level 1
             //       *     *   *    *   *       *   *     level 2 
 
-            Statement statement = new Statement(parentText, 0, 38, "My brother-in-law doesn't like hot dogs", new List<string>(), injective, rooted);
+            TextDecomposition back = reret[0].RootedDecomposition;
 
-            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement }, null);
-            var defs = ret[0].Item2;
-
-            Assert.AreEqual(defs.Count, 6);
-
-            StatementDefinitionNode bilDef = defs.Where(def => def.DictionaryDefinition.Word == "brother-in-law").First();
-            Assert.AreEqual(bilDef.CurrentLevel, 1);
-            Assert.AreEqual(bilDef.IndexAtCurrentLevel, 1);
-
-            StatementDefinitionNode bDef = defs.Where(def => def.DictionaryDefinition.Word == "brother").First();
-            Assert.AreEqual(bDef.CurrentLevel, 2);
-            Assert.AreEqual(bDef.IndexAtCurrentLevel, 0);
-
-            StatementDefinitionNode lawDef = defs.Where(def => def.DictionaryDefinition.Word == "law").First();
-            Assert.AreEqual(lawDef.CurrentLevel, 2);
-            Assert.AreEqual(lawDef.IndexAtCurrentLevel, 2);
-
-            StatementDefinitionNode notDef = defs.Where(def => def.DictionaryDefinition.Word == "not").First();
-            Assert.AreEqual(notDef.CurrentLevel, 2);
-            Assert.AreEqual(notDef.IndexAtCurrentLevel, 4);
-
-            StatementDefinitionNode hotDef = defs.Where(def => def.DictionaryDefinition.Word == "hot").First();
-            Assert.AreEqual(hotDef.CurrentLevel, 2);
-            Assert.AreEqual(hotDef.IndexAtCurrentLevel, 5);
-
-            StatementDefinitionNode lkDef = defs.Where(def => def.DictionaryDefinition.Word == "like").First();
-            Assert.AreEqual(lkDef.CurrentLevel, 1);
-            Assert.AreEqual(lkDef.IndexAtCurrentLevel, 3);
-
+            // level 0
+            Assert.IsNull(back.Definition);
+            // level 1
+            Assert.IsNull(back.Decomposition[0].Definition); // my
+            Assert.AreEqual(back.Decomposition[1].Definition.Word, "brother-in-law");
+            Assert.IsNull(back.Decomposition[2].Definition); // doesn't
+            Assert.AreEqual(back.Decomposition[3].Definition.Word, "like");
+            Assert.IsNull(back.Decomposition[4].Definition); // hot dogs
+            // level 2
+            Assert.AreEqual(back.Decomposition[1].Decomposition[0].Definition.Word, "brother");
+            Assert.IsNull(back.Decomposition[1].Decomposition[1].Definition); // in
+            Assert.AreEqual(back.Decomposition[1].Decomposition[2].Definition.Word, "law");
+            Assert.IsNull(back.Decomposition[2].Decomposition[0].Definition); // does
+            Assert.AreEqual(back.Decomposition[2].Decomposition[1].Definition.Word, "not");
+            Assert.AreEqual(back.Decomposition[4].Decomposition[0].Definition.Word, "hot");
+            Assert.IsNull(back.Decomposition[4].Decomposition[1].Definition); // dogs
         }
-
-        */
     }
 }
