@@ -24,12 +24,11 @@ namespace Linguine
         private MainModel? _model;
         private readonly SynchronizationContext _syncContext;
 
-
         public ObservableCollection<TabViewModelBase> Tabs { get; private set; } 
             = new ObservableCollection<TabViewModelBase>();
         public TabViewModelBase? SelectedTab { get; set; }
         
-
+        // this property is responsible for replacing the underlying model
         public MainModel? Model
         {
             get => _model;
@@ -71,7 +70,7 @@ namespace Linguine
                 // since tabs are what let us run model methods, if a tab is open, then there must be
                 // an underlying loaded model
 
-                _model?.BeginLoading();
+                _model?.BeginLoading(); // now we have all the event handler ready
             }
         }
 
@@ -216,6 +215,9 @@ namespace Linguine
                 }
             }
         }
+        #endregion
+
+        #region tab switching
 
         internal void CloseThisAndSwitchToLatestSession(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
         {
