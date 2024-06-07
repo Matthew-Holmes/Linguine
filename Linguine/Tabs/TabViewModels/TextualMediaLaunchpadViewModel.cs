@@ -19,7 +19,6 @@ namespace Linguine.Tabs
 
     internal class TextualMediaLaunchpadViewModel : TabViewModelBase
     {
-        private MainViewModel _mainViewModel;
         private TextualMediaImporter _loader;
 
         private bool _showNewSessionButton = false;
@@ -30,13 +29,7 @@ namespace Linguine.Tabs
         public ICommand ImportNewCommand { get; private set; }
         public ICommand NewSessionCommand { get; private set; }
 
-        public List<String> AvailableTexts
-        {
-            get
-            {
-                return _mainModel.AvailableTextualMediaNames ?? new List<String>();
-            }
-        }
+        public List<String> AvailableTexts => _model.AvailableTextualMediaNames;
 
         public String SelectedTextName
         {
@@ -95,7 +88,7 @@ namespace Linguine.Tabs
 
                 decimal progress = SessionInfo[index].Item2;
 
-                bool success = _mainModel.ActivateExistingSessionFor(SelectedTextName, progress);
+                bool success = _model.ActivateExistingSessionFor(SelectedTextName, progress);
 
                 if (!success)
                 {
@@ -103,13 +96,13 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                _mainViewModel.CloseThisAndSwitchToLatestSession(this);
+                _parent.CloseThisAndSwitchToLatestSession(this);
             }
         }
 
         private void LoadSessionsFor(string name)
         {
-            var info = _mainModel.GetSessionInfoByName(name);
+            var info = _model.GetSessionInfoByName(name);
 
             if (info is null)
             {
@@ -145,12 +138,10 @@ namespace Linguine.Tabs
 
         public TextualMediaLaunchpadViewModel(
             UIComponents uiComponents,
-            MainModel parent,
-            MainViewModel mainViewModel) : base(uiComponents, parent)
+            MainModel model,
+            MainViewModel parent) : base(uiComponents, model, parent)
         {
-            _mainViewModel = mainViewModel; // so we can ask it to close this once done
-
-            _mainModel.Reloaded += (s, e) => OnPropertyChanged(nameof(AvailableTexts));
+            _model.Loaded += (s, e) => OnPropertyChanged(nameof(AvailableTexts));
 
             _loader = new TextualMediaImporter(uiComponents.CanVerify, uiComponents.CanChooseFromList, uiComponents.CanGetText);
 
@@ -163,9 +154,9 @@ namespace Linguine.Tabs
 
         private void NewSession()
         {
-            if (_mainModel.StartNewTextualMediaSession(SelectedTextName))
+            if (_model.StartNewTextualMediaSession(SelectedTextName))
             {
-                _mainViewModel.CloseThisAndSwitchToLatestSession(this);
+                _parent.CloseThisAndSwitchToLatestSession(this);
                 return;
             }
 
@@ -180,7 +171,7 @@ namespace Linguine.Tabs
             {
                 TextualMedia tm = _loader.ImportFromFile(filename);
 
-                var manager = _mainModel.TextualMediaManager;
+                var manager = _model.TextualMediaManager;
 
                 if (manager is null)
                 {
@@ -236,7 +227,7 @@ namespace Linguine.Tabs
 
         private void BrowseAll()
         {
-            // TODO - decide what to do if we don't wan't to just list all the files
+            // TODO - decide what to do if we don't want to just list all the files
             throw new NotImplementedException();
         }
     }

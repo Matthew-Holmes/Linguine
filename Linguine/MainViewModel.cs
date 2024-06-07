@@ -11,27 +11,97 @@ using Linguine.Tabs;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Collections.Specialized;
+using System.Windows.Media.Imaging;
+using System.Threading;
+using System.Windows.Documents;
+using System.Windows.Threading;
 
 namespace Linguine
 {
-    internal class MainViewModel : ViewModelBase
+    public class MainViewModel : ViewModelBase
     {
         private UIComponents _UIcomponents;
-        private MainModel _model;
+        private MainModel? _model;
+        private readonly SynchronizationContext _syncContext;
 
-        public ObservableCollection<TabViewModelBase> Tabs { get; private set; }
-        public TabViewModelBase SelectedTab { get; set; }
+
+        public ObservableCollection<TabViewModelBase> Tabs { get; private set; } 
+            = new ObservableCollection<TabViewModelBase>();
+        public TabViewModelBase? SelectedTab { get; set; }
         
+
+        public MainModel? Model
+        {
+            get => _model;
+            set
+            {
+                // config manager is special, it will update its model and the MainViewModel's model 
+                // kill the remaining tabs, those based off sessions will be revivable
+
+                bool reopenConfigTab = false;
+                foreach(TabViewModelBase tabViewModel in Tabs)
+                {
+                    if (tabViewModel.GetType() == typeof(ConfigManagerViewModel))
+                    {
+                        reopenConfigTab = true;
+                    }
+                    RunOnUIThread(() => Tabs.Remove(tabViewModel));
+                }
+
+                OpenTextualMediaViewerTabCommand = null; OnPropertyChanged(nameof(OpenTextualMediaViewerTabCommand));
+                OpenHomeTabCommand               = null; OnPropertyChanged(nameof(OpenHomeTabCommand));
+                OpenConfigManagerTabCommand      = null; OnPropertyChanged(nameof(OpenConfigManagerTabCommand));
+
+                _model?.Dispose();
+                _model = value;
+
+                if (_model is not null)
+                {
+                    _model.LoadingFailed   += (s, e) => RunOnUIThread(() => DatabaseLoadingFailed());
+                    _model.Loaded          += (s, e) => RunOnUIThread(() => SetupTabs());
+                    _model.Loaded          += (s, e) => RunOnUIThread(() => TurnSessionsToTabs());
+                    _model.SessionsChanged += (s, e) => RunOnUIThread(() => TurnSessionsToTabs());
+
+                    if (reopenConfigTab)
+                    {
+                        _model.Loaded += (s, e) => RunOnUIThread(
+                            () => AddUniquely<ConfigManagerViewModel>(_UIcomponents, _model, this));
+                    }
+                }
+                // since tabs are what let us run model methods, if a tab is open, then there must be
+                // an underlying loaded model
+
+                _model?.BeginLoading();
+            }
+        }
+
+        private void DatabaseLoadingFailed()
+        {
+            _UIcomponents.CanMessage.Show("database loading failed");
+        }
 
         public MainViewModel(UIComponents uiComponents, MainModel model)
         {
             _UIcomponents = uiComponents;
-            _model = model;
+            _syncContext  = SynchronizationContext.Current;
 
-            model.LoadingFailed += (s,e) => uiComponents.CanMessage.Show("database loading failed");
-            model.SessionsChanged += (s, e) => TurnSessionsToTabs();
+            Tabs.CollectionChanged += Tabs_CollectionChanged;
 
-            SetupTabs();
+            Model = model;
+        }
+
+        private void RunOnUIThread(Action action)
+        {
+
+            if (_syncContext != null)
+            {
+                _syncContext.Post(_ => action(), null);
+            }
+            else
+            {
+                // Fallback: If _syncContext is null, execute the action directly
+                action();
+            }
         }
 
         private void TurnSessionsToTabs()
@@ -41,6 +111,8 @@ namespace Linguine
                 .Cast<TextualMediaViewerViewModel>()
                 .ToList();
 
+            if (_model is null) { throw new Exception("model is null"); }
+
             var sessions = _model.ActiveSessionsIDs;
 
             // close non-existent tabs
@@ -48,7 +120,7 @@ namespace Linguine
             {
                 if (!sessions.Contains(tab.SessionID))
                 {
-                    tab.CloseCommmand.Execute(this); // deactivates in the session database
+                    tab.CloseCommand.Execute(this); // deactivates in the session database
                 }
             }
 
@@ -58,7 +130,7 @@ namespace Linguine
             {
                 if (!existingSessions.Contains(session))
                 {
-                    Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model));
+                    Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model, this));
                 }
             }
 
@@ -66,12 +138,20 @@ namespace Linguine
 
         private void SetupTabs()
         {
-            Tabs = new ObservableCollection<TabViewModelBase>();
-            Tabs.CollectionChanged += Tabs_CollectionChanged;
+            OnPropertyChanged(nameof(Tabs));
 
-            OpenHomeTabCommand               = new RelayCommand(() => Add(              new HomeViewModel(_UIcomponents, _model)));
-            OpenTextualMediaViewerTabCommand = new RelayCommand(() => Add(new TextualMediaLaunchpadViewModel(_UIcomponents, _model, this)));
-            OpenConfigManagerTabCommand      = new RelayCommand(() => AddUniquely<ConfigManagerViewModel>(_UIcomponents, _model));
+            if (Model is null) { throw new Exception("mode is null"); }
+
+            OpenHomeTabCommand = 
+                new RelayCommand(() => Add(new HomeViewModel(_UIcomponents, Model, this)));
+            OpenTextualMediaViewerTabCommand =
+                new RelayCommand(() => Add(new TextualMediaLaunchpadViewModel(_UIcomponents, Model, this)));
+            OpenConfigManagerTabCommand  = 
+                new RelayCommand(() => AddUniquely<ConfigManagerViewModel>(_UIcomponents,Model, this));
+
+            OnPropertyChanged(nameof(OpenHomeTabCommand));
+            OnPropertyChanged(nameof(OpenTextualMediaViewerTabCommand));
+            OnPropertyChanged(nameof(OpenConfigManagerTabCommand));
         }
 
         private void SelectTab(TabViewModelBase tab)
@@ -81,9 +161,9 @@ namespace Linguine
         }
 
         #region open tab commands
-        public ICommand OpenHomeTabCommand { get; private set; }
-        public ICommand OpenConfigManagerTabCommand { get; private set; }
-        public ICommand OpenTextualMediaViewerTabCommand { get; private set; }
+        public ICommand? OpenHomeTabCommand { get; private set; }
+        public ICommand? OpenConfigManagerTabCommand { get; private set; }
+        public ICommand? OpenTextualMediaViewerTabCommand { get; private set; }
         #endregion
 
         #region tab opening
@@ -93,12 +173,12 @@ namespace Linguine
             SelectTab(viewModel);
         }
 
-        private void AddUniquely<T>(UIComponents ui, MainModel model) where T : TabViewModelBase
+        private void AddUniquely<T>(UIComponents ui, MainModel model, MainViewModel parent) where T : TabViewModelBase
         {
             var existingTab = Tabs.OfType<T>().FirstOrDefault();
             if (existingTab == null)
             {
-                var newTab = (T)Activator.CreateInstance(typeof(T), ui, model);
+                var newTab = (T)Activator.CreateInstance(typeof(T), ui, model, parent);
                 Tabs.Add(newTab);
                 SelectTab(newTab);
             }
@@ -138,6 +218,13 @@ namespace Linguine
         }
 
         internal void CloseThisAndSwitchToLatestSession(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
+        {
+            // bit of a rough edge, required since the sync context messes up consecutive calls from other classes
+            // when some events are invoked, this means that they get posted after if the invocation was before
+            _syncContext.Post(_ => CloseThisAndSwitchToLatestSessionInternal(textualMediaLaunchpadViewModel), null);
+        }
+
+        private void CloseThisAndSwitchToLatestSessionInternal(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
         {
             Tabs.Remove(textualMediaLaunchpadViewModel);
 

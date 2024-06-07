@@ -9,92 +9,77 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        private TextualMediaManager? _textualMediaManager;
-        private ExternalDictionaryManager? _externalDictionaryManager;
-        private VariantsManager? _variantsManager;
-        private TextualMediaSessionManager? _textualMediaSessionManager;
-        private StatementDatabaseEntryManager? _statementDatabaseEntryManager;
+        private TextualMediaManager?            _textualMediaManager;
+        private ExternalDictionaryManager?      _externalDictionaryManager;
+        private VariantsManager?                _variantsManager;
+        private TextualMediaSessionManager?     _textualMediaSessionManager;
+        private StatementDatabaseEntryManager?  _statementDatabaseEntryManager;
 
         private void LoadManagers()
         {
-            _externalDictionaryManager = new ExternalDictionaryManager(Linguine);
-            _textualMediaManager = new TextualMediaManager(Linguine);
-            _textualMediaSessionManager = new TextualMediaSessionManager(Linguine);
-            _variantsManager = new VariantsManager(Linguine);
-            _statementDatabaseEntryManager = new StatementDatabaseEntryManager(Linguine);
+            _externalDictionaryManager      = new ExternalDictionaryManager(Linguine);
+            _textualMediaManager            = new TextualMediaManager(Linguine);
+            _textualMediaSessionManager     = new TextualMediaSessionManager(Linguine);
+            _variantsManager                = new VariantsManager(Linguine);
+            _statementDatabaseEntryManager  = new StatementDatabaseEntryManager(Linguine);
         }
 
-        public TextualMediaManager? TextualMediaManager
+        public TextualMediaManager TextualMediaManager
         {
             get
             {
-                if (StartupComplete)
+                if (_textualMediaManager is null)
                 {
-                    return _textualMediaManager;
+                    throw new Exception("Attempting to read property before model loading complete");
                 }
-                else
-                {
-                    return null;
-                }
+                return _textualMediaManager;
             }
         }
 
-        public ExternalDictionaryManager? ExternalDictionaryManager
+        public ExternalDictionaryManager ExternalDictionaryManager
         {
             get
             {
-                if (StartupComplete)
+                if (_externalDictionaryManager is null)
                 {
-                    return _externalDictionaryManager;
+                    throw new Exception("Attempting to read property before model loading complete");
                 }
-                else
-                {
-                    return null;
-                }
+                return _externalDictionaryManager;
             }
         }
-        public VariantsManager? VariantsManager
+        public VariantsManager VariantsManager
         {
             get
             {
-                if (StartupComplete)
+                if (_variantsManager is null)
                 {
-                    return _variantsManager;
+                    throw new Exception("Attempting to read property before model loading complete");
                 }
-                else
-                {
-                    return null;
-                }
+                return _variantsManager;
             }
         }
 
-        private TextualMediaSessionManager? TextualMediaSessionManager
+        private TextualMediaSessionManager TextualMediaSessionManager
         {
             get
             {
-                if (StartupComplete)
+                if (_textualMediaSessionManager is null)
                 {
-                    return _textualMediaSessionManager;
+                    throw new Exception("Attempting to read property before model loading complete");
                 }
-                else
-                {
-                    return null;
-                }
+                return _textualMediaSessionManager;
             }
         }
 
-        private StatementDatabaseEntryManager? StatementDatabaseEntryManager
+        private StatementDatabaseEntryManager StatementDatabaseEntryManager
         {
             get
             {
-                if (StartupComplete)
+                if (_statementDatabaseEntryManager is null)
                 {
-                    return _statementDatabaseEntryManager;
+                    throw new Exception("Attempting to read property before model loading complete");
                 }
-                else
-                {
-                    return null;
-                }
+                return _statementDatabaseEntryManager;
             }
         }
     }

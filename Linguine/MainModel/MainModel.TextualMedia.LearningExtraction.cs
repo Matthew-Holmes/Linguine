@@ -10,18 +10,17 @@ namespace Linguine
 {
     public partial class MainModel
     {
+        /*
         List<Statement>? GetStatementsCoveringRange(String textualMediaName, int start, int stop)
         {
-            if (TextualMediaManager is null || StatementDatabaseEntryManager is null) { return null; }
-
-            TextualMediaManager             tmManager = TextualMediaManager;
-            StatementDatabaseEntryManager statManager = StatementDatabaseEntryManager;
-
-            TextualMedia? tm = tmManager.GetByName(textualMediaName);
+            TextualMedia? tm = TextualMediaManager?.GetByName(textualMediaName) ?? null;
 
             if (tm is null) { return null; } // couldn't find a media matching the name
 
-            List<StatementDatabaseEntry> found = statManager.GetStatementsCoveringRangeWithEndpoints(tm, start, stop);
+            List<StatementDatabaseEntry>? found = StatementDatabaseEntryManager?.GetStatementsCoveringRangeWithEndpoints(
+                tm, start, stop) ?? null;
+
+            if (found is null) { return null; }
 
             int oldCount = found.Count;
             found = statManager.PrependUpToContextCheckpoint(found);
@@ -52,10 +51,15 @@ namespace Linguine
             // Then the context engine TODO
             // Then text decomposition
             // Then definition resolution
-            // Save in database, then return latest
+
+
+
+            // Save in database, then return latest, if database connection string changed, throw away the progress
 
 
             throw new NotImplementedException();
         }
+    }
+        */
     }
 }

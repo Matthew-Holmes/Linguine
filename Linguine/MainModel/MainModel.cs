@@ -5,6 +5,8 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+
 //using Agents;
 //using Agents.DummyAgents;
 using Infrastructure;
@@ -14,15 +16,32 @@ using UserInputInterfaces;
 
 namespace Linguine
 {
-    public partial class MainModel
+    public partial class MainModel : IDisposable
     {
+        public event EventHandler? Loaded;
+        public event EventHandler? LoadingFailed;
+        public bool HasManagers { get; private set; } = false;
 
-        public bool StartupComplete { get; private set; }
-
-        public event EventHandler Reloaded;
-        public event EventHandler LoadingFailed;
-
-        private LinguineDataHandler Linguine { get; set; }
+        private LinguineDataHandler? _linguine;
+        private LinguineDataHandler Linguine
+        {
+            get
+            {
+                if (_linguine is null)
+                {
+                    throw new Exception("attempting to access database before model loaded");
+                }
+                return _linguine;
+            }
+            set
+            {
+                if (value is null)
+                {
+                    throw new Exception("don't set the database to null");
+                }
+                _linguine = value;
+            }
+        }
 
 
         public MainModel()
@@ -32,40 +51,52 @@ namespace Linguine
                 // this is the only exception that should be possibly to be thrown during main model construction
                 throw new FileNotFoundException("Couldn't find config");
             }
-
-            Task.Run(() => Reload()); // load in background
-            
         }
 
-        public void Reload()
+        public void BeginLoading()
+        {
+            Task.Run(() => Load()); // load in background
+        }
+
+        private void Load()
         {
             try
             {
-                StartupComplete = false;
-
                 if (ConfigManager.DatabaseDirectory != null)
                 {
                     Directory.CreateDirectory(ConfigManager.DatabaseDirectory);
                 }
 
-                if (Linguine is not null)
-                {
-                    Linguine.SaveChanges();
-                    Linguine.Dispose();
-                }
-
                 Linguine = new LinguineDataHandler(ConfigManager.ConnectionString);
                 Linguine.Database.EnsureCreated();
 
-                LoadManagers();
+                LoadManagers(); HasManagers = true;
 
-                StartupComplete = true;
-                Reloaded?.Invoke(this, EventArgs.Empty);
+                Loaded?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception e)
             {
-                LoadingFailed.Invoke(this, EventArgs.Empty);
+                LoadingFailed?.Invoke(this, EventArgs.Empty);
             }
+        }
+
+        public void Dispose()
+        {
+            // clean up our events
+            foreach (Delegate d in LoadingFailed.GetInvocationList())
+            {
+                LoadingFailed -= (EventHandler)d;
+            }
+            foreach (Delegate d in Loaded.GetInvocationList())
+            {
+                Loaded -= (EventHandler)d;
+            }
+            foreach (Delegate d in SessionsChanged.GetInvocationList())
+            {
+                SessionsChanged -= (EventHandler)d;
+            }
+            Linguine.SaveChanges();
+            Linguine.Dispose();
         }
 
 

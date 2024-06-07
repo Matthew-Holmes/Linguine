@@ -15,7 +15,7 @@ using UserInputInterfaces;
 
 namespace Linguine.Tabs
 {
-    internal class TextualMediaViewerViewModel : TabViewModelBase
+    public class TextualMediaViewerViewModel : TabViewModelBase
     {
         public readonly int SessionID;
         private int _charsToDisplay = 1000;
@@ -36,13 +36,14 @@ namespace Linguine.Tabs
         }
 
 
-        public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
+        public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel model, MainViewModel parent) 
+            : base(uiComponents, model, parent)
         {
             Title = "Text Viewer";
             SessionID = sessionId;
-            TabClosed += (s,e) => parent.CloseSession(sessionId);
+            TabClosed += (s,e) => model.CloseSession(sessionId);
 
-            String? loaded = parent.GetFullTextFromSessionID(sessionId);
+            String? loaded = model.GetFullTextFromSessionID(sessionId);
 
             if (loaded is null)
             {
@@ -51,7 +52,7 @@ namespace Linguine.Tabs
             }
 
             _fullText = loaded;
-            _localCursor = parent.GetCursor(SessionID);
+            _localCursor = model.GetCursor(SessionID);
 
             Step(0);
 
@@ -103,7 +104,7 @@ namespace Linguine.Tabs
 
             TextViewWindow = tmp;
 
-            if (!_mainModel.CursorMoved(SessionID, _localCursor))
+            if (!_model.CursorMoved(SessionID, _localCursor))
             {
                 _uiComponents.CanMessage.Show("Updating cursor position failed");
             }

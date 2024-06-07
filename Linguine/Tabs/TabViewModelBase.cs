@@ -13,20 +13,22 @@ namespace Linguine.Tabs
         // base class for anything that can exist as a distinct tab/window
 
         protected UIComponents _uiComponents;
-        protected MainModel _mainModel;
+        protected MainViewModel _parent;
+        protected MainModel _model;
 
         public String Title { get; protected set; }
 
-        public ICommand CloseCommmand { get; private set; }
+        public ICommand CloseCommand { get; private set; }
 
         public event EventHandler TabClosed;
 
-        public TabViewModelBase(UIComponents uiComponents, MainModel parent)
+        internal TabViewModelBase(UIComponents uiComponents, MainModel model, MainViewModel parent)
         {
             _uiComponents = uiComponents;
-            _mainModel = parent; // maybe this should be the viewmodel, will have to decide later
+            _parent = parent;
+            _model = model;
 
-            CloseCommmand = new RelayCommand(() => TabClosed?.Invoke(this, EventArgs.Empty));
+            CloseCommand = new RelayCommand(() => TabClosed?.Invoke(this, EventArgs.Empty));
         }
     }
 }

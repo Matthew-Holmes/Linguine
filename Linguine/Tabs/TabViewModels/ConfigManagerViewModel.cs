@@ -39,12 +39,13 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                UpdateTargetLanguageInConfig(_languageCodes[value]);
+                // ********************* model replacement *******************
+                ConfigManager.TargetLanguage = _languageCodes[value];
                 _targetLanguageIndex = value;
+                _parent.Model = new MainModel(); // build a new one
+                // ******* this should be the only time it is changed ********
 
                 OnPropertyChanged(nameof(TargetLanguage));
-
-                _mainModel.Reload();
             }
         }
 
@@ -67,13 +68,6 @@ namespace Linguine.Tabs
             }
         }
 
-        private void UpdateTargetLanguageInConfig(LanguageCode newTarget)
-        {
-            if (newTarget != ConfigManager.TargetLanguage)
-            {
-                ConfigManager.TargetLanguage = newTarget;
-            }
-        }
         private void UpdateNativeLanguageInConfig(LanguageCode newNative)
         {
             if (newNative != ConfigManager.NativeLanguage)
@@ -100,9 +94,9 @@ namespace Linguine.Tabs
 
         private void SetupDictionarySelection()
         {
-            RefreshAvailableDictionaries();
+            if (_parent.Model.HasManagers) { RefreshAvailableDictionaries(); }
 
-            _mainModel.Reloaded += (s,e) => RefreshAvailableDictionaries();
+            _model.Loaded += (s,e) => RefreshAvailableDictionaries();
 
             AddNewTargetDictionaryCommand = new RelayCommand(() => AddNewTargetDictionary());
         }
@@ -134,15 +128,14 @@ namespace Linguine.Tabs
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }
 
-            ExternalDictionaryManager? manager = _mainModel.ExternalDictionaryManager;
-
-            if (manager is null)
+            if (!_model.HasManagers)
             {
                 _uiComponents.CanMessage.Show("Please wait for dictionary management to load");
                 return;
             }
             else
             {
+                ExternalDictionaryManager manager = _model.ExternalDictionaryManager;
                 try
                 {
                     manager.AddNewDictionaryFromCSV(filename, name);
@@ -158,7 +151,7 @@ namespace Linguine.Tabs
 
         private void RefreshAvailableDictionaries()
         {
-            TargetLanguageDictionaries = _mainModel.ExternalDictionaryManager?.AvailableDictionaries() ?? new List<String>();
+            TargetLanguageDictionaries = _model.ExternalDictionaryManager.AvailableDictionaries();
 
             OnPropertyChanged(nameof(TargetLanguageDictionaries));
         }
@@ -172,7 +165,7 @@ namespace Linguine.Tabs
         private void SetupVariantsSelection()
         {
             RefreshAvailableVariantsSources();
-            _mainModel.Reloaded += (s, e) => RefreshAvailableVariantsSources();
+            _model.Loaded += (s, e) => RefreshAvailableVariantsSources();
 
             AddNewTargetVariantsSourceCommand = new RelayCommand(() => AddNewTargetVariantsSource());
         }
@@ -199,19 +192,19 @@ namespace Linguine.Tabs
 
             while (true)
             {
-                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictioary");
+                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictionary");
                 if (name is not null && name != "") { break; }
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }
 
-            VariantsManager? manager = _mainModel.VariantsManager;
 
-            if (manager is null)
+            if (!_model.HasManagers)
             {
-                _uiComponents.CanMessage.Show("please wait for variabts manager to load");
+                _uiComponents.CanMessage.Show("please wait for variants manager to load");
             }
             else
             {
+                VariantsManager manager = _model.VariantsManager;
                 try
                 {
                     manager.AddNewVariantsSourceFromCSV(filename, name);
@@ -226,12 +219,13 @@ namespace Linguine.Tabs
 
         private void RefreshAvailableVariantsSources()
         {
-            TargetLanguageVariantSources = _mainModel.VariantsManager?.AvailableVariantsSources() ?? new List<String>();
+            TargetLanguageVariantSources = _model.VariantsManager.AvailableVariantsSources();
             OnPropertyChanged(nameof(TargetLanguageVariantSources));
         }
         #endregion
 
-        public ConfigManagerViewModel(UIComponents uiComponents, MainModel parent) : base(uiComponents, parent)
+        public ConfigManagerViewModel(UIComponents uiComponents, MainModel model, MainViewModel parent) 
+            : base(uiComponents, model, parent)
         {
             Title = "Config Manager";
             SetupLanguageSelection();

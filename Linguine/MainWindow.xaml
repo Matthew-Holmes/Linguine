@@ -30,7 +30,7 @@
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Title}"/>
-                        <Button Content="X" Command="{Binding CloseCommmand}"/>
+                        <Button Content="X" Command="{Binding CloseCommand}"/>
                     </StackPanel>
                 </DataTemplate>
             </TabControl.ItemTemplate>

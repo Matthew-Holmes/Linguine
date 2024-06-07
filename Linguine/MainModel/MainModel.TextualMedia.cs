@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        public List<string>? AvailableTextualMediaNames
+        public List<string> AvailableTextualMediaNames
         {
-            get => _textualMediaManager?.AvailableTextualMediaNames() ?? null;
+            get => TextualMediaManager.AvailableTextualMediaNames();
         }
 
         internal string? GetFullTextFromSessionID(int sessionId)
@@ -21,6 +22,5 @@ namespace Linguine
 
             return session.TextualMedia.Text;
         }
-
     }
 }
