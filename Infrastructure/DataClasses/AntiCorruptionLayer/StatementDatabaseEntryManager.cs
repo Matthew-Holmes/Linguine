@@ -32,7 +32,7 @@ namespace Infrastructure
             return ret;
         }
 
-        internal List<StatementDatabaseEntry> GetAllStatementsFor(TextualMedia tm)
+        internal List<StatementDatabaseEntry> GetAllStatementsEntriesFor(TextualMedia tm)
         {
             return _db.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).ToList();
         }
@@ -75,11 +75,6 @@ namespace Infrastructure
             toPrepend.AddRange(entries);
 
             return toPrepend;
-        }
-
-        internal int IndexOffEndOfLastStatement(TextualMedia tm)
-        {
-            return _db.Statements.Where(s => s.Parent == tm).Max(s => s.LastCharIndex) + 1;
         }
 
         internal void RemoveAllFrom(StatementDatabaseEntry statement, int maxCollateral = 100)
