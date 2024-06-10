@@ -31,7 +31,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
         }
@@ -43,7 +43,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -57,7 +57,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -71,7 +71,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -86,7 +86,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -100,7 +100,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -115,7 +115,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -129,7 +129,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -144,7 +144,7 @@ namespace Tests_LearningExtraction
             normaliser.Agent = new EverythingLowercaseAgent();
             normaliser.MaxVolumeToProcess = 1000;
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString("Hello Bob", "Hello\nBob");
+            TextDecomposition source = DecompositionHelper.FromNewLinedString("Hello Bob", "Hello\nBob");
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -163,7 +163,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
         }
@@ -179,7 +179,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -197,7 +197,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -215,7 +215,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -236,7 +236,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -257,7 +257,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -278,7 +278,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -299,7 +299,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -317,7 +317,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
 
@@ -336,7 +336,7 @@ namespace Tests_LearningExtraction
             String longText = string.Join(" ", Enumerable.Repeat("Word", 100));
             String longUnits = string.Join("\n", Enumerable.Repeat("Word", 100));
 
-            TextDecomposition source = TextDecomposition.FromNewLinedString(longText, longUnits);
+            TextDecomposition source = DecompositionHelper.FromNewLinedString(longText, longUnits);
 
             var result = normaliser.NormaliseCases(source).Result;
         }

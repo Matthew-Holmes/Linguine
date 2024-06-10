@@ -20,7 +20,7 @@ namespace LearningExtraction
 
             String response = await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines); // agent best at identifying lower --> upper, not the other way around
 
-            return TextDecomposition.FromNewLinedString(source.Total, response);
+            return DecompositionHelper.FromNewLinedString(source.Total, response);
         }
 
         private static async Task<String> GetCombinedResponses(AgentBase agent, string prompt, int maxCharsToProcess, int joinLines)

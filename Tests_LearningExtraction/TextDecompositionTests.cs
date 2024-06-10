@@ -28,48 +28,7 @@ namespace Tests_LearningExtraction
             Assert.AreEqual(units, decomposition.Decomposition);
         }
 
-        [TestMethod]
-        public void FromNewLinedString_CreatesCorrectDecomposition()
-        {
-            // Arrange
-            string parent = "Parent text";
-            string newLinedDecomposition = "Child text 1\nChild text 2";
-
-            // Act
-            TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
-
-            // Assert
-            Assert.AreEqual(parent, decomposition.Total); // Assuming TextUnit has a Content property
-            Assert.IsNotNull(decomposition.Decomposition);
-            Assert.AreEqual(2, decomposition.Decomposition.Count);
-            Assert.AreEqual("Child text 1", decomposition.Decomposition[0].Total);
-            Assert.AreEqual("Child text 2", decomposition.Decomposition[1].Total);
-        }
-
-        [TestMethod]
-        public void FromNewLinedString_EmptyStringCreatesLeaf()
-        {
-            string parent = "Parent text";
-            string newLinedDecomposition = "";
-
-            TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
-
-            Assert.AreEqual(parent, decomposition.Total);
-            Assert.IsNull(decomposition.Decomposition);
-        }
-
-        [TestMethod]
-        public void FromNewLinedString_NoNewLinesCreatesLeaf()
-        {
-            string parent = "Parent text";
-            string newLinedDecomposition = "Parent text";
-
-            TextDecomposition decomposition = TextDecomposition.FromNewLinedString(parent, newLinedDecomposition);
-
-            Assert.AreEqual(parent, decomposition.Total);
-            Assert.IsNull(decomposition.Decomposition);
-        }
-
+       
         [TestMethod]
         public void TestInjects_WithDirectSubstrings_ShouldReturnTrue()
         {

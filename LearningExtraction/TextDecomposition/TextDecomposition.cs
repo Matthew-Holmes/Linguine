@@ -110,31 +110,5 @@ namespace LearningExtraction
                 return new TextDecomposition(Total, flatUnits);
             }
         }
-
-
-        internal static TextDecomposition FromNewLinedString(String parent, String newLinedDecomposition)
-        {
-            String total = parent;
-            List<TextDecomposition> decomposition = new List<TextDecomposition>();
-
-            foreach (String substring in newLinedDecomposition.Split('\n', StringSplitOptions.RemoveEmptyEntries))
-            {
-                String unit = new String(substring);
-                decomposition.Add(new TextDecomposition(unit, null)); // leaves
-            }
-
-            if (decomposition.Count == 0)
-            {
-                return new TextDecomposition(total, null); // is a leaf
-            }
-            else if (decomposition.Count == 1 && decomposition.First().Total == parent)
-            {
-                return new TextDecomposition(total, null); // single element newLinedDecomposition bijects, is a leaf
-            }
-            else
-            {
-                return new TextDecomposition(total, decomposition);
-            }
-        }
     }
 }

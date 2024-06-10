@@ -44,19 +44,19 @@ namespace LearningExtraction
             }
 
             String newLinedDecomposition = await StandardAgent.GetResponse(textSource.Text); // only called in the base case
-            TextDecomposition ret = TextDecomposition.FromNewLinedString(textSource.Text, newLinedDecomposition);
+            TextDecomposition ret = DecompositionHelper.FromNewLinedString(textSource.Text, newLinedDecomposition);
 
             if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
             {
                 // first attempt failed, use something more powerful
                 String highPoweredAttempt = await HighPerformanceAgent.GetResponse(textSource.Text);
-                ret = TextDecomposition.FromNewLinedString(textSource.Text, highPoweredAttempt);
+                ret = DecompositionHelper.FromNewLinedString(textSource.Text, highPoweredAttempt);
 
                 if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
                 {
                     // do default
                     String finalAttempt = await FallbackAgent.GetResponse(textSource.Text);
-                    ret = TextDecomposition.FromNewLinedString(textSource.Text, finalAttempt);
+                    ret = DecompositionHelper.FromNewLinedString(textSource.Text, finalAttempt);
 
                     if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
                     {

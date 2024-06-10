@@ -120,9 +120,9 @@ namespace Tests_LearningExtraction
             //-----------------012345678901234567890123456
             parentText.Text = "A sample text decomposition, then some more";
 
-            TextDecomposition injective = TextDecomposition.FromNewLinedString(
+            TextDecomposition injective = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "A\nsample\ntext\ndecomposition");
-            TextDecomposition rooted = TextDecomposition.FromNewLinedString(
+            TextDecomposition rooted = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "a\nsample\ntext\ndecomposition");
 
             Statement statement = new Statement(parentText, 0, 26, "A sample text decomposition", new List<string>(), injective, rooted);
@@ -138,9 +138,9 @@ namespace Tests_LearningExtraction
             //-----------------012345678901234567890123456
             parentText.Text = "A sample text decomposition, then some more";
 
-            TextDecomposition injective = TextDecomposition.FromNewLinedString(
+            TextDecomposition injective = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "A\nsample\ntext\ndecomposition");
-            TextDecomposition rooted = TextDecomposition.FromNewLinedString(
+            TextDecomposition rooted = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "a\nsample\ntext\ndecomposition");
 
             Statement statement = new Statement(parentText, 0, 26, "A sample text decomposition", new List<string>(), injective, rooted);
@@ -183,9 +183,9 @@ namespace Tests_LearningExtraction
             //-----------------012345678901234567890123456
             parentText.Text = "A sample text decomposition, then some more";
 
-            TextDecomposition injective = TextDecomposition.FromNewLinedString(
+            TextDecomposition injective = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "A\nsample\ntext\ndecomposition");
-            TextDecomposition rooted = TextDecomposition.FromNewLinedString(
+            TextDecomposition rooted = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "a\nsample\ntext\ndecomposition");
 
             Assert.IsNotNull(rooted.Decomposition);
@@ -224,9 +224,9 @@ namespace Tests_LearningExtraction
             //-----------------012345678901234567890123456
             parentText.Text = "A sample text decomposition, then some more";
 
-            TextDecomposition injective = TextDecomposition.FromNewLinedString(
+            TextDecomposition injective = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "A\nsample\ntext\ndecomposition");
-            TextDecomposition rooted = TextDecomposition.FromNewLinedString(
+            TextDecomposition rooted = DecompositionHelper.FromNewLinedString(
                 "A sample text decomposition", "a\nsample\ntext\ndecomposition");
 
             Assert.IsNotNull(rooted.Decomposition);
@@ -273,13 +273,13 @@ namespace Tests_LearningExtraction
             //-----------------0123456789012345678901234567890123456789
             parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
 
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveA = DecompositionHelper.FromNewLinedString(
                 "brother-in-law", "brother\nin\nlaw");
 
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nn't");
 
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveC = DecompositionHelper.FromNewLinedString(
                 "hot dogs", "hot\ndogs");
 
             TextDecomposition injective = new TextDecomposition(parentText.Text,
@@ -293,13 +293,13 @@ namespace Tests_LearningExtraction
                 });
 
 
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedA = DecompositionHelper.FromNewLinedString(
                "brother-in-law", "brother\nin\nlaw");
 
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nnot");
 
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedC = DecompositionHelper.FromNewLinedString(
                 "hot dog", "hot\ndog");
 
             TextDecomposition rooted = new TextDecomposition(parentText.Text,
@@ -330,13 +330,13 @@ namespace Tests_LearningExtraction
             //-----------------0123456789012345678901234567890123456789
             parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
 
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveA = DecompositionHelper.FromNewLinedString(
                 "brother-in-law", "brother\nin\nlaw");
 
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nn't");
 
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveC = DecompositionHelper.FromNewLinedString(
                 "hot dogs", "hot\ndogs");
 
             TextDecomposition injective = new TextDecomposition(parentText.Text,
@@ -350,13 +350,13 @@ namespace Tests_LearningExtraction
                 });
 
 
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedA = DecompositionHelper.FromNewLinedString(
                "brother-in-law", "brother\nin\nlaw");
 
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nnot");
 
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedC = DecompositionHelper.FromNewLinedString(
                 "hot dog", "hot\ndog");
 
             TextDecomposition rooted = new TextDecomposition(parentText.Text,
@@ -394,13 +394,13 @@ namespace Tests_LearningExtraction
             //-----------------0123456789012345678901234567890123456789
             parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
 
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveA = DecompositionHelper.FromNewLinedString(
                 "brother-in-law", "brother\nin\nlaw");
 
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nn't");
 
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveC = DecompositionHelper.FromNewLinedString(
                 "hot dogs", "hot\ndogs");
 
             TextDecomposition injective = new TextDecomposition(parentText.Text,
@@ -414,7 +414,7 @@ namespace Tests_LearningExtraction
                 });
 
 
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedA = DecompositionHelper.FromNewLinedString(
                "brother-in-law", "brother\nin\nlaw");
 
             rootedA.Definition = new DictionaryDefinition
@@ -438,7 +438,7 @@ namespace Tests_LearningExtraction
                 Source = "definitions I made up"
             };
 
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nnot");
 
             rootedB.Decomposition[1].Definition = new DictionaryDefinition
@@ -448,7 +448,7 @@ namespace Tests_LearningExtraction
                 Source = "definitions I made up"
             };
 
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedC = DecompositionHelper.FromNewLinedString(
                 "hot dog", "hot\ndog");
 
             rootedC.Decomposition[0].Definition = new DictionaryDefinition
@@ -490,13 +490,13 @@ namespace Tests_LearningExtraction
             //-----------------0123456789012345678901234567890123456789
             parentText.Text = "My brother-in-law doesn't like hot dogs, and more text";
 
-            TextDecomposition injectiveA = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveA = DecompositionHelper.FromNewLinedString(
                 "brother-in-law", "brother\nin\nlaw");
 
-            TextDecomposition injectiveB = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nn't");
 
-            TextDecomposition injectiveC = TextDecomposition.FromNewLinedString(
+            TextDecomposition injectiveC = DecompositionHelper.FromNewLinedString(
                 "hot dogs", "hot\ndogs");
 
             TextDecomposition injective = new TextDecomposition(parentText.Text,
@@ -510,7 +510,7 @@ namespace Tests_LearningExtraction
                 });
 
 
-            TextDecomposition rootedA = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedA = DecompositionHelper.FromNewLinedString(
                "brother-in-law", "brother\nin\nlaw");
 
             rootedA.Definition = new DictionaryDefinition
@@ -534,7 +534,7 @@ namespace Tests_LearningExtraction
                 Source = "definitions I made up"
             };
 
-            TextDecomposition rootedB = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedB = DecompositionHelper.FromNewLinedString(
                 "doesn't", "does\nnot");
 
             rootedB.Decomposition[1].Definition = new DictionaryDefinition
@@ -544,7 +544,7 @@ namespace Tests_LearningExtraction
                 Source = "definitions I made up"
             };
 
-            TextDecomposition rootedC = TextDecomposition.FromNewLinedString(
+            TextDecomposition rootedC = DecompositionHelper.FromNewLinedString(
                 "hot dog", "hot\ndog");
 
             rootedC.Decomposition[0].Definition = new DictionaryDefinition
