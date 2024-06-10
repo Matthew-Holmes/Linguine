@@ -10,39 +10,13 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        /*
-        List<Statement>? GetStatementsCoveringRange(String textualMediaName, int start, int stop)
-        {
-            TextualMedia? tm = TextualMediaManager?.GetByName(textualMediaName) ?? null;
-
-            if (tm is null) { return null; } // couldn't find a media matching the name
-
-            List<StatementDatabaseEntry>? found = StatementDatabaseEntryManager?.GetStatementsCoveringRangeWithEndpoints(
-                tm, start, stop) ?? null;
-
-            if (found is null) { return null; }
-
-            int oldCount = found.Count;
-            found = statManager.PrependUpToContextCheckpoint(found);
-            int bookMark = found.Count - oldCount;
-
-            var raw = statManager.AttachDefinitions(found);
-
-            return StatementFactory.FromDatabaseEntries(raw).Skip(bookMark).ToList();
-        }
-
         public List<Statement>? DoProcessingStep(String textualMediaName)
         {
-            if (TextualMediaManager is null || StatementDatabaseEntryManager is null) { return null; }
-
-            TextualMediaManager             tmManager = TextualMediaManager;
-            StatementDatabaseEntryManager statManager = StatementDatabaseEntryManager;
-
-            TextualMedia? tm = tmManager.GetByName(textualMediaName);
+            TextualMedia? tm = TextualMediaManager.GetByName(textualMediaName);
 
             if (tm is null) { return null; } // couldn't find a media matching the name
 
-            int end = StatementDatabaseEntryManager.IndexOffEndOfLastStatement(tm);
+            int end = StatementManager.IndexOffEndOfLastStatement(tm);
 
             if (end == tm.Text.Length) { return null; } // already processed
                                                         // TODO - what if there is junk at the end of the text?
@@ -59,7 +33,5 @@ namespace Linguine
 
             throw new NotImplementedException();
         }
-    }
-        */
     }
 }

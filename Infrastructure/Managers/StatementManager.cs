@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Managers
+namespace Infrastructure
 {
     public class StatementManager : ManagerBase
     {

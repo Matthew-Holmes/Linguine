@@ -13,6 +13,7 @@ namespace LearningExtraction
 {
     public class TextDecomposer
     {
+        // TODO - refactor this produce statements
         public int MaxVolumeToProcess { get; set; }     = 300; // if given text larger than this, chunk it
         public int JoinCharacterCount { get; set; }     = 20;
         public int PaddingCharacterCount { get; set; }  = 30; // longest English word is 45 letters 20+30=50

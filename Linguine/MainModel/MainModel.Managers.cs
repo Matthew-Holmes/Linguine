@@ -9,19 +9,19 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        private TextualMediaManager?            _textualMediaManager;
-        private ExternalDictionaryManager?      _externalDictionaryManager;
-        private VariantsManager?                _variantsManager;
-        private TextualMediaSessionManager?     _textualMediaSessionManager;
-        private StatementDatabaseEntryManager?  _statementDatabaseEntryManager;
+        private TextualMediaManager?        _textualMediaManager;
+        private ExternalDictionaryManager?  _externalDictionaryManager;
+        private VariantsManager?            _variantsManager;
+        private TextualMediaSessionManager? _textualMediaSessionManager;
+        private StatementManager?           _statementManager;
 
         private void LoadManagers()
         {
-            _externalDictionaryManager      = new ExternalDictionaryManager(Linguine);
-            _textualMediaManager            = new TextualMediaManager(Linguine);
-            _textualMediaSessionManager     = new TextualMediaSessionManager(Linguine);
-            _variantsManager                = new VariantsManager(Linguine);
-            _statementDatabaseEntryManager  = new StatementDatabaseEntryManager(Linguine);
+            _externalDictionaryManager  = new ExternalDictionaryManager(Linguine);
+            _textualMediaManager        = new TextualMediaManager(Linguine);
+            _textualMediaSessionManager = new TextualMediaSessionManager(Linguine);
+            _variantsManager            = new VariantsManager(Linguine);
+            _statementManager           = new StatementManager(Linguine);
         }
 
         public TextualMediaManager TextualMediaManager
@@ -71,15 +71,15 @@ namespace Linguine
             }
         }
 
-        private StatementDatabaseEntryManager StatementDatabaseEntryManager
+        private StatementManager StatementManager
         {
             get
             {
-                if (_statementDatabaseEntryManager is null)
+                if (_statementManager is null)
                 {
                     throw new Exception("Attempting to read property before model loading complete");
                 }
-                return _statementDatabaseEntryManager;
+                return _statementManager;
             }
         }
     }

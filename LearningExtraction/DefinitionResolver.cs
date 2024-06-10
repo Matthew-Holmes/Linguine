@@ -24,6 +24,7 @@ namespace LearningExtraction
         {
         }
         
+        // TODO - refactor this to work on statements
         public List<List<DictionaryDefinition>> GetPossibleDefinitions(TextDecomposition td)
         {
             return td.Units.Select(u => Dictionary.TryGetDefinition(u)).ToList();
