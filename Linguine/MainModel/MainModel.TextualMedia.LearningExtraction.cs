@@ -233,12 +233,12 @@ namespace Linguine
             {
                 if (contextChangeStatements.Contains(i))
                 {
-                    ret.Append(await GetUpdatedContextAt(previous, statementTotals, i));
+                    ret.Add(await GetUpdatedContextAt(previous, statementTotals, i));
                     previous = ret.Last();
                 } 
                 else
                 {
-                    ret.Append(previous);
+                    ret.Add(previous);
                 }
             }
 
@@ -265,9 +265,16 @@ namespace Linguine
 
             prompt.AppendLine();
 
-            prompt.AppendLine("Changes between:");
-            prompt.AppendLine(statementTotals[i - 1]);
-            prompt.AppendLine(statementTotals[i]);
+            if (i == 0)
+            {
+                prompt.AppendLine("Needs further context at the start:");
+                prompt.AppendLine(statementTotals[i]);
+            } else
+            {
+                prompt.AppendLine("Changes between:");
+                prompt.AppendLine(statementTotals[i - 1]);
+                prompt.AppendLine(statementTotals[i]);
+            }
 
             prompt.AppendLine();
             prompt.Append("From Text:");
@@ -306,13 +313,16 @@ namespace Linguine
                 prompt.AppendLine(statementTotals[i]);
             }
 
-            String response = await ContextChangeIdentificationAgent.GetResponse(prompt.ToString());
+            String promptString = prompt.ToString();
+
+            String response = await ContextChangeIdentificationAgent.GetResponse(promptString);
 
             List<String> raw = response.Split('\n').ToList();
             List<int> ret = new List<int>();
 
             foreach (String line in raw)
             {
+                if (!line.Contains(':')) { continue; }
                 ret.Add(int.Parse(line.Split(':')[0]) - 1); // agent uses one indexing
             }
 
