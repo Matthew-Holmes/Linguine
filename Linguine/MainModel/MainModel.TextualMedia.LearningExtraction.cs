@@ -27,6 +27,14 @@ namespace Linguine
         private ContextChangeIdentificationAgent? ContextChangeIdentificationAgent {get; set;}
         private ContextUpdateAgent? ContextUpdateAgent { get; set;}
 
+        internal async Task ProcessNextChunk(int sessionID)
+        {
+            TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
+            if (tm is null) { return; }
+
+            await DoProcessingStepInternal(tm, 1000);
+        }
+
         public async Task<List<Statement>?> DoProcessingStep(String textualMediaName, int chars)
         {
             TextualMedia? tm = TextualMediaManager.GetByName(textualMediaName);
@@ -329,8 +337,7 @@ namespace Linguine
                 ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(apiKey);
             }
 
-            TextDecomposition statementsDecomp = await ToStatementsDecomposer.DecomposeText(
-                new TextualMedia { Text = chunk });
+            TextDecomposition statementsDecomp = await ToStatementsDecomposer.DecomposeText(chunk);
 
             return statementsDecomp.Units;
         }

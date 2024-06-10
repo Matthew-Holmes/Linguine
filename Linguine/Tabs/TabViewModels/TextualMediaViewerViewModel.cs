@@ -58,6 +58,13 @@ namespace Linguine.Tabs
 
             SetupTraversalCommands();
 
+            ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
+
+        }
+
+        private async Task ProcessChunk()
+        {
+            await _model.ProcessNextChunk(SessionID);
         }
 
         #region traversal
@@ -119,5 +126,7 @@ namespace Linguine.Tabs
         }
 
         #endregion
+
+        public ICommand ProcessChunkCommand { get; set; }
     }
 }

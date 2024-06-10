@@ -22,6 +22,5 @@ namespace Agents.DummyAgents
 
             return Task.FromResult(response);
         }
-    {
     }
 }

@@ -25,6 +25,7 @@
 
                 <Button Grid.Column="0" Margin="10" Content="&lt;&lt;" Command="{Binding BigStepLeftCommand}"/>
                 <Button Grid.Column="1" Margin="10" Content="&lt;" Command="{Binding StepLeftCommand}"/>
+                <Button Grid.Column="2" Margin="10" Content="Process" Command="{Binding ProcessChunkCommand}"/>
                 <Button Grid.Column="3" Margin="10" Content=">"  Command="{Binding StepRightCommand}"/>
                 <Button Grid.Column="4" Margin="10" Content=">>" Command="{Binding BigStepRightCommand}"/>
 
