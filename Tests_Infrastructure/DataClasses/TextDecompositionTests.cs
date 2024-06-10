@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LearningExtraction;
-using ExternalMedia; // Assuming this namespace contains the definition of TextUnit
+using Infrastructure;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Infrastructure;
 using System;
 
-namespace Tests_LearningExtraction
+namespace Tests_Infrastructure
 {
     [TestClass]
     public class TextDecompositionTests
