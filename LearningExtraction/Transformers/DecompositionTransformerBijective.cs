@@ -23,7 +23,7 @@ namespace LearningExtraction
 
             String response = await GetResponse(agent, prompt, maxCharsToProcess, joinLines, retry); // agent best at identifying lower --> upper, not the other way around
 
-            return DecompositionHelper.FromNewLinedString(source.Total, response);
+            return TextDecomposition.FromNewLinedString(source.Total, response);
         }
 
         private static bool Bijects(String prompt, String response)

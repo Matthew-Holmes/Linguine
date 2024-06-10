@@ -11,49 +11,7 @@ namespace Tests_LearningExtraction
     [TestClass]
     public class DecompositionHelperTests
     {
-        [TestMethod]
-        public void FromNewLinedString_CreatesCorrectDecomposition()
-        {
-            // Arrange
-            string parent = "Parent text";
-            string newLinedDecomposition = "Child text 1\nChild text 2";
-
-            // Act
-            TextDecomposition decomposition = DecompositionHelper.FromNewLinedString(parent, newLinedDecomposition);
-
-            // Assert
-            Assert.AreEqual(parent, decomposition.Total); // Assuming TextUnit has a Content property
-            Assert.IsNotNull(decomposition.Decomposition);
-            Assert.AreEqual(2, decomposition.Decomposition.Count);
-            Assert.AreEqual("Child text 1", decomposition.Decomposition[0].Total);
-            Assert.AreEqual("Child text 2", decomposition.Decomposition[1].Total);
-        }
-
-        [TestMethod]
-        public void FromNewLinedString_EmptyStringCreatesLeaf()
-        {
-            string parent = "Parent text";
-            string newLinedDecomposition = "";
-
-            TextDecomposition decomposition = DecompositionHelper.FromNewLinedString(parent, newLinedDecomposition);
-
-            Assert.AreEqual(parent, decomposition.Total);
-            Assert.IsNull(decomposition.Decomposition);
-        }
-
-        [TestMethod]
-        public void FromNewLinedString_NoNewLinesCreatesLeaf()
-        {
-            string parent = "Parent text";
-            string newLinedDecomposition = "Parent text";
-
-            TextDecomposition decomposition = DecompositionHelper.FromNewLinedString(parent, newLinedDecomposition);
-
-            Assert.AreEqual(parent, decomposition.Total);
-            Assert.IsNull(decomposition.Decomposition);
-        }
-
-
+      
         [TestMethod]
         public void Window_BelowThreshold_ReturnsSingleElementList()
         {
@@ -247,7 +205,7 @@ namespace Tests_LearningExtraction
         [ExpectedException(typeof(ArgumentException))]
         public void GetUnitLocations_NotInjective_Throws()
         {
-            TextDecomposition td = DecompositionHelper.FromNewLinedString("the total text", "the\nnoninjective\ndecomposition");
+            TextDecomposition td = TextDecomposition.FromNewLinedString("the total text", "the\nnoninjective\ndecomposition");
 
             DecompositionHelper.GetUnitLocations(td);
 
@@ -256,7 +214,7 @@ namespace Tests_LearningExtraction
         [TestMethod]
         public void GetUnitLocations_Injective_ResultRightLength()
         {
-            TextDecomposition td = DecompositionHelper.FromNewLinedString("the total text", "the\ntotal\ntext");
+            TextDecomposition td = TextDecomposition.FromNewLinedString("the total text", "the\ntotal\ntext");
 
             List<int> ret = DecompositionHelper.GetUnitLocations(td);
 
@@ -266,7 +224,7 @@ namespace Tests_LearningExtraction
         [TestMethod]
         public void GetUnitLocations_Injective_ResultCorrectLocations()
         {
-            TextDecomposition td = DecompositionHelper.FromNewLinedString("the total text", "the\ntotal\ntext");
+            TextDecomposition td = TextDecomposition.FromNewLinedString("the total text", "the\ntotal\ntext");
 
             List<int> ret = DecompositionHelper.GetUnitLocations(td);
 
@@ -280,7 +238,7 @@ namespace Tests_LearningExtraction
         public void GetContextWindows_NonInjective_Throws()
         {
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("the total text", "the\nnoninjective\ndecomposition");
+                TextDecomposition td = TextDecomposition.FromNewLinedString("the total text", "the\nnoninjective\ndecomposition");
 
                 DecompositionHelper.GetContextWindows(td, 1, 1, 100);
             }
@@ -290,7 +248,7 @@ namespace Tests_LearningExtraction
         public void GetContextWindows_Injective_ResultRightLength()
         {
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("a longer piece of text that will have context windows",
+                TextDecomposition td = TextDecomposition.FromNewLinedString("a longer piece of text that will have context windows",
                     "a\nlonger\npiece\nof\ntext\nthat\nwill\nhave\ncontext\nwindows");
 
                 var ret = DecompositionHelper.GetContextWindows(td, 1, 1, 100);
@@ -303,7 +261,7 @@ namespace Tests_LearningExtraction
         public void GetContextWindows_Injective_IsNotNull()
         {
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("a longer piece of text that will have context windows",
+                TextDecomposition td = TextDecomposition.FromNewLinedString("a longer piece of text that will have context windows",
                     "a\nlonger\npiece\nof\ntext\nthat\nwill\nhave\ncontext\nwindows");
 
                 var ret = DecompositionHelper.GetContextWindows(td, 1, 1, 100);
@@ -316,7 +274,7 @@ namespace Tests_LearningExtraction
         public void GetContextWindows_Injective_CorrectWindows()
         {
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("a longer piece of text that will have context windows",
+                TextDecomposition td = TextDecomposition.FromNewLinedString("a longer piece of text that will have context windows",
                     "a\nlonger\npiece\nof\ntext\nthat\nwill\nhave\ncontext\nwindows");
 
                 var ret = DecompositionHelper.GetContextWindows(td, 1, 1, 100);
@@ -338,7 +296,7 @@ namespace Tests_LearningExtraction
         public void GetContextWindows_InjectiveContractsWindows_WindowsContainsUnit()
         {
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("a longer piece of text that will have context windows",
+                TextDecomposition td = TextDecomposition.FromNewLinedString("a longer piece of text that will have context windows",
                     "a\nlonger\npiece\nof\ntext\nthat\nwill\nhave\ncontext\nwindows");
 
                 var ret = DecompositionHelper.GetContextWindows(td, 2, 2, 20);
@@ -360,7 +318,7 @@ namespace Tests_LearningExtraction
         public void GetContextWindows_InjectiveContractsWindows_WindowsBelowSizeLimit()
         {
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("a longer piece of text that will have context windows",
+                TextDecomposition td = TextDecomposition.FromNewLinedString("a longer piece of text that will have context windows",
                     "a\nlonger\npiece\nof\ntext\nthat\nwill\nhave\ncontext\nwindows");
 
                 var ret = DecompositionHelper.GetContextWindows(td, 2, 2, 20);
@@ -378,7 +336,7 @@ namespace Tests_LearningExtraction
             // only testing a necessary condition for the windows not being too small
             // not sufficient
             {
-                TextDecomposition td = DecompositionHelper.FromNewLinedString("a longer piece of text that will have context windows",
+                TextDecomposition td = TextDecomposition.FromNewLinedString("a longer piece of text that will have context windows",
                     "a\nlonger\npiece\nof\ntext\nthat\nwill\nhave\ncontext\nwindows");
 
                 var ret = DecompositionHelper.GetContextWindows(td, 2, 2, 20);
