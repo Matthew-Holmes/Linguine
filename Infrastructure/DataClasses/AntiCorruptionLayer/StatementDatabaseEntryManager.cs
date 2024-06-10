@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class StatementDatabaseEntryManager : ManagerBase
+    internal class StatementDatabaseEntryManager : ManagerBase
     {
         // TODO  - we may want to be able to edit terms; or even merge or insert statements
         // add those methods as reqired
 
-        public StatementDatabaseEntryManager(LinguineDataHandler db) : base(db)
+        internal StatementDatabaseEntryManager(LinguineDataHandler db) : base(db)
         {
         }
 
-        public List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> AttachDefinitions(List<StatementDatabaseEntry> statements)
+        internal List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> AttachDefinitions(List<StatementDatabaseEntry> statements)
         {
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> ret = new List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>>();
 
@@ -32,12 +32,12 @@ namespace Infrastructure
             return ret;
         }
 
-        public List<StatementDatabaseEntry> GetAllStatementsFor(TextualMedia tm)
+        internal List<StatementDatabaseEntry> GetAllStatementsFor(TextualMedia tm)
         {
             return _db.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).ToList();
         }
 
-        public List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain)
+        internal List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain)
         {
             List<StatementDatabaseEntry> chain = new List<StatementDatabaseEntry> { lastInChain };
 
@@ -50,7 +50,7 @@ namespace Infrastructure
             chain.Reverse(); return chain;
         }
 
-        public List<StatementDatabaseEntry> GetStatementsInsideRangeWithEndpoints(TextualMedia tm, int start, int stop)
+        internal List<StatementDatabaseEntry> GetStatementsInsideRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
             return _db.Statements
                 .Where(s => s.Parent == tm)
@@ -58,7 +58,7 @@ namespace Infrastructure
                 .ToList();
         }
 
-        public List<StatementDatabaseEntry> GetStatementsCoveringRangeWithEndpoints(TextualMedia tm, int start, int stop)
+        internal List<StatementDatabaseEntry> GetStatementsCoveringRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
             return _db.Statements
                 .Where(s => s.Parent == tm)
@@ -66,7 +66,7 @@ namespace Infrastructure
                 .ToList();
         }
 
-        public List<StatementDatabaseEntry> PrependUpToContextCheckpoint(List<StatementDatabaseEntry> entries)
+        internal List<StatementDatabaseEntry> PrependUpToContextCheckpoint(List<StatementDatabaseEntry> entries)
         {
             List<StatementDatabaseEntry> toPrepend = FindChainFromContextCheckpoint(entries.First());
 
@@ -77,12 +77,12 @@ namespace Infrastructure
             return toPrepend;
         }
 
-        public int IndexOffEndOfLastStatement(TextualMedia tm)
+        internal int IndexOffEndOfLastStatement(TextualMedia tm)
         {
             return _db.Statements.Where(s => s.Parent == tm).Max(s => s.LastCharIndex) + 1;
         }
 
-        public void RemoveAllFrom(StatementDatabaseEntry statement, int maxCollateral = 100)
+        internal void RemoveAllFrom(StatementDatabaseEntry statement, int maxCollateral = 100)
         {
             List<StatementDatabaseEntry> toRemove = _db.Statements
                 .Where(s => s.Parent == statement.Parent && s.FirstCharIndex >= statement.FirstCharIndex)
@@ -99,7 +99,7 @@ namespace Infrastructure
                     d => toRemove.Contains(d.StatementDatabaseEntry)));
         }
 
-        public void AddContinuationOfChain(
+        internal void AddContinuationOfChain(
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
         {
             if (statementsChain.First().Item1.Previous is null)
@@ -109,7 +109,7 @@ namespace Infrastructure
             AddInternal(statementsChain);
         }
 
-        public void AddStartOfChain(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
+        internal void AddStartOfChain(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
         {
             if (statementsChain[0].Item1.Previous is not null)
             {
@@ -118,7 +118,7 @@ namespace Infrastructure
             AddInternal(statementsChain);
         }
 
-        private void AddInternal(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
+        internal void AddInternal(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
         {
             // do rigorous checking so that we know the database maintains integrity
 
