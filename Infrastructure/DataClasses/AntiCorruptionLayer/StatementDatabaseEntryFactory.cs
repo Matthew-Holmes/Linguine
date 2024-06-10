@@ -8,7 +8,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LearningExtraction
+namespace Infrastructure
 {
     public static class StatementDatabaseEntryFactory
     {
