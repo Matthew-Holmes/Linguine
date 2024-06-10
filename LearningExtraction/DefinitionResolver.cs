@@ -35,7 +35,7 @@ namespace LearningExtraction
             TextDecomposition td,
             TextDecomposition? injective = null)
         {
-            // returns the index of the correct defition
+            // returns the index of the correct definition
             // if the provided Decomposition td is not injective then must provide a injective version that bijects
 
             if (!td.Injects())

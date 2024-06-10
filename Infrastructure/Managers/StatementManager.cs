@@ -38,7 +38,12 @@ namespace Infrastructure
 
         public int IndexOffEndOfLastStatement(TextualMedia tm)
         {
-            return _db.Statements.Where(s => s.Parent == tm).Max(s => s.LastCharIndex) + 1;
+            var statements = _db.Statements.Where(s => s.Parent == tm);
+            if (!statements.Any())
+            {
+                return -1;
+            }
+            return statements.Max(s => s.LastCharIndex) + 1;
         }
 
         public void AddInitialStatements(List<Statement> statements)
@@ -75,6 +80,13 @@ namespace Infrastructure
                 StatementDatabaseEntryFactory.FromStatements(statements, previous, previousEntry));
         }
 
+        public Statement? GetLastStatement(TextualMedia tm)
+        {
+            // don't use this in other methods here to avoid calling intensive methods again
+            int lastIndex = IndexOffEndOfLastStatement(tm);
+
+            return GetStatementsCoveringRange(tm, lastIndex - 1, lastIndex - 1).LastOrDefault() ?? null;
+        }
 
         private static TextualMedia VerifyChainAndGetParent(List<Statement> statements)
         {

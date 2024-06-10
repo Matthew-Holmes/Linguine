@@ -123,7 +123,7 @@ namespace Linguine.Tabs
 
             while (true)
             {
-                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictioary");
+                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictionary");
                 if (name is not null && name != "") { break; }
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }

@@ -20,8 +20,7 @@ namespace Linguine
     {
         public event EventHandler? Loaded;
         public event EventHandler? LoadingFailed;
-        public bool HasManagers { get; private set; } = false;
-
+        
         private LinguineDataHandler? _linguine;
         private LinguineDataHandler Linguine
         {
@@ -42,7 +41,6 @@ namespace Linguine
                 _linguine = value;
             }
         }
-
 
         public MainModel()
         {
@@ -70,7 +68,7 @@ namespace Linguine
                 Linguine = new LinguineDataHandler(ConfigManager.ConnectionString);
                 Linguine.Database.EnsureCreated();
 
-                LoadManagers(); HasManagers = true;
+                LoadManagers(); 
 
                 Loaded?.Invoke(this, EventArgs.Empty);
             }
@@ -133,7 +131,7 @@ namespace Linguine
 
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
 
-            DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);
+            DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);   
 
             return true;
         }

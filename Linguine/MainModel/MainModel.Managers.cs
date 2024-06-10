@@ -9,6 +9,8 @@ namespace Linguine
 {
     public partial class MainModel
     {
+        public bool HasManagers { get; private set; } = false;
+
         private TextualMediaManager?        _textualMediaManager;
         private ExternalDictionaryManager?  _externalDictionaryManager;
         private VariantsManager?            _variantsManager;
@@ -22,6 +24,8 @@ namespace Linguine
             _textualMediaSessionManager = new TextualMediaSessionManager(Linguine);
             _variantsManager            = new VariantsManager(Linguine);
             _statementManager           = new StatementManager(Linguine);
+
+            HasManagers = true;
         }
 
         public TextualMediaManager TextualMediaManager

@@ -14,26 +14,24 @@ namespace LearningExtraction
     public class TextDecomposer
     {
         // TODO - refactor this produce statements
-        public int MaxVolumeToProcess { get; set; }     = 300; // if given text larger than this, chunk it
-        public int JoinCharacterCount { get; set; }     = 20;
-        public int PaddingCharacterCount { get; set; }  = 30; // longest English word is 45 letters 20+30=50
+        public int MaxVolumeToProcess { get; set; }  // if given text larger than this, chunk it
+        public int JoinCharacterCount { get; set; }  
+        public int PaddingCharacterCount { get; set; } 
 
         public AgentBase StandardAgent { get; set; }
         public AgentBase HighPerformanceAgent { get; set; }
         public AgentBase FallbackAgent { get; set; }
 
-        public async Task<TextDecomposition> DecomposeText(TextualMedia textSource, bool mustInject = true, bool mustBiject = false)
+        public async Task<TextDecomposition> DecomposeText(String text, bool mustInject = true, bool mustBiject = false)
         {
-            if (textSource.Text.Length > MaxVolumeToProcess)
+            if (text.Length > MaxVolumeToProcess)
             {
                 // TODO - how to ensure that these will be valid values??
-                List<String> windows = TextualMediaHelper.Windowed(textSource, MaxVolumeToProcess, JoinCharacterCount, PaddingCharacterCount);
+                List<String> windows = TextualMediaHelper.Window(text, MaxVolumeToProcess, JoinCharacterCount, PaddingCharacterCount);
 
                 // Asynchronously decompose each window
                 var decompositionTasks = windows.Select(window =>
-                    DecomposeText(new TextualMedia { 
-                                    Text = window,
-                                    Description = textSource.Description },
+                    DecomposeText(window,
                                   mustInject,
                                   mustBiject));
 
@@ -41,23 +39,23 @@ namespace LearningExtraction
                 TextDecomposition[] partialDecompositions = await Task.WhenAll(decompositionTasks);
 
                 // Combine partial decompositions
-                return Combine(partialDecompositions.ToList(), JoinCharacterCount, PaddingCharacterCount, textSource, mustInject, mustBiject);
+                return Combine(partialDecompositions.ToList(), JoinCharacterCount, PaddingCharacterCount, text, mustInject, mustBiject);
             }
 
-            String newLinedDecomposition = await StandardAgent.GetResponse(textSource.Text); // only called in the base case
-            TextDecomposition ret = TextDecomposition.FromNewLinedString(textSource.Text, newLinedDecomposition);
+            String newLinedDecomposition = await StandardAgent.GetResponse(text); // only called in the base case
+            TextDecomposition ret = TextDecomposition.FromNewLinedString(text, newLinedDecomposition);
 
             if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
             {
                 // first attempt failed, use something more powerful
-                String highPoweredAttempt = await HighPerformanceAgent.GetResponse(textSource.Text);
-                ret = TextDecomposition.FromNewLinedString(textSource.Text, highPoweredAttempt);
+                String highPoweredAttempt = await HighPerformanceAgent.GetResponse(text);
+                ret = TextDecomposition.FromNewLinedString(text, highPoweredAttempt);
 
                 if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
                 {
                     // do default
-                    String finalAttempt = await FallbackAgent.GetResponse(textSource.Text);
-                    ret = TextDecomposition.FromNewLinedString(textSource.Text, finalAttempt);
+                    String finalAttempt = await FallbackAgent.GetResponse(text);
+                    ret = TextDecomposition.FromNewLinedString(text, finalAttempt);
 
                     if ((mustBiject && !ret.Bijects()) || (mustInject && !ret.Injects()))
                     {
@@ -69,7 +67,7 @@ namespace LearningExtraction
         }
 
         private TextDecomposition Combine(List<TextDecomposition> partialDecompositions, int joinCharacterCount, int paddingCharacterCount,
-            TextualMedia parent, bool mustInject, bool mustBiject)
+            String parent, bool mustInject, bool mustBiject)
         {
             // base case 
             if (partialDecompositions.Count == 1)
@@ -112,12 +110,12 @@ namespace LearningExtraction
             }
 
             // combine the first and second
-            TextDecomposition both = new TextDecomposition(new String(parent.Text), lhs.Copy().Decomposition);
+            TextDecomposition both = new TextDecomposition(parent, lhs.Copy().Decomposition);
             both.Decomposition.AddRange(rhs.Copy().Decomposition);
 
             for (int i = 1; mustInject && !both.Injects(); i++)
             {
-                both = new TextDecomposition(new String(parent.Text), lhs.Copy().Decomposition);
+                both = new TextDecomposition(parent, lhs.Copy().Decomposition);
                 both.Decomposition.AddRange(rhs.Copy().Decomposition.Skip(i));
 
                 if (i == rhs.Decomposition.Count)
