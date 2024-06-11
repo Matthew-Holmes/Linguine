@@ -34,10 +34,10 @@ namespace Linguine
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            await DoProcessingStep(tm, 1000);
+            await DoProcessingStep(tm, 1000, 20);
         }
 
-        private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm, int chars)
+        private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm, int chars, int maxStatements)
         {
             int end = StatementManager.IndexOffEndOfLastStatement(tm);
 
@@ -55,15 +55,16 @@ namespace Linguine
                 chars = tm.Text.Length - end;
             }
 
-            return await DoProcessingStepWork(tm, end, chars);
+            return await DoProcessingStepWork(tm, end, chars, maxStatements);
            
         }
 
-        private async Task<List<Statement>?> DoProcessingStepWork(TextualMedia tm, int end, int chars)
+        private async Task<List<Statement>?> DoProcessingStepWork(
+            TextualMedia tm, int end, int chars, int maxStatements)
         {
             List<StatementBuilder> builders = new List<StatementBuilder>();
 
-            await PopulateBuilders(builders, tm, end, chars);
+            await PopulateBuilders(builders, tm, end, chars, maxStatements);
 
             SetIndices(builders, end);
 
@@ -79,7 +80,7 @@ namespace Linguine
         }
 
         private async Task PopulateBuilders(
-            List<StatementBuilder> builders, TextualMedia tm, int end, int chars)
+            List<StatementBuilder> builders, TextualMedia tm, int end, int chars, int maxStatements)
         {
             String chunk = tm.Text.Substring(end, chars);
 
@@ -97,6 +98,7 @@ namespace Linguine
                 statementTexts.RemoveAt(statementTexts.Count() - 1); // and a bit more for good measure
             }
 
+
             foreach (String total in statementTexts)
             {
                 if (String.IsNullOrWhiteSpace(total))
@@ -107,6 +109,8 @@ namespace Linguine
                 builders.Add(new StatementBuilder());
                 builders.Last().Parent = tm;
                 builders.Last().StatementText = total;
+
+                if (builders.Count > maxStatements) { break; }
             }
         }
 
@@ -297,13 +301,13 @@ namespace Linguine
                 for (int j = 1; i - j > 0 && j < 5; j++)
                 {
                     prompt.AppendLine(statementTotals[i - j]);
-            }
+                }
 
-            prompt.AppendLine();
+                prompt.AppendLine();
                 prompt.AppendLine("Now considering statements:");
 
                 for (int j = 0; j < statementTotals.Count && j < 3; j++)
-            {
+                {
                     prompt.Append(statementTotals[i + j]);
                 }
 
