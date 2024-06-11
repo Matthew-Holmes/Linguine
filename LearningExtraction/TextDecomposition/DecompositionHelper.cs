@@ -107,7 +107,7 @@ namespace LearningExtraction
                 int pos = injective.Total.Substring(consumed).IndexOf(unit);
                 ret.Add(consumed + pos);
 
-                consumed += pos;
+                consumed += pos + unit.Length;
             }
 
             return ret;
@@ -123,10 +123,11 @@ namespace LearningExtraction
             List<String> ret = new List<String>();
 
             List<int> unitLocations = GetUnitLocations(injective);
+
             unitLocations.Add(injective.Total.Length); // off the end location
 
             int lhsUnit = 0;
-            int rhsUnit = Math.Min(RHSContextUnits, injective.Units.Count);
+            int rhsUnit = Math.Min(RHSContextUnits, injective.Units.Count - 1);
 
             int lhsTmp, rhsTmp;
 
@@ -137,7 +138,7 @@ namespace LearningExtraction
                 {
                     lhsUnit++;
                 }
-                                                                 //index of last true unit location entry - we added an off the end index too               
+                //index of last true unit location entry - we added an off the end index too               
                 while (rhsUnit < i + RHSContextUnits && rhsUnit < unitLocations.Count - 2 )
                 {
                     rhsUnit++;
