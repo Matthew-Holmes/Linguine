@@ -41,9 +41,11 @@ namespace Infrastructure
         {
             List<StatementDatabaseEntry> chain = new List<StatementDatabaseEntry> { lastInChain };
 
-            while (chain.Last().ContextCheckpoint is not null)
+            while (chain.Last().ContextCheckpoint is null)
             {
-                chain.Add(lastInChain.Previous); // will throw if first statement doesn't have checkpoint
+                _db.Entry(chain.Last()).Reference(e => e.Previous).Load();
+                StatementDatabaseEntry previous = chain.Last().Previous;
+                chain.Add(chain.Last().Previous); // will throw if first statement doesn't have checkpoint
                 // it should, so a throw is correct
             }
 

@@ -22,7 +22,7 @@ namespace Infrastructure
         public int LastCharIndex { get; set; }
 
         // efficient storing of contextual information
-        public StatementDatabaseEntry? Previous { get; set; } // null if the first statement of a piece of media
+        public virtual StatementDatabaseEntry? Previous { get; set; } // null if the first statement of a piece of media
         public int? PreviousKey { get; set; }
         public List<String>? ContextCheckpoint { get; set; } // so don't have to replay all the way to root
         public List<int> ContextDeltaRemovalsDescendingIndex { get; set; }
