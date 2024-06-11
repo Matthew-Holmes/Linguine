@@ -9,7 +9,7 @@ namespace Agents
 {
     public class StatementGeneratorAgent : OpenAIProcessingBase
     {
-        private static String systemMessage = "break the following text into statements, usually sentences for conventional text, they should be long enough that with context provided a user can understand the meaning of the statement; the statements must be verbatim from the text, mapping injectively into it. format \nstatement1\nstatement2 etc";
+        private static String systemMessage = "break the following text into the statements composing it, usually sentences for conventional text, they should be long enough that with context provided a user can understand the meaning of the statement; the statements must be verbatim from the text DO NOT SUMMARISE, DO NOT NUMBER THE STATEMENTS, the statements should map injectively into the text. Return each statement on a new line";
 
         public StatementGeneratorAgent(string apiKey, bool highPowered = false) : base(apiKey)
         {
