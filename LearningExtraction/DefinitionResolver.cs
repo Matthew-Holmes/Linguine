@@ -27,7 +27,7 @@ namespace LearningExtraction
         // TODO - refactor this to work on statements
         public List<List<DictionaryDefinition>> GetPossibleDefinitions(TextDecomposition td)
         {
-            return td.Units.Select(u => Dictionary.TryGetDefinition(u)).ToList();
+            return td.Units?.Select(u => Dictionary.TryGetDefinition(u)).ToList() ?? new List<List<DictionaryDefinition>>();
         }
 
         public async Task<List<int>> IdentifyCorrectDefinitions(
@@ -112,7 +112,7 @@ namespace LearningExtraction
             // TODO - need to think about how to manage multiple languages
             // this should probably live with the agent
 
-            if (td.Units.Count != defs.Count || defs.Count != contexts.Count)
+            if ((td.Units?.Count ?? 0) != defs.Count || defs.Count != contexts.Count)
             {
                 throw new ArgumentException("all provided enumerables must be the same length");
             }

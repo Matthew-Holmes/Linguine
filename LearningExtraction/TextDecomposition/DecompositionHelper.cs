@@ -99,6 +99,11 @@ namespace LearningExtraction
                 throw new ArgumentException("provided decomposition must inject");
             }
 
+            if (injective.Units is null)
+            {
+                return new List<int>();
+            }
+
             int consumed = 0;
             List<int> ret = new List<int>();
 
@@ -123,6 +128,8 @@ namespace LearningExtraction
             List<String> ret = new List<String>();
 
             List<int> unitLocations = GetUnitLocations(injective);
+
+            if (unitLocations.Count == 0) { return new List<string>(); }
 
             unitLocations.Add(injective.Total.Length); // off the end location
 

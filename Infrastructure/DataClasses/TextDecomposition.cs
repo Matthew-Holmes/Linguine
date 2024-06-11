@@ -25,10 +25,10 @@ namespace Infrastructure
         public List<TextDecomposition>? Decomposition { get; private set; }
 
         [JsonIgnore]
-        public List<String> Units => Decomposition.Select(x => x.Total).ToList();
+        public List<String>? Units => Decomposition?.Select(x => x.Total).ToList() ?? null;
 
         [JsonIgnore]
-        public String NewLinedUnitsString => String.Join('\n', Units);
+        public String NewLinedUnitsString => Units is not null ? String.Join('\n', Units) : "";
 
         public TextDecomposition(String total, List<TextDecomposition>? decomposition)
         {

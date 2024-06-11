@@ -18,10 +18,6 @@ namespace LearningExtraction
 
         public async Task<TextDecomposition> RootUnits(TextDecomposition priorDecomposition)
         {
-            if (priorDecomposition.Decomposition == null)
-            {
-                throw new ArgumentException("No units to normalise");
-            }
 
             TextDecomposition ret = await DecompositionTransformerBijective.ApplyAgent(Agent, priorDecomposition, MaxVolumeToProcess, JoinLineCount, 0);
 

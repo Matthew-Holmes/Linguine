@@ -18,7 +18,7 @@ namespace LearningExtraction
             // applies windowing if the prompt would be too big
 
             // ensures that as many lines of response as in prompt
-            if (source.Decomposition.Count == 0)
+            if ((source.Decomposition?.Count ?? 0) == 0)
             {
                 return TextDecomposition.FromNewLinedString(source.Total, "");
             }
