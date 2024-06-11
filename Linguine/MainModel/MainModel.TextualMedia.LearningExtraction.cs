@@ -311,7 +311,7 @@ namespace Linguine
                 prompt.AppendLine();
                 prompt.AppendLine("Now considering statements:");
 
-                for (int j = 0; j < statementTotals.Count && j < 3; j++)
+                for (int j = 0; j < statementTotals.Count - i && j < 3; j++)
                 {
                     prompt.Append(statementTotals[i + j]);
                 }

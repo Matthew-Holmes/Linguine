@@ -47,9 +47,9 @@ namespace Infrastructure
                 toAdd.LastCharIndex = statement.LastCharIndex;
                 toAdd.Parent = statement.Parent;
 
-                if (previous is null || cnt % contextualiseEvery == 0)
+                if (previous is null || cnt % contextualiseEvery == 0 || cnt == statements.Count() - 1)
                 {
-                    // at the start
+                    // at the start, at a regular checkpoint, or tying off at the end
                     toAdd.ContextCheckpoint = statement.StatementContext;
                     toAdd.ContextDeltaRemovalsDescendingIndex = new List<int>();
                     toAdd.ContextDeltaInsertionsDescendingIndex = new List<Tuple<int, string>>();

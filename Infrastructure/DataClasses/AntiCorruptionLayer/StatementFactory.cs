@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -149,7 +150,7 @@ namespace Infrastructure
             bool listIncludesFirstStatement = entries.First().Item1.Previous is null;
             bool firstStatementHasContextCheckpoint = entries.First().Item1.ContextCheckpoint != null;
 
-            if (!listIncludesFirstStatement || !firstStatementHasContextCheckpoint)
+            if (!(listIncludesFirstStatement || firstStatementHasContextCheckpoint))
             {
                 throw new ArgumentException("can't resolve contexts without a checkpoint!");
             }

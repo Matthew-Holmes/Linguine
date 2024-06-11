@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Infrastructure
 
         internal List<StatementDatabaseEntry> GetAllStatementsEntriesFor(TextualMedia tm)
         {
-            return _db.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).ToList();
+            return _db.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
         }
 
         internal List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain)
@@ -57,6 +58,7 @@ namespace Infrastructure
             return _db.Statements
                 .Where(s => s.Parent == tm)
                 .Where(s => s.FirstCharIndex >= start && s.LastCharIndex <= stop)
+                .Include(s => s.Previous)
                 .ToList();
         }
 
@@ -65,6 +67,7 @@ namespace Infrastructure
             return _db.Statements
                 .Where(s => s.Parent == tm)
                 .Where(s => s.LastCharIndex >= start && s.FirstCharIndex <= stop)
+                .Include(s => s.Previous)
                 .ToList();
         }
 
