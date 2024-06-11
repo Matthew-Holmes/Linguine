@@ -34,7 +34,12 @@ namespace Linguine
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            await DoProcessingStep(tm, 1000, 20);
+            List<Statement> ret = await DoProcessingStep(tm, 1000, 20);
+
+            if (ret is not null)
+            {
+                StatementManager.AddStatements(ret);
+            }
         }
 
         private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm, int chars, int maxStatements)
@@ -230,7 +235,7 @@ namespace Linguine
 
         private void SetCorrectDefinitions(TextDecomposition textDecomposition, List<int> correctIndices, List<List<DictionaryDefinition>> possibleDefs)
         {
-            if (textDecomposition.Decomposition.Count != correctIndices.Count
+            if ((textDecomposition.Decomposition?.Count ?? 0) != correctIndices.Count
                       || correctIndices.Count != possibleDefs.Count)
             {
                 throw new Exception("all lists must be of the same size");
@@ -352,7 +357,10 @@ namespace Linguine
             foreach (String line in raw)
             {
                 if (!line.Contains(':')) { continue; }
-                ret.Add(int.Parse(line.Split(':')[0]) - 1); // agent uses one indexing
+                try
+                {
+                    ret.Add(int.Parse(line.Split(':')[0]) - 1); // agent uses one indexing
+                } catch { continue; } // we can live without this, especially if the agent did something weird
             }
 
             return ret;
