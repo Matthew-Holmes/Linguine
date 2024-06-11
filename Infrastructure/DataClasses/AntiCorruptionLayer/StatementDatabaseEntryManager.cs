@@ -135,6 +135,7 @@ namespace Infrastructure
 
             _db.Statements.AddRange(statementsChain.Select(s => s.Item1));
             _db.StatementDefinitions.AddRange(statementsChain.SelectMany(s => s.Item2)); // flattens list
+            _db.SaveChanges();
         }
     }
 }
