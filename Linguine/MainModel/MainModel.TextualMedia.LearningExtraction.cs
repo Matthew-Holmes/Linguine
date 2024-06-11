@@ -22,12 +22,12 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        private TextDecomposer? ToStatementsDecomposer { get; set; }
-        private TextDecomposer? FromStatementsDecomposer { get; set; }
-        private UnitRooter? UnitRooter { get; set; }    
-        private DefinitionResolver? DefinitionResolver { get; set; }
-        private ContextChangeIdentificationAgent? ContextChangeIdentificationAgent {get; set;}
-        private ContextUpdateAgent? ContextUpdateAgent { get; set;}
+        private TextDecomposer?                    ToStatementsDecomposer           { get; set; }
+        private TextDecomposer?                    FromStatementsDecomposer         { get; set; }
+        private UnitRooter?                        UnitRooter                       { get; set; }    
+        private DefinitionResolver?                DefinitionResolver               { get; set; }
+        private ContextChangeIdentificationAgent?  ContextChangeIdentificationAgent {get; set;}
+        private ContextUpdateAgent?                ContextUpdateAgent               { get; set;}
 
         internal async Task ProcessNextChunk(int sessionID)
         {
@@ -103,7 +103,6 @@ namespace Linguine
                 statementTexts.RemoveAt(statementTexts.Count() - 1); // and a bit more for good measure
             }
 
-
             foreach (String total in statementTexts)
             {
                 if (String.IsNullOrWhiteSpace(total))
@@ -163,16 +162,16 @@ namespace Linguine
         {
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
 
-            ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(apiKey);
+            ToStatementsDecomposer   = TextDecomposerFactory.MakeStatementsDecomposer(apiKey);
             FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(apiKey);
 
             ContextChangeIdentificationAgent = new ContextChangeIdentificationAgent(apiKey);
-            ContextUpdateAgent = new ContextUpdateAgent(apiKey);
+            ContextUpdateAgent               = new ContextUpdateAgent(apiKey);
 
-            UnitRooter = new UnitRooter();
+            UnitRooter       = new UnitRooter();
             UnitRooter.Agent = new UnitRootingAgent(apiKey);
 
-            DefinitionResolver = new DefinitionResolver();
+            DefinitionResolver       = new DefinitionResolver();
             DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);
 
             // TODO - factories?
