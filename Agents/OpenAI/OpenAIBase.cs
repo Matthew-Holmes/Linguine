@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Core;
 using Helpers;
 using Newtonsoft.Json;
 
@@ -71,7 +73,26 @@ namespace Agents.OpenAI
 
             var content         = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
-            var response        = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+            HttpResponseMessage? response;
+
+            for (int retryCnt = 0; /* will throw */; retryCnt++)
+            {
+                try
+                {
+                    response = await _httpClient.PostAsync(
+                        "https://api.openai.com/v1/chat/completions", content);
+                    break;
+                } 
+                catch (Exception e)
+                {
+                    if (retryCnt > 3)
+                    {
+                        throw e;
+                    }
+                    Thread.Sleep(100);
+                }
+            }
+
             var responseString  = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
