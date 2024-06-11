@@ -291,17 +291,22 @@ namespace Linguine
                 prompt.AppendLine(statementTotals[i]);
             } else
             {
-                prompt.AppendLine("Changes between:");
-                prompt.AppendLine(statementTotals[i - 1]);
-                prompt.AppendLine(statementTotals[i]);
+                prompt.AppendLine("Was for following statements:");
+                prompt.AppendLine();
+
+                for (int j = 1; i - j > 0 && j < 5; j++)
+                {
+                    prompt.AppendLine(statementTotals[i - j]);
             }
 
             prompt.AppendLine();
-            prompt.Append("From Text:");
+                prompt.AppendLine("Now considering statements:");
 
-            foreach (String line in statementTotals)
+                for (int j = 0; j < statementTotals.Count && j < 3; j++)
             {
-                prompt.AppendLine(line);
+                    prompt.Append(statementTotals[i + j]);
+                }
+
             }
 
             String response = await ContextUpdateAgent.GetResponse(prompt.ToString());
