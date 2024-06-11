@@ -217,7 +217,7 @@ namespace Linguine
             }
 
             var correctDefTask = taskData.Select(items => DefinitionResolver.IdentifyCorrectDefinitions(
-                items.Item2, items.Item1.RootedDecomposition, items.Item1.InjectiveDecomposition));
+                items.Item2, items.Item1.RootedDecomposition, items.Item1.InjectiveDecomposition, items.Item1.Context));
 
             List<int>[] correct = await Task.WhenAll(correctDefTask);  
 

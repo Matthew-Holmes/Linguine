@@ -33,7 +33,8 @@ namespace LearningExtraction
         public async Task<List<int>> IdentifyCorrectDefinitions(
             List<List<DictionaryDefinition>> defs,
             TextDecomposition td,
-            TextDecomposition? injective = null)
+            TextDecomposition? injective = null,
+            List<String>? parentContext = null)
         {
             // returns the index of the correct definition
             // if the provided Decomposition td is not injective then must provide a injective version that bijects
@@ -59,7 +60,7 @@ namespace LearningExtraction
             List<String> contexts = DecompositionHelper.GetContextWindows(
                 injective, LHSContextUnits, RHSContextUnits, MaxContextChars);
 
-            List<String> prompts = FormPromptsOneIndexed(td, defs, contexts);
+            List<String> prompts = FormPromptsOneIndexed(td, defs, contexts, parentContext);
 
             // the prompt is empty if there is no work to be done
             Task<String> defaultTask = Task<String>.Factory.StartNew(() => "0");
@@ -103,7 +104,7 @@ namespace LearningExtraction
             
         }
 
-        private List<String> FormPromptsOneIndexed(TextDecomposition td, List<List<DictionaryDefinition>> defs, List<String> contexts)
+        private List<String> FormPromptsOneIndexed(TextDecomposition td, List<List<DictionaryDefinition>> defs, List<String> contexts, List<String> parentContext)
         {
             // gets the prompts to pass to the agent
             // if there is no decision to be made then the prompt is empty
@@ -127,9 +128,18 @@ namespace LearningExtraction
 
                 builder.Append("Word: ");
                 builder.Append(td.Units[i]);
+
+                builder.AppendLine();
                 builder.AppendLine();
 
-                builder.Append("Context: ");
+                builder.AppendLine("Text source summary and context:");
+                foreach (String parentContextItem in parentContext)
+                {
+                    builder.AppendLine(parentContextItem);
+                }
+                builder.AppendLine();
+
+                builder.AppendLine("Surrounding Context: ");
                 builder.Append(contexts[i]);
                 builder.AppendLine();
 
