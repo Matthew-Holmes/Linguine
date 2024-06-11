@@ -85,6 +85,8 @@ namespace Infrastructure
             // don't use this in other methods here to avoid calling intensive methods again
             int lastIndex = IndexOffEndOfLastStatement(tm);
 
+            if (lastIndex == -1) { return null; } // no statements
+
             return GetStatementsCoveringRange(tm, lastIndex - 1, lastIndex - 1).LastOrDefault() ?? null;
         }
 

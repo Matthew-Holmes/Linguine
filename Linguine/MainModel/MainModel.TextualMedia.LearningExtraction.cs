@@ -1,6 +1,7 @@
 ﻿using Agents;
 using Infrastructure;
 using LearningExtraction;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Printing;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,31 +34,16 @@ namespace Linguine
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            await DoProcessingStepInternal(tm, 1000);
+            await DoProcessingStep(tm, 1000);
         }
 
-        public async Task<List<Statement>?> DoProcessingStep(String textualMediaName, int chars)
-        {
-            TextualMedia? tm = TextualMediaManager.GetByName(textualMediaName);
-            if (tm is null)
-            {
-                return await Task.FromResult<List<Statement>?>(null);
-            }
-
-            return await DoProcessingStepInternal(tm, chars);
-        }
-
-        private async Task<List<Statement>?> DoProcessingStepInternal(TextualMedia tm, int chars)
+        private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm, int chars)
         {
             int end = StatementManager.IndexOffEndOfLastStatement(tm);
 
             if (end == tm.Text.Length)
             {
                 return await Task.FromResult<List<Statement>?>(null);
-            }
-            else if (end == 0)
-            {
-                throw new Exception("zero length statement implied");
             }
             else if (end == -1)
             {
@@ -68,62 +55,84 @@ namespace Linguine
                 chars = tm.Text.Length - end;
             }
 
-            List<String> statementTotals = await BreakIntoStatements(tm.Text.Substring(end, chars));
-            List<String> previousContext;
-
-            if (end == 0)
-            {
-                previousContext = await FormInitialContext(tm);
-            } 
-            else
-            {
-                Statement? previousStatement = StatementManager.GetLastStatement(tm);
-                if (previousStatement is null) { throw new Exception("something went wrong"); }
-                previousContext = previousStatement.StatementContext;
-            }
-
-            List<List<String>> contexts = await FormContexts(previousContext, statementTotals);
-
-            if (contexts.Count != statementTotals.Count)
-            {
-                throw new Exception("something went from forming the contexts");
-            }
-
-            return await DecomposeAndAttachDefinitions(statementTotals, contexts, tm, end);
+            return await DoProcessingStepWork(tm, end, chars);
+           
         }
 
-        private async Task<List<Statement>> DecomposeAndAttachDefinitions(List<String> statementTotals, List<List<String>> contexts, TextualMedia parent, int startOfStatementsIndex)
+        private async Task<List<Statement>?> DoProcessingStepWork(TextualMedia tm, int end, int chars)
+        {
+            List<StatementBuilder> builders = new List<StatementBuilder>();
+
+            await PopulateBuilders(builders, tm, end, chars);
+
+            SetIndices(builders, end);
+
+            List<String> previousContext = await GetPreviousContext(tm);
+
+            await FormContexts(previousContext, builders);
+
+            await Decompose(builders);
+
+            await AttachCorrectDefinitions(builders);
+
+            return builders.Select(b => b.ToStatement()).ToList();
+        }
+
+        private async Task PopulateBuilders(
+            List<StatementBuilder> builders, TextualMedia tm, int end, int chars)
+        {
+            String chunk = tm.Text.Substring(end, chars);
+
+            List<String> statementTexts = await BreakIntoStatements(chunk); // 
+
+            if (statementTexts.Count() < 3)
+            {
+                throw new Exception("Failed to generate enough statements");
+            }
+
+            // no need to clip if the text is being processed all in one go
+            if (tm.Text.Length != chars)
+            {
+                statementTexts.RemoveAt(statementTexts.Count() - 1); // remove anything that got clipped
+                statementTexts.RemoveAt(statementTexts.Count() - 1); // and a bit more for good measure
+            }
+
+            foreach (String total in statementTexts)
+            {
+                if (String.IsNullOrWhiteSpace(total))
+                {
+                    continue;
+                }
+
+                builders.Add(new StatementBuilder());
+                builders.Last().Parent = tm;
+                builders.Last().StatementText = total;
+            }
+        }
+
+        private async Task<List<String>> GetPreviousContext(TextualMedia tm)
+        {
+            Statement? previousStatement = StatementManager.GetLastStatement(tm);
+
+            if (previousStatement is null)
+            {
+                return await FormInitialContext(tm);
+            }
+            else
+            {
+                return previousStatement.StatementContext;
+            }
+        }
+
+        private async Task Decompose(List<StatementBuilder> builders)
         {
             if (FromStatementsDecomposer is null)
             {
-                String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
-                FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(apiKey);
-
-                UnitRooter = new UnitRooter();
-                UnitRooter.Agent = new UnitRootingAgent(apiKey);
-
-                DefinitionResolver = new DefinitionResolver();
-                DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);
-
-                // TODO - factories?
-                List<String> dictionaries = ExternalDictionaryManager.AvailableDictionaries();
-                if (dictionaries.Count == 0)
-                {
-                    throw new Exception("no dictionary!");
-                } 
-                else if (dictionaries.Count > 1)
-                {
-                    throw new NotImplementedException();
-                }
-                else
-                {
-                    DefinitionResolver.Dictionary = ExternalDictionaryManager.GetDictionary(dictionaries[0]) 
-                        ?? throw new Exception();
-                }
+                PrepareWorkers();
             }
             
-            var decompositionTasks = statementTotals.Select(statement =>
-                FromStatementsDecomposer.DecomposeText(statement));
+            var decompositionTasks = builders.Select(
+                b => FromStatementsDecomposer.DecomposeText(b.StatementText));
 
             TextDecomposition[] injectives = await Task.WhenAll(decompositionTasks);
 
@@ -132,76 +141,87 @@ namespace Linguine
 
             TextDecomposition[] rooted = await Task.WhenAll(rootingTasks);
 
-            List<Tuple<TextDecomposition, TextDecomposition>> decompData 
-                = await AttachCorrectDefinitions(statementTotals, injectives, rooted);
-
-            return BuildStatements(parent, startOfStatementsIndex, decompData, contexts);
-        }
-
-        private List<Statement> BuildStatements(TextualMedia parent, int startOfStatementsIndex, List<Tuple<TextDecomposition, TextDecomposition>> decompData, List<List<String>> contexts)
-        {
-            if (decompData.Count != contexts.Count)
+            for (int i = 0; i != builders.Count; i++)
             {
-                throw new Exception("something went wrong");
+                builders[i].InjectiveDecomposition = injectives[i];
+                builders[i].RootedDecomposition = rooted[i];
             }
 
-            List<Statement> ret = new List<Statement>();
+            return;
+        }
+
+        private void PrepareWorkers()
+        {
+            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
+
+            ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(apiKey);
+            FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(apiKey);
+
+            ContextChangeIdentificationAgent = new ContextChangeIdentificationAgent(apiKey);
+            ContextUpdateAgent = new ContextUpdateAgent(apiKey);
+
+            UnitRooter = new UnitRooter();
+            UnitRooter.Agent = new UnitRootingAgent(apiKey);
+
+            DefinitionResolver = new DefinitionResolver();
+            DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);
+
+            // TODO - factories?
+            List<String> dictionaries = ExternalDictionaryManager.AvailableDictionaries();
+            if (dictionaries.Count == 0)
+            {
+                throw new Exception("no dictionary!");
+            }
+            else if (dictionaries.Count > 1)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                DefinitionResolver.Dictionary = ExternalDictionaryManager.GetDictionary(dictionaries[0])
+                    ?? throw new Exception();
+            }
+        }
+
+        private void SetIndices(List<StatementBuilder> builders, int startOfStatementsIndex)
+        {
+            if (builders.Select(b => b.Parent).Distinct().Count() != 1)
+            {
+                throw new Exception("something went wrong!");
+            }
+
+            String parentText = builders.FirstOrDefault().Parent.Text;
+
             int ptr = startOfStatementsIndex;
 
-            for(int i = 0; i != decompData.Count; i++) 
+            foreach (StatementBuilder builder in builders) 
             {
-                int firstCharIndex = parent.Text.IndexOf(decompData[i].Item1.Total, startOfStatementsIndex);
-                int LastCharIndex = firstCharIndex + decompData[i].Item1.Total.Length - 1;
-
-                Statement toAdd = new Statement(
-                    parent,
-                    firstCharIndex,
-                    LastCharIndex,
-                    decompData[i].Item1.Total,
-                    contexts[i],
-                    decompData[i].Item1,
-                    decompData[i].Item2);
-
-                ptr = LastCharIndex;
-
-                ret.Add(toAdd);
+                builder.FirstCharIndex = parentText.IndexOf(builder.StatementText, startOfStatementsIndex);
+                builder.LastCharIndex  = builder.FirstCharIndex + builder.StatementText.Length - 1;
             }
-
-            return ret;
         }
 
-        private async Task<List<Tuple<TextDecomposition,TextDecomposition>>> AttachCorrectDefinitions(List<string> statementTotals, TextDecomposition[] injectives, TextDecomposition[] rooted)
+        private async Task AttachCorrectDefinitions(List<StatementBuilder> builders)
         {
-            List<Tuple<TextDecomposition, TextDecomposition, List<List<DictionaryDefinition>>>> taskData = new List<Tuple<TextDecomposition, TextDecomposition, List<List<DictionaryDefinition>>>>();
+            List<Tuple<StatementBuilder, List<List<DictionaryDefinition>>>> taskData = new List<Tuple<StatementBuilder, List<List<DictionaryDefinition>>>>();
 
-            for(int i = 0; i < statementTotals.Count; i++)
+            foreach(StatementBuilder builder in builders)
             {
                 taskData.Add(Tuple.Create(
-                    injectives[i],
-                    rooted[i],
-                    DefinitionResolver.GetPossibleDefinitions(rooted[i])));
+                    builder,
+                    DefinitionResolver.GetPossibleDefinitions(builder.RootedDecomposition)));
             }
 
             var correctDefTask = taskData.Select(items => DefinitionResolver.IdentifyCorrectDefinitions(
-                items.Item3, items.Item2, items.Item1));
+                items.Item2, items.Item1.RootedDecomposition, items.Item1.InjectiveDecomposition));
 
             List<int>[] correct = await Task.WhenAll(correctDefTask);  
 
-            for (int i = 0; i != statementTotals.Count; i++)
+            for (int i = 0; i != builders.Count; i++)
             {
-                SetCorrectDefinitions(rooted[i], correct[i], taskData[i].Item3);
+                // will pass by reference and fill in the definitions
+                SetCorrectDefinitions(builders[i].RootedDecomposition, correct[i], taskData[i].Item2);
             }
-
-            List<Tuple<TextDecomposition, TextDecomposition>> ret
-                = new List<Tuple<TextDecomposition, TextDecomposition>>();
-
-            for (int i = 0; i != statementTotals.Count; i++)
-            {
-                // TODO - indices.
-                ret.Add(Tuple.Create(injectives[i], rooted[i]));
-            }
-
-            return ret;
         }
 
         private void SetCorrectDefinitions(TextDecomposition textDecomposition, List<int> correctIndices, List<List<DictionaryDefinition>> possibleDefs)
@@ -222,27 +242,28 @@ namespace Linguine
             }
         }
 
-        private async Task<List<List<String>>> FormContexts(List<String> previousContext, List<String> statementTotals)
+        private async Task FormContexts(List<String> previousContext, List<StatementBuilder> builders)
         {
-            List<int> contextChangeStatements = await GetStatementsWhereContextChanges(previousContext, statementTotals);
+            List<String> statementTotals = builders.Select(
+                    b => b.StatementText ?? throw new Exception()).ToList();
+
+            List<int> contextChangeStatements = await GetStatementsWhereContextChanges(
+                previousContext, statementTotals);
 
             List<String> previous = previousContext;
-            List<List<String>> ret = new List<List<String>>();
 
-            for (int i = 0; i != statementTotals.Count; i++)
+            for (int i = 0; i != builders.Count; i++)
             {
                 if (contextChangeStatements.Contains(i))
                 {
-                    ret.Add(await GetUpdatedContextAt(previous, statementTotals, i));
-                    previous = ret.Last();
+                    builders[i].Context = await GetUpdatedContextAt(previous, statementTotals, i);
+                    previous = builders[i].Context ?? throw new Exception();
                 } 
                 else
                 {
-                    ret.Add(previous);
+                    builders[i].Context = previous;
                 }
             }
-
-            return ret;
         }
 
         private async Task<List<String>> GetUpdatedContextAt(
@@ -250,8 +271,7 @@ namespace Linguine
         {
             if (ContextUpdateAgent is null)
             {
-                String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
-                ContextUpdateAgent = new ContextUpdateAgent(apiKey);
+                PrepareWorkers();
             }
 
             StringBuilder prompt = new StringBuilder();
@@ -289,12 +309,12 @@ namespace Linguine
             return response.Split('\n').ToList();
         }
 
-        private async Task<List<int>> GetStatementsWhereContextChanges(List<string> previousContext, List<string> statementTotals)
+        private async Task<List<int>> GetStatementsWhereContextChanges(
+            List<string> previousContext, List<string> statementTotals)
         {
             if (ContextChangeIdentificationAgent is null)
             {
-                String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
-                ContextChangeIdentificationAgent = new ContextChangeIdentificationAgent(apiKey);
+                PrepareWorkers();
             }
 
             StringBuilder prompt = new StringBuilder();
@@ -343,8 +363,7 @@ namespace Linguine
         {
             if (ToStatementsDecomposer is null)
             {
-                String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
-                ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(apiKey);
+                PrepareWorkers();
             }
 
             TextDecomposition statementsDecomp = await ToStatementsDecomposer.DecomposeText(chunk);
