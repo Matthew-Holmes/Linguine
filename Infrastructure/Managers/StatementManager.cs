@@ -58,7 +58,7 @@ namespace Infrastructure
             _databaseManager.AddStartOfChain(StatementDatabaseEntryFactory.FromStatements(statements, null, null));
         }
 
-        public void AddMoreStatements(List<Statement> statements)
+        public void AddStatements(List<Statement> statements)
         {
             TextualMedia parent = VerifyChainAndGetParent(statements);
 
