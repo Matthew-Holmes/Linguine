@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,71 +28,33 @@ namespace Linguine.Tabs.WPF.Controls
 
     public partial class RichTextControl : UserControl
     {
-        public static readonly DependencyProperty FullTextProperty =
-            DependencyProperty.Register(
-                "FullText", typeof(String), typeof(RichTextControl), new PropertyMetadata(string.Empty));
+        public ICommand PageLocatedCommand { get; set; }
 
-        public static readonly DependencyProperty LocalCursorProperty = 
-            DependencyProperty.Register(
-                "LocalCursor", typeof(int), typeof(RichTextControl), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty EndOfPageProperty = 
-            DependencyProperty.Register(
-                "EndOfPage",   typeof(int), typeof(RichTextControl), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty PageEndLocatedCommandProperty =
-            DependencyProperty.Register(
-                "PageEndLocatedCommand",   
-                typeof(ICommand), typeof(RichTextControl), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty PageStartLocatedCommandProperty =
-            DependencyProperty.Register(
-                "PageStartLocatedCommand", 
-                typeof(ICommand), typeof(RichTextControl), new PropertyMetadata(null));
-
-
-        public ICommand PageEndLocatedCommand
-        {
-            get => (ICommand)GetValue(PageEndLocatedCommandProperty);
-            set => SetValue(PageEndLocatedCommandProperty, value);
-        }
-
-        public ICommand PageStartLocatedCommand
-        {
-            get => (ICommand)GetValue(PageStartLocatedCommandProperty);
-            set => SetValue(PageStartLocatedCommandProperty, value);
-        }
-
-        public string FullText
-        {
-            get => (string)GetValue(FullTextProperty);
-            set => SetValue(FullTextProperty, value);
-        }
-
-
-        public int LocalCursor
-        {
-            get => (int)GetValue(LocalCursorProperty);
-            set => SetValue(LocalCursorProperty, value);
-        }
-
-        public int EndOfPage
-        {
-            get => (int)GetValue(EndOfPageProperty);
-            set => SetValue(EndOfPageProperty, value);
-        }
+        public string FullText { get; set; }
+        public int LocalCursor { get; set; }
+        public int EndOfPage { get; set; }
 
         public RichTextControl()
         {
             InitializeComponent();
+            
             this.Loaded += OnLoaded;
-            this.DataContextChanged += OnDataContextChanged;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             if (this.DataContext is TextualMediaViewerViewModel viewModel)
             {
+                LocalCursor = viewModel.LocalCursor;
+                FullText = viewModel.FullText;
+
+                viewModel.PageForward   += CalculatePageForward;
+                viewModel.PageBackwards += CalculatePageBackwards;
+
+                PageLocatedCommand = viewModel.PageLocated;
+
+                CalculatePageFromStartIndex(LocalCursor);
+
                 return;
             }
             else
@@ -100,40 +63,28 @@ namespace Linguine.Tabs.WPF.Controls
             }
         }
 
-        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private String ClippedSubstring(String str, int start, int span)
         {
-            if (e.OldValue is INotifyPropertyChanged oldViewModel)
-            {
-                oldViewModel.PropertyChanged -= ViewModel_PropertyChanged;
-            }
-
-            if (e.NewValue is INotifyPropertyChanged newViewModel)
-            {
-                newViewModel.PropertyChanged += ViewModel_PropertyChanged;
-            }
+            start = Math.Max(start, 0);
+            span = Math.Min(span, str.Length - start - 1);
+            span = Math.Max(span, 0);
+            start = Math.Max(start, 0);
+            return str.Substring(start, span);
         }
-
-        // when these property changed events fire, begins the back and forth between
-        // ViewModel and UI to place the text
-        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(LocalCursor))
-            {
-                CalculatePageForwards();
-            }
-            else if (e.PropertyName == nameof(EndOfPage))
-            {
-                throw new NotImplementedException();
-                // Respond to EndOfPage changes
-            }
-        }
-
 
         int _charsPerPageStartGuess = 1000;
-        private void CalculatePageForwards()
+
+        private void CalculatePageForward(Object? sender, EventArgs e)
+        {
+            int newStartIndex = EndOfPage + 1;
+            CalculatePageFromStartIndex(newStartIndex);
+        }
+
+        private void CalculatePageFromStartIndex(int newStartIndex)
         {
             int maxHeight = (int)TextDisplayRegion.ActualHeight;
-            int startIndex = LocalCursor;
+
+            if (newStartIndex >= FullText.Length) { return; }
 
             Typeface typeface = new Typeface(
                 TextDisplayRegion.FontFamily,
@@ -146,7 +97,7 @@ namespace Linguine.Tabs.WPF.Controls
             while (true)
             {
                 formattedText = new FormattedText(
-                    FullText.Substring(startIndex, _charsPerPageStartGuess),
+                    ClippedSubstring(FullText, newStartIndex, _charsPerPageStartGuess),
                     System.Globalization.CultureInfo.CurrentCulture,
                     FlowDirection.LeftToRight,
                     typeface,
@@ -155,9 +106,11 @@ namespace Linguine.Tabs.WPF.Controls
                     new NumberSubstitution(),
                     VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
 
-                if (formattedText.Height < maxHeight)
+                bool clipped = FullText.Length < newStartIndex + _charsPerPageStartGuess;
+
+                if (formattedText.Height < maxHeight && !clipped /* if at the end then a small page is fine */)
                 {
-                    _charsPerPageStartGuess *= 2;
+                    _charsPerPageStartGuess = (int)(_charsPerPageStartGuess * 1.618);
                 } 
                 else
                 {
@@ -170,9 +123,8 @@ namespace Linguine.Tabs.WPF.Controls
 
             while (true)
             {
-
                 formattedText = new FormattedText(
-                    FullText.Substring(startIndex, (int)charSpan),
+                    ClippedSubstring(FullText, newStartIndex, (int)charSpan),
                     System.Globalization.CultureInfo.CurrentCulture,
                     FlowDirection.LeftToRight,
                     typeface,
@@ -190,25 +142,111 @@ namespace Linguine.Tabs.WPF.Controls
                     break;
                 }
             }
-
+            
             // try to get somewhere to break that is less jarring
-            for (int i = 0; i != 50 /* don't strip more than 50 chars */; i++)
+            for (int i = 0; i != 50 /* don't strip more than 50 chars */&& FullText.Length - charSpan > 0 ; i++)
             {
-                if (Char.IsWhiteSpace(FullText[LocalCursor + (int)charSpan]))
+                if (Char.IsWhiteSpace(FullText[newStartIndex + (int)charSpan - 1]))
                 {
                     break;
-                } else if (Char.IsPunctuation(FullText[LocalCursor+(int)charSpan - 1]))
+                } else if (Char.IsPunctuation(FullText[newStartIndex+(int)charSpan - 1]))
                 {
                     break;
                 }
                 charSpan--;
             }
 
-            TextDisplayRegion.Text = FullText.Substring(LocalCursor, (int)charSpan);
-            EndOfPage = LocalCursor + (int)charSpan - 1;
+            TextDisplayRegion.Text = ClippedSubstring(FullText, newStartIndex, (int)charSpan);
+            LocalCursor = Math.Min(newStartIndex, FullText.Length - 1);
+            EndOfPage = newStartIndex + (int)charSpan - 1;
             // this shouldn't message anything, just keeps parity with the ViewModel
-            PageEndLocatedCommand?.Execute(LocalCursor + (int)charSpan - 1);
+            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
 
+        }
+
+        private void CalculatePageBackwards(Object? sender, EventArgs e)
+        {
+            int maxHeight = (int)TextDisplayRegion.ActualHeight;
+            int newEndIndex = LocalCursor - 1;
+
+            if (newEndIndex < 0) { return; }
+
+            Typeface typeface = new Typeface(
+                TextDisplayRegion.FontFamily,
+                TextDisplayRegion.FontStyle,
+                TextDisplayRegion.FontWeight,
+                TextDisplayRegion.FontStretch);
+
+            FormattedText formattedText;
+
+            while (true)
+            {
+                formattedText = new FormattedText(
+                    ClippedSubstring(FullText, newEndIndex - _charsPerPageStartGuess + 1, _charsPerPageStartGuess),
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    TextDisplayRegion.FontSize,
+                    Brushes.Black,
+                    new NumberSubstitution(),
+                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
+
+                bool clipped = FullText.Length < newEndIndex + _charsPerPageStartGuess;
+
+                if (formattedText.Height < maxHeight && !clipped /* if at the end then a small page is fine */)
+                {
+                    _charsPerPageStartGuess = (int)(_charsPerPageStartGuess * 1.618);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            double ratioOnDisplay = maxHeight / formattedText.Height;
+            double charSpan = _charsPerPageStartGuess * ratioOnDisplay;
+
+            while (true)
+            {
+                formattedText = new FormattedText(
+                    ClippedSubstring(FullText, newEndIndex - (int)charSpan + 1, (int)charSpan),
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    TextDisplayRegion.FontSize,
+                    Brushes.Black,
+                    new NumberSubstitution(),
+                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
+
+                if (formattedText.Height > maxHeight && charSpan != 0 /* no infinite loop*/)
+                {
+                    charSpan = charSpan * 0.9;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // try to get somewhere to break that is less jarring
+            for (int i = 0; i != 50 /* don't strip more than 50 chars */&& newEndIndex - (int)charSpan >= 0; i++)
+            {
+                if (Char.IsWhiteSpace(FullText[newEndIndex - (int)charSpan]))
+                {
+                    break;
+                }
+                else if (Char.IsPunctuation(FullText[newEndIndex - (int)charSpan]))
+                {
+                    break;
+                }
+                charSpan--;
+            }
+
+            TextDisplayRegion.Text = ClippedSubstring(FullText, newEndIndex - (int)charSpan + 1, (int)charSpan);
+            LocalCursor = newEndIndex - (int)charSpan + 1;
+            EndOfPage = newEndIndex;
+            // this shouldn't message anything, just keeps parity with the ViewModel
+            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
         }
     }
 }

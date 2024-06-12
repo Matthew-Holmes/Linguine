@@ -13,6 +13,7 @@ using System.Printing;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using UserInputInterfaces;
@@ -25,20 +26,11 @@ namespace Linguine.Tabs
         private int _localCursor;
         private int _endOfPage;
         int _pageDelta = 0;
-        private string _fullText;
         private List<int> _statementStartIndices;
         private List<Statement> _statementsCoveringPage;
 
-        public String FullText
-        {
-            get => _fullText;
-            set
-            {
-                _fullText = value; OnPropertyChanged(nameof(FullText));
-            }
-        }
+        public String FullText { get; set; }
 
-        // changing this triggers the beginning of forwards paging
         public int LocalCursor
         {
             get => _localCursor;
@@ -48,15 +40,15 @@ namespace Linguine.Tabs
             }
         }
 
-        // changing this triggers the beginning of backwards paging
         public int EndOfPage
         {
             get => _endOfPage;
             private set
             {
-                _endOfPage = value; OnPropertyChanged(nameof(_endOfPage)); 
+                _localCursor = value; OnPropertyChanged(nameof(EndOfPage));
             }
         }
+
 
         // these are all that are required for initial typesetting
         // once we have the range for a page, we can request the corresponding statements
@@ -81,8 +73,7 @@ namespace Linguine.Tabs
             }
         }
 
-        public ICommand PageEndLocated { get; set; }
-        public ICommand PageStartLocated { get; set; }
+        public ICommand PageLocated { get; set;}
 
         public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel model, MainViewModel parent) 
             : base(uiComponents, model, parent)
@@ -91,20 +82,20 @@ namespace Linguine.Tabs
             SessionID = sessionId;
             TabClosed += (s,e) => model.CloseSession(sessionId);
 
-            _fullText = model.GetFullTextFromSessionID(sessionId);
+            FullText = model.GetFullTextFromSessionID(sessionId);
             _localCursor = model.GetCursor(SessionID);
 
             SetupTraversalCommands();
 
-            PageEndLocated = new RelayCommand<int>(OnPageEndLocated);
-            PageStartLocated = new RelayCommand<int>(OnPageStartLocated);
+            PageLocated = new RelayCommand<Tuple<int,int>>(OnPageLocated);
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
 
         }
 
-        private void OnPageStartLocated(int startOfPageChar)
+        private void OnPageLocated(Tuple<int,int> indices)
         {
-            _localCursor = startOfPageChar;
+            _localCursor = indices.Item1;
+            _endOfPage   = indices.Item2;
 
             // if we still have pages to turn, then don't do expensive statement lookup
             if (_pageDelta < 0)
@@ -113,24 +104,6 @@ namespace Linguine.Tabs
                 return;
             }
             else if (_pageDelta > 0)
-            {
-                StepForward(_pageDelta);
-                return;
-            }
-
-            PageChanged();
-        }
-
-        private void OnPageEndLocated(int endOfPageChar)
-        {
-            _endOfPage = endOfPageChar;
-
-            // if we still have pages to turn, then don't do expensive statement lookup
-            if (_pageDelta < 0)
-            {
-                StepBack(-1 * _pageDelta);
-                return;
-            } else if (_pageDelta > 0)
             {
                 StepForward(_pageDelta);
                 return;
@@ -167,22 +140,24 @@ namespace Linguine.Tabs
         public ICommand BigStepRightCommand { get; set; }
         public ICommand BigStepLeftCommand { get; set; }
 
+        public event EventHandler PageForward;
         private void StepForward(int pages)
         {
             if (pages < 1) { return; }
 
             _pageDelta = pages - 1;
-            
-            LocalCursor = _endOfPage + 1; // will trigger the events required to turn the page forwards
+
+            PageForward?.Invoke(this, EventArgs.Empty);
         }
 
+        public event EventHandler PageBackwards;
         private void StepBack(int pages)
         {
             if (pages < 1) { return; }
 
             _pageDelta = -1 * (pages - 1);
 
-            EndOfPage = _localCursor - 1; // will trigger the events required to turn the page backwards
+            PageBackwards?.Invoke(this, EventArgs.Empty);
         }
 
         private void SetupTraversalCommands()
