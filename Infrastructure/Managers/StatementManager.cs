@@ -23,9 +23,16 @@ namespace Infrastructure
             return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
         }
 
+        public List<int> StatementStartIndices(TextualMedia tm)
+        {
+            return _db.Statements.Where(s => s.Parent == tm).Select(s => s.FirstCharIndex).ToList();
+        }
+
         public List<Statement> GetStatementsCoveringRange(TextualMedia tm, int start, int stop)
         {
             List<StatementDatabaseEntry> found = _databaseManager.GetStatementsCoveringRangeWithEndpoints(tm, start, stop);
+
+            if (found.Count == 0) { return new List<Statement>(); }
 
             int oldCount = found.Count;
             found = _databaseManager.PrependUpToContextCheckpoint(found);

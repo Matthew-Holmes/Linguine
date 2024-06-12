@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Linguine.Tabs.WPF">
+                    xmlns:local="clr-namespace:Linguine.Tabs.WPF"
+                    xmlns:controls="clr-namespace:Linguine.Tabs.WPF.Controls">
     <!-- any template like this must be referenced in App.xaml too! -->
     <DataTemplate x:Key="TextualMediaViewerTabTemplate">
         <DataTemplate.Resources>
@@ -12,7 +13,12 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="{Binding TextViewWindow}"/>
+            <controls:RichTextControl Grid.Row="0"  
+                FullText="{Binding FullText, Mode=OneWay}"
+                LocalCursor="{Binding LocalCursor, Mode=OneWay}"
+                EndOfPage="{Binding EndOfPage, Mode=OneWay}"
+                PageStartLocatedCommand="{Binding PageStartLocated}"
+                PageEndLocatedCommand="{Binding PageEndLocated}"/>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
