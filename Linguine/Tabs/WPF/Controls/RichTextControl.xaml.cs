@@ -34,6 +34,8 @@ namespace Linguine.Tabs.WPF.Controls
         public int LocalCursor { get; set; }
         public int EndOfPage { get; set; }
 
+        private List<int> _statementsStartIndices;
+
         public RichTextControl()
         {
             InitializeComponent();
@@ -47,6 +49,7 @@ namespace Linguine.Tabs.WPF.Controls
             {
                 LocalCursor = viewModel.LocalCursor;
                 FullText = viewModel.FullText;
+                _statementsStartIndices = viewModel.SortedStatementStartIndices;
 
                 viewModel.PageForward   += CalculatePageForward;
                 viewModel.PageBackwards += CalculatePageBackwards;
@@ -142,23 +145,39 @@ namespace Linguine.Tabs.WPF.Controls
                     break;
                 }
             }
-            
-            // try to get somewhere to break that is less jarring
-            for (int i = 0; i != 50 /* don't strip more than 50 chars */&& FullText.Length - charSpan > 0 ; i++)
+
+            int span = (int)charSpan;
+
+            if (_statementsStartIndices.Last() > newStartIndex + span)
             {
-                if (Char.IsWhiteSpace(FullText[newStartIndex + (int)charSpan - 1]))
+                // if we have statements use them to for page intervals
+                int lastStatementStartListIndex = BinarySearchForLargestIndexBefore(newStartIndex + span);
+                int lastStatementStartIndex = _statementsStartIndices[lastStatementStartListIndex];
+                if (lastStatementStartIndex > newStartIndex + span - 100)
                 {
-                    break;
-                } else if (Char.IsPunctuation(FullText[newStartIndex+(int)charSpan - 1]))
-                {
-                    break;
+                    span = lastStatementStartIndex - newStartIndex;
                 }
-                charSpan--;
+            }
+            else
+            {
+                // try to get somewhere to break that is less jarring
+                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& FullText.Length - span > 0; i++)
+                {
+                    if (Char.IsWhiteSpace(FullText[newStartIndex + span - 1]))
+                    {
+                        break;
+                    }
+                    else if (Char.IsPunctuation(FullText[newStartIndex + span - 1]))
+                    {
+                        break;
+                    }
+                    span--;
+                }
             }
 
-            TextDisplayRegion.Text = ClippedSubstring(FullText, newStartIndex, (int)charSpan);
+            TextDisplayRegion.Text = ClippedSubstring(FullText, newStartIndex, span);
             LocalCursor = Math.Min(newStartIndex, FullText.Length - 1);
-            EndOfPage = newStartIndex + (int)charSpan - 1;
+            EndOfPage = newStartIndex + span - 1;
             // this shouldn't message anything, just keeps parity with the ViewModel
             PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
 
@@ -228,25 +247,72 @@ namespace Linguine.Tabs.WPF.Controls
                 }
             }
 
-            // try to get somewhere to break that is less jarring
-            for (int i = 0; i != 50 /* don't strip more than 50 chars */&& newEndIndex - (int)charSpan >= 0; i++)
+            int span = (int)charSpan;
+
+            if (_statementsStartIndices.Last() > newEndIndex - span)
             {
-                if (Char.IsWhiteSpace(FullText[newEndIndex - (int)charSpan]))
+                // if we have statements use them to for page intervals
+                int firstStatementStartListIndex = BinarySearchForLargestIndexBefore(newEndIndex - span);
+                int firstStatementStartIndex = _statementsStartIndices[firstStatementStartListIndex + 1];
+                // use the first statement after
+                if (firstStatementStartIndex > newEndIndex - span - 100)
                 {
-                    break;
+                    span = newEndIndex - firstStatementStartIndex + 1;
                 }
-                else if (Char.IsPunctuation(FullText[newEndIndex - (int)charSpan]))
+            }
+            else
+            {
+
+                // try to get somewhere to break that is less jarring
+                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& newEndIndex - span >= 0; i++)
                 {
-                    break;
+                    if (Char.IsWhiteSpace(FullText[newEndIndex - span]))
+                    {
+                        break;
+                    }
+                    else if (Char.IsPunctuation(FullText[newEndIndex - span]))
+                    {
+                        break;
+                    }
+                    charSpan--;
                 }
-                charSpan--;
             }
 
-            TextDisplayRegion.Text = ClippedSubstring(FullText, newEndIndex - (int)charSpan + 1, (int)charSpan);
-            LocalCursor = newEndIndex - (int)charSpan + 1;
+            TextDisplayRegion.Text = ClippedSubstring(FullText, newEndIndex - span + 1, span);
+            LocalCursor = newEndIndex - span + 1;
             EndOfPage = newEndIndex;
             // this shouldn't message anything, just keeps parity with the ViewModel
             PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
         }
+
+        // Assuming _statementsStartIndices is a List<int> that is sorted in ascending order
+
+        int BinarySearchForLargestIndexBefore(int target)
+        {
+            int left = 0;
+            int right = _statementsStartIndices.Count - 1;
+
+            int mid = 0;
+            while (left <= right)
+            {
+                mid = left + (right - left) / 2;
+
+                if (_statementsStartIndices[mid] < target)
+                {
+                    // Move to the right half to potentially find a larger value
+                    left = mid + 1;
+                }
+                else
+                {
+                    // If _statementsStartIndices[mid] >= target, move to the left half
+                    right = mid - 1;
+                }
+            }
+
+            return mid;
+        }
+
     }
+
+
 }

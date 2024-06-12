@@ -55,12 +55,12 @@ namespace Linguine.Tabs
         // these are more memory intensive so don't want to load all of them for the text
         // when we only need the few that are present on the visible page
         // (and maybe some for buffered pages ahead/behind)
-        public List<int> StatementStartIndices
+        public List<int> SortedStatementStartIndices
         {
             get => _statementStartIndices;
             set
             {
-                _statementStartIndices = value; OnPropertyChanged(nameof(StatementStartIndices));
+                _statementStartIndices = value; OnPropertyChanged(nameof(SortedStatementStartIndices));
             }
         }
 
@@ -84,6 +84,7 @@ namespace Linguine.Tabs
 
             FullText = model.GetFullTextFromSessionID(sessionId);
             _localCursor = model.GetCursor(SessionID);
+            SortedStatementStartIndices = model.GetSortedStatementStartIndicesFromSessionID(sessionId);
 
             SetupTraversalCommands();
 

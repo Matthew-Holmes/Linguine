@@ -1,9 +1,5 @@
 ﻿using Infrastructure;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Linguine
 {
@@ -23,13 +19,17 @@ namespace Linguine
             return session.TextualMedia.Text;
         }
 
-        internal List<int>? GetStatementStartIndicesFromSessionID(int sessionId)
+        internal List<int>? GetSortedStatementStartIndicesFromSessionID(int sessionId)
         {
             var session = GetSessionFromID(sessionId);
 
             if (session is null) { return null; }
 
-            return StatementManager.StatementStartIndices(session.TextualMedia);
+            var ret = StatementManager.StatementStartIndices(session.TextualMedia);
+
+            ret.Sort();
+
+            return ret;
         }
 
 
