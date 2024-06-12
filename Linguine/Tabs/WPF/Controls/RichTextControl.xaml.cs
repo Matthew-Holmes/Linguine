@@ -113,6 +113,8 @@ namespace Linguine.Tabs.WPF.Controls
             }
         }
 
+        // when these property changed events fire, begins the back and forth between
+        // ViewModel and UI to place the text
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(LocalCursor))
@@ -126,39 +128,87 @@ namespace Linguine.Tabs.WPF.Controls
             }
         }
 
+
+        int _charsPerPageStartGuess = 1000;
         private void CalculatePageForwards()
         {
             int maxHeight = (int)TextDisplayRegion.ActualHeight;
-            double lineHeight = TextDisplayRegion.FontSize * TextDisplayRegion.LineHeight;
-            int maxLines = (int)(maxHeight / lineHeight);
+            int startIndex = LocalCursor;
 
-            TextDisplayRegion.Text = FullText.Substring(LocalCursor, 1000);
-            EndOfPage = LocalCursor + 999;
-            // this shouldn't message anything, just keeps parity with the ViewModel
-            PageEndLocatedCommand?.Execute(LocalCursor + 999);
-            
-            /*
-            int startIndex = 0;
-            foreach (var endIndex in _sentenceEndMarkers)
+            Typeface typeface = new Typeface(
+                TextDisplayRegion.FontFamily,
+                TextDisplayRegion.FontStyle,
+                TextDisplayRegion.FontWeight,
+                TextDisplayRegion.FontStretch);
+
+            FormattedText formattedText;
+
+            while (true)
             {
-                string pageText = _fullText.Substring(startIndex, endIndex - startIndex + 1);
-                var formattedText = new System.Windows.Media.FormattedText(
-                    pageText,
+                formattedText = new FormattedText(
+                    FullText.Substring(startIndex, _charsPerPageStartGuess),
                     System.Globalization.CultureInfo.CurrentCulture,
                     FlowDirection.LeftToRight,
-                    new Typeface(TextDisplayRegion.FontFamily, TextDisplayRegion.FontStyle, TextDisplayRegion.FontWeight, TextDisplayRegion.FontStretch),
+                    typeface,
                     TextDisplayRegion.FontSize,
-                    System.Windows.Media.Brushes.Black
-                );
+                    Brushes.Black,
+                    new NumberSubstitution(),
+                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
 
-                if (formattedText.Height > maxHeight)
+                if (formattedText.Height < maxHeight)
                 {
-                    _pages.Add(_fullText.Substring(startIndex, _sentenceEndMarkers[_pages.Count] - startIndex + 1));
-                    startIndex = _sentenceEndMarkers[_pages.Count];
+                    _charsPerPageStartGuess *= 2;
+                } 
+                else
+                {
+                    break;
                 }
             }
-            _pages.Add(_fullText.Substring(startIndex));
-            */
+
+            double ratioOnDisplay = maxHeight / formattedText.Height;
+            double charSpan = _charsPerPageStartGuess * ratioOnDisplay;
+
+            while (true)
+            {
+
+                formattedText = new FormattedText(
+                    FullText.Substring(startIndex, (int)charSpan),
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    TextDisplayRegion.FontSize,
+                    Brushes.Black,
+                    new NumberSubstitution(),
+                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
+
+                if (formattedText.Height > maxHeight && charSpan != 0 /* no infinite loop*/)
+                {
+                    charSpan = charSpan * 0.9; 
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // try to get somewhere to break that is less jarring
+            for (int i = 0; i != 50 /* don't strip more than 50 chars */; i++)
+            {
+                if (Char.IsWhiteSpace(FullText[LocalCursor + (int)charSpan]))
+                {
+                    break;
+                } else if (Char.IsPunctuation(FullText[LocalCursor+(int)charSpan - 1]))
+                {
+                    break;
+                }
+                charSpan--;
+            }
+
+            TextDisplayRegion.Text = FullText.Substring(LocalCursor, (int)charSpan);
+            EndOfPage = LocalCursor + (int)charSpan - 1;
+            // this shouldn't message anything, just keeps parity with the ViewModel
+            PageEndLocatedCommand?.Execute(LocalCursor + (int)charSpan - 1);
+
         }
     }
 }
