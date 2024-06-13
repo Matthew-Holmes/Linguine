@@ -1,9 +1,13 @@
 ﻿using Azure;
 using Azure.Core;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,36 +32,111 @@ namespace Linguine.Tabs.WPF.Controls
 
     public partial class RichTextControl : UserControl
     {
-        public ICommand PageLocatedCommand { get; set; }
+        // UI                      VM
+        // button -------------->  updates LocalCursor
+        //                               |
+        //                         raises LocalCursorChanged
+        // OnLocalCursorChanged  <-------
+        //        | 
+        // Computes page
+        // PageLocatedCommand(int,int) --> invokes further paging/or updates statements
 
-        public string FullText { get; set; }
-        public int LocalCursor { get; set; }
-        public int EndOfPage { get; set; }
+        public static readonly DependencyProperty FullTextProperty =
+                    DependencyProperty.Register("FullText", typeof(string), typeof(RichTextControl),
+                        new PropertyMetadata(string.Empty));
 
-        private List<int> _statementsStartIndices;
+        public static readonly DependencyProperty LocalCursorProperty =
+            DependencyProperty.Register(
+                "LocalCursor", typeof(int), typeof(RichTextControl),
+                    new PropertyMetadata(OnLocalCursorChanged));
+
+        public static readonly DependencyProperty EndOfPageProperty =
+            DependencyProperty.Register(
+                "EndOfPage", typeof(int), typeof(RichTextControl),
+                    new PropertyMetadata(OnEndOfPageChanged));
+
+        public static readonly DependencyProperty SortedStatementStartIndicesProperty =
+            DependencyProperty.Register(
+                "SortedStatementStartIndices", typeof(List<int>), typeof(RichTextControl),
+                    new PropertyMetadata());
+
+        public static readonly DependencyProperty PageLocatedCommandProperty =
+            DependencyProperty.Register("PageLocatedCommand", typeof(ICommand), typeof(RichTextControl),
+                new PropertyMetadata(null));
+
+
+        public string FullText
+        {
+            get => (string)GetValue(FullTextProperty);
+            set => SetValue(FullTextProperty, value);
+        }
+
+        public int LocalCursor
+        {
+            get => (int)GetValue(LocalCursorProperty);
+            set => SetValue(LocalCursorProperty, value);
+        }
+
+        public int EndOfPage
+        {
+            get => (int)GetValue(EndOfPageProperty);
+            set => SetValue(EndOfPageProperty, value);
+        }
+
+        public List<int> SortedStatementStartIndices
+        {
+            get => (List<int>)GetValue(SortedStatementStartIndicesProperty); 
+            set => SetValue(SortedStatementStartIndicesProperty, value);
+        }
+
+        public ICommand PageLocatedCommand
+        {
+            get => (ICommand)GetValue(PageLocatedCommandProperty);
+            set => SetValue(PageLocatedCommandProperty, value);
+        }
 
         public RichTextControl()
         {
+            //https://learn.microsoft.com/en-us/dotnet/desktop/wpf/properties/collection-type-dependency-properties?view=netdesktop-8.0
+            //SetValue(SortedStatementStartIndicesProperty, new ObservableCollection<int>());
+
             InitializeComponent();
             
             this.Loaded += OnLoaded;
+            this.DataContextChanged += OnDataContextChanged;
         }
 
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is not null && e.NewValue is TextualMediaViewerViewModel newViewModel)
+            {
+                loaded = false;
+                // Rebind properties or reset if needed
+                BindingOperations.ClearBinding(this, FullTextProperty);
+                BindingOperations.ClearBinding(this, LocalCursorProperty);
+                BindingOperations.ClearBinding(this, EndOfPageProperty);
+                BindingOperations.ClearBinding(this, SortedStatementStartIndicesProperty);
+                BindingOperations.ClearBinding(this, PageLocatedCommandProperty);
+
+                BindingOperations.SetBinding(this, FullTextProperty, new Binding("FullText") { Source = newViewModel });
+                BindingOperations.SetBinding(this, LocalCursorProperty, new Binding("LocalCursor") { Source = newViewModel });
+                BindingOperations.SetBinding(this, EndOfPageProperty, new Binding("EndOfPage") { Source = newViewModel });
+                BindingOperations.SetBinding(this, SortedStatementStartIndicesProperty, new Binding("SortedStatementStartIndices") { Source = newViewModel });
+                BindingOperations.SetBinding(this, PageLocatedCommandProperty, new Binding("PageLocatedCommand") { Source = newViewModel });
+
+                this.InvalidateVisual();
+                CalculatePageFromStartIndex(LocalCursor);
+                loaded = true;
+            }
+        }
+
+        public bool loaded = false;
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             if (this.DataContext is TextualMediaViewerViewModel viewModel)
             {
-                LocalCursor = viewModel.LocalCursor;
-                FullText = viewModel.FullText;
-                _statementsStartIndices = viewModel.SortedStatementStartIndices;
-
-                viewModel.PageForward   += CalculatePageForward;
-                viewModel.PageBackwards += CalculatePageBackwards;
-
-                PageLocatedCommand = viewModel.PageLocated;
-
+                loaded = true;
                 CalculatePageFromStartIndex(LocalCursor);
-
                 return;
             }
             else
@@ -66,23 +145,55 @@ namespace Linguine.Tabs.WPF.Controls
             }
         }
 
+        private static void OnLocalCursorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is RichTextControl control)
+            {
+                if (control.loaded)
+                {
+                    control.CalculatePageFromStartIndex(control.LocalCursor);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Failed to respond to local cursor change due to wrong dependency object");
+            }
+        }
+
+        private static void OnEndOfPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is RichTextControl control)
+            {
+                if (control.loaded)
+                {
+                    control.CalculatePageFromEndIndex(control.EndOfPage);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Failed to respond to local cursor change due to wrong dependency object");
+            }
+        }
+
+        #region paging logic
+
         private String ClippedSubstring(String str, int start, int span)
         {
+            var indices = DoClip(str, start, span);
+            return str.Substring(indices.Item1, indices.Item2);
+        }
+
+        public Tuple<int,int> DoClip(String str, int start, int span)
+        {
             start = Math.Max(start, 0);
+            span = Math.Max(span, 0);
             span = Math.Min(span, str.Length - start - 1);
             span = Math.Max(span, 0);
-            start = Math.Max(start, 0);
-            return str.Substring(start, span);
+
+            return Tuple.Create(start, span);
         }
 
         int _charsPerPageStartGuess = 1000;
-
-        private void CalculatePageForward(Object? sender, EventArgs e)
-        {
-            int newStartIndex = EndOfPage + 1;
-            CalculatePageFromStartIndex(newStartIndex);
-        }
-
         private void CalculatePageFromStartIndex(int newStartIndex)
         {
             int maxHeight = (int)TextDisplayRegion.ActualHeight;
@@ -148,11 +259,11 @@ namespace Linguine.Tabs.WPF.Controls
 
             int span = (int)charSpan;
 
-            if (_statementsStartIndices.Last() > newStartIndex + span)
+            if (SortedStatementStartIndices.Last() > newStartIndex + span)
             {
                 // if we have statements use them to for page intervals
                 int lastStatementStartListIndex = BinarySearchForLargestIndexBefore(newStartIndex + span);
-                int lastStatementStartIndex = _statementsStartIndices[lastStatementStartListIndex];
+                int lastStatementStartIndex = SortedStatementStartIndices[lastStatementStartListIndex];
                 if (lastStatementStartIndex > newStartIndex + span - 100)
                 {
                     span = lastStatementStartIndex - newStartIndex;
@@ -175,18 +286,18 @@ namespace Linguine.Tabs.WPF.Controls
                 }
             }
 
-            TextDisplayRegion.Text = ClippedSubstring(FullText, newStartIndex, span);
-            LocalCursor = Math.Min(newStartIndex, FullText.Length - 1);
-            EndOfPage = newStartIndex + span - 1;
+            var bounds = DoClip(FullText, newStartIndex, span);
+
+            TextDisplayRegion.Text = FullText.Substring(bounds.Item1, bounds.Item2);
+
             // this shouldn't message anything, just keeps parity with the ViewModel
-            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
+            PageLocatedCommand?.Execute(Tuple.Create(bounds.Item1, bounds.Item1 + bounds.Item2 - 1));
 
         }
 
-        private void CalculatePageBackwards(Object? sender, EventArgs e)
+        private void CalculatePageFromEndIndex(int newEndIndex)
         {
             int maxHeight = (int)TextDisplayRegion.ActualHeight;
-            int newEndIndex = LocalCursor - 1;
 
             if (newEndIndex < 0) { return; }
 
@@ -225,6 +336,13 @@ namespace Linguine.Tabs.WPF.Controls
             double ratioOnDisplay = maxHeight / formattedText.Height;
             double charSpan = _charsPerPageStartGuess * ratioOnDisplay;
 
+            if (newEndIndex - charSpan <= 0)
+            {
+                CalculatePageFromStartIndex(0); // display the full first page
+                return;
+            }
+
+
             while (true)
             {
                 formattedText = new FormattedText(
@@ -249,11 +367,11 @@ namespace Linguine.Tabs.WPF.Controls
 
             int span = (int)charSpan;
 
-            if (_statementsStartIndices.Last() > newEndIndex - span)
+            if (SortedStatementStartIndices.Last() > newEndIndex - span)
             {
                 // if we have statements use them to for page intervals
                 int firstStatementStartListIndex = BinarySearchForLargestIndexBefore(newEndIndex - span);
-                int firstStatementStartIndex = _statementsStartIndices[firstStatementStartListIndex + 1];
+                int firstStatementStartIndex = SortedStatementStartIndices[firstStatementStartListIndex + 1];
                 // use the first statement after
                 if (firstStatementStartIndex > newEndIndex - span - 100)
                 {
@@ -278,11 +396,12 @@ namespace Linguine.Tabs.WPF.Controls
                 }
             }
 
-            TextDisplayRegion.Text = ClippedSubstring(FullText, newEndIndex - span + 1, span);
-            LocalCursor = newEndIndex - span + 1;
-            EndOfPage = newEndIndex;
+            var bounds = DoClip(FullText, newEndIndex - span + 1, span);
+
+            TextDisplayRegion.Text = FullText.Substring(bounds.Item1, bounds.Item2);
+
             // this shouldn't message anything, just keeps parity with the ViewModel
-            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
+            PageLocatedCommand?.Execute(Tuple.Create(bounds.Item1, bounds.Item1 + bounds.Item2 - 1));
         }
 
         // Assuming _statementsStartIndices is a List<int> that is sorted in ascending order
@@ -290,14 +409,14 @@ namespace Linguine.Tabs.WPF.Controls
         int BinarySearchForLargestIndexBefore(int target)
         {
             int left = 0;
-            int right = _statementsStartIndices.Count - 1;
+            int right = SortedStatementStartIndices.Count - 1;
 
             int mid = 0;
             while (left <= right)
             {
                 mid = left + (right - left) / 2;
 
-                if (_statementsStartIndices[mid] < target)
+                if (SortedStatementStartIndices[mid] < target)
                 {
                     // Move to the right half to potentially find a larger value
                     left = mid + 1;
@@ -311,6 +430,8 @@ namespace Linguine.Tabs.WPF.Controls
 
             return mid;
         }
+
+        #endregion
 
     }
 

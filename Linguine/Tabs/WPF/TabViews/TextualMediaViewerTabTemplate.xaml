@@ -13,7 +13,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <controls:RichTextControl Grid.Row="0"/>
+            <controls:RichTextControl Grid.Row="0"
+                    FullText="{Binding FullText, Mode = OneWay}"
+                    LocalCursor="{Binding LocalCursor, Mode = OneWay}"
+                    EndOfPage="{Binding EndOfPage, Mode = OneWay}"
+                    PageLocatedCommand="{Binding PageLocatedCommand, Mode = OneWay}"
+                    SortedStatementStartIndices="{Binding SortedStatementStartIndices, Mode = OneWay}"/>
+
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
