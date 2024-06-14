@@ -2,6 +2,7 @@
 using Infrastructure;
 using LearningExtraction;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -160,7 +161,7 @@ namespace Linguine.Tabs.WPF.Controls
                 }
 
                 // initial grey highlight
-                if (unitStarts[0] > 0)
+                if (unitStarts[0] > start)
                 {
                     highlights.Add(Tuple.Create(start, unitStarts[0] - 1, faintGreyBrush, j, -1));
                 }
@@ -193,8 +194,9 @@ namespace Linguine.Tabs.WPF.Controls
 
             int currentIndex = LocalCursor;
 
-            foreach (var section in highlights)
+            for (int i = 0; i != highlights.Count; i++)
             {
+                var section = highlights[i];
                 int start = section.Item1;
                 int end = section.Item2;
 
@@ -207,6 +209,11 @@ namespace Linguine.Tabs.WPF.Controls
                 // Add highlighted text
                 if (start <= end && end <= EndOfPage)
                 {
+                    if (FullText[end] == '\r' && FullText[end+1] == '\n')
+                    {
+                        end++; // don't split these chars as the agents sometimes like to do
+                    }
+
                     Run highlightRun = new Run(FullText.Substring(start, end - start + 1));
                     highlightRun.Background = section.Item3;
 
@@ -242,6 +249,7 @@ namespace Linguine.Tabs.WPF.Controls
         }
 
         #endregion
+
 
         #region paging
 
@@ -358,7 +366,9 @@ namespace Linguine.Tabs.WPF.Controls
 
             int span = (int)charSpan;
 
-            if (SortedStatementStartIndices.Last() > newStartIndex + span)
+            span = Math.Min(span, FullText.Length - newStartIndex - 1);
+
+            if (SortedStatementStartIndices.Count > 0 && SortedStatementStartIndices.Last() > newStartIndex + span)
             {
                 // if we have statements use them to for page intervals
                 int lastStatementStartListIndex = BinarySearchForLargestIndexBefore(newStartIndex + span);
@@ -371,7 +381,7 @@ namespace Linguine.Tabs.WPF.Controls
             else
             {
                 // try to get somewhere to break that is less jarring
-                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& FullText.Length - span > 0; i++)
+                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& span > 0; i++)
                 {
                     if (Char.IsWhiteSpace(FullText[newStartIndex + span - 1]))
                     {
@@ -463,23 +473,29 @@ namespace Linguine.Tabs.WPF.Controls
             }
 
             int span = (int)charSpan;
+            span = Math.Max(span, newEndIndex - LocalCursor + 1);
 
-            if (SortedStatementStartIndices.Last() > newEndIndex - span)
+            if (SortedStatementStartIndices.Count != 0 && SortedStatementStartIndices.Last() > newEndIndex - span)
             {
                 // if we have statements use them to for page intervals
                 int firstStatementStartListIndex = BinarySearchForLargestIndexBefore(newEndIndex - span);
-                int firstStatementStartIndex = SortedStatementStartIndices[firstStatementStartListIndex + 1];
-                // use the first statement after
-                if (firstStatementStartIndex > newEndIndex - span - 100)
+
+                // edge case at the end, we'll just use the whitespace method
+                if (firstStatementStartListIndex + 1 < SortedStatementStartIndices.Count)
                 {
-                    span = newEndIndex - firstStatementStartIndex + 1;
+                    int firstStatementStartIndex = SortedStatementStartIndices[firstStatementStartListIndex + 1];
+                    // use the first statement after
+                    if (firstStatementStartIndex > newEndIndex - span - 100)
+                    {
+                        span = newEndIndex - firstStatementStartIndex + 1;
+                    }
                 }
             }
             else
             {
 
                 // try to get somewhere to break that is less jarring
-                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& newEndIndex - span >= 0; i++)
+                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& span >= 0; i++)
                 {
                     if (Char.IsWhiteSpace(FullText[newEndIndex - span]))
                     {

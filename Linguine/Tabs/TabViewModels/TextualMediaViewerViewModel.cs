@@ -48,6 +48,9 @@ namespace Linguine.Tabs
         public event EventHandler<List<Statement>> StatementsCoveringPageChanged;
         public List<Statement> StatementsCoveringPage;
         private string _selectedUnitText;
+        private string _selectedUnitDefinition;
+        private string _selectedUnitRootedText;
+        private ObservableCollection<string> _selectedUnitContextInfo;
 
         // the user can then trigger this by clicking on a unit
         public ICommand UnitSelectedCommand { get; internal set; }
@@ -62,7 +65,44 @@ namespace Linguine.Tabs
         public String SelectedUnitText
         {
             get => _selectedUnitText;
+            set
+            {
+                _selectedUnitText = value;
+                OnPropertyChanged(nameof(SelectedUnitText));
+            }
         }
+
+        public String SelectedUnitRootedText
+        {
+            get => _selectedUnitRootedText;
+            set
+            {
+                _selectedUnitRootedText = value;
+                OnPropertyChanged(nameof(SelectedUnitRootedText));
+            }
+        }
+
+        public String SelectedUnitDefinition
+        {
+            get => _selectedUnitDefinition;
+            set
+            {
+                _selectedUnitDefinition = value;
+                OnPropertyChanged(nameof(SelectedUnitDefinition));
+            }
+        }
+
+        public ObservableCollection<String> SelectedUnitContextInfo
+        {
+            get => _selectedUnitContextInfo;
+            set
+            {
+                _selectedUnitContextInfo = value;
+                OnPropertyChanged(nameof(SelectedUnitContextInfo));
+            }
+        }
+
+        
 
         
 
@@ -92,6 +132,11 @@ namespace Linguine.Tabs
 
             Statement statement = StatementsCoveringPage[statementIndex];
 
+            // Warning - this won't work if the decomposition is multilevel
+            SelectedUnitText        = statement.InjectiveDecomposition.Units[unitIndex];
+            SelectedUnitRootedText  = statement.RootedDecomposition.Units[unitIndex];
+            SelectedUnitDefinition  = statement.RootedDecomposition.Decomposition[unitIndex].Definition?.Definition ?? "";
+            SelectedUnitContextInfo = new ObservableCollection<String>(statement.StatementContext);
         }
 
         private async Task ProcessChunk()

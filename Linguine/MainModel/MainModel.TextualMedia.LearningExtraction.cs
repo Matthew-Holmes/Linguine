@@ -131,8 +131,10 @@ namespace Linguine
 
             foreach (StatementBuilder builder in builders) 
             {
-                builder.FirstCharIndex = parentText.IndexOf(builder.StatementText, startOfStatementsIndex);
+                builder.FirstCharIndex = parentText.IndexOf(builder.StatementText, ptr);
                 builder.LastCharIndex  = builder.FirstCharIndex + builder.StatementText.Length - 1;
+
+                ptr = builder.LastCharIndex + 1 ?? throw new Exception();
             }
         }
 
