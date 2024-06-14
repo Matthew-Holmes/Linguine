@@ -34,26 +34,26 @@ namespace Linguine.Tabs
             get => _localCursor;
             private set
             {
-                _localCursor = value; OnPropertyChanged(nameof(LocalCursor));
+                _localCursor = value;
             }
         }
 
-        private int _endOfPage;
-        public int EndOfPage
-        {
-            get => _endOfPage;
-            private set
-            {
-                _endOfPage = value; OnPropertyChanged(nameof(EndOfPage));
-            }
-        }
+        // these are bound too by the view to do the UI view involved filling the display with text
+        public event EventHandler<int> PageForwards;
+        public event EventHandler<int> PageBackwards;
 
+        // the view then invokes this when it has done paging
+        public ICommand PageLocatedCommand { get; set; }
+
+        // the view binds to this and uses it to markup the text
+        public event EventHandler<List<Statement>> StatementsCoveringPageChanged;
 
         // these are all that are required for initial typesetting
         // once we have the range for a page, we can request the corresponding statements
         // these are more memory intensive so don't want to load all of them for the text
         // when we only need the few that are present on the visible page
         // (and maybe some for buffered pages ahead/behind)
+        // TODO - the UI needs to have an event to know when these start indices change
         private List<int> _statementStartIndices;
         public List<int> SortedStatementStartIndices
         {
@@ -74,7 +74,7 @@ namespace Linguine.Tabs
             }
         }
 
-        public ICommand PageLocatedCommand { get; set;}
+        
 
         public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel model, MainViewModel parent) 
             : base(uiComponents, model, parent)
@@ -88,7 +88,7 @@ namespace Linguine.Tabs
                     ?? throw new Exception("couldn't find session");
 
             PageLocatedCommand = new RelayCommand<Tuple<int, int>>(OnPageLocated);
-            _localCursor = model.GetCursor(SessionID);
+            LocalCursor = model.GetCursor(SessionID);
 
             SetupTraversalCommands();
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
@@ -116,74 +116,22 @@ namespace Linguine.Tabs
 
         private void StepForward(int pages)
         {
-            if (pages < 1 || EndOfPage >= FullText.Length - 1) { return; }
-
-            _pageDelta = pages;
-
-            if (LocalCursor == EndOfPage + 1)
-            {
-                LocalCursor++; // give jog if have got stuck for whatever reason
-            }
-
-            LocalCursor = EndOfPage + 1; // will trigger paging on the view, will call command when done
+            PageForwards?.Invoke(this, pages);
         }
 
         private void StepBack(int pages)
         {
-            if (pages < 1 || LocalCursor <= 0) { return; }
-
-            _pageDelta = -1 * pages;
-
-            if (EndOfPage == LocalCursor - 1)
-            { 
-                EndOfPage--;
-            }
-
-            EndOfPage = LocalCursor - 1; // will trigger paging on the view, will call command when done
+            PageBackwards?.Invoke(this, pages);
         }
 
-        private void OnPageLocated(Tuple<int, int> indices)
+        private void OnPageLocated(Tuple<int,int> indices)
         {
-            _localCursor = indices.Item1;
-            _endOfPage = indices.Item2;
+            LocalCursor = indices.Item1;
 
-            if (LocalCursor <= 0 || EndOfPage >= FullText.Length - 1 )
-            { 
-                // stop turning when we reach the end
-            }
-            else if (_pageDelta < -1 /* if we still have pages to turn, then don't do expensive statement lookup */)
-            {
-                _pageDelta++;
-
-                if (LocalCursor > 0)
-                {
-                    EndOfPage = LocalCursor - 1; // will trigger paging on the view, will call command when done
-                }
-
-                return;
-            }
-            else if (_pageDelta > 1)
-            {
-                _pageDelta--;
-
-                if (EndOfPage < FullText.Length - 1)
-                {
-                    LocalCursor = EndOfPage + 1; // will trigger paging on the view, will call command when done
-                }
-                return;
-            }
-
-            _pageDelta = 0;
-
-            PageChanged(); // this only calls once we have no delta, so not loading statements for no reason
-        }
-
-        private void PageChanged()
-        {
-            _model.CursorMoved(SessionID, LocalCursor); // now we are static can update the database
+            _model.CursorMoved(SessionID, indices.Item1); // now we are static can update the database
 
             List<Statement>? toUpdate = _model.GetStatementsCoveringRange(
-                SessionID, LocalCursor, EndOfPage);
+                SessionID, indices.Item1, indices.Item2);
 
             if (toUpdate == null)
             {
@@ -192,6 +140,8 @@ namespace Linguine.Tabs
             }
 
             StatementsCoveringPage = toUpdate;
+
+            StatementsCoveringPageChanged?.Invoke(this, StatementsCoveringPage);
         }
 
 
