@@ -56,6 +56,7 @@ namespace Linguine.Tabs.WPF.Controls
                 oldViewModel.PageBackwards -= HandlePageBackwards;
 
                 oldViewModel.StatementsCoveringPageChanged -= ProcessStatementInformation;
+                oldViewModel.UnderlyingStatementsChanged   -= UnderlyingStatementsChanged;
             }
 
             if (e.NewValue is TextualMediaViewerViewModel newViewModel)
@@ -68,6 +69,7 @@ namespace Linguine.Tabs.WPF.Controls
                 LocalCursor                 = newViewModel.LocalCursor;
 
                 newViewModel.StatementsCoveringPageChanged += ProcessStatementInformation;
+                newViewModel.UnderlyingStatementsChanged   += UnderlyingStatementsChanged;
 
                 if (IsLoaded)
                 {
@@ -79,6 +81,15 @@ namespace Linguine.Tabs.WPF.Controls
                 newViewModel.PageForwards  += HandlePageForwards;
                 newViewModel.PageBackwards += HandlePageBackwards;
             }
+        }
+
+        private void UnderlyingStatementsChanged(object? sender, List<int> e)
+        {
+            SortedStatementStartIndices = e;
+
+            // redraw the page
+            CalculatePageFromStartIndex(LocalCursor);
+            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage)); 
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)

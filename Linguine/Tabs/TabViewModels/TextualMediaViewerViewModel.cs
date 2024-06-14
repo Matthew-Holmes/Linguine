@@ -54,6 +54,7 @@ namespace Linguine.Tabs
         // when we only need the few that are present on the visible page
         // (and maybe some for buffered pages ahead/behind)
         // TODO - the UI needs to have an event to know when these start indices change
+        public event EventHandler<List<int>> UnderlyingStatementsChanged;
         private List<int> _statementStartIndices;
         public List<int> SortedStatementStartIndices
         {
@@ -97,6 +98,11 @@ namespace Linguine.Tabs
         private async Task ProcessChunk()
         {
             await _model.ProcessNextChunk(SessionID);
+
+            SortedStatementStartIndices = _model.GetSortedStatementStartIndicesFromSessionID(SessionID)
+                ?? throw new Exception("couldn't find session");
+
+            UnderlyingStatementsChanged?.Invoke(this, SortedStatementStartIndices);
         }
 
         #region traversal
