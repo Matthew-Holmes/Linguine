@@ -23,56 +23,45 @@ namespace Linguine.Tabs
     public class TextualMediaViewerViewModel : TabViewModelBase
     {
         public readonly int SessionID;
-        int _pageDelta = 0;
-        private List<Statement> _statementsCoveringPage;
-
         public String FullText { get; set; }
 
-        private int _localCursor;
-        public int LocalCursor
-        {
-            get => _localCursor;
-            private set
-            {
-                _localCursor = value;
-            }
-        }
 
-        // these are bound too by the view to do the UI view involved filling the display with text
+        // ****************** UI Interaction Properties ************************
+        // they use custom events, and are used to handle paging 
+        // since only the UI will be able to tell how much of the text can
+        // be displayed on the given display region
+
+        public int LocalCursor;
+
+        // UI handles these, can do multiple page steps if desired
         public event EventHandler<int> PageForwards;
         public event EventHandler<int> PageBackwards;
 
-        // the view then invokes this when it has done paging
+        // this is used by the UI to choose where to break the text
+        public List<int> SortedStatementStartIndices;
+
+        // the UI then invokes this when it has done paging
         public ICommand PageLocatedCommand { get; set; }
 
-        // the view binds to this and uses it to markup the text
+        // ViewModel then raises this once has pulled the statements covering
+        // the page displayed
         public event EventHandler<List<Statement>> StatementsCoveringPageChanged;
+        public List<Statement> StatementsCoveringPage;
+        private string _selectedUnitText;
 
-        // these are all that are required for initial typesetting
-        // once we have the range for a page, we can request the corresponding statements
-        // these are more memory intensive so don't want to load all of them for the text
-        // when we only need the few that are present on the visible page
-        // (and maybe some for buffered pages ahead/behind)
-        // TODO - the UI needs to have an event to know when these start indices change
+        // the user can then trigger this by clicking on a unit
+        public ICommand UnitSelectedCommand { get; internal set; }
+
+        // invoke this to trigger a redraw, e.g. if another processing step
+        // has been completed
         public event EventHandler<List<int>> UnderlyingStatementsChanged;
-        private List<int> _statementStartIndices;
-        public List<int> SortedStatementStartIndices
-        {
-            get => _statementStartIndices;
-            set
-            {
-                _statementStartIndices = value; 
-                OnPropertyChanged(nameof(SortedStatementStartIndices));
-            }
-        }
 
-        public List<Statement> StatementsCoveringPage
+        // *********************************************************************        
+
+
+        public String SelectedUnitText
         {
-            get => _statementsCoveringPage;
-            set
-            {
-                _statementsCoveringPage = value; OnPropertyChanged(nameof(StatementsCoveringPage));
-            }
+            get => _selectedUnitText;
         }
 
         
@@ -88,11 +77,21 @@ namespace Linguine.Tabs
             SortedStatementStartIndices =   model.GetSortedStatementStartIndicesFromSessionID(sessionId) 
                     ?? throw new Exception("couldn't find session");
 
-            PageLocatedCommand = new RelayCommand<Tuple<int, int>>(OnPageLocated);
+            PageLocatedCommand  = new RelayCommand<Tuple<int, int>>(OnPageLocated);
+            UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
             LocalCursor = model.GetCursor(SessionID);
 
             SetupTraversalCommands();
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
+        }
+
+        private void OnUnitSelected(Tuple<int, int> tuple)
+        {
+            int statementIndex = tuple.Item1;
+            int unitIndex = tuple.Item2;
+
+            Statement statement = StatementsCoveringPage[statementIndex];
+
         }
 
         private async Task ProcessChunk()
@@ -154,5 +153,6 @@ namespace Linguine.Tabs
         #endregion
 
         public ICommand ProcessChunkCommand { get; set; }
+        
     }
 }

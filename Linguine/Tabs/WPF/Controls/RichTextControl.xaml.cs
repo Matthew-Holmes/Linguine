@@ -39,7 +39,10 @@ namespace Linguine.Tabs.WPF.Controls
         private String FullText;
         private String PageText;
         private List<int> SortedStatementStartIndices;
-        private ICommand PageLocatedCommand; 
+        private ICommand PageLocatedCommand;
+        private ICommand UnitSelectedCommand;
+
+        Style hyperlinkStyle;
 
         public RichTextControl()
         {
@@ -47,6 +50,23 @@ namespace Linguine.Tabs.WPF.Controls
 
             this.Loaded += OnLoaded;
             this.DataContextChanged += OnDataContextChanged;
+
+            CreateHyperlinkStyle();
+        }
+
+        private void CreateHyperlinkStyle()
+        {
+            // Create the style for the hyperlinks
+            hyperlinkStyle = new Style(typeof(Hyperlink));
+            hyperlinkStyle.Setters.Add(new Setter(Hyperlink.FocusVisualStyleProperty, null));
+            hyperlinkStyle.Setters.Add(new Setter(Hyperlink.ForegroundProperty, Brushes.Black));
+            hyperlinkStyle.Setters.Add(new Setter(TextBlock.TextDecorationsProperty, null));
+
+            Trigger mouseOverTrigger = new Trigger { Property = Hyperlink.IsMouseOverProperty, Value = true };
+            mouseOverTrigger.Setters.Add(new Setter(Hyperlink.ForegroundProperty, Brushes.Red));
+            //mouseOverTrigger.Setters.Add(new Setter(TextBlock.TextDecorationsProperty, TextDecorations.Underline));
+
+            hyperlinkStyle.Triggers.Add(mouseOverTrigger);
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -67,6 +87,7 @@ namespace Linguine.Tabs.WPF.Controls
                 FullText                    = newViewModel.FullText;
                 SortedStatementStartIndices = newViewModel.SortedStatementStartIndices;
                 PageLocatedCommand          = newViewModel.PageLocatedCommand;
+                UnitSelectedCommand         = newViewModel.UnitSelectedCommand;
                 LocalCursor                 = newViewModel.LocalCursor;
 
                 newViewModel.StatementsCoveringPageChanged += ProcessStatementInformation;
@@ -115,13 +136,15 @@ namespace Linguine.Tabs.WPF.Controls
 
         private void ProcessStatementInformation(object? sender, List<Statement> statementsCoveringPage)
         {
-            TextDisplayRegion.Text = ""; // now using fancier text placement
-            TextDisplayRegion.Inlines.Clear();
+            // decide how to do the highlights before we flush the text
+            //        start end  colour stat unit
+            List<Tuple<int, int, Brush, int, int>> highlights = new List<Tuple<int, int, Brush, int, int>>();
 
-            List<Tuple<int, int, Brush>> highlights = new List<Tuple<int, int, Brush>>();
-
-            foreach (Statement s in statementsCoveringPage)
+            #region highlight computation
+            for (int j = 0; j != statementsCoveringPage.Count; j++)
             {
+                Statement s = statementsCoveringPage[j];
+
                 int start = s.FirstCharIndex;
                 int end = s.LastCharIndex;
                 int offset = s.FirstCharIndex;
@@ -133,34 +156,40 @@ namespace Linguine.Tabs.WPF.Controls
                 // TODO - empty units
                 if (unitStarts.Count == 0)
                 {
-                    highlights.Add(Tuple.Create(start, end, faintGreyBrush)); continue;
+                    highlights.Add(Tuple.Create(start, end, faintGreyBrush, j , -1)); continue;
                 }
 
                 // initial grey highlight
                 if (unitStarts[0] > 0)
                 {
-                    highlights.Add(Tuple.Create(start, unitStarts[0] - 1, faintGreyBrush));
+                    highlights.Add(Tuple.Create(start, unitStarts[0] - 1, faintGreyBrush, j, -1));
                 }
 
                 for (int i = 0; i != unitStarts.Count; i++)
                 {
                     // main unit highlight
-                    highlights.Add(Tuple.Create(unitStarts[i], unitStarts[i] + unitLengths[i] - 1, faintRedBrush));
+                    highlights.Add(Tuple.Create(unitStarts[i], unitStarts[i] + unitLengths[i] - 1, faintRedBrush, j, i));
 
                     // grey after
                     if (i != unitStarts.Count - 1 && unitStarts[i] + unitLengths[i] < unitStarts[i+1])
                     {
-                        highlights.Add(Tuple.Create(unitStarts[i] + unitLengths[i], unitStarts[i + 1] - 1, faintGreyBrush));
+                        highlights.Add(Tuple.Create(
+                            unitStarts[i] + unitLengths[i], unitStarts[i + 1] - 1, faintGreyBrush, j , -1));
                     }
                 }
 
                 // trailing grey highlight
                 if (unitStarts.Last() + unitLengths.Last() <= end)
                 {
-                    highlights.Add(Tuple.Create(unitStarts.Last() + unitLengths.Last(), end, faintGreyBrush));
+                    highlights.Add(Tuple.Create(unitStarts.Last() + unitLengths.Last(), end, faintGreyBrush, j, -1));
                 }
 
             }
+            #endregion
+
+            // clear so we can use the fancy placement
+            TextDisplayRegion.Text = ""; 
+            TextDisplayRegion.Inlines.Clear();
 
             int currentIndex = LocalCursor;
 
@@ -180,7 +209,21 @@ namespace Linguine.Tabs.WPF.Controls
                 {
                     Run highlightRun = new Run(FullText.Substring(start, end - start + 1));
                     highlightRun.Background = section.Item3;
-                    TextDisplayRegion.Inlines.Add(highlightRun);
+
+                    if (section.Item5 == -1)
+                    {
+                        // indicates no unit here
+                        TextDisplayRegion.Inlines.Add(highlightRun);
+                    }
+                    else
+                    {
+                        TextDisplayRegion.Inlines.Add(new Hyperlink(highlightRun)
+                        {
+                            Style = hyperlinkStyle,
+                        });
+                        ((Hyperlink)TextDisplayRegion.Inlines.LastInline).Click += (sender, args) 
+                            => OnUnitClick(Tuple.Create(section.Item4, section.Item5));
+                    }
                 }
 
                 currentIndex = end+1;
@@ -191,6 +234,11 @@ namespace Linguine.Tabs.WPF.Controls
             {
                 TextDisplayRegion.Inlines.Add(new Run(FullText.Substring(currentIndex, EndOfPage - currentIndex + 1)));
             }
+        }
+
+        private void OnUnitClick(Tuple<int, int> tuple)
+        {
+            UnitSelectedCommand?.Execute(tuple);
         }
 
         #endregion
