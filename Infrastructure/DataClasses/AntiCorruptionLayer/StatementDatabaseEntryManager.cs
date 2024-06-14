@@ -26,7 +26,8 @@ namespace Infrastructure
             foreach (StatementDatabaseEntry statement in statements) 
             {
                 List<StatementDefinitionNode> defs = _db.StatementDefinitions
-                    .Where(d => d.StatementDatabaseEntry == statement).ToList();
+                    .Where(d => d.StatementDatabaseEntry == statement)
+                    .Include(n => n.DictionaryDefinition).ToList();
                 ret.Add(Tuple.Create(statement, defs));
             }
 
