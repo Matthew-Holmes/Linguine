@@ -1,5 +1,6 @@
 ﻿
 using Infrastructure;
+using LearningExtraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,18 +109,62 @@ namespace Linguine.Tabs.WPF.Controls
         }
 
         Brush faintGreyBrush = new SolidColorBrush(Color.FromArgb(20, 128, 128, 128));
+        Brush faintRedBrush  = new SolidColorBrush(Color.FromArgb(20, 255, 0,   0));
+
+        #region typesetting
 
         private void ProcessStatementInformation(object? sender, List<Statement> statementsCoveringPage)
         {
             TextDisplayRegion.Text = ""; // now using fancier text placement
             TextDisplayRegion.Inlines.Clear();
 
-            List<Tuple<int, int>> statementSpans = statementsCoveringPage.Select(
-                s => Tuple.Create(s.FirstCharIndex, s.LastCharIndex)).ToList();
+            List<Tuple<int, int, Brush>> highlights = new List<Tuple<int, int, Brush>>();
+
+            foreach (Statement s in statementsCoveringPage)
+            {
+                int start = s.FirstCharIndex;
+                int end = s.LastCharIndex;
+                int offset = s.FirstCharIndex;
+
+                List<int> unitStarts = DecompositionHelper.GetUnitLocations(s.InjectiveDecomposition)
+                    .Select(s => s + offset).ToList();
+                List<int> unitLengths = s.InjectiveDecomposition.Units?.Select(s => s.Length).ToList() ?? new List<int>();
+
+                // TODO - empty units
+                if (unitStarts.Count == 0)
+                {
+                    highlights.Add(Tuple.Create(start, end, faintGreyBrush)); continue;
+                }
+
+                // initial grey highlight
+                if (unitStarts[0] > 0)
+                {
+                    highlights.Add(Tuple.Create(start, unitStarts[0] - 1, faintGreyBrush));
+                }
+
+                for (int i = 0; i != unitStarts.Count; i++)
+                {
+                    // main unit highlight
+                    highlights.Add(Tuple.Create(unitStarts[i], unitStarts[i] + unitLengths[i] - 1, faintRedBrush));
+
+                    // grey after
+                    if (i != unitStarts.Count - 1 && unitStarts[i] + unitLengths[i] < unitStarts[i+1])
+                    {
+                        highlights.Add(Tuple.Create(unitStarts[i] + unitLengths[i], unitStarts[i + 1] - 1, faintGreyBrush));
+                    }
+                }
+
+                // trailing grey highlight
+                if (unitStarts.Last() + unitLengths.Last() <= end)
+                {
+                    highlights.Add(Tuple.Create(unitStarts.Last() + unitLengths.Last(), end, faintGreyBrush));
+                }
+
+            }
 
             int currentIndex = LocalCursor;
 
-            foreach (var section in statementSpans)
+            foreach (var section in highlights)
             {
                 int start = section.Item1;
                 int end = section.Item2;
@@ -131,10 +176,10 @@ namespace Linguine.Tabs.WPF.Controls
                 }
 
                 // Add highlighted text
-                if (start < end && end <= EndOfPage)
+                if (start <= end && end <= EndOfPage)
                 {
                     Run highlightRun = new Run(FullText.Substring(start, end - start + 1));
-                    highlightRun.Background = faintGreyBrush;
+                    highlightRun.Background = section.Item3;
                     TextDisplayRegion.Inlines.Add(highlightRun);
                 }
 
@@ -148,6 +193,9 @@ namespace Linguine.Tabs.WPF.Controls
             }
         }
 
+        #endregion
+
+        #region paging
 
         private void HandlePageBackwards(object? sender, int pages)
         {
@@ -442,7 +490,8 @@ namespace Linguine.Tabs.WPF.Controls
             return mid;
         }
 
-  
+
+        #endregion
 
     }
 

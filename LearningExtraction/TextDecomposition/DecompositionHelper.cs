@@ -90,7 +90,7 @@ namespace LearningExtraction
 
 
 
-        internal static List<int> GetUnitLocations(TextDecomposition injective)
+        public static List<int> GetUnitLocations(TextDecomposition injective)
         {
             // TODO - write tests
 
