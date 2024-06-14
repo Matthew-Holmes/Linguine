@@ -1,12 +1,15 @@
 ﻿
+using Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Linguine.Tabs.WPF.Controls
 {
@@ -51,6 +54,8 @@ namespace Linguine.Tabs.WPF.Controls
             {
                 oldViewModel.PageForwards  -= HandlePageForwards;
                 oldViewModel.PageBackwards -= HandlePageBackwards;
+
+                oldViewModel.StatementsCoveringPageChanged -= ProcessStatementInformation;
             }
 
             if (e.NewValue is TextualMediaViewerViewModel newViewModel)
@@ -61,6 +66,8 @@ namespace Linguine.Tabs.WPF.Controls
                 SortedStatementStartIndices = newViewModel.SortedStatementStartIndices;
                 PageLocatedCommand          = newViewModel.PageLocatedCommand;
                 LocalCursor                 = newViewModel.LocalCursor;
+
+                newViewModel.StatementsCoveringPageChanged += ProcessStatementInformation;
 
                 if (IsLoaded)
                 {
@@ -88,6 +95,48 @@ namespace Linguine.Tabs.WPF.Controls
                 MessageBox.Show("invalid data context!");
             }
         }
+
+        Brush faintGreyBrush = new SolidColorBrush(Color.FromArgb(20, 128, 128, 128));
+
+        private void ProcessStatementInformation(object? sender, List<Statement> statementsCoveringPage)
+        {
+            TextDisplayRegion.Text = ""; // now using fancier text placement
+            TextDisplayRegion.Inlines.Clear();
+
+            List<Tuple<int, int>> statementSpans = statementsCoveringPage.Select(
+                s => Tuple.Create(s.FirstCharIndex, s.LastCharIndex)).ToList();
+
+            int currentIndex = LocalCursor;
+
+            foreach (var section in statementSpans)
+            {
+                int start = section.Item1;
+                int end = section.Item2;
+
+                // Add unhighlighted text before the highlighted section
+                if (currentIndex < start)
+                {
+                    TextDisplayRegion.Inlines.Add(new Run(FullText.Substring(currentIndex, start - currentIndex)));
+                }
+
+                // Add highlighted text
+                if (start < end && end <= EndOfPage)
+                {
+                    Run highlightRun = new Run(FullText.Substring(start, end - start + 1));
+                    highlightRun.Background = faintGreyBrush;
+                    TextDisplayRegion.Inlines.Add(highlightRun);
+                }
+
+                currentIndex = end+1;
+            }
+
+            // Add any remaining unhighlighted text
+            if (currentIndex <= EndOfPage)
+            {
+                TextDisplayRegion.Inlines.Add(new Run(FullText.Substring(currentIndex, EndOfPage - currentIndex + 1)));
+            }
+        }
+
 
         private void HandlePageBackwards(object? sender, int pages)
         {
@@ -141,9 +190,11 @@ namespace Linguine.Tabs.WPF.Controls
         int _charsPerPageStartGuess = 1000;
         private void CalculatePageFromStartIndex(int newStartIndex)
         {
-            int maxHeight = (int)TextDisplayRegion.ActualHeight;
-
             if (newStartIndex >= FullText.Length) { return; }
+
+            TextDisplayRegion.Inlines.Clear();
+
+            int maxHeight = (int)TextDisplayRegion.ActualHeight;
 
             Typeface typeface = CreateTypeface();
 
@@ -238,9 +289,11 @@ namespace Linguine.Tabs.WPF.Controls
 
         private void CalculatePageFromEndIndex(int newEndIndex)
         {
-            int maxHeight = (int)TextDisplayRegion.ActualHeight;
-
             if (newEndIndex < 0) { return; }
+
+            TextDisplayRegion.Inlines.Clear();
+
+            int maxHeight = (int)TextDisplayRegion.ActualHeight;
 
             Typeface typeface = CreateTypeface();
 
