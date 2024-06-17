@@ -9,7 +9,7 @@ namespace Agents
 {
     public class UnitRootingAgent : OpenAIProcessingBase
     {
-        private static String systemMessage = "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names, acronyms MUST obey capitisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unecessary punctutation and possesive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc.";
+        private static String systemMessage = "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names and acronyms MUST obey capitalisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unnecessary punctuation and possessive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc.";
 
         public UnitRootingAgent(string apiKey) : base(apiKey)
         {

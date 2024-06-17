@@ -11,10 +11,13 @@ namespace Agents
     {
         private static int _concurrencyLimit = 30;
 
-        public List<Tuple<String, String>>          SequentialPromptLog { get; private set; } = new List<Tuple<String, String>>();
-        public ConcurrentBag<Tuple<String, String>> ConcurrentPromptLog { get; private set; } = new ConcurrentBag<Tuple<String, String>>();
+        public List<Tuple<String, String>>          SequentialPromptLog { get; private set; } 
+            = new List<Tuple<String, String>>();
+        public ConcurrentBag<Tuple<String, String>> ConcurrentPromptLog { get; private set; } 
+            = new ConcurrentBag<Tuple<String, String>>();
 
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1,_concurrencyLimit); // use this instead of lock since doing async stuff
+        private SemaphoreSlim _semaphore = new SemaphoreSlim(1,_concurrencyLimit); 
+        // use this instead of lock since doing async stuff
 
         private int _maxConcurrentResponses = 1;
         public int MaxConcurrentResponses
@@ -50,7 +53,8 @@ namespace Agents
 
             try
             {
-                response = await GetResponseCore(prompt).ConfigureAwait(false); // since this isn't a UI thing we'll let it resume on any thread TODO - understand this better!
+                response = await GetResponseCore(prompt).ConfigureAwait(false); 
+                // since this isn't a UI thing we'll let it resume on any thread TODO - understand this better!
 
                 if (MaxConcurrentResponses == 1)
                 {
