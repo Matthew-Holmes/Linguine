@@ -24,6 +24,7 @@ namespace Agents.OpenAI
 
             DiscreteParameters.Add(new Parameter<int>("PromptDepth", 10, int.MaxValue, 0, 100,   0));
             DiscreteParameters.Add(new Parameter<int>("MaxTokens", 1000, int.MaxValue, 0, 16000, 0));
+            DiscreteParameters.Add(new Parameter<int>("RetryCount",   3, int.MaxValue, 0, 10,    0));
 
             ContinousParameters.Add(new Parameter<double>("Temperature",      1.0, 2.0, 0.0));
             ContinousParameters.Add(new Parameter<double>("TopP",             1.0, 1.0, 0.0));
@@ -62,16 +63,16 @@ namespace Agents.OpenAI
 
             var data = new
             {
-                model = StringParameters["model"],
-                messages = messages.ToArray(),
-                temperature = ContinousParameter("Temperature").Value,
-                max_tokens = DiscreteParameter("MaxTokens").Value,
-                top_p = ContinousParameter("TopP").Value,
+                model             = StringParameters["model"],
+                messages          = messages.ToArray(),
+                temperature       = ContinousParameter("Temperature").Value,
+                max_tokens        = DiscreteParameter("MaxTokens").Value,
+                top_p             = ContinousParameter("TopP").Value,
                 frequency_penalty = ContinousParameter("FrequencyPenalty").Value,
-                presence_penalty = ContinousParameter("PresencePenalty").Value
+                presence_penalty  = ContinousParameter("PresencePenalty").Value
             };
 
-            var content         = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
             HttpResponseMessage? response;
 
@@ -79,13 +80,12 @@ namespace Agents.OpenAI
             {
                 try
                 {
-                    response = await _httpClient.PostAsync(
-                        "https://api.openai.com/v1/chat/completions", content);
+                    response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
                     break;
                 } 
                 catch (Exception e)
                 {
-                    if (retryCnt > 3)
+                    if (retryCnt > DiscreteParameter("RetryCount").Value)
                     {
                         throw e;
                     }
