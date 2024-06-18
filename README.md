@@ -11,11 +11,22 @@ Linguine is a Windows WPF app, it will include: tools to analyse user imported m
 
 For implementation details see readme's in each subfolder (excluding tests).
 
+
+## Current Progress
+
+The app can import and store pieces of text, and the user can return to previous sessions. Once imported, text can be iteratively processed using the LLMs, which identifies words and resolves definitions - when homonyms are present.
+
+The text that has been processed is highlighted and the user can interact with it, selecting words to see their root form and definition when it has been found.
+
+
+<img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Linguine/SampleImages/LinguineDemo001.png?raw=true" width="400"> <img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Linguine/SampleImages/LinguineDemo002.png?raw=true" width="400">
+<p align="center">
+<img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Linguine/SampleImages/LinguineDemo003.png?raw=true" width="400">
+</p>
+
 ## Domain Driven Design
 
-"Efforts to automate what must be the product of thought are naïve and counterproductive" - Eric Evans.
-
-Domain driven design is a pretty interesting concept, pulling focus away from the technical details of implementation frameworks. Instead the focus is on the domain, and the language used to describe it. In this project the domain is language learning. I read the book Domain-Driven Design by Eric Evans, which provides a sweeping description of what he views as best practises, from the design of classes and their interactions, up to the large scale structure and management of large projects.
+Domain driven design pulls focus away from the technical details of implementation frameworks. Instead looking to the domain, and the language used to describe it, to drive the structure of the software. In this project the domain is language learning. I read the book Domain-Driven Design by Eric Evans, which provides a sweeping description of what he views as best practises, from the design of classes and their interactions, up to the large scale structure and management of large projects.
 
 A key idea of Domain Driven Design is the formation of a **Ubiquitous Language** that is used when describing the domain, and should be also used when naming classes, modules and services. the most extreme implementation of Domain Driven Design hinges on the idea that: "Changing code changes the model" - Eric Evans. Here the model is the model that developers and subject matter experts hold in their head of the domain.
 
@@ -29,7 +40,7 @@ Evans introduces lots of vocabulary to desribe Domain Driven Design, some includ
 
 **Core Domain** - the boiled down, business specific domain model that should be focussed on
 
-**Anti-Corruption Layer** - Designed to form a hard boundary between two models. It is noted how information is not just the data format, but the context and meaning of said data. An anticorruption layer's role is to ensure there is no bleed in the meaning of data between two models . May be formed of facades, adaptors, translators and services.
+**Anti-Corruption Layer** - Designed to form a hard boundary between two models. It is noted how information is not just the formatted data, but the context and meaning surrounding the data. An anticorruption layer's role is to ensure there is no bleed in the meaning of data between two models . May be formed of facades, adaptors, translators and services.
 
 
 ### Application
@@ -48,10 +59,10 @@ I attempted these:
 | ---------------------- | ----------------------------- | -------------------------------------------- |
 | Linguistics            | spectrographic audio analysis | focus on audio signals and sound replication |
 | External Media         | media normalisation           | anti-corruption layer                        |
-| Learnings: Extraction  | services to extract learnings | heavy use of LLMs, should be stateless       |
-| Learnings: Store       | repository of things to learn | just "facts" - no recall tracking            |
-| Learnings: User Recall | recall tracking for a user    | SRS etc                                      |
-| Chat                   | chatbot access and config     | likely to bleed the most into other contexts |
+| Learnings: Extraction  | services to extract learnings | heavy use of LLM APIs                        |
+| Learnings: Store       | repository of things to learn | just "facts" - no tracking of recall         |
+| Learnings: User Recall | recall tracking for a user    | spaced repetition, similar to ANKI           |
+| Chat                   | chatbot access and config     | to practice using the language               |
 | Analytics              | user data tracking            | to help guide policy                         |
 | Policy                 | user learning direction       | use analytics                                |
 
@@ -73,5 +84,5 @@ For example the ubiquitous language in Learnings: Store
 
 In this case the core domain is Learnings: Discovery. Breaking down text into vocabulary and grammar is not a simple task, and most other contexts require this process.
 
-Tracking recall and storing learnings are both well understood domains, with "off the shelf" implementations that can be emulated. With this in mind the first step of the project was producing a MVP that could load and decompose pieces of text into "learnings", to do this LLMs were used. For implementation details see the LearningExtraction directory.
+Tracking recall and storing learnings are both well understood domains, with "off the shelf" implementations that can be emulated. With this in mind the first step of the project was producing an app that could load and decompose pieces of text into "learnings", to do this LLMs were used. For implementation details see the LearningExtraction directory.
 
