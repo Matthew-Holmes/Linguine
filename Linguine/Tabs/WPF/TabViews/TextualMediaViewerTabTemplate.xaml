@@ -24,7 +24,7 @@
                 <TextBlock Text="{Binding SelectedUnitText}"/>
                 <TextBlock Text="{Binding SelectedUnitRootedText}"/>
                 <TextBlock Text="{Binding SelectedUnitDefinition}" TextWrapping="Wrap"/>
-                <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/>
+                <!-- <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/>> -->
             </StackPanel>
 
 

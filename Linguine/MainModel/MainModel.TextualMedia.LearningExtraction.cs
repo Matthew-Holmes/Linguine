@@ -22,19 +22,19 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        private TextDecomposer?                    ToStatementsDecomposer           { get; set; }
-        private TextDecomposer?                    FromStatementsDecomposer         { get; set; }
-        private UnitRooter?                        UnitRooter                       { get; set; }    
-        private DefinitionResolver?                DefinitionResolver               { get; set; }
-        private ContextChangeIdentificationAgent?  ContextChangeIdentificationAgent {get; set;}
-        private ContextUpdateAgent?                ContextUpdateAgent               { get; set;}
+        private TextDecomposer?     ToStatementsDecomposer           { get; set; }
+        private TextDecomposer?     FromStatementsDecomposer         { get; set; }
+        private UnitRooter?         UnitRooter                       { get; set; }    
+        private DefinitionResolver? DefinitionResolver               { get; set; }
+        private AgentBase?          ContextChangeIdentificationAgent { get; set; }
+        private AgentBase?          ContextUpdateAgent               { get; set; }
 
         internal async Task ProcessNextChunk(int sessionID)
         {
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            List<Statement> ret = await DoProcessingStep(tm, 1000, 20);
+            List<Statement> ret = await DoProcessingStep(tm, 500, 20);
 
             if (ret is not null)
             {
@@ -142,17 +142,22 @@ namespace Linguine
         {
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
 
-            ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(apiKey);
-            FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(apiKey);
+            ToStatementsDecomposer   = TextDecomposerFactory.MakeStatementsDecomposer(apiKey, ConfigManager.TargetLanguage);
+            FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(     apiKey, ConfigManager.TargetLanguage);
 
-            ContextChangeIdentificationAgent = new ContextChangeIdentificationAgent(apiKey);
-            ContextUpdateAgent = new ContextUpdateAgent(apiKey);
+            ContextChangeIdentificationAgent = AgentFactory.GenerateProcessingAgent(
+                apiKey, AgentTask.ContextChangeIdentification, ConfigManager.TargetLanguage);
+
+            ContextUpdateAgent = AgentFactory.GenerateProcessingAgent(
+                apiKey, AgentTask.ContextUpdating, ConfigManager.TargetLanguage);
 
             UnitRooter = new UnitRooter();
-            UnitRooter.Agent = new UnitRootingAgent(apiKey);
+            UnitRooter.Agent = AgentFactory.GenerateProcessingAgent(
+                apiKey, AgentTask.UnitRooting, ConfigManager.TargetLanguage);
 
             DefinitionResolver = new DefinitionResolver();
-            DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);
+            DefinitionResolver.Agent = AgentFactory.GenerateProcessingAgent(
+                apiKey, AgentTask.DefinitionResolution, ConfigManager.TargetLanguage);
 
             // TODO - factories?
             List<String> dictionaries = ExternalDictionaryManager.AvailableDictionaries();

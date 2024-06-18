@@ -14,7 +14,7 @@ namespace Agents.OpenAI
         public OpenAIProcessingBase(string apiKey) : base(apiKey)
         {
             DiscreteParameter("PromptDepth").Value = 0;
-            MaxConcurrentResponses = 10;
+            MaxConcurrentResponses = 5;
         }
     }
 }

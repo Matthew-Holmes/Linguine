@@ -92,7 +92,7 @@ namespace LearningExtraction
                     }
                 } catch (Exception e)
                 {
-                    throw e;
+                    defIndex = -1;
                 }
 
                 if (defIndex == -1) { defIndex++; /* keep this -1 even after reverting to zero indexing */ }

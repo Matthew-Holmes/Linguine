@@ -22,9 +22,10 @@ namespace Agents.OpenAI
             this._httpClient    = new HttpClient();
             this._httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
 
-            DiscreteParameters.Add(new Parameter<int>("PromptDepth", 10, int.MaxValue, 0, 100,   0));
-            DiscreteParameters.Add(new Parameter<int>("MaxTokens", 1000, int.MaxValue, 0, 16000, 0));
-            DiscreteParameters.Add(new Parameter<int>("RetryCount",   3, int.MaxValue, 0, 10,    0));
+            DiscreteParameters.Add(new Parameter<int>("PromptDepth",      10, int.MaxValue, 0, 100,   0));
+            DiscreteParameters.Add(new Parameter<int>("ContextTokens",  1000, int.MaxValue, 0, 16000, 0));
+            DiscreteParameters.Add(new Parameter<int>("ResponseTokens", 1000, int.MaxValue, 0, 4000,  0));
+            DiscreteParameters.Add(new Parameter<int>("RetryCount",        3, int.MaxValue, 0, 10,    0));
 
             ContinousParameters.Add(new Parameter<double>("Temperature",      1.0, 2.0, 0.0));
             ContinousParameters.Add(new Parameter<double>("TopP",             1.0, 1.0, 0.0));
@@ -66,7 +67,7 @@ namespace Agents.OpenAI
                 model             = StringParameters["model"],
                 messages          = messages.ToArray(),
                 temperature       = ContinousParameter("Temperature").Value,
-                max_tokens        = DiscreteParameter("MaxTokens").Value,
+                max_tokens        = DiscreteParameter("ResponseTokens").Value,
                 top_p             = ContinousParameter("TopP").Value,
                 frequency_penalty = ContinousParameter("FrequencyPenalty").Value,
                 presence_penalty  = ContinousParameter("PresencePenalty").Value

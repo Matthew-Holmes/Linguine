@@ -11,7 +11,6 @@ namespace Agents
     {
         internal static String SystemMessageFor(AgentTask task, LanguageCode language)
         {
-            string _;
             switch (language)
             {
                 case LanguageCode.eng:
