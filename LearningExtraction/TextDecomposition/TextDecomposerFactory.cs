@@ -17,8 +17,6 @@ namespace LearningExtraction
             TextDecomposer ret = new TextDecomposer();
 
             ret.MaxVolumeToProcess    = 5000;
-            ret.PaddingCharacterCount = 500;
-            ret.JoinCharacterCount    = 500;
 
             ret.StandardAgent        = AgentFactory.GenerateProcessingAgent(openAI_APIKey, AgentTask.DecompositionToStatements, lc);
 
@@ -34,8 +32,6 @@ namespace LearningExtraction
             TextDecomposer ret = new TextDecomposer();
 
             ret.MaxVolumeToProcess    = 5000;
-            ret.PaddingCharacterCount = 20;
-            ret.JoinCharacterCount    = 30; // longest English word is 45 letters 20+30=50
 
             ret.StandardAgent       = AgentFactory.GenerateProcessingAgent(openAI_APIKey,
                 AgentTask.DecompositionToUnits, lc);
