@@ -47,21 +47,26 @@ namespace Linguine.Tabs
         // the page displayed
         public event EventHandler<List<Statement>> StatementsCoveringPageChanged;
         public List<Statement> StatementsCoveringPage;
-        private string _selectedUnitText;
-        private string _selectedUnitDefinition;
-        private string _selectedUnitRootedText;
-        private ObservableCollection<string> _selectedUnitContextInfo;
 
-        // the user can then trigger this by clicking on a unit
+        // the user can then select a unit to see its details
         public ICommand UnitSelectedCommand { get; internal set; }
 
-        // invoke this to trigger a redraw, e.g. if another processing step
+        // perform a processing step
+        public ICommand ProcessChunkCommand { get; set; }
+
+        // invoke this to trigger a redraw, e.g. once a processing step
         // has been completed
         public event EventHandler<List<int>> UnderlyingStatementsChanged;
 
         // *********************************************************************        
 
 
+        private string _selectedUnitText;
+        private string _selectedUnitDefinition;
+        private string _selectedUnitRootedText;
+        private ObservableCollection<string> _selectedUnitContextInfo;
+
+        // right hand pane unit properties
         public String SelectedUnitText
         {
             get => _selectedUnitText;
@@ -102,9 +107,7 @@ namespace Linguine.Tabs
             }
         }
 
-        
 
-        
 
         public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel model, MainViewModel parent) 
             : base(uiComponents, model, parent)
@@ -193,11 +196,6 @@ namespace Linguine.Tabs
 
             StatementsCoveringPageChanged?.Invoke(this, StatementsCoveringPage);
         }
-
-
         #endregion
-
-        public ICommand ProcessChunkCommand { get; set; }
-        
     }
 }

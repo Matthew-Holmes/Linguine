@@ -7,6 +7,5 @@
              mc:Ignorable="d">
     <Grid>
         <TextBlock Name="TextDisplayRegion" TextWrapping="Wrap" Margin="10"/>
-        
     </Grid>
 </UserControl>
