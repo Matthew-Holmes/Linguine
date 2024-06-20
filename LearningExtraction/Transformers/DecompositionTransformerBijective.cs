@@ -10,12 +10,10 @@ namespace LearningExtraction
 {
     public static class DecompositionTransformerBijective
     {
-        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int joinLines, int retry = 2)
+        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int retry = 2)
         {
             // prompts the agent with a prompt derived from each decomposition unit on each line
             // the response is converted to a response decomposition
-
-            // applies windowing if the prompt would be too big
 
             // ensures that as many lines of response as in prompt
             if ((source.Decomposition?.Count ?? 0) == 0)
@@ -25,7 +23,7 @@ namespace LearningExtraction
 
             String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total));
 
-            String response = await GetResponse(agent, prompt, maxCharsToProcess, joinLines, retry); // agent best at identifying lower --> upper, not the other way around
+            String response = await GetResponse(agent, prompt, maxCharsToProcess, retry); // agent best at identifying lower --> upper, not the other way around
 
             return TextDecomposition.FromNewLinedString(source.Total, response);
         }
@@ -35,15 +33,14 @@ namespace LearningExtraction
             return prompt.Split('\n').Count() == response.Split('\n').Count();
         }
 
-        private static async Task<String> GetResponse(AgentBase agent, string prompt, int maxCharsToProcess, int joinLines, int retry)
+        private static async Task<String> GetResponse(AgentBase agent, string prompt, int maxCharsToProcess, int retry)
         {
             // parallel windows strategy
             if (prompt.Length > maxCharsToProcess)
             {
-                return await GetCombinedResponses(agent, prompt, maxCharsToProcess, joinLines, retry);
+                throw new ArgumentException("prompt too long");
             }
 
-            // no need for windowing
             String newLinedResponse = await agent.GetResponse(prompt);
 
             for (int j = 0; j != retry && !Bijects(prompt, newLinedResponse); j++)
@@ -59,60 +56,6 @@ namespace LearningExtraction
             }
 
             return newLinedResponse;
-        }
-
-        private static async Task<String> GetCombinedResponses(AgentBase agent, String prompt, int maxCharsToProcess, int joinLines, int retry)
-        {
-            (List<String> prompts, int joinLinesUsed) = DecompositionHelper.Window(prompt, maxCharsToProcess, joinLines);
-
-            var getResponseTasks = prompts.Select(prompt => agent.GetResponse(prompt));
-
-            String[] responses = await Task.WhenAll(getResponseTasks);
-
-            for (int i = 0; i != prompts.Count; i++)
-            {
-                for (int j = 0; j != retry && !Bijects(prompts[i], responses[i]); j++)
-                {
-                    responses[i] = await agent.GetResponse(prompts[i]);
-                }
-
-                if (!Bijects(prompts[i], responses[i]))
-                {
-                    // bijectivity compromised
-                    // revert to identity map
-                    responses[i] = prompts[i];
-                }
-            }
-
-            return Combine(responses.ToList(), joinLinesUsed);
-        }
-
-        private static string Combine(List<string> list, int joinLines)
-        {
-            // undo the windowing
-
-            if (list.Count == 1)
-            {
-                return list[0];
-            }
-
-            List<String> lhs = list[0].Split('\n').ToList();
-            List<String> rhs = list[1].Split('\n').ToList();
-
-            int overlap = joinLines;
-
-            int rhsDrop = overlap / 2;
-            int lhsDrop = overlap - rhsDrop;
-
-            rhs = rhs.Skip(rhsDrop).ToList();
-            lhs.RemoveRange(lhs.Count - lhsDrop - 1, lhsDrop);
-
-            lhs.AddRange(rhs);
-
-            List<String> reduced = new List<String> { String.Join('\n', lhs) };
-            reduced.AddRange(list.Skip(2));
-
-            return Combine(reduced, joinLines);
         }
     }
 }
