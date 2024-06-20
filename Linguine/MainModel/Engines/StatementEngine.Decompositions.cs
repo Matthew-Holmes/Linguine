@@ -8,15 +8,10 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    public partial class MainModel
+    internal partial class StatementEngine
     {
         private async Task<List<String>> DecomposeIntoStatements(String chunk)
         {
-            if (ToStatementsDecomposer is null)
-            {
-                PrepareWorkers();
-            }
-
             TextDecomposition statementsDecomp = await ToStatementsDecomposer.DecomposeText(chunk);
 
             return statementsDecomp.Units;
@@ -24,11 +19,6 @@ namespace Linguine
 
         private async Task DecomposeStatements(List<StatementBuilder> builders)
         {
-            if (FromStatementsDecomposer is null)
-            {
-                PrepareWorkers();
-            }
-
             var decompositionTasks = builders.Select(
                 b => FromStatementsDecomposer.DecomposeText(b.StatementText));
 

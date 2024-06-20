@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    public partial class MainModel
+    internal partial class StatementEngine
     {
         private async Task AttachCorrectDefinitions(List<StatementBuilder> builders)
         {

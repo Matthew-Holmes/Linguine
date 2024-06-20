@@ -8,14 +8,10 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    public partial  class MainModel
+    internal partial class StatementEngine
     {
-        private async Task FormContexts(List<StatementBuilder> builders)
+        private async Task FormContexts(List<StatementBuilder> builders, List<String> previousContext)
         {
-            TextualMedia tm = builders.FirstOrDefault()?.Parent ?? throw new Exception("no textual media found");
-
-            List<String> previousContext = await GetPreviousContext(tm);
-
             List<String> statementTotals = builders.Select(
                     b => b.StatementText ?? throw new Exception()).ToList();
 
@@ -41,11 +37,6 @@ namespace Linguine
         private async Task<List<int>> GetStatementsWhereContextChanges(
          List<string> previousContext, List<string> statementTotals)
         {
-            if (ContextChangeIdentificationAgent is null)
-            {
-                PrepareWorkers();
-            }
-
             StringBuilder prompt = new StringBuilder();
             prompt.AppendLine("Context: ");
             foreach (string context in previousContext)
@@ -85,11 +76,6 @@ namespace Linguine
         private async Task<List<String>> GetUpdatedContextAt(
           List<String> previous, List<String> statementTotals, int i)
         {
-            if (ContextUpdateAgent is null)
-            {
-                PrepareWorkers();
-            }
-
             StringBuilder prompt = new StringBuilder();
 
             prompt.AppendLine("Old Context:");
@@ -129,29 +115,6 @@ namespace Linguine
             String response = await ContextUpdateAgent.GetResponse(prompt.ToString());
 
             return response.Split('\n').ToList();
-        }
-
-        private async Task<List<String>> GetPreviousContext(TextualMedia tm)
-        {
-            Statement? previousStatement = StatementManager.GetLastStatement(tm);
-
-            if (previousStatement is null)
-            {
-                return await FormInitialContext(tm);
-            }
-            else
-            {
-                return previousStatement.StatementContext;
-            }
-        }
-        private async Task<List<String>> FormInitialContext(TextualMedia tm)
-        {
-            List<String> ret = new List<String>();
-
-            ret.Add(tm.Description);
-            ret.Add("called " + tm.Name);
-
-            return await Task.FromResult(ret);
         }
     }
 }
