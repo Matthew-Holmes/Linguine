@@ -82,7 +82,7 @@ For example the ubiquitous language in Learnings: Store
 
 #### Core Domain
 
-In this case the core domain is Learnings: Discovery. Breaking down text into vocabulary and grammar is not a simple task, and most other contexts require this process.
+In this case the core domain is Learnings: Extraction. Breaking down text into vocabulary and grammar is not a simple task, and most other contexts require this process.
 
 Tracking recall and storing learnings are both well understood domains, with "off the shelf" implementations that can be emulated. With this in mind the first step of the project was producing an app that could load and decompose pieces of text into "learnings", to do this LLMs were used. For implementation details see the LearningExtraction directory.
 
