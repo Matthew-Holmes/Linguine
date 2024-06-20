@@ -96,45 +96,5 @@ namespace Linguine
             Linguine.SaveChanges();
             Linguine.Dispose();
         }
-
-
-
-
-
-
-
-        /*
-        public TextDecomposer? TextDecomposer { get; private set; } = null;
-        public UnitRooter? UnitRooter { get; private set; } = null;
-        public DefinitionResolver? DefinitionResolver { get; private set; } = null;
-
-        public bool LoadTextDecompositionService()
-        {
-            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
-
-            TextDecomposer = new TextDecomposer();
-
-            TextDecomposer.StandardAgent = new TextDecompositionAgent(apiKey, highPowered: false);
-            TextDecomposer.HighPerformanceAgent = new TextDecompositionAgent(apiKey, highPowered: true);
-            TextDecomposer.FallbackAgent = new WhitespaceDecompositionAgent();
-
-            UnitRooter = new UnitRooter();
-            UnitRooter.Agent = new UnitRootingAgent(apiKey);
-
-            return true;
-        }
-
-        public bool LoadDefinitionResolutionService(ExternalDictionary dictionary)
-        {
-            DefinitionResolver = new DefinitionResolver();
-            DefinitionResolver.Dictionary = dictionary;
-
-            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
-
-            DefinitionResolver.Agent = new DefinitionResolutionAgent(apiKey);   
-
-            return true;
-        }
-        */
     }
 }
