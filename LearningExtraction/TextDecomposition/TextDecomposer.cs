@@ -31,24 +31,22 @@ namespace LearningExtraction
                 => (!mustBiject || td.Bijects()) && (!mustInject || td.Injects());
 
             // first pass at the decomposition, using StandardAgent
-            ret = TextDecomposition.FromNewLinedString(text, await StandardAgent.GetResponse(text));
+            ret = await FromTextUsingAgent(text, StandardAgent);
+            if (MaintainsInvariants(ret))
+            {
+                return ret;
+            }
+
+            // first attempt failed, use more powerful agent (e.g. higher spec LLM)
+            ret = await FromTextUsingAgent(text, HighPerformanceAgent);
 
             if (MaintainsInvariants(ret))
             {
                 return ret;
             }
 
-            // first attempt failed, use something more powerful
-            ret = TextDecomposition.FromNewLinedString(text, await HighPerformanceAgent.GetResponse(text));
-
-            if (MaintainsInvariants(ret))
-            {
-                return ret;
-            }
-
-            // do default
-            ret = TextDecomposition.FromNewLinedString(text, await FallbackAgent.GetResponse(text));
-
+            // do default, recommendation: use dummy agent guaranteed to maintain invariants
+            ret = await FromTextUsingAgent(text, FallbackAgent);
             if (MaintainsInvariants(ret))
             {
                 return ret;
@@ -57,6 +55,11 @@ namespace LearningExtraction
             {
                 throw new Exception("Invalid decomposition");
             }
+        }
+
+        private async Task<TextDecomposition> FromTextUsingAgent(String text, AgentBase agent)
+        {
+            return TextDecomposition.FromNewLinedString(text, await agent.GetResponse(text));
         }
 
         public TextDecomposer()
