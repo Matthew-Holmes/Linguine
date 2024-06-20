@@ -69,13 +69,9 @@ namespace Linguine
         {
             List<StatementBuilder> builders = new List<StatementBuilder>();
 
-            await PopulateBuilders(builders, tm, end, chars, maxStatements);
+            await FindStatementsAndPopulateBuilders(builders, tm, end, chars, maxStatements);
 
-            SetIndices(builders, end);
-
-            List<String> previousContext = await GetPreviousContext(tm);
-
-            await FormContexts(previousContext, builders);
+            await FormContexts(builders);
 
             await DecomposeStatements(builders);
 
@@ -84,7 +80,7 @@ namespace Linguine
             return builders.Select(b => b.ToStatement()).ToList();
         }
 
-        private async Task PopulateBuilders(
+        private async Task FindStatementsAndPopulateBuilders(
             List<StatementBuilder> builders, TextualMedia tm, int end, int chars, int maxStatements)
         {
             String chunk = tm.Text.Substring(end, chars);
@@ -116,6 +112,8 @@ namespace Linguine
 
                 if (builders.Count > maxStatements) { break; }
             }
+
+            SetIndices(builders, end);
         }
 
         private void SetIndices(List<StatementBuilder> builders, int startOfStatementsIndex)

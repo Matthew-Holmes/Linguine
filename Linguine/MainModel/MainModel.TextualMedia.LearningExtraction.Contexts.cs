@@ -10,8 +10,12 @@ namespace Linguine
 {
     public partial  class MainModel
     {
-        private async Task FormContexts(List<String> previousContext, List<StatementBuilder> builders)
+        private async Task FormContexts(List<StatementBuilder> builders)
         {
+            TextualMedia tm = builders.FirstOrDefault()?.Parent ?? throw new Exception("no textual media found");
+
+            List<String> previousContext = await GetPreviousContext(tm);
+
             List<String> statementTotals = builders.Select(
                     b => b.StatementText ?? throw new Exception()).ToList();
 
