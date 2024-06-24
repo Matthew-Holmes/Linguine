@@ -32,7 +32,7 @@ A key idea of Domain Driven Design is the formation of a **Ubiquitous Language**
 
 ### Definitions
 
-Evans introduces lots of vocabulary to desribe Domain Driven Design, some include:
+Evans introduces lots of vocabulary to describe Domain Driven Design, some include:
 
 **Ubiquitous Language** - used to describe the domain and problems by both experts and developers
 
