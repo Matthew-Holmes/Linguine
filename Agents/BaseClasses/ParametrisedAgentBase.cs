@@ -34,5 +34,30 @@ namespace Agents
         {
             return JsonConvert.DeserializeObject<T>(json);
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 17; // initial start
+
+            foreach (var param in ContinuousParameters)
+            {
+                hash = hash * 31 + param.Name.GetHashCode();
+                hash = hash * 31 + param.Value.GetHashCode();
+            }
+
+            foreach (var param in DiscreteParameters)
+            {
+                hash = hash * 13 + param.Name.GetHashCode();
+                hash = hash * 13 + param.Value.GetHashCode();
+            }
+
+            foreach (var kvp in StringParameters)
+            {
+                hash = hash * 19 + kvp.Key.GetHashCode();
+                hash = hash * 19 + kvp.Value.GetHashCode();
+            }
+
+            return hash;
+        }
     }
 }
