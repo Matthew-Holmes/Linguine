@@ -28,6 +28,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helpers", "..\Helpers\Helpe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests_Helpers", "..\Tests_Helpers\Tests_Helpers.csproj", "{41950A64-7011-4697-9244-A9FE790F5100}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests_Agents", "..\Agents_Test\Tests_Agents.csproj", "{915AF23D-E2A2-426F-821F-04EE479538E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{41950A64-7011-4697-9244-A9FE790F5100}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41950A64-7011-4697-9244-A9FE790F5100}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41950A64-7011-4697-9244-A9FE790F5100}.Release|Any CPU.Build.0 = Release|Any CPU
+		{915AF23D-E2A2-426F-821F-04EE479538E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{915AF23D-E2A2-426F-821F-04EE479538E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{915AF23D-E2A2-426F-821F-04EE479538E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{915AF23D-E2A2-426F-821F-04EE479538E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

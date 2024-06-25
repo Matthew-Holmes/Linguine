@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 namespace Agents
@@ -11,8 +12,11 @@ namespace Agents
     {
         private static int _concurrencyLimit = 30;
 
+        [JsonIgnore]
         public List<Tuple<String, String>>          SequentialPromptLog { get; private set; } 
             = new List<Tuple<String, String>>();
+
+        [JsonIgnore]    
         public ConcurrentBag<Tuple<String, String>> ConcurrentPromptLog { get; private set; } 
             = new ConcurrentBag<Tuple<String, String>>();
 
@@ -20,6 +24,8 @@ namespace Agents
         // use this instead of lock since doing async stuff
 
         private int _maxConcurrentResponses = 1;
+
+        [JsonIgnore]
         public int MaxConcurrentResponses
         {
             get => _maxConcurrentResponses;
