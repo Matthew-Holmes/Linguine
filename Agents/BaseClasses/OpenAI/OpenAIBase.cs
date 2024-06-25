@@ -99,6 +99,7 @@ namespace Agents.OpenAI
             if (response.IsSuccessStatusCode)
             {
                 dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
+                // TODO - could request multiple choices for some error prone tasks??
                 string modelResponse = jsonResponse.choices[0].message.content.ToString().Trim();
 
                 return modelResponse;
