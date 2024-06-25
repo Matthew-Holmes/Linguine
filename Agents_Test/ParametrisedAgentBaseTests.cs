@@ -16,7 +16,7 @@ namespace Agents_Test
         }
 
         [TestMethod]
-        public void ToJon_RunsCorrectly()
+        public void ToJson_RunsCorrectly()
         {
             var agent = new TestAgent();
             agent.ContinuousParameters.Add(new Parameter<double>("param1", 1.23, double.MaxValue, 0.0));
