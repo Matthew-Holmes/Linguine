@@ -1,4 +1,5 @@
 ﻿using Helpers;
+using Newtonsoft.Json;
 
 namespace Tests_Helpers
 {
@@ -278,6 +279,64 @@ namespace Tests_Helpers
 
             // Assert
             Assert.AreEqual(originalSUB, parameter.SoftUpperBound);
+        }
+
+        [TestMethod]
+        public void TestSerialization()
+        {
+            // Arrange
+            var parameter = new Parameter<double>("TestParameter", 50.0, 100.0, 0.0, 90.0, 10.0);
+
+            // Act
+            string json = JsonConvert.SerializeObject(parameter);
+
+            Assert.IsNotNull(json);
+        }
+
+        [TestMethod]
+        public void TestDeserialization()
+        {
+            // Arrange
+            string json = @"{
+                ""Name"": ""TestParameter"",
+                ""Value"": 50.0,
+                ""UpperBound"": 100.0,
+                ""LowerBound"": 0.0,
+                ""SoftUpperBound"": 90.0,
+                ""SoftLowerBound"": 10.0
+            }";
+
+            // Act
+            var parameter = JsonConvert.DeserializeObject<Parameter<double>>(json);
+            var deserializedParameter = JsonConvert.DeserializeObject<Parameter<double>>(json);
+
+            // Assert
+            Assert.IsNotNull(parameter);
+            Assert.AreEqual("TestParameter", deserializedParameter.Name);
+            Assert.AreEqual(50.0, deserializedParameter.Value);
+            Assert.AreEqual(100.0, deserializedParameter.UpperBound);
+            Assert.AreEqual(0.0, deserializedParameter.LowerBound);
+            Assert.AreEqual(90.0, deserializedParameter.SoftUpperBound);
+            Assert.AreEqual(10.0, deserializedParameter.SoftLowerBound);
+        }
+
+        [TestMethod]
+        public void TestInvalidDeserialization()
+        {
+            // Arrange
+            string json = @"{
+                ""Name"": ""TestParameter"",
+                ""Value"": 150.0,
+                ""UpperBound"": 100.0,
+                ""LowerBound"": 0.0,
+                ""SoftUpperBound"": 90.0,
+                ""SoftLowerBound"": 10.0
+            }";
+
+            // Act & Assert
+            Assert.ThrowsException<Exception>(() =>
+                JsonConvert.DeserializeObject<Parameter<double>>(json));
+               
         }
 
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Helpers
 {
@@ -18,7 +19,9 @@ namespace Helpers
         // the soft bounds are there to provide basic distributional information on the parameter
         // and to provided sensible bounds if full range parameters are presented to the user
 
+        [JsonProperty (PropertyName = "SoftUpperBound")]
         private T _softUpperBound;
+        [JsonIgnore]
         public T SoftUpperBound
         {
             get => _softUpperBound;
@@ -30,8 +33,10 @@ namespace Helpers
                 }
             }
         }
-
+        [JsonProperty (PropertyName = "SoftLowerBound")]
         private T _softLowerBound;
+
+        [JsonIgnore]
         public T SoftLowerBound
         {
             get => _softLowerBound;
@@ -44,7 +49,9 @@ namespace Helpers
             }
         }
 
+        [JsonProperty (PropertyName = "Value")]
         private T _val;
+        [JsonIgnore]
         public T Value
         {
             get => _val;
@@ -75,20 +82,22 @@ namespace Helpers
             SoftLowerBound = lb;
         }
 
-        public Parameter(String name, T val, T ub, T lb, T sub, T slb) : this(name, val, ub, lb)
+        [JsonConstructor]
+        public Parameter(String name, T Value, T UpperBound, T LowerBound, T SoftUpperBound, T SoftLowerBound) 
+            : this(name, Value, UpperBound, LowerBound)
         {
-            if (Comparer<T>.Default.Compare(sub, ub) > 0 || Comparer<T>.Default.Compare(sub, lb) < 0)
+            if (Comparer<T>.Default.Compare(SoftUpperBound, UpperBound) > 0 || Comparer<T>.Default.Compare(SoftUpperBound, LowerBound) < 0)
             {
                 throw new Exception("Soft upper bound provided exceeds bounds");
             }
 
-            if (Comparer<T>.Default.Compare(slb, ub) > 0 || Comparer<T>.Default.Compare(slb, lb) < 0)
+            if (Comparer<T>.Default.Compare(SoftLowerBound, UpperBound) > 0 || Comparer<T>.Default.Compare(SoftLowerBound, LowerBound) < 0)
             {
                 throw new Exception("Soft lower bound provided exceeds bounds");
             }
 
-            SoftUpperBound = sub;
-            SoftLowerBound = slb;
+            this.SoftUpperBound = SoftUpperBound;
+            this.SoftLowerBound = SoftLowerBound;
         }
     }
 }
