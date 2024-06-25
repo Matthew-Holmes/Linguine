@@ -27,10 +27,10 @@ namespace Agents.OpenAI
             DiscreteParameters.Add(new Parameter<int>("ResponseTokens", 1000, int.MaxValue, 0, 4000,  0));
             DiscreteParameters.Add(new Parameter<int>("RetryCount",        3, int.MaxValue, 0, 10,    0));
 
-            ContinousParameters.Add(new Parameter<double>("Temperature",      1.0, 2.0, 0.0));
-            ContinousParameters.Add(new Parameter<double>("TopP",             1.0, 1.0, 0.0));
-            ContinousParameters.Add(new Parameter<double>("FrequencyPenalty", 0.0, 1.0, 0.0));
-            ContinousParameters.Add(new Parameter<double>("PresencePenalty",  0.0, 1.0, 0.0));
+            ContinuousParameters.Add(new Parameter<double>("Temperature",      1.0, 2.0, 0.0));
+            ContinuousParameters.Add(new Parameter<double>("TopP",             1.0, 1.0, 0.0));
+            ContinuousParameters.Add(new Parameter<double>("FrequencyPenalty", 0.0, 1.0, 0.0));
+            ContinuousParameters.Add(new Parameter<double>("PresencePenalty",  0.0, 1.0, 0.0));
 
             StringParameters.Add("system", "You are a helpful assistant");
             StringParameters.Add("model", "gpt-3.5-turbo-0125");
@@ -66,18 +66,18 @@ namespace Agents.OpenAI
             {
                 model             = StringParameters["model"],
                 messages          = messages.ToArray(),
-                temperature       = ContinousParameter("Temperature").Value,
+                temperature       = ContinuousParameter("Temperature").Value,
                 max_tokens        = DiscreteParameter("ResponseTokens").Value,
-                top_p             = ContinousParameter("TopP").Value,
-                frequency_penalty = ContinousParameter("FrequencyPenalty").Value,
-                presence_penalty  = ContinousParameter("PresencePenalty").Value
+                top_p             = ContinuousParameter("TopP").Value,
+                frequency_penalty = ContinuousParameter("FrequencyPenalty").Value,
+                presence_penalty  = ContinuousParameter("PresencePenalty").Value
             };
 
             var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
             HttpResponseMessage? response;
 
-            for (int retryCnt = 0; /* will throw */; retryCnt++)
+            for (int retryCnt = 0; /* will throw/break */; retryCnt++)
             {
                 try
                 {

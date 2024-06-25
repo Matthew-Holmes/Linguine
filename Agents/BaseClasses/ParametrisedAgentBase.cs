@@ -9,14 +9,14 @@ namespace Agents
 {
     public abstract class ParametrisedAgentBase : AgentBase
     {
-        public List<Parameter<double>>    ContinousParameters { get; } = new List<Parameter<double>>();
+        public List<Parameter<double>>    ContinuousParameters { get; } = new List<Parameter<double>>();
         public List<Parameter<int>>       DiscreteParameters  { get; } = new List<Parameter<int>>();
         public Dictionary<String, String> StringParameters    { get; } = new Dictionary<String, String>();
 
 
-        public Parameter<double> ContinousParameter(String name)
+        public Parameter<double> ContinuousParameter(String name)
         {
-            return ContinousParameters.Where(p => p.Name == name).First();            
+            return ContinuousParameters.Where(p => p.Name == name).First();            
         }
 
         public Parameter<int> DiscreteParameter(String name)
