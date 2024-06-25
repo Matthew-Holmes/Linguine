@@ -53,6 +53,21 @@ namespace Agents_Test
             Assert.IsFalse(json.Contains(nameof(agent.SequentialPromptLog)));
             Assert.IsFalse(json.Contains(nameof(agent.MaxConcurrentResponses)));
         }
+
+        [TestMethod]
+        public void FromJson_RoundTripWorks()
+        {
+            var agent = new TestAgent();
+            agent.ContinuousParameters.Add(new Parameter<double>("param1", 1.23, double.MaxValue, 0.0));
+            agent.DiscreteParameters.Add(new Parameter<int>("param2", 42, int.MaxValue, 1));
+            agent.StringParameters.Add("Key1", "Value1");
+
+            string json = agent.ToJson();
+
+            TestAgent clone = ParametrisedAgentBase.FromJson<TestAgent>(json);
+
+            Assert.AreEqual(agent.GetHashCode(), clone.GetHashCode());
+        }
         // TODO - round trip serialisation once hashing algo implemented and tested
 
         [TestMethod]
