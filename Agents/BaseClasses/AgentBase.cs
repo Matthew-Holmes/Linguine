@@ -5,12 +5,17 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using Infrastructure;
 
 namespace Agents
 {
     public abstract class AgentBase
     {
         private static int _concurrencyLimit = 30;
+
+        public AgentTask    AgentTask { get; set; }
+        public LLM          LLM       { get; set; }   
+        public LanguageCode Language  { get; set; }
 
         [JsonIgnore]
         public List<Tuple<String, String>>          SequentialPromptLog { get; private set; } 

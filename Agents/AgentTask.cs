@@ -1,5 +1,6 @@
 ﻿namespace Agents
 {
+    // used in JSON so only add new tasks at the end
     public enum AgentTask
     {
         ContextChangeIdentification,

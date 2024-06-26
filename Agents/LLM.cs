@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agents
 {
+    // Used in JSON so only add new models to the end
     public enum LLM
     {
         ChatGPT3_5,

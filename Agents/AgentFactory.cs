@@ -26,7 +26,8 @@ namespace Agents
             }
         }
 
-        private static AgentBase GenerateOpenAIProcessingAgent(String key, AgentTask task, LanguageCode language, LLM model)
+        private static AgentBase GenerateOpenAIProcessingAgent(String key, AgentTask task, 
+            LanguageCode language, LLM model)
         {
             OpenAIProcessingBase ret = new OpenAIProcessingBase(key);
 
@@ -38,6 +39,7 @@ namespace Agents
 
                 ret.DiscreteParameter("ContextTokens").Value  = 16000;
                 ret.DiscreteParameter("ResponseTokens").Value = 4000;
+
             } else if (model == LLM.ChatGPT4o)
             {
                 ret.StringParameters["model"] = "gpt-4o";
@@ -48,6 +50,10 @@ namespace Agents
             {
                 throw new NotImplementedException();
             }
+
+            ret.AgentTask = task;
+            ret.LLM       = model;
+            ret.Language  = language;
 
             return ret;
         }
