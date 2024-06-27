@@ -26,7 +26,7 @@ namespace Agents.DummyAgents
         public SentenceDecompositionAgent()
         {
             AgentTask = AgentTask.DecompositionToStatements;
-            LLM = LLM.Dummy;
+            LLM       = LLM.Dummy;
         }
     }
 }

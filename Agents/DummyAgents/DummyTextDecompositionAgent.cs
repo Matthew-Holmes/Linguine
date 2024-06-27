@@ -32,7 +32,7 @@ namespace Agents.DummyAgents
         public DummyTextDecompositionAgent()
         {
             AgentTask = AgentTask.DecompositionToUnits;
-            LLM = LLM.Dummy;
+            LLM       = LLM.Dummy;
         }
     }
 }

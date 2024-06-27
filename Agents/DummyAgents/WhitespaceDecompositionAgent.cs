@@ -26,7 +26,7 @@ namespace Agents.DummyAgents
         public WhitespaceDecompositionAgent()
         {
             AgentTask = AgentTask.DecompositionToUnits;
-            LLM = LLM.Dummy;
+            LLM       = LLM.Dummy;
         }
     }
 }

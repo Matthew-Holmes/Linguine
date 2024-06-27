@@ -16,7 +16,7 @@ namespace Agents.DummyAgents
         public LowercasingAgent()
         {
             AgentTask = AgentTask.UnitRooting;
-            LLM = LLM.Dummy;
+            LLM       = LLM.Dummy;
         }
 
     }

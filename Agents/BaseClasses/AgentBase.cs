@@ -28,7 +28,7 @@ namespace Agents
         public LanguageCode Language  { get; set; }
 
         [JsonIgnore]
-        public List<Tuple<String, String>>          SequentialPromptLog { get; private set; } 
+        public List<Tuple<String, String>> SequentialPromptLog { get; private set; } 
             = new List<Tuple<String, String>>();
         // used for agents which use conversation history for context
 
@@ -68,7 +68,9 @@ namespace Agents
         {
             String response;
             await _semaphore.WaitAsync(); // get local permission
-            
+
+            // now get the potentially more scarce resource
+            // _globalSemaphore could be on overall lock for an API
             if (_globalSemaphore is not null)
             {
                 await _globalSemaphore.WaitAsync();
