@@ -17,11 +17,5 @@ namespace Infrastructure
         public int          DatabasePrimaryKey { get; set; }
         public String       JSONParameters     { get; set; } // this is a serialised ParametrisedAgentBase
         public String       Hash               { get; set; } 
-
-        // not part of the hash, but help the user see what the point of the agent was
-        // and interpret the JSON parameters possibly
-        public AgentTask    AgentTask          { get; set; }
-        public LLM          LLM                { get; set; }
-        public LanguageCode Language           { get; set; } // possibly redundant
     }
 }
