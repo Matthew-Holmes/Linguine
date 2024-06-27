@@ -10,6 +10,8 @@ namespace Agents
 {
     public static class AgentFactory
     {
+        private static SemaphoreSlim OpenAISemaphore = new SemaphoreSlim(10); // global API lock for OpenAI
+
         public static AgentBase GenerateProcessingAgent(
             String key,
             AgentTask task,
@@ -26,10 +28,15 @@ namespace Agents
             }
         }
 
-        private static AgentBase GenerateOpenAIProcessingAgent(String key, AgentTask task, 
+        private static AgentBase GenerateOpenAIProcessingAgent(
+            String key, AgentTask task, 
             LanguageCode language, LLM model)
         {
-            OpenAIProcessingBase ret = new OpenAIProcessingBase(key);
+            OpenAIBase ret = new OpenAIBase(key, OpenAISemaphore);
+
+            // processing, so no history and allows concurrency
+            ret.DiscreteParameter("PromptDepth").Value = 0;
+            ret.MaxConcurrentResponses = 5; // local concurrency limit
 
             ret.StringParameters["system"] = SystemMessageFactory.SystemMessageFor(task, language);
 

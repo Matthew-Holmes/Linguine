@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Helpers;
+using Infrastructure;
 using Newtonsoft.Json;
 
 namespace Agents.OpenAI
@@ -16,7 +17,7 @@ namespace Agents.OpenAI
         private readonly String _apiKey;
         private readonly HttpClient _httpClient;
 
-        public OpenAIBase(String apiKey)
+        public OpenAIBase(String apiKey, SemaphoreSlim globalSemaphore) : base(globalSemaphore)
         {
             _apiKey             = apiKey;
             this._httpClient    = new HttpClient();
@@ -35,6 +36,7 @@ namespace Agents.OpenAI
             StringParameters.Add("system", "You are a helpful assistant");
             StringParameters.Add("model", "gpt-3.5-turbo-0125");
         }
+
 
         protected override async Task<String> GetResponseCore(string prompt)
         {
@@ -90,7 +92,7 @@ namespace Agents.OpenAI
                     {
                         throw e;
                     }
-                    Thread.Sleep(100);
+                    Thread.Sleep(1000); // long wait since don't want to overload the API
                 }
             }
 

@@ -11,5 +11,6 @@ namespace Agents
     {
         ChatGPT3_5,
         ChatGPT4o,
+        Dummy,
     }
 }

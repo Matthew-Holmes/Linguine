@@ -11,19 +11,26 @@ namespace Agents
 {
     public abstract class AgentBase
     {
+        public AgentBase(SemaphoreSlim? globalSemaphore = null)
+        {
+            // to inhibit access to a single LLM API for all agents that use it
+            _globalSemaphore = globalSemaphore;
+        }
+        private SemaphoreSlim? _globalSemaphore;
+
         private static int _concurrencyLimit = 30;
 
+        [JsonIgnore]
         public AgentTask    AgentTask { get; set; }
-        public LLM          LLM       { get; set; }   
+        [JsonIgnore]
+        public LLM          LLM       { get; set; }
+        [JsonIgnore]
         public LanguageCode Language  { get; set; }
 
         [JsonIgnore]
         public List<Tuple<String, String>>          SequentialPromptLog { get; private set; } 
             = new List<Tuple<String, String>>();
-
-        [JsonIgnore]    
-        public ConcurrentBag<Tuple<String, String>> ConcurrentPromptLog { get; private set; } 
-            = new ConcurrentBag<Tuple<String, String>>();
+        // used for agents which use conversation history for context
 
         private SemaphoreSlim _semaphore = new SemaphoreSlim(1,_concurrencyLimit); 
         // use this instead of lock since doing async stuff
@@ -60,7 +67,12 @@ namespace Agents
         public async Task<String> GetResponse(String prompt)
         {
             String response;
-            await _semaphore.WaitAsync(); // get permission
+            await _semaphore.WaitAsync(); // get local permission
+            
+            if (_globalSemaphore is not null)
+            {
+                await _globalSemaphore.WaitAsync();
+            }
 
             try
             {
@@ -71,16 +83,19 @@ namespace Agents
                 {
                     SequentialPromptLog.Add(Tuple.Create(prompt, response));
                 }
-                else
-                {
-                    ConcurrentPromptLog.Add(Tuple.Create(prompt, response));
-                }
             } finally
             {
+                // even if call throws don't upset concurrency limits
+               _globalSemaphore?.Release();
                _semaphore.Release();
             }
 
             return response;
+        }
+
+        public override int GetHashCode()
+        {
+            return GetType().Name.GetHashCode();
         }
 
         protected abstract Task<String> GetResponseCore(String prompt);

@@ -28,5 +28,11 @@ namespace Agents.DummyAgents
 
             return Task.FromResult(response);
         }
+
+        public DummyTextDecompositionAgent()
+        {
+            AgentTask = AgentTask.DecompositionToUnits;
+            LLM = LLM.Dummy;
+        }
     }
 }

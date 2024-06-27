@@ -2,7 +2,7 @@ using Agents;
 using Helpers;
 using Infrastructure;
 
-namespace Agents_Test
+namespace Tests_Agents
 {
     [TestClass]
     public class ParametrisedAgentBaseTests
@@ -40,9 +40,7 @@ namespace Agents_Test
             Assert.IsTrue(json.Contains(int.MaxValue.ToString()));
             Assert.IsTrue(json.Contains("Key1"));
             Assert.IsTrue(json.Contains("Value1"));
-            Assert.IsTrue(json.Contains("\"AgentTask\": 1"));
-            Assert.IsTrue(json.Contains("\"Language\": 1"));
-            Assert.IsTrue(json.Contains("\"LLM\": 1"));
+
         }
 
         [TestMethod]
@@ -56,9 +54,12 @@ namespace Agents_Test
             string json = agent.ToJson();
 
             Assert.IsNotNull(json);
-            Assert.IsFalse(json.Contains(nameof(agent.ConcurrentPromptLog)));
             Assert.IsFalse(json.Contains(nameof(agent.SequentialPromptLog)));
             Assert.IsFalse(json.Contains(nameof(agent.MaxConcurrentResponses)));
+
+            Assert.IsFalse(json.Contains("\"AgentTask\":"));
+            Assert.IsFalse(json.Contains("\"Language\":"));
+            Assert.IsFalse(json.Contains("\"LLM\":"));
         }
 
         [TestMethod]

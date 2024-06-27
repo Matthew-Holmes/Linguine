@@ -12,5 +12,12 @@ namespace Agents.DummyAgents
         {
             return Task.FromResult(prompt.ToLower());
         }
+
+        public LowercasingAgent()
+        {
+            AgentTask = AgentTask.UnitRooting;
+            LLM = LLM.Dummy;
+        }
+
     }
 }

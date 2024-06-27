@@ -22,5 +22,11 @@ namespace Agents.DummyAgents
 
             return Task.FromResult(response);
         }
+
+        public SentenceDecompositionAgent()
+        {
+            AgentTask = AgentTask.DecompositionToStatements;
+            LLM = LLM.Dummy;
+        }
     }
 }
