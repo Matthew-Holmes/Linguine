@@ -2164,12 +2164,13 @@ namespace Tests_LearningExtraction
             Assert.AreEqual(insertions4[2].Item1, 0);
             Assert.AreEqual(insertions4[2].Item2, "inside a test statement");
 
+            // has a context checkpoint since last
             Assert.AreEqual(insertions5.Count, 0);
-            Assert.AreEqual(removals5.Count, 4);
-            Assert.AreEqual(removals5[0], 3);
-            Assert.AreEqual(removals5[1], 2);
-            Assert.AreEqual(removals5[2], 1);
-            Assert.AreEqual(removals5[3], 0);
+            Assert.AreEqual(removals5.Count, 0);
+            //Assert.AreEqual(removals5[0], 3);
+            //Assert.AreEqual(removals5[1], 2);
+            //Assert.AreEqual(removals5[2], 1);
+            //Assert.AreEqual(removals5[3], 0);
         }
 
 

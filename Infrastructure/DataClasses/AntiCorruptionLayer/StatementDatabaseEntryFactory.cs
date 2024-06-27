@@ -47,7 +47,7 @@ namespace Infrastructure
                 toAdd.LastCharIndex = statement.LastCharIndex;
                 toAdd.Parent = statement.Parent;
 
-                if (previous is null || cnt % contextualiseEvery == 0 || cnt == statements.Count() - 1)
+                if (previous is null || cnt % contextualiseEvery == 0 || cnt == statements.Count())
                 {
                     // at the start, at a regular checkpoint, or tying off at the end
                     toAdd.ContextCheckpoint = statement.StatementContext;
