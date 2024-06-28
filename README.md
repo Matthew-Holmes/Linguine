@@ -14,7 +14,7 @@ For implementation details see readme's in each subfolder (excluding tests).
 
 ## Current Progress
 
-The app can import and store pieces of text, and the user can return to previous sessions. Once imported, text can be iteratively processed using the LLMs, which identifies words and resolves definitions - when homonyms are present.
+The app can import and store pieces of text, and the user can return to previous sessions. Once imported, text can be iteratively processed using the LLMs, which identify words and resolve definitions - when homonyms are present.
 
 The text that has been processed is highlighted and the user can interact with it, selecting words to see their root form and definition when it has been found.
 
