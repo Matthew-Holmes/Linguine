@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Agents
+namespace Infrastructure
 {
     // Used in JSON so only add new models to the end
     public enum LLM

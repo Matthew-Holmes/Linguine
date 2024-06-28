@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.DataClasses.AgentInteractionStore
+namespace Infrastructure
 {
     internal class AgentQuery
     {
@@ -23,6 +23,8 @@ namespace Infrastructure.DataClasses.AgentInteractionStore
 
         // if false then bad, null implies unknown
         public bool?                IsGoodExample           { get; set; }
+        // when technically correct, but the prompt was not really doing what we wanted
+        public bool?                IsIllPosed              { get; set; }  
         public String?              ExtraInfo               { get; set; } // use for custom tagging
     }
 }
