@@ -20,12 +20,6 @@ namespace Agents
 
         private static int _concurrencyLimit = 30;
 
-        [JsonIgnore]
-        public AgentTask    AgentTask { get; set; }
-        [JsonIgnore]
-        public LLM          LLM       { get; set; }
-        [JsonIgnore]
-        public LanguageCode Language  { get; set; }
 
         [JsonIgnore]
         public List<Tuple<String, String>> SequentialPromptLog { get; private set; } 

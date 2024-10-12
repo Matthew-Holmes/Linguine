@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Infrastructure;
 
 namespace Agents.DummyAgents
 {
@@ -25,8 +26,8 @@ namespace Agents.DummyAgents
 
         public SentenceDecompositionAgent()
         {
-            AgentTask = AgentTask.DecompositionToStatements;
-            LLM       = LLM.Dummy;
+            //AgentTask = AgentTask.DecompositionToStatements;
+            //LLM       = LLM.Dummy;
         }
     }
 }

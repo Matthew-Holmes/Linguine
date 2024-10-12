@@ -34,7 +34,7 @@ namespace Agents.OpenAI
             ContinuousParameters.Add(new Parameter<double>("PresencePenalty",  0.0, 1.0, 0.0));
 
             StringParameters.Add("system", "You are a helpful assistant");
-            StringParameters.Add("model", "gpt-3.5-turbo-0125");
+            StringParameters.Add("model", "gpt-4o-mini");
         }
 
 

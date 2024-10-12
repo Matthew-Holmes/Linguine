@@ -16,9 +16,9 @@ namespace Agents
             String key,
             AgentTask task,
             LanguageCode language,
-            LLM model = LLM.ChatGPT3_5)
+            LLM model = LLM.ChatGPT4o_mini)
         {
-            if (model == LLM.ChatGPT3_5 || model == LLM.ChatGPT4o)
+            if (model == LLM.ChatGPT3_5 || model == LLM.ChatGPT4o || model == LLM.ChatGPT4o_mini)
             {
                 return GenerateOpenAIProcessingAgent(key, task, language, model);
             }
@@ -53,14 +53,21 @@ namespace Agents
 
                 ret.DiscreteParameter("ContextTokens").Value  = 128000;
                 ret.DiscreteParameter("ResponseTokens").Value = 4000;
-            } else
+            } else if (model == LLM.ChatGPT4o_mini)
+            {
+                ret.StringParameters["model"] = "gpt-4o-mini";
+                ret.DiscreteParameter("ContextTokens").Value  = 128000;
+                ret.DiscreteParameter("ResponseTokens").Value = 4000;
+            }
+            else
             {
                 throw new NotImplementedException();
             }
 
-            ret.AgentTask = task;
-            ret.LLM       = model;
-            ret.Language  = language;
+            // TODO - employed agent 
+            //ret.AgentTask = task;
+            //ret.LLM       = model;
+            //ret.Language  = language;
 
             return ret;
         }
