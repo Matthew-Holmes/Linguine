@@ -65,6 +65,7 @@ namespace Linguine.Tabs
         private string _selectedUnitDefinition;
         private string _selectedUnitRootedText;
         private ObservableCollection<string> _selectedUnitContextInfo;
+        private bool _showSaveWordButton;
 
         // right hand pane unit properties
         public String SelectedUnitText
@@ -87,13 +88,13 @@ namespace Linguine.Tabs
             }
         }
 
-        public String SelectedUnitDefinition
+        public String SelectedUnitDefinitionText
         {
             get => _selectedUnitDefinition;
             set
             {
                 _selectedUnitDefinition = value;
-                OnPropertyChanged(nameof(SelectedUnitDefinition));
+                OnPropertyChanged(nameof(SelectedUnitDefinitionText));
             }
         }
 
@@ -107,7 +108,19 @@ namespace Linguine.Tabs
             }
         }
 
+        public bool ShowSaveWordButton
+        {
+            get => _showSaveWordButton;
+            set
+            {
+                _showSaveWordButton = value;
+                OnPropertyChanged(nameof(ShowSaveWordButton));
 
+            }
+        }
+
+        public ICommand SaveWordCommand { get; private set; }
+        public ICommand ExportLearnerListCommand { get; private set; }
 
         public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel model, MainViewModel parent) 
             : base(uiComponents, model, parent)
@@ -126,7 +139,52 @@ namespace Linguine.Tabs
 
             SetupTraversalCommands();
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
+
+            SaveWordCommand = new RelayCommand(() => SaveSelectedUnit());
+            ExportLearnerListCommand = new RelayCommand(() => ExportLearnerListToCsv());
+            ShowSaveWordButton = false;
         }
+
+        private DictionaryDefinition? SelectedUnitDefinition { get; set; }
+
+        private void SaveSelectedUnit()
+        {
+            if (SelectedUnitDefinition is null)
+            {
+                _uiComponents.CanMessage.Show("attempting to save null definition - aborting");
+                return;
+            }
+            _model.AddLearnerListItem(SelectedUnitDefinition);    
+        }
+
+        private void ExportLearnerListToCsv()
+        {
+            if (_model.LearnerList.Count == 0)
+            {
+                _uiComponents.CanMessage.Show("please save some words");
+                return;
+            }
+
+            string csv_out = _uiComponents.CanBrowseFiles.BrowseSaveFile(
+                "export.csv", ".csv", "CSV files (*.csv)|*.csv|All files (*.*)|*.*");
+
+            if (csv_out == null || csv_out == "")
+            {
+                _uiComponents.CanMessage.Show("no output file selected");
+                return;
+            }
+
+            if (_model.ExportLearnerListToCSV(csv_out))
+            {
+                _uiComponents.CanMessage.Show("export successful");
+            }
+            else
+            {
+                _uiComponents.CanMessage.Show("export failed");
+            }
+
+        }
+
 
         private void OnUnitSelected(Tuple<int, int> tuple)
         {
@@ -136,10 +194,17 @@ namespace Linguine.Tabs
             Statement statement = StatementsCoveringPage[statementIndex];
 
             // Warning - this won't work if the decomposition is multilevel
-            SelectedUnitText        = statement.InjectiveDecomposition.Units[unitIndex];
-            SelectedUnitRootedText  = statement.RootedDecomposition.Units[unitIndex];
-            SelectedUnitDefinition  = statement.RootedDecomposition.Decomposition[unitIndex].Definition?.Definition ?? "";
+            SelectedUnitText        = statement.InjectiveDecomposition?.Units?[unitIndex] ?? "";
+            SelectedUnitRootedText  = statement.RootedDecomposition?.Units?[unitIndex] ?? "";
+
+            SelectedUnitDefinition = statement.RootedDecomposition?.Decomposition?[unitIndex].Definition;
+            SelectedUnitDefinitionText = SelectedUnitDefinition?.Definition ?? "";
             SelectedUnitContextInfo = new ObservableCollection<String>(statement.StatementContext);
+
+            if (SelectedUnitDefinition is null)
+                ShowSaveWordButton = false;
+            else
+                ShowSaveWordButton = true;
         }
 
         private async Task ProcessChunk()

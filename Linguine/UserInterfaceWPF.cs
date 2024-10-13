@@ -75,7 +75,25 @@ namespace Linguine
             return result == true ? openFileDialog.FileName : string.Empty;
         }
 
+        public string BrowseSaveFile(
+            String defaultFileName,
+            String defaultExtension,
+            String filter)
+        {
+            var saveFileDialog = new SaveFileDialog
+            {
+                FileName = defaultFileName, 
+                DefaultExt = defaultExtension, 
+                Filter = filter, 
+                Title = "Select Save Location"
+            };
+
+            bool? result = saveFileDialog.ShowDialog();
+
+            return result == true ? saveFileDialog.FileName : String.Empty;
+        }
     }
+
 
     public class UserResponseService : ICanGetText
     {

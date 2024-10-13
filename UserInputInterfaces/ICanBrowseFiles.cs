@@ -9,5 +9,6 @@ namespace UserInputInterfaces
     public interface ICanBrowseFiles
     {
         public String Browse();
+        public String BrowseSaveFile(string defaultFileName, string defaultExtension, string filter);
     }
 }

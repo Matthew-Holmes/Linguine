@@ -88,6 +88,8 @@ namespace Linguine.Tabs
 
                 decimal progress = SessionInfo[index].Item2;
 
+                // TODO - having sessions receive a name would mean we didn't have to search them by progress
+
                 bool success = _model.ActivateExistingSessionFor(SelectedTextName, progress);
 
                 if (!success)

@@ -6,6 +6,7 @@
     <DataTemplate x:Key="TextualMediaViewerTabTemplate">
         <DataTemplate.Resources>
             <local:HighlightConverter x:Key="HighlightConverter"/>
+            <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         </DataTemplate.Resources>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -23,8 +24,14 @@
             <StackPanel Grid.Row="0" Grid.Column="1">
                 <TextBlock Text="{Binding SelectedUnitText}"/>
                 <TextBlock Text="{Binding SelectedUnitRootedText}"/>
-                <TextBlock Text="{Binding SelectedUnitDefinition}" TextWrapping="Wrap"/>
-                <!-- <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/>> -->
+                <TextBlock Text="{Binding SelectedUnitDefinitionText}" TextWrapping="Wrap"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="save word" Command="{Binding SaveWordCommand}"
+                            Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <Button Content="export saved" Command="{Binding ExportLearnerListCommand}"
+                            Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
+                <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/>
             </StackPanel>
 
 
