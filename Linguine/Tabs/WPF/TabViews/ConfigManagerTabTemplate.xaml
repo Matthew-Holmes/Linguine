@@ -30,6 +30,14 @@
                       Text="{Binding TargetLanguage, Mode=OneWay}"
                       Width="100"/>
                 </StackPanel>
+
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Learner Level:"/>
+                    <ComboBox ItemsSource="{Binding LearnerLevelOptions, Mode=OneWay}"
+                        SelectedIndex="{Binding LearnerLevelIndex, Mode=OneWayToSource}"
+                        Text="{Binding LearnerLevel, Mode=OneWay}"
+                        Width="100"/>
+                </StackPanel>
                 
             </StackPanel>
 
@@ -48,6 +56,8 @@
                     <Button Content="Add" Command="{Binding AddNewTargetVariantsSourceCommand}"/>
                 </StackPanel>
             </StackPanel>
+            
+            
 
         </Grid>
 

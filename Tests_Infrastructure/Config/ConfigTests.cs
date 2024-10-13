@@ -70,5 +70,6 @@ namespace Tests_Infrastructure
             modifiedCopy.ConnectionStrings[LanguageCode.zho] = "ni hao";
             Assert.IsFalse(originalConfig.Equals(modifiedCopy));
         }
+        // TODO - similar tests for learner levels as for connection strings
     }
 }

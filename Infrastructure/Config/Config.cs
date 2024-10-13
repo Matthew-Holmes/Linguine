@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
+
+
     [JsonObject(MemberSerialization.Fields)]
     internal class Config // keep internal: should not be able to instantiate in wider code
     {
@@ -21,6 +23,10 @@ namespace Infrastructure
         [JsonConverter(typeof(StringEnumConverter))]
         internal LanguageCode TargetLanguage;
 
+
+        internal Dictionary<LanguageCode, LearnerLevel> LearnerLevels =
+            new Dictionary<LanguageCode, LearnerLevel>();
+
         internal Config Copy()
         {
             Config copy = new Config
@@ -30,7 +36,8 @@ namespace Infrastructure
 
                 OpenAI_APIKeyLocation = this.OpenAI_APIKeyLocation,
 
-                ConnectionStrings = new Dictionary<LanguageCode, String>()
+                ConnectionStrings = new Dictionary<LanguageCode, String>(),
+                LearnerLevels = new Dictionary<LanguageCode, LearnerLevel>()
 
             };
 
@@ -39,6 +46,14 @@ namespace Infrastructure
                 foreach (var entry in this.ConnectionStrings)
                 {
                     copy.ConnectionStrings.Add(entry.Key, entry.Value);
+                }
+            }
+
+            if (this.LearnerLevels is not null)
+            {
+                foreach (var entry in this.LearnerLevels)
+                {
+                    copy.LearnerLevels.Add(entry.Key, entry.Value);
                 }
             }
 
@@ -64,7 +79,15 @@ namespace Infrastructure
                 sameConnectionStrings = sameConnectionStrings && (ConnectionStrings[entry.Key] == rhs.ConnectionStrings[entry.Key]);
             }
 
-            return sameTarget && sameNative && sameAPIKeyLocation && sameConnectionStrings;
+            bool sameLevels = LearnerLevels.Keys.Count == rhs.LearnerLevels.Keys.Count;
+
+            foreach (var entry in this.LearnerLevels)
+            {
+                sameLevels = sameLevels && (LearnerLevels[entry.Key] ==
+                    rhs.LearnerLevels[entry.Key]);
+            }
+
+            return sameTarget && sameNative && sameLevels && sameAPIKeyLocation && sameConnectionStrings;
 
         }
 

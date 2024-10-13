@@ -36,6 +36,12 @@ namespace Infrastructure
 
             config.TargetLanguage = LanguageCode.eng;
             config.NativeLanguage = LanguageCode.eng;
+            config.LearnerLevels = new Dictionary<LanguageCode, LearnerLevel>();
+
+            config.LearnerLevels[LanguageCode.eng] = LearnerLevel.native;
+            config.LearnerLevels[LanguageCode.zho] = LearnerLevel.beginner;
+            config.LearnerLevels[LanguageCode.fra] = LearnerLevel.beginner;
+
 
             return config;
         }

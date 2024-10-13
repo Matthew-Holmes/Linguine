@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.Query.Internal;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -29,6 +31,7 @@ namespace Infrastructure
             {
                 Config tmp = ConfigFileHandler.Copy;
                 tmp.NativeLanguage = value;
+
                 ConfigFileHandler.UpdateConfig(tmp);
             }
         }
@@ -40,9 +43,23 @@ namespace Infrastructure
             {
                 Config tmp = ConfigFileHandler.Copy;
                 tmp.TargetLanguage = value;
+
                 ConfigFileHandler.UpdateConfig(tmp);
             }
         }
+
+        public static void SetLearnerLevel(LanguageCode lc, LearnerLevel ll)
+        {
+            Config tmp = ConfigFileHandler.Copy;
+            tmp.LearnerLevels[lc] = ll;
+            ConfigFileHandler.UpdateConfig(tmp);
+        }
+
+        public static LearnerLevel GetLearnerLevel(LanguageCode lc)
+        {
+            return ConfigFileHandler.Copy.LearnerLevels[lc];
+        }
+
 
         public static String ConnectionString
         {

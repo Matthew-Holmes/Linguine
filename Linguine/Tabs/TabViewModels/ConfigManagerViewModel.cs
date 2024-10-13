@@ -18,16 +18,22 @@ namespace Linguine.Tabs
     {
         #region language selection
         private List<LanguageCode> _languageCodes = LanguageCodeDetails.LanguageCodes();
+        private List<LearnerLevel> _learnerLevels = LearnerLevelDetails.LearnerLevels();
 
         private int _targetLanguageIndex;
         private int _nativeLanguageIndex;
+        private int _learnerLevelIndex;
 
         private List<String> _languageOptions;
         public  List<String> LanguageOptions { get => _languageOptions; private set => _languageOptions = value; }
 
+        private List<String> _learnerLevelOptions;
+        public List<String> LearnerLevelOptions { 
+            get => _learnerLevelOptions; private set => _learnerLevelOptions = value; }
+
         public String TargetLanguage => LanguageOptions[TargetLanguageIndex];
         public String NativeLanguage => LanguageOptions[NativeLanguageIndex];
-
+        public String LearnerLevel => LearnerLevelOptions[LearnerLevelIndex];
         public int TargetLanguageIndex
         {
             get => _targetLanguageIndex;
@@ -45,6 +51,7 @@ namespace Linguine.Tabs
                 _parent.Model = new MainModel(); // build a new one
                 // ******* this should be the only time it is changed ********
 
+                OnPropertyChanged(nameof(LearnerLevel));
                 OnPropertyChanged(nameof(TargetLanguage));
             }
         }
@@ -68,6 +75,23 @@ namespace Linguine.Tabs
             }
         }
 
+        public int LearnerLevelIndex
+        {
+            get => _learnerLevels.IndexOf(ConfigManager.GetLearnerLevel(_languageCodes[_targetLanguageIndex]));
+            set
+            {
+                if (value == -1)
+                {
+                    return;
+                }
+
+                ConfigManager.SetLearnerLevel(_languageCodes[_targetLanguageIndex], _learnerLevels[value]);
+                _learnerLevelIndex = value;
+
+                OnPropertyChanged(nameof(LearnerLevel));
+            }
+        }
+
         private void UpdateNativeLanguageInConfig(LanguageCode newNative)
         {
             if (newNative != ConfigManager.NativeLanguage)
@@ -81,9 +105,12 @@ namespace Linguine.Tabs
         private void SetupLanguageSelection()
         {
             _languageOptions = LanguageCodeDetails.LanguageNames(ConfigManager.NativeLanguage);
+            _learnerLevelOptions = LearnerLevelDetails.LearnerLevelNames();
 
             _nativeLanguageIndex = _languageCodes.IndexOf(ConfigManager.NativeLanguage);
             _targetLanguageIndex = _languageCodes.IndexOf(ConfigManager.TargetLanguage);
+            _learnerLevelIndex = _learnerLevels.IndexOf(
+                ConfigManager.GetLearnerLevel(ConfigManager.TargetLanguage));
         }
         #endregion
 
