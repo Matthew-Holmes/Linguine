@@ -21,7 +21,12 @@ namespace Tests_Infrastructure
                 {
                     { LanguageCode.eng, "ConnectionString1" }
                 },
+                LearnerLevels = new Dictionary<LanguageCode, LearnerLevel>(),
             };
+
+            originalConfig.LearnerLevels[LanguageCode.eng] = LearnerLevel.native;
+            originalConfig.LearnerLevels[LanguageCode.zho] = LearnerLevel.beginner;
+            originalConfig.LearnerLevels[LanguageCode.fra] = LearnerLevel.beginner;
 
             copiedConfig = originalConfig.Copy();
         }
@@ -41,6 +46,14 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void Copy_LearnerLevelsAreDeepCopied()
+        {
+            copiedConfig.LearnerLevels[LanguageCode.fra] = LearnerLevel.intermediate;
+            Assert.AreNotEqual(originalConfig.LearnerLevels[LanguageCode.fra], 
+                               copiedConfig.LearnerLevels[LanguageCode.fra]);
+        }
+
+        [TestMethod]
         public void Equal_returnsTrueForCopy()
         {
             Assert.IsTrue(originalConfig.Equals(originalConfig.Copy()));
@@ -54,6 +67,14 @@ namespace Tests_Infrastructure
             Assert.IsFalse(originalConfig.Equals(modifiedCopy));
         }
 
+        [TestMethod]
+        public void Equal_returnsFalseForModifiedLearnerLevel()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.LearnerLevels[LanguageCode.fra] = LearnerLevel.intermediate;
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
 
         [TestMethod]
         public void Equal_returnsFalseRemovedKeyInConnectionStrings()
@@ -64,12 +85,19 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void Equal_returnsFalseRemovedKeyInLearnerLevels()
+        {
+            Config modifiedCopy = originalConfig.Copy();
+            modifiedCopy.LearnerLevels.Remove(LanguageCode.eng);
+            Assert.IsFalse(originalConfig.Equals(modifiedCopy));
+        }
+
+        [TestMethod]
         public void Equal_returnsFalseAddKeyInConnectionStrings()
         {
             Config modifiedCopy = originalConfig.Copy();
             modifiedCopy.ConnectionStrings[LanguageCode.zho] = "ni hao";
             Assert.IsFalse(originalConfig.Equals(modifiedCopy));
         }
-        // TODO - similar tests for learner levels as for connection strings
     }
 }

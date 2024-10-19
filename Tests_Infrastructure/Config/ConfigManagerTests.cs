@@ -57,6 +57,14 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
+        public void TestLearnerLevelGetSet()
+        {
+            LearnerLevel testValue = LearnerLevel.intermediate;
+            ConfigManager.SetLearnerLevel(LanguageCode.eng, testValue);
+            Assert.AreEqual(testValue, ConfigManager.GetLearnerLevel(LanguageCode.eng));
+        }
+
+        [TestMethod]
         public void TestReplaceConnectionStringReturnsTrueIfOverridingEmpty()
         {
             LanguageCode lc = LanguageCode.zho;
