@@ -24,6 +24,8 @@ namespace Infrastructure
         public DbSet<StatementDatabaseEntry> Statements { get; set; }
         public DbSet<StatementDefinitionNode> StatementDefinitions { get; set; }
 
+        public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
+     
 
         public LinguineDataHandler(String connectionString)
         {
@@ -96,7 +98,16 @@ namespace Infrastructure
                 .HasOne(e => e.DictionaryDefinition)
                 .WithMany()
                 .HasForeignKey(e => e.DefinitionKey);
-                
+
+            modelBuilder.Entity<ParsedDictionaryDefinition>()
+                .HasKey(e => e.DatabasePrimaryKey);
+            modelBuilder.Entity<ParsedDictionaryDefinition>()
+                .Property(e => e.DatabasePrimaryKey)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<ParsedDictionaryDefinition>()
+                .HasOne(e => e.CoreDefinition)
+                .WithMany()
+                .HasForeignKey(e => e.DictionaryDefinitionKey);
 
             // Other configurations...
         }
