@@ -8,7 +8,8 @@
         DefinitionResolution,
         DecompositionToStatements,
         DecompositionToUnits,
-        UnitRooting
+        UnitRooting,
+        DefinitionParsing
     }
 
 }

@@ -9,6 +9,7 @@ namespace Agents
 {
     internal static class SystemMessageFactory
     {
+        // TODO - parametrisable system messages!
         internal static String SystemMessageFor(AgentTask task, LanguageCode language)
         {
             switch (language)
@@ -36,7 +37,9 @@ namespace Agents
 
             {AgentTask.DecompositionToUnits, "Decompose the following text into units of meaning, normally single words. Do not split compound words such as \nhot dog\n or \nfind out\n. Do not split names such as \nJoe Bloggs\n or \nUnited Kingdom\n. Only respond using direct contents of the text, with each unit of meaning on a newline, ignore punctuation and brackets that don't affect words' meaning, similarly don't add punctuation to the units unless essential, the result must map injectively into the original text, add no whitespace unless it already existed and conveyed meaning. Do not complete truncated words, all units should map into the original verbatim, DO NOT skip words, you can skip punctuation. format \nunit1\nunit2 etc" },
 
-            {AgentTask.UnitRooting, "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names and acronyms MUST obey capitalisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unnecessary punctuation and possessive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc." }
+            {AgentTask.UnitRooting, "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names and acronyms MUST obey capitalisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unnecessary punctuation and possessive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc." },
+
+            {AgentTask.DefinitionParsing, "parse this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language." }
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
@@ -51,7 +54,9 @@ namespace Agents
 
             {AgentTask.DecompositionToUnits, "Décomposez le texte suivant en unités de sens, normalement des mots simples. Ne divisez pas les mots composés tels que \npomme de terre\n ou \nposte de travail\n. Ne divisez pas les noms tels que \nean Dupont\n ou \nNouvelle-Zélande\n. Répondez uniquement en utilisant le contenu direct du texte, avec chaque unité de sens sur une nouvelle ligne, ignorez la ponctuation et les crochets qui n'affectent pas le sens des mots, de même, n'ajoutez pas de ponctuation aux unités sauf si cela est essentiel, le résultat doit être mappé de manière injective dans le texte original, n’ajoutez aucun espace à moins qu’il n’existe déjà et ne transmette un sens. Ne complétez pas les mots tronqués, toutes les unités doivent correspondre au texte original, NE sautez PAS de mots, vous pouvez sauter la ponctuation. formater \nunité1\nunité2 etc." },
 
-            {AgentTask.UnitRooting, "Traitez les lignes suivantes pour supprimer l'inflexion, en convertissant les verbes à l'infinitif et les noms au singulier par exemple. Utilisez des majuscules anglaises standard : les noms propres, les prénoms, les lieux, les noms de lieux et les acronymes DOIVENT obéir aux règles de majuscule, avec la lettre initiale en majuscule, sinon privilégiez les minuscules. Supprimez la ponctuation inutile et les apostrophes possessives. Vous NE DEVEZ PAS omettre de lignes. NE combinez PAS les lignes. NE divisez PAS les lignes. Le nombre de lignes de sortie et d'entrée DOIT être le même. Formater \nmot1\nmot2 etc." }
+            {AgentTask.UnitRooting, "Traitez les lignes suivantes pour supprimer l'inflexion, en convertissant les verbes à l'infinitif et les noms au singulier par exemple. Utilisez des majuscules anglaises standard : les noms propres, les prénoms, les lieux, les noms de lieux et les acronymes DOIVENT obéir aux règles de majuscule, avec la lettre initiale en majuscule, sinon privilégiez les minuscules. Supprimez la ponctuation inutile et les apostrophes possessives. Vous NE DEVEZ PAS omettre de lignes. NE combinez PAS les lignes. NE divisez PAS les lignes. Le nombre de lignes de sortie et d'entrée DOIT être le même. Formater \nmot1\nmot2 etc." },
+
+            {AgentTask.DefinitionParsing, "Analysez cette définition pour un adulte francophone, votre réponse doit être en français et prendre en compte son niveau de compétence dans la langue de la définition." }
         };
 
         private static Dictionary<AgentTask, String> ChineseSystemMessages = new Dictionary<AgentTask, String>
@@ -66,7 +71,9 @@ namespace Agents
 
             {AgentTask.DecompositionToUnits, "将以下文本分解为意义单元，通常是单个单词。不要拆分复合词，例如 \n日光灯\n 或 \n洗衣机\n。不要拆分名称，例如 \n张伟\n 或 \n中华人民共和国\n。仅使用文本的直接内容进行响应，每个意义单元位于换行符上，忽略不影响单词含义的标点符号和括号，同样，除非必要，否则不要向单元添加标点符号，结果必须直接映射到原始文本中，除非空格已经存在并传达含义，否则不要添加空格。不要完成截断的单词，所有单元都应逐字映射到原始文本中，不要跳过单词，你可以跳过标点符号。格式 \n单元1\n单元2 等" },
 
-            {AgentTask.UnitRooting, "处理以下行以删除词形变化，例如将动词转换为不定式，将名词转换为单数。使用标准英语大写字母，专有名词、姓名、姓氏、地点、地名和首字母缩略词必须遵守大写字母规则，首字母大写，否则请小写。删除不必要的标点符号和所有格撇号。您不得省略行。不要合并行。不要拆分行。输出和输入行的数量必须相同。格式 \n单词1\n单词2 等。" }
+            {AgentTask.UnitRooting, "处理以下行以删除词形变化，例如将动词转换为不定式，将名词转换为单数。使用标准英语大写字母，专有名词、姓名、姓氏、地点、地名和首字母缩略词必须遵守大写字母规则，首字母大写，否则请小写。删除不必要的标点符号和所有格撇号。您不得省略行。不要合并行。不要拆分行。输出和输入行的数量必须相同。格式 \n单词1\n单词2 等。" },
+
+            {AgentTask.DefinitionParsing, "为成年中文使用者解析此定义，您的回答应该用中文进行，并考虑他们对该定义语言的熟练程度。" }
         };
     }
 
