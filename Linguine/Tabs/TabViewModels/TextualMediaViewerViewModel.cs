@@ -196,6 +196,8 @@ namespace Linguine.Tabs
             // Warning - this won't work if the decomposition is multilevel
             SelectedUnitText        = statement.InjectiveDecomposition?.Units?[unitIndex] ?? "";
             SelectedUnitRootedText  = statement.RootedDecomposition?.Units?[unitIndex] ?? "";
+            
+            // TODO - get the parsed definition
 
             SelectedUnitDefinition = statement.RootedDecomposition?.Decomposition?[unitIndex].Definition;
             SelectedUnitDefinitionText = SelectedUnitDefinition?.Definition ?? "";
@@ -205,6 +207,10 @@ namespace Linguine.Tabs
                 ShowSaveWordButton = false;
             else
                 ShowSaveWordButton = true;
+
+            throw new NotImplementedException();
+            // the logic to query the parsed definition from the model, and setup a callback if
+            // it needs to be recomputed
         }
 
         private async Task ProcessChunk()

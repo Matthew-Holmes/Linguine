@@ -23,19 +23,33 @@ namespace Linguine
     public partial class MainModel
     {
 
-        private StatementEngine? StatementEngine { get;set; }
+        private StatementEngine?         StatementEngine         { get;set; }
+        private DefinitionParsingEngine? DefinitionParsingEngine { get; set; }
 
+
+        // TODO - should this return bool for success?
         internal async Task ProcessNextChunk(int sessionID)
         {
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            List<Statement> ret = await DoProcessingStep(tm);
+            List<Statement>? ret = await DoProcessingStep(tm);
 
-            if (ret is not null)
+            if (ret is null)
             {
-                StatementManager.AddStatements(ret);
+                return;
             }
+
+            StatementManager.AddStatements(ret);
+            
+            if (DefinitionParsingEngine is null)
+            {
+                return;
+            }
+            // TODO - what if it is null?
+            List<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
+
+            await DefinitionParsingEngine.ParseStatementsDefinitions(definitions);
         }
 
         private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm)

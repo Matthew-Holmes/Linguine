@@ -120,5 +120,9 @@ namespace Infrastructure
             return statements.Select(s => s.Parent).Distinct().FirstOrDefault() ?? throw new Exception();
         }
 
+        public List<DictionaryDefinition> GetAllUniqueDefinitions(List<Statement>? ret)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

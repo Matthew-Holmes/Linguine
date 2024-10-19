@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using System;
 using System.Collections.Generic;
 
 namespace Linguine
@@ -41,6 +42,14 @@ namespace Linguine
 
             return StatementManager.GetStatementsCoveringRange(session.TextualMedia, start, end);
         }
+
+        internal ParsedDictionaryDefinition? GetParsedDictionaryDefinition(DictionaryDefinition core)
+        {
+            // TODO - how to treat the learner level in config - since this will evolve/change
+            // so must be in the model somehow?
+            return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core);
+        }
+          
 
     }
 }
