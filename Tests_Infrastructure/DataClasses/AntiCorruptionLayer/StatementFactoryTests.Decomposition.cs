@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests_LearningExtraction
+namespace Tests_Infrastructure
 {
     [TestClass]
     public partial class StatementFactoryTest

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests_LearningExtraction
+namespace Tests_Infrastructure
 {
     // [TestClass] - don't need as other partial class file has this attribute
     public partial class StatementDatabaseEntryFactoryTests

@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Tests_LearningExtraction
+namespace Tests_Infrastructure
 {
     // since have tests for StatementDatabaseEntryFactory will reuse those
     // but check that this class can undo operations from before

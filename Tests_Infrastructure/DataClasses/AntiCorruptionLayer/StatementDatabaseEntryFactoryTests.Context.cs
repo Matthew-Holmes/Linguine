@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests_LearningExtraction
+namespace Tests_Infrastructure
 {
     [TestClass]
     public partial class StatementDatabaseEntryFactoryTests
