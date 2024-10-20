@@ -11,12 +11,12 @@ namespace Linguine
     {
         public bool HasManagers { get; private set; } = false;
 
-        private TextualMediaManager?                 _textualMediaManager;
+        private TextualMediaManager?                _textualMediaManager;
         private ExternalDictionaryManager?          _externalDictionaryManager;
         private VariantsManager?                    _variantsManager;
         private TextualMediaSessionManager?         _textualMediaSessionManager;
         private StatementManager?                   _statementManager;
-        private ParsedDictionaryDefinitionManager? _parsedDictionaryDefinitionManager;
+        private ParsedDictionaryDefinitionManager?  _parsedDictionaryDefinitionManager;
 
         private void LoadManagers()
         {
@@ -25,7 +25,7 @@ namespace Linguine
             _textualMediaSessionManager         = new TextualMediaSessionManager(Linguine);
             _variantsManager                    = new VariantsManager(Linguine);
             _statementManager                   = new StatementManager(Linguine);
-            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager();
+            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(Linguine);
 
             HasManagers = true;
         }
