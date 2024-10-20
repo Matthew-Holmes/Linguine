@@ -47,7 +47,9 @@ namespace Linguine
         {
             // TODO - how to treat the learner level in config - since this will evolve/change
             // so must be in the model somehow?
-            return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core);
+            LanguageCode native = ConfigManager.NativeLanguage;
+            LearnerLevel level  = ConfigManager.GetLearnerLevel(ConfigManager.TargetLanguage); // TODO - just a property
+            return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core, level, native);
         }
           
 
