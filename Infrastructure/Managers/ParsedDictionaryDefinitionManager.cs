@@ -26,7 +26,7 @@ namespace Infrastructure
         {
             if (GetParsedDictionaryDefinition(pDef.CoreDefinition, pDef.LearnerLevel, pDef.NativeLanguage) != null)
             {
-                throw new Exception("trying to add a parsed definition that already exists!");
+                throw new ArgumentException("trying to add a parsed definition that already exists!");
             }
             _db.Add(pDef);
             _db.SaveChanges();

@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,9 @@ namespace Tests_Infrastructure
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
         private LinguineDataHandler _db;
+
+        private DictionaryDefinition? def1 = null;
+        private DictionaryDefinition? def2 = null; 
 
         [TestInitialize]
         public void TestInitialize()
@@ -35,7 +39,7 @@ namespace Tests_Infrastructure
 
         private void InitializeDummyData()
         {
-            DictionaryDefinition def1 = new DictionaryDefinition
+            def1 = new DictionaryDefinition
             {
                 Word = "test",
                 Source = "dummy",
@@ -43,7 +47,7 @@ namespace Tests_Infrastructure
                 Definition = "a way to determine if some behaviour is correct"
             };
 
-            DictionaryDefinition def2 = new DictionaryDefinition
+            def2 = new DictionaryDefinition
             {
                 Word = "word",
                 Source = "dummy",
@@ -82,6 +86,135 @@ namespace Tests_Infrastructure
 
         }
 
+        [TestMethod]
+        public void GetParsedDictionaryDefinition_ReturnsExisting()
+        {
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            Assert.IsNotNull(def1);
+
+            ParsedDictionaryDefinition? pdef = manager.GetParsedDictionaryDefinition(
+                def1, LearnerLevel.beginner, LanguageCode.eng);
+
+            Assert.IsNotNull(pdef);
+
+            Assert.AreEqual(pdef.ParsedDefinition, "a way to check things");
+        }
+
+        [TestMethod]
+        public void GetParsedDictionaryDefinition_ReturnsNullIfNonexisting()
+        {
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            Assert.IsNotNull(def1);
+
+            ParsedDictionaryDefinition? pdef = manager.GetParsedDictionaryDefinition(
+                def1, LearnerLevel.elementary, LanguageCode.eng);
+
+            Assert.IsNull(pdef);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Add_ThrowsIfExistsAlready()
+        {
+            ParsedDictionaryDefinition pdef1_again = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.beginner, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.Add(pdef1_again);
+        }
+
+        [TestMethod]
+        public void Add_NoThrowIfNew()
+        {
+            ParsedDictionaryDefinition pdef1_again = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.Add(pdef1_again);
+        }
+
+        [TestMethod]
+        public void Add_CorrectlyAdded()
+        {
+            ParsedDictionaryDefinition pdef = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.Add(pdef);
+
+            ParsedDictionaryDefinition? found = manager.GetParsedDictionaryDefinition(def1, LearnerLevel.elementary, LanguageCode.eng);
+
+            Assert.IsNotNull(found);    
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void AddSet_ThrowsIfOneAlreadyExist()
+        {
+            ParsedDictionaryDefinition pdef1_again = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.beginner, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            ParsedDictionaryDefinition pdef = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            HashSet<ParsedDictionaryDefinition> toAdd = new HashSet<ParsedDictionaryDefinition> { pdef1_again, pdef };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.AddSet(toAdd);
+
+        }
+
+        [TestMethod]
+        public void AddSet_NoThrowIfAllAreNew()
+        {
+            ParsedDictionaryDefinition pdef1 = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            ParsedDictionaryDefinition pdef2 = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.native, NativeLanguage = LanguageCode.eng, ParsedDefinition = def1.Definition };
+
+            HashSet<ParsedDictionaryDefinition> toAdd = new HashSet<ParsedDictionaryDefinition> { pdef1, pdef2 };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.AddSet(toAdd);
+
+        }
+
+        [TestMethod]
+        public void AddSet_AllAreAdded()
+        {
+            ParsedDictionaryDefinition pdef1 = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
+
+            ParsedDictionaryDefinition pdef2 = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.native, NativeLanguage = LanguageCode.eng, ParsedDefinition = def1.Definition };
+
+            HashSet<ParsedDictionaryDefinition> toAdd = new HashSet<ParsedDictionaryDefinition> { pdef1, pdef2 };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.AddSet(toAdd);
+
+            ParsedDictionaryDefinition? found1 = manager.GetParsedDictionaryDefinition(
+                def1, LearnerLevel.intermediate, LanguageCode.eng);
+            ParsedDictionaryDefinition? found2 = manager.GetParsedDictionaryDefinition(
+                def1, LearnerLevel.native, LanguageCode.eng);
+
+            Assert.IsNotNull(found1);
+            Assert.IsNotNull(found2);
+        }
+
+        [TestMethod]
+        public void FilterOutKnown_doesFiltering()
+        {
+            HashSet<DictionaryDefinition> defs = new HashSet<DictionaryDefinition> { def1, def2 };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            HashSet<DictionaryDefinition> filtered = manager.FilterOutKnown(defs, LearnerLevel.intermediate, LanguageCode.fra);
+
+            Assert.AreEqual(filtered.Count, 1);
+            Assert.AreEqual(filtered.First(), def2);
+        }
 
 
 
