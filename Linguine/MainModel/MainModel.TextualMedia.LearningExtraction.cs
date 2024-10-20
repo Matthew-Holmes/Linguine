@@ -47,7 +47,8 @@ namespace Linguine
                 return;
             }
             // TODO - what if it is null?
-            List<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
+
+            HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
 
             await DefinitionParsingEngine.ParseStatementsDefinitions(definitions);
         }

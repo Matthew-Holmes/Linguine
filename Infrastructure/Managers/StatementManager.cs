@@ -1,6 +1,8 @@
 ﻿using Linguine;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -120,9 +122,31 @@ namespace Infrastructure
             return statements.Select(s => s.Parent).Distinct().FirstOrDefault() ?? throw new Exception();
         }
 
-        public List<DictionaryDefinition> GetAllUniqueDefinitions(List<Statement>? ret)
+        public static HashSet<DictionaryDefinition> GetAllUniqueDefinitions(List<Statement> statements)
         {
-            throw new NotImplementedException();
+            HashSet<DictionaryDefinition> ret = new HashSet<DictionaryDefinition>();
+
+            foreach (Statement statement in statements)
+            {
+                TextDecomposition flattenedRooted = statement.RootedDecomposition.Flattened();
+                if (flattenedRooted.Decomposition is null) 
+                { 
+                    if (statement.RootedDecomposition.Definition is not null)
+                    {
+                        ret.Add(statement.RootedDecomposition.Definition); // whole statement's decomposition was a leaf
+                    }
+                    continue;
+                }
+
+                foreach (TextDecomposition leaf in flattenedRooted.Decomposition)
+                {
+                    if (leaf is null || leaf.Definition is null) { continue; }
+                    ret.Add(leaf.Definition);
+                }
+            }
+
+            return ret;
         }
+
     }
 }

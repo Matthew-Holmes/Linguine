@@ -11,7 +11,7 @@ namespace Linguine
     {
         // should have a database handle to lookup before calling the agent
         // then run an agent to get the results
-        internal async Task ParseStatementsDefinitions(List<DictionaryDefinition> definitions)
+        internal async Task ParseStatementsDefinitions(HashSet<DictionaryDefinition> definitions)
         {
             throw new NotImplementedException();
         }
