@@ -15,9 +15,10 @@ namespace Linguine
 
         private AgentBase ParsingAgent { get; set; }
 
-        internal DefinitionParsingEngine(ParsedDictionaryDefinitionManager pdefManager) 
+        internal DefinitionParsingEngine(ParsedDictionaryDefinitionManager pdefManager, AgentBase parsingAgent) 
         {
-            PDefManager = pdefManager;
+            PDefManager  = pdefManager;
+            ParsingAgent = parsingAgent;
         }
 
         internal async Task ParseStatementsDefinitions(
