@@ -44,7 +44,7 @@ namespace Linguine
             
             if (DefinitionParsingEngine is null)
             {
-                return;
+                StartParsingEngine();
             }
             // TODO - what if it is null?
 
@@ -53,6 +53,7 @@ namespace Linguine
             await DefinitionParsingEngine.ParseStatementsDefinitions(
                 definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
         }
+
 
         private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm)
         {
@@ -98,6 +99,17 @@ namespace Linguine
                 StatementEngine = StatementEngineFactory.BuildStatementEngine(apiKey, dictionary);
             }
         }
+
+        private void StartParsingEngine()
+        {
+            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
+
+            AgentBase parsingAgent = AgentFactory.GenerateProcessingAgent(
+                apiKey, AgentTask.DefinitionParsing, ConfigManager.TargetLanguage);
+
+            DefinitionParsingEngine = new DefinitionParsingEngine(ParsedDictionaryDefinitionManager, parsingAgent);
+        }
+
 
         private async Task<List<String>> GetPreviousContext(TextualMedia tm)
         {
