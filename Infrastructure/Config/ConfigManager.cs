@@ -60,6 +60,11 @@ namespace Infrastructure
             return ConfigFileHandler.Copy.LearnerLevels[lc];
         }
 
+        public static LearnerLevel LearnerLevel
+        {
+            get => GetLearnerLevel(TargetLanguage);
+        }
+
 
         public static String ConnectionString
         {

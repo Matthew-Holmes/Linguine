@@ -50,7 +50,8 @@ namespace Linguine
 
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
 
-            await DefinitionParsingEngine.ParseStatementsDefinitions(definitions);
+            await DefinitionParsingEngine.ParseStatementsDefinitions(
+                definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
         }
 
         private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm)
