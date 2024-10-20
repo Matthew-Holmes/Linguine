@@ -89,6 +89,7 @@ namespace Infrastructure
             if (Decomposition is null || Decomposition.Count <= 1) /* a leaf or at least should be */
             {
                 return new TextDecomposition(Total, null);
+                // TODO - should this attach definition info too??
             }
             else
             {

@@ -130,10 +130,11 @@ namespace Infrastructure
             {
                 TextDecomposition flattenedRooted = statement.RootedDecomposition.Flattened();
                 if (flattenedRooted.Decomposition is null) 
-                { 
+                {
+                    // whole statement's decomposition was a leaf
                     if (statement.RootedDecomposition.Definition is not null)
                     {
-                        ret.Add(statement.RootedDecomposition.Definition); // whole statement's decomposition was a leaf
+                        ret.Add(statement.RootedDecomposition.Definition);
                     }
                     continue;
                 }
