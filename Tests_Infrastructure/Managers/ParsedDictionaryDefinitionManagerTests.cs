@@ -125,6 +125,26 @@ namespace Tests_Infrastructure
             manager.Add(pdef1_again);
         }
 
+
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Add_ThrowsUnknownDictionaryDefinition()
+        {
+            DictionaryDefinition def = new DictionaryDefinition
+            {
+                Word = "unknown",
+                Definition = "not recorded, unseen previously",
+                ID = 42
+            };
+
+            ParsedDictionaryDefinition pdef = new ParsedDictionaryDefinition { CoreDefinition = def, LearnerLevel = LearnerLevel.beginner, NativeLanguage = LanguageCode.eng, ParsedDefinition = "not known" };
+
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+
+            manager.Add(pdef);
+        }
+
         [TestMethod]
         public void Add_NoThrowIfNew()
         {

@@ -24,6 +24,11 @@ namespace Infrastructure
 
         public void Add(ParsedDictionaryDefinition pDef)
         {
+            if (_db.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
+            {
+                throw new ArgumentException("core definition not in the database!");
+            }
+
             if (GetParsedDictionaryDefinition(pDef.CoreDefinition, pDef.LearnerLevel, pDef.NativeLanguage) != null)
             {
                 throw new ArgumentException("trying to add a parsed definition that already exists!");
