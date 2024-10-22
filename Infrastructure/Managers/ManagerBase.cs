@@ -8,11 +8,16 @@ namespace Infrastructure
 { 
     public class ManagerBase
     {
-        protected LinguineDataHandler _db;
+        protected readonly String _connectionString;
 
-        public ManagerBase(LinguineDataHandler db)
+        public ManagerBase(String connectionString)
         {
-            _db = db;
+            _connectionString = connectionString;
+        }
+
+        protected LinguineContext Linguine()
+        {
+            return new LinguineContext(_connectionString);
         }
     }
 }

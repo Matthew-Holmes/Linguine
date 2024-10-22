@@ -15,17 +15,17 @@ namespace Infrastructure
         // TODO  - we may want to be able to edit terms; or even merge or insert statements
         // add those methods as reqired
 
-        internal StatementDatabaseEntryManager(LinguineDataHandler db) : base(db)
+        internal StatementDatabaseEntryManager(String conn) : base(conn)
         {
         }
 
-        internal List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> AttachDefinitions(List<StatementDatabaseEntry> statements)
+        internal List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> AttachDefinitions(List<StatementDatabaseEntry> statements, LinguineContext lg)
         {
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> ret = new List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>>();
 
             foreach (StatementDatabaseEntry statement in statements) 
             {
-                List<StatementDefinitionNode> defs = _db.StatementDefinitions
+                List<StatementDefinitionNode> defs = lg.StatementDefinitions
                     .Where(d => d.StatementDatabaseEntry == statement)
                     .Include(n => n.DictionaryDefinition).ToList();
                 ret.Add(Tuple.Create(statement, defs));
@@ -34,21 +34,28 @@ namespace Infrastructure
             return ret;
         }
 
-        internal List<StatementDatabaseEntry> GetAllStatementsEntriesFor(TextualMedia tm)
+        internal List<StatementDatabaseEntry> GetAllStatementsEntriesFor(TextualMedia tm, LinguineContext lg)
         {
-            return _db.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
+            return lg.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
         }
 
-        internal List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain)
+        internal List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain, LinguineContext lg)
         {
             List<StatementDatabaseEntry> chain = new List<StatementDatabaseEntry> { lastInChain };
 
-            while (chain.Last().ContextCheckpoint is null)
+            StatementDatabaseEntry current = chain.Last();
+
+            while (current.ContextCheckpoint is null)
             {
-                _db.Entry(chain.Last()).Reference(e => e.Previous).Load();
-                StatementDatabaseEntry previous = chain.Last().Previous;
-                chain.Add(chain.Last().Previous); // will throw if first statement doesn't have checkpoint
-                // it should, so a throw is correct
+                lg.Entry(current).Reference(e => e.Previous).Load();
+
+                if (current.Previous == null)
+                {
+                    throw new InvalidOperationException("First statement does not have a checkpoint.");
+                }
+
+                current = current.Previous;
+                chain.Add(current);
             }
 
             chain.Reverse(); return chain;
@@ -56,25 +63,27 @@ namespace Infrastructure
 
         internal List<StatementDatabaseEntry> GetStatementsInsideRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
-            return _db.Statements
+            using LinguineContext lg = Linguine();
+            return lg.Statements
                 .Where(s => s.Parent == tm)
                 .Where(s => s.FirstCharIndex >= start && s.LastCharIndex <= stop)
                 .Include(s => s.Previous)
                 .ToList();
         }
 
-        internal List<StatementDatabaseEntry> GetStatementsCoveringRangeWithEndpoints(TextualMedia tm, int start, int stop)
+        internal List<StatementDatabaseEntry> GetStatementsCoveringRangeWithEndpoints(
+            TextualMedia tm, int start, int stop, LinguineContext lg)
         {
-            return _db.Statements
+            return lg.Statements
                 .Where(s => s.Parent == tm)
                 .Where(s => s.LastCharIndex >= start && s.FirstCharIndex <= stop)
                 .Include(s => s.Previous)
                 .ToList();
         }
 
-        internal List<StatementDatabaseEntry> PrependUpToContextCheckpoint(List<StatementDatabaseEntry> entries)
+        internal List<StatementDatabaseEntry> PrependUpToContextCheckpoint(List<StatementDatabaseEntry> entries, LinguineContext lg)
         {
-            List<StatementDatabaseEntry> toPrepend = FindChainFromContextCheckpoint(entries.First());
+            List<StatementDatabaseEntry> toPrepend = FindChainFromContextCheckpoint(entries.First(), lg);
 
             toPrepend.RemoveAt(toPrepend.Count - 1); // remove the overlap
 
@@ -85,7 +94,8 @@ namespace Infrastructure
 
         internal void RemoveAllFrom(StatementDatabaseEntry statement, int maxCollateral = 100)
         {
-            List<StatementDatabaseEntry> toRemove = _db.Statements
+            using LinguineContext lg = Linguine();
+            List<StatementDatabaseEntry> toRemove = lg.Statements
                 .Where(s => s.Parent == statement.Parent && s.FirstCharIndex >= statement.FirstCharIndex)
                 .ToList();
 
@@ -94,10 +104,12 @@ namespace Infrastructure
                 throw new Exception($"attempting to remove more than the allowed {maxCollateral} statements");
             }
 
-            _db.Statements.RemoveRange(toRemove);
-            _db.StatementDefinitions.RemoveRange(
-                _db.StatementDefinitions.Where(
+            lg.Statements.RemoveRange(toRemove);
+            lg.StatementDefinitions.RemoveRange(
+                lg.StatementDefinitions.Where(
                     d => toRemove.Contains(d.StatementDatabaseEntry)));
+
+            lg.SaveChanges();
         }
 
         internal void AddContinuationOfChain(
@@ -138,10 +150,10 @@ namespace Infrastructure
                     }
                 }
             }
-
-            _db.Statements.AddRange(statementsChain.Select(s => s.Item1));
-            _db.StatementDefinitions.AddRange(statementsChain.SelectMany(s => s.Item2)); // flattens list
-            _db.SaveChanges();
+            using LinguineContext lg = Linguine();
+            lg.Statements.AddRange(statementsChain.Select(s => s.Item1));
+            lg.StatementDefinitions.AddRange(statementsChain.SelectMany(s => s.Item2)); // flattens list
+            lg.SaveChanges();
         }
     }
 }

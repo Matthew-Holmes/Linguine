@@ -1,10 +1,16 @@
 ﻿using Infrastructure;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Linguine
 {
     public class TextualMediaManager : ManagerBase
     {
-        public TextualMediaManager(LinguineDataHandler db) : base(db)
+        public TextualMediaManager(String conn) : base(conn)
         {
         }
 
@@ -15,30 +21,35 @@ namespace Linguine
                 throw new ArgumentException("already have a text of this name");
             }
 
-            _db.TextualMedia.Add(tm);
-            _db.SaveChanges();
+            using LinguineContext lg = Linguine();
+            lg.TextualMedia.Add(tm);
+            lg.SaveChanges();
         }
 
         public List<String> AvailableTextualMediaNames()
         {
-            return _db.TextualMedia.Select(m => m.Name)
+            using LinguineContext lg = Linguine();
+            return lg.TextualMedia.Select(m => m.Name)
                                .Distinct()
                                .ToList();
         }
 
         public bool HaveMediaWithSameDescription(String description)
         {
-            return _db.TextualMedia.Where(m => m.Description == description).Any();
+            using LinguineContext lg = Linguine();
+            return lg.TextualMedia.Where(m => m.Description == description).Any();
         }
 
         public bool HaveMediaWithSameContent(String text)
         {
-            return _db.TextualMedia.Where(m => m.Description == text).Any();
+            using LinguineContext lg = Linguine();
+            return lg.TextualMedia.Where(m => m.Description == text).Any();
         }
 
         public TextualMedia? GetByName(string selectedText)
         {
-            var possibilities = _db.TextualMedia.Where(m => m.Name == selectedText).ToList();
+            using LinguineContext lg = Linguine();
+            var possibilities = lg.TextualMedia.Where(m => m.Name == selectedText).ToList();
     
             if (possibilities is null || possibilities.Count == 0)
             {

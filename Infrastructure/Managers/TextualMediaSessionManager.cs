@@ -7,12 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Helpers;
 using Microsoft.VisualBasic;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
     public class TextualMediaSessionManager : ManagerBase
     {
-        public TextualMediaSessionManager(LinguineDataHandler db) : base(db)
+        public TextualMediaSessionManager(String conn) : base(conn)
         {
         }
 
@@ -22,15 +23,16 @@ namespace Infrastructure
             {
                 session.LastActive = DateTime.Now;
             }
-
+            using LinguineContext lg = Linguine();
             session.Active = false;
-            _db.SaveChanges();
+            lg.SaveChanges();
 
         }
 
         public List<TextualMediaSession> ActiveSessions()
         {
-            return _db.TextualMediaSessions.Where(tms => tms.Active).ToList();
+            using LinguineContext lg = Linguine();
+            return lg.TextualMediaSessions.Where(tms => tms.Active).ToList();
         }
 
         public bool NewSession(TextualMedia tm)
@@ -39,11 +41,12 @@ namespace Infrastructure
 
             TextualMediaSession? alreadyHere = Sessions(tm).Where(s => s.Cursor == 0).FirstOrDefault();
 
+            using LinguineContext lg = Linguine();
             if (alreadyHere is not null)
             {
                 alreadyHere.Active = true;
                 alreadyHere.LastActive = DateTime.Now;
-                _db.SaveChanges(); // calling this in context where changes are updates the database
+                lg.SaveChanges(); // calling this in context where changes are updates the database
                 return true;
             }
 
@@ -55,8 +58,8 @@ namespace Infrastructure
                 LastActive = DateTime.Now
             };
 
-            _db.TextualMediaSessions.Add(toAdd);
-            _db.SaveChanges();
+            lg.TextualMediaSessions.Add(toAdd);
+            lg.SaveChanges();
 
             return true;
 
@@ -80,14 +83,16 @@ namespace Infrastructure
 
         private List<TextualMediaSession> Sessions(TextualMedia tm)
         {
-            return _db.TextualMediaSessions.Where(
+            using LinguineContext lg = Linguine();
+            return lg.TextualMediaSessions.Where(
                 s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
         }
 
         private void Remove(TextualMediaSession tm)
         {
-            _db.TextualMediaSessions.Remove(tm);
-            _db.SaveChanges();
+            using LinguineContext lg = Linguine();
+            lg.TextualMediaSessions.Remove(tm);
+            lg.SaveChanges();
         }
 
         private void TidySessionsFor(TextualMedia tm)
@@ -119,7 +124,8 @@ namespace Infrastructure
         {
             tms.Active = true;
             tms.LastActive = DateTime.Now;
-            _db.SaveChanges();
+            using LinguineContext lg = Linguine();
+            lg.SaveChanges();
         }
 
         public bool ActivateExistingSession(TextualMedia text, decimal progress, decimal proximity = 1.0m)

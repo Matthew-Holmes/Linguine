@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,9 +40,9 @@ namespace Linguine
             return false;
         }
 
-        internal TextualMediaSession? GetSessionFromID(int sessionID)
+        internal TextualMediaSession? GetSessionFromID(int sessionID, LinguineContext lg)
         {
-            var ret = Linguine.TextualMediaSessions
+            var ret = lg.TextualMediaSessions
                 .Where(s => s.DatabasePrimaryKey == sessionID)
                 .Include(s => s.TextualMedia)
                 .FirstOrDefault();
@@ -51,7 +52,8 @@ namespace Linguine
 
         internal void CloseSession(int sessionID)
         {
-            var session = GetSessionFromID(sessionID); 
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            var session = GetSessionFromID(sessionID, lg); 
 
             if (session is null) { return; }
 
@@ -84,23 +86,26 @@ namespace Linguine
 
         internal int GetCursor(int sessionID)
         {
-            return GetSessionFromID(sessionID)?.Cursor ?? 0;
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            return GetSessionFromID(sessionID, lg)?.Cursor ?? 0;
         }
 
         internal bool CursorMoved(int sessionID, int newCursor)
         {
-            var session = GetSessionFromID(sessionID);
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            var session = GetSessionFromID(sessionID, lg);
             if (session is null) { return false; }
 
             session.Cursor = newCursor;
-            Linguine.SaveChanges();
+            lg.SaveChanges();
 
             return true;
         }
 
         internal DateTime WhenLastActive(int sessionID)
         {
-            return GetSessionFromID(sessionID)?.LastActive ?? DateTime.MinValue;
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            return GetSessionFromID(sessionID, lg)?.LastActive ?? DateTime.MinValue;
         }
 
     }

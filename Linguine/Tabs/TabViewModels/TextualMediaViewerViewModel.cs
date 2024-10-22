@@ -1,6 +1,7 @@
 ﻿//using Agents.OpenAI;
 using ExternalMedia;
 using Infrastructure;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json.Linq;
 using SQLitePCL;
 
@@ -63,6 +64,7 @@ namespace Linguine.Tabs
 
         private string _selectedUnitText;
         private string _selectedUnitDefinition;
+        private string _selectedUnitParsedDefinition;
         private string _selectedUnitRootedText;
         private ObservableCollection<string> _selectedUnitContextInfo;
         private bool _showSaveWordButton;
@@ -95,6 +97,16 @@ namespace Linguine.Tabs
             {
                 _selectedUnitDefinition = value;
                 OnPropertyChanged(nameof(SelectedUnitDefinitionText));
+            }
+        }
+
+        public String SelectedUnitParsedDefinitionText
+        {
+            get => _selectedUnitParsedDefinition;
+            set
+            {
+                _selectedUnitParsedDefinition = value;
+                OnPropertyChanged(nameof(SelectedUnitParsedDefinitionText));
             }
         }
 
@@ -146,15 +158,16 @@ namespace Linguine.Tabs
         }
 
         private DictionaryDefinition? SelectedUnitDefinition { get; set; }
+        private ParsedDictionaryDefinition? SelectedUnitParsedDefinition { get; set; }
 
         private void SaveSelectedUnit()
         {
-            if (SelectedUnitDefinition is null)
+            if (SelectedUnitParsedDefinition is null)
             {
                 _uiComponents.CanMessage.Show("attempting to save null definition - aborting");
                 return;
             }
-            _model.AddLearnerListItem(SelectedUnitDefinition);    
+            _model.AddLearnerListItem(SelectedUnitParsedDefinition);    
         }
 
         private void ExportLearnerListToCsv()
@@ -197,20 +210,31 @@ namespace Linguine.Tabs
             SelectedUnitText        = statement.InjectiveDecomposition?.Units?[unitIndex] ?? "";
             SelectedUnitRootedText  = statement.RootedDecomposition?.Units?[unitIndex] ?? "";
             
-            // TODO - get the parsed definition
 
             SelectedUnitDefinition = statement.RootedDecomposition?.Decomposition?[unitIndex].Definition;
             SelectedUnitDefinitionText = SelectedUnitDefinition?.Definition ?? "";
             SelectedUnitContextInfo = new ObservableCollection<String>(statement.StatementContext);
 
-            if (SelectedUnitDefinition is null)
+            if (SelectedUnitDefinition is not null) 
+            {
+
+                ParsedDictionaryDefinition? pdef = _model.GetParsedDictionaryDefinition(SelectedUnitDefinition);
+
+                SelectedUnitParsedDefinition = pdef;
+
+                SelectedUnitParsedDefinitionText = pdef?.ParsedDefinition ?? "";
+                // TODO - callback if this isn't found, process the word at the given learner level
+            } else
+            {
+                SelectedUnitParsedDefinitionText = "";
+            }
+
+
+            if (SelectedUnitParsedDefinitionText is not null && SelectedUnitParsedDefinitionText != "")
                 ShowSaveWordButton = false;
             else
                 ShowSaveWordButton = true;
 
-            throw new NotImplementedException();
-            // the logic to query the parsed definition from the model, and setup a callback if
-            // it needs to be recomputed
         }
 
         private async Task ProcessChunk()

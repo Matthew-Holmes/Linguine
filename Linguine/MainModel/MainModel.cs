@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,27 +21,9 @@ namespace Linguine
     {
         public event EventHandler? Loaded;
         public event EventHandler? LoadingFailed;
-        
-        private LinguineDataHandler? _linguine;
-        private LinguineDataHandler Linguine
-        {
-            get
-            {
-                if (_linguine is null)
-                {
-                    throw new Exception("attempting to access database before model loaded");
-                }
-                return _linguine;
-            }
-            set
-            {
-                if (value is null)
-                {
-                    throw new Exception("don't set the database to null");
-                }
-                _linguine = value;
-            }
-        }
+
+        private String _linguineConnectionString;
+
 
         public MainModel()
         {
@@ -49,6 +32,7 @@ namespace Linguine
                 // this is the only exception that should be possibly to be thrown during main model construction
                 throw new FileNotFoundException("Couldn't find config");
             }
+            _linguineConnectionString = ConfigManager.ConnectionString;
         }
 
         public void BeginLoading()
@@ -65,8 +49,8 @@ namespace Linguine
                     Directory.CreateDirectory(ConfigManager.DatabaseDirectory);
                 }
 
-                Linguine = new LinguineDataHandler(ConfigManager.ConnectionString);
-                Linguine.Database.EnsureCreated();
+                using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+                lg.Database.EnsureCreated();
 
                 LoadManagers(); 
 
@@ -93,8 +77,6 @@ namespace Linguine
             {
                 SessionsChanged -= (EventHandler)d;
             }
-            Linguine.SaveChanges();
-            Linguine.Dispose();
         }
     }
 }

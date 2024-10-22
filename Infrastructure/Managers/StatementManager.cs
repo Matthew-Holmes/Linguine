@@ -13,41 +13,45 @@ namespace Infrastructure
     {
         private StatementDatabaseEntryManager _databaseManager;
 
-        public StatementManager(LinguineDataHandler db) : base(db)
+        public StatementManager(String conn) : base(conn)
         {
-            _databaseManager = new StatementDatabaseEntryManager(db);
+            _databaseManager = new StatementDatabaseEntryManager(conn);
         }
 
         public List<Statement> GetAllStatementsFor(TextualMedia tm)
         {
-            List<StatementDatabaseEntry> entries = _databaseManager.GetAllStatementsEntriesFor(tm);
+            using LinguineContext lg = Linguine();
+            List<StatementDatabaseEntry> entries = _databaseManager.GetAllStatementsEntriesFor(tm, lg);
 
-            return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
+            return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries, lg));
         }
 
         public List<int> StatementStartIndices(TextualMedia tm)
         {
-            return _db.Statements.Where(s => s.Parent == tm).Select(s => s.FirstCharIndex).ToList();
+            using LinguineContext lg = Linguine();
+            return lg.Statements.Where(s => s.Parent == tm).Select(s => s.FirstCharIndex).ToList();
         }
 
         public List<Statement> GetStatementsCoveringRange(TextualMedia tm, int start, int stop)
         {
-            List<StatementDatabaseEntry> found = _databaseManager.GetStatementsCoveringRangeWithEndpoints(tm, start, stop);
+            using LinguineContext lg = Linguine();
+            List<StatementDatabaseEntry> found = _databaseManager.GetStatementsCoveringRangeWithEndpoints(tm, start, stop, lg);
 
             if (found.Count == 0) { return new List<Statement>(); }
 
             int oldCount = found.Count;
-            found = _databaseManager.PrependUpToContextCheckpoint(found);
+            found = _databaseManager.PrependUpToContextCheckpoint(found, lg);
             int bookMark = found.Count - oldCount;
 
-            var raw = _databaseManager.AttachDefinitions(found);
+            var raw = _databaseManager.AttachDefinitions(found, lg);
 
             return StatementFactory.FromDatabaseEntries(raw).Skip(bookMark).ToList();
         }
 
         public int IndexOffEndOfLastStatement(TextualMedia tm)
         {
-            var statements = _db.Statements.Where(s => s.Parent == tm);
+            using LinguineContext lg = Linguine();
+            var statements = lg.Statements.Where(s => s.Parent == tm);
             if (!statements.Any())
             {
                 return -1;
@@ -82,7 +86,8 @@ namespace Infrastructure
             Statement previous = GetStatementsCoveringRange(
                 parent, endOfChain - 1, endOfChain - 1).LastOrDefault() ?? throw new Exception();
 
-            StatementDatabaseEntry previousEntry = _db.Statements.Where(
+            using LinguineContext lg = Linguine();
+            StatementDatabaseEntry previousEntry = lg.Statements.Where(
                 s => s.LastCharIndex == endOfChain - 1).FirstOrDefault() ?? throw new Exception();
 
             _databaseManager.AddContinuationOfChain(

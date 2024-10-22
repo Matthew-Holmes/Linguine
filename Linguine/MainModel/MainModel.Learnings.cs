@@ -13,9 +13,9 @@ namespace Linguine
         // TODO - this should be a lot more fleshed out
         // but for now we'll just a basic add and export functionality
 
-        public List<DictionaryDefinition> LearnerList { get; private set; } = new List<DictionaryDefinition>();
+        public List<ParsedDictionaryDefinition> LearnerList { get; private set; } = new List<ParsedDictionaryDefinition>();
 
-        public void AddLearnerListItem(DictionaryDefinition definition)
+        public void AddLearnerListItem(ParsedDictionaryDefinition definition)
         {
             LearnerList.Add(definition);
         }
@@ -27,13 +27,13 @@ namespace Linguine
             {
                 // writer.WriteLine("Word,Definition"); // import better into Anki without this
 
-                foreach (DictionaryDefinition def in LearnerList)
+                foreach (ParsedDictionaryDefinition def in LearnerList)
                 {
-                    writer.WriteLine($"{def.Word},{def.Definition}");
+                    writer.WriteLine($"{def.CoreDefinition.Word},{def.ParsedDefinition}");
                 }
             }
 
-            LearnerList = new List<DictionaryDefinition>();
+            LearnerList = new List<ParsedDictionaryDefinition>();
 
             return true;
         }

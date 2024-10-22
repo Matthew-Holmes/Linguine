@@ -11,7 +11,7 @@ using System.Linq;
 namespace Infrastructure
 {
     // one context per target language should be replaced on config change
-    public class LinguineDataHandler : DbContext
+    public class LinguineContext : DbContext
     {
         private readonly String _connectionString;
 
@@ -27,7 +27,7 @@ namespace Infrastructure
         public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
      
 
-        public LinguineDataHandler(String connectionString)
+        public LinguineContext(String connectionString)
         {
             _connectionString = connectionString;
         }

@@ -11,7 +11,7 @@ namespace Tests_Infrastructure
     public class ExternalDictionaryManagerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDataHandler _db;
+        private LinguineContext _db;
 
         private string dummyDataFile;
 
@@ -24,7 +24,7 @@ namespace Tests_Infrastructure
         [TestInitialize]
         public void TestInitialize()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }
@@ -34,7 +34,7 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDataHandler(ConnectionString);
+            _db = new LinguineContext(ConnectionString);
             _db.Database.EnsureCreated();
 
             dummyDataFile = Path.Combine("dummyRawData.csv");
@@ -143,7 +143,7 @@ namespace Tests_Infrastructure
         [TestCleanup]
         public void Cleanup()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }

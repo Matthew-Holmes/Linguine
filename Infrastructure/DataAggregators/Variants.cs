@@ -8,21 +8,20 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class Variants
+    public class Variants : ManagerBase
     {
         public String Source { get; }
 
-        private LinguineDataHandler _db;
 
-        public Variants(String source, LinguineDataHandler db)
+        public Variants(String source, String conn) : base(conn)
         {
             Source = source;
-            _db = db;
         }
 
         public IEnumerable<String> GetVariants(String root)
         {
-            return _db.Variants
+            using LinguineContext lg = Linguine();
+            return lg.Variants
                 .Where(v => v.Source == Source)
                 .Where(v => v.Root.Contains(root))
                 .Select(v => v.Variant)
@@ -32,7 +31,8 @@ namespace Infrastructure
 
         public IEnumerable<String> GetRoots(String variant)
         {
-            return _db.Variants
+            using LinguineContext lg = Linguine();
+            return lg.Variants
                 .Where(v => v.Source == Source)
                 .Where(v => v.Variant.Contains(variant))
                 .Select(v => v.Root)
@@ -40,7 +40,7 @@ namespace Infrastructure
                 .ToList();
         }
 
-        internal bool Add(VariantRoot variantRoot, bool save = true)
+        internal bool Add(VariantRoot variantRoot, LinguineContext? lg)
         {
             // TODO - test
             if (variantRoot.Source !=  Source)
@@ -48,11 +48,14 @@ namespace Infrastructure
                 return false;
             }
 
-            _db.Variants.Add(variantRoot);
-
-            if (save)
+            if (lg is null)
             {
-                _db.SaveChanges();
+                using LinguineContext lg_tmp = Linguine();
+                lg_tmp.Variants.Add(variantRoot);
+                lg_tmp.SaveChanges();
+            } else
+            {
+                lg.Variants.Add(variantRoot);
             }
 
             return true;
@@ -66,12 +69,14 @@ namespace Infrastructure
                 return false;
             }
 
+            using LinguineContext lg = Linguine();
+
             foreach (var vr in variantRoots)
             {
-                Add(vr, false);
+                Add(vr, lg);
             }
 
-            _db.SaveChanges();
+            lg.SaveChanges();
 
             return true;
         }
@@ -79,7 +84,8 @@ namespace Infrastructure
         internal bool DuplicateEntries()
         {
             // TODO - test
-            return _db.Variants
+            using LinguineContext lg = Linguine();
+            return lg.Variants
                       .Where(v => v.Source == Source)
                       .GroupBy(p => new { p.Variant, p.Root })
                       .Where(p => p.Count() > 1)

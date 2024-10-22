@@ -13,21 +13,21 @@ namespace Tests_Infrastructure
     public class ExternalDictionaryCSVParserTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDataHandler _db;
+        private LinguineContext _db;
 
         private string _csvFilePath;
         private string _testDictionaryName;
 
         private void SeedData()
         {
-        _db = new LinguineDataHandler(ConnectionString);
+        _db = new LinguineContext(ConnectionString);
         _db.Database.EnsureCreated();
         }
 
         [TestInitialize]
         public void SetUp()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }
@@ -152,7 +152,7 @@ namespace Tests_Infrastructure
                 File.Delete(_csvFilePath);
             }
 
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }

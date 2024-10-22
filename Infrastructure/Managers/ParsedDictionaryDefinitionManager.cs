@@ -8,42 +8,59 @@ namespace Infrastructure
 {
     public class ParsedDictionaryDefinitionManager : ManagerBase
     {
-        public ParsedDictionaryDefinitionManager(LinguineDataHandler db) : base(db)
+        public ParsedDictionaryDefinitionManager(String conn) : base(conn)
         {
         }
 
         public ParsedDictionaryDefinition? GetParsedDictionaryDefinition(
             DictionaryDefinition core, LearnerLevel level, LanguageCode nativeLanguage)
         {
-            return _db.ParsedDictionaryDefinitions
+            using LinguineContext lg = Linguine();
+            return lg.ParsedDictionaryDefinitions
                 .Where(d => d.CoreDefinition == core)
                 .Where(d => d.NativeLanguage == nativeLanguage)
                 .Where(d => d.LearnerLevel == level)
                 .FirstOrDefault();
         }
 
-        public void Add(ParsedDictionaryDefinition pDef)
+        public void Add(ParsedDictionaryDefinition pDef, LinguineContext? lg)
         {
-            if (_db.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
-            {
-                throw new ArgumentException("core definition not in the database!");
-            }
-
             if (GetParsedDictionaryDefinition(pDef.CoreDefinition, pDef.LearnerLevel, pDef.NativeLanguage) != null)
             {
                 throw new ArgumentException("trying to add a parsed definition that already exists!");
             }
-            _db.Add(pDef);
-            _db.SaveChanges();
+
+            if (lg is null)
+            {
+                using LinguineContext lg_tmp = Linguine();
+
+                if (lg_tmp.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
+                {
+                    throw new ArgumentException("core definition not in the database!");
+                }
+
+                lg_tmp.ParsedDictionaryDefinitions.Add(pDef);
+                lg_tmp.SaveChanges();
+            } 
+            else
+            {
+                if (lg.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
+                {
+                    throw new ArgumentException("core definition not in the database!");
+                }
+
+                lg.ParsedDictionaryDefinitions.Add(pDef);
+            }
         }
 
         public void AddSet(HashSet<ParsedDictionaryDefinition> definitions)
         {
+            using LinguineContext lg = Linguine();
             foreach (var def in definitions)
             {
-                Add(def);  
+                Add(def, lg);  
             }
-            _db.SaveChanges(); 
+            lg.SaveChanges(); 
         }
 
         public HashSet<DictionaryDefinition> FilterOutKnown(

@@ -20,12 +20,12 @@ namespace Linguine
 
         private void LoadManagers()
         {
-            _externalDictionaryManager          = new ExternalDictionaryManager(Linguine);
-            _textualMediaManager                = new TextualMediaManager(Linguine);
-            _textualMediaSessionManager         = new TextualMediaSessionManager(Linguine);
-            _variantsManager                    = new VariantsManager(Linguine);
-            _statementManager                   = new StatementManager(Linguine);
-            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(Linguine);
+            _externalDictionaryManager          = new ExternalDictionaryManager(_linguineConnectionString);
+            _textualMediaManager                = new TextualMediaManager(_linguineConnectionString);
+            _textualMediaSessionManager         = new TextualMediaSessionManager(_linguineConnectionString);
+            _variantsManager                    = new VariantsManager(_linguineConnectionString);
+            _statementManager                   = new StatementManager(_linguineConnectionString);
+            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(_linguineConnectionString);
 
             HasManagers = true;
         }
@@ -89,7 +89,7 @@ namespace Linguine
             }
         }
 
-        private ParsedDictionaryDefinitionManager ParsedDictionaryDefinitionManager
+        public ParsedDictionaryDefinitionManager ParsedDictionaryDefinitionManager
         {
             get
             {

@@ -30,7 +30,8 @@ namespace Linguine
         // TODO - should this return bool for success?
         internal async Task ProcessNextChunk(int sessionID)
         {
-            TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            TextualMedia? tm = GetSessionFromID(sessionID, lg)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
             List<Statement>? ret = await DoProcessingStep(tm);

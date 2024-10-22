@@ -12,7 +12,7 @@ namespace Tests_Infrastructure
     public class ParsedDictionaryDefinitionManagerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDataHandler _db;
+        private LinguineContext _db;
 
         private DictionaryDefinition? def1 = null;
         private DictionaryDefinition? def2 = null; 
@@ -20,7 +20,7 @@ namespace Tests_Infrastructure
         [TestInitialize]
         public void TestInitialize()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }
@@ -30,7 +30,7 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDataHandler(ConnectionString);
+            _db = new LinguineContext(ConnectionString);
             _db.Database.EnsureCreated();
 
             InitializeDummyData();
@@ -241,7 +241,7 @@ namespace Tests_Infrastructure
         [TestCleanup]
         public void Cleanup()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }

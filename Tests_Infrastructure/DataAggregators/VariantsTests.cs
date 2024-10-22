@@ -11,14 +11,14 @@ namespace Tests_Infrastructure
     public class VariantsTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDataHandler _db;
+        private LinguineContext _db;
         private Variants _variants;
 
 
         [TestInitialize]
         public void SetUp()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted();
             }
@@ -28,7 +28,7 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDataHandler(ConnectionString);
+            _db = new LinguineContext(ConnectionString);
             _db.Database.EnsureCreated();
 
 
@@ -238,7 +238,7 @@ namespace Tests_Infrastructure
         [TestCleanup]
         public void CleanUp()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted();
             }
