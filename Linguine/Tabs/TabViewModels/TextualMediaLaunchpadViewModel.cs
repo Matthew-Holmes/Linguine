@@ -186,7 +186,10 @@ namespace Linguine.Tabs
 
                 if (IsADuplicate(tm, manager)) { return; }
 
+
+
                 manager.Add(tm);
+
 
                 OnPropertyChanged(nameof(AvailableTexts));
 

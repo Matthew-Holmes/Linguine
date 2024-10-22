@@ -17,13 +17,13 @@ namespace Infrastructure
         {
         }
 
-        public void CloseSession(TextualMediaSession session)
+        public void CloseSession(TextualMediaSession session, LinguineContext lg)
         {
             if (session.Active)
             {
                 session.LastActive = DateTime.Now;
             }
-            using LinguineContext lg = Linguine();
+
             session.Active = false;
             lg.SaveChanges();
 
@@ -35,13 +35,11 @@ namespace Infrastructure
             return lg.TextualMediaSessions.Where(tms => tms.Active).ToList();
         }
 
-        public bool NewSession(TextualMedia tm)
+        public bool NewSession(TextualMedia tm, LinguineContext lg)
         {
             // check if we already have a session with cursor at the start
-
-            TextualMediaSession? alreadyHere = Sessions(tm).Where(s => s.Cursor == 0).FirstOrDefault();
-
-            using LinguineContext lg = Linguine();
+            TextualMediaSession? alreadyHere = Sessions(tm, lg).Where(s => s.Cursor == 0).FirstOrDefault();
+            
             if (alreadyHere is not null)
             {
                 alreadyHere.Active = true;
@@ -65,13 +63,13 @@ namespace Infrastructure
 
         }
 
-        public List<Tuple<bool,decimal>> SessionInfo(TextualMedia tm)
+        public List<Tuple<bool,decimal>> SessionInfo(TextualMedia tm, LinguineContext lg)
         {
             // returns if active and progress percentage
 
             TidySessionsFor(tm);
 
-            List<TextualMediaSession> sessions = Sessions(tm);
+            List<TextualMediaSession> sessions = Sessions(tm, lg);
 
             List<bool> activities = sessions.Select(s => s.Active).ToList();   
             
@@ -81,16 +79,14 @@ namespace Infrastructure
             return activities.Zip(roundedProgress, (a, p) => new Tuple<bool, decimal>(a, p)).ToList();
         }
 
-        private List<TextualMediaSession> Sessions(TextualMedia tm)
+        private List<TextualMediaSession> Sessions(TextualMedia tm, LinguineContext lg)
         {
-            using LinguineContext lg = Linguine();
             return lg.TextualMediaSessions.Where(
                 s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
         }
 
-        private void Remove(TextualMediaSession tm)
+        private void Remove(TextualMediaSession tm, LinguineContext lg)
         {
-            using LinguineContext lg = Linguine();
             lg.TextualMediaSessions.Remove(tm);
             lg.SaveChanges();
         }
@@ -99,7 +95,8 @@ namespace Infrastructure
         {
             // don't want multiple cursors pointing at the same location
 
-            List<TextualMediaSession> sessions = Sessions(tm)
+            using LinguineContext lg = Linguine();
+            List<TextualMediaSession> sessions = Sessions(tm, lg)
                 .OrderByDescending(session => session.LastActive).ToList();
             // time order so oldest at the end (so get deleted first)
 
@@ -109,7 +106,7 @@ namespace Infrastructure
             {
                 if (cursors.Contains(session.Cursor))
                 {
-                    Remove(session);
+                    Remove(session, lg);
                 }
                 cursors.Add(session.Cursor);
             }
@@ -120,17 +117,16 @@ namespace Infrastructure
             return (decimal) (100.0 * (double)session.Cursor / (double)session.TextualMedia.Text.Length);
         }
 
-        public void Activate(TextualMediaSession tms)
+        public void Activate(TextualMediaSession tms, LinguineContext lg)
         {
             tms.Active = true;
             tms.LastActive = DateTime.Now;
-            using LinguineContext lg = Linguine();
             lg.SaveChanges();
         }
 
-        public bool ActivateExistingSession(TextualMedia text, decimal progress, decimal proximity = 1.0m)
+        public bool ActivateExistingSession(TextualMedia text, decimal progress, LinguineContext lg, decimal proximity = 1.0m)
         {
-            var sessions = Sessions(text);
+            var sessions = Sessions(text, lg);
 
             if (sessions.Count == 0)
             {
@@ -148,7 +144,7 @@ namespace Infrastructure
 
             int closestIndex = progresses.IndexOf(closest);
 
-            Activate(sessions[closestIndex]);
+            Activate(sessions[closestIndex], lg);
 
             return true;
         }

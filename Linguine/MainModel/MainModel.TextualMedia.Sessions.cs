@@ -24,14 +24,15 @@ namespace Linguine
 
         internal bool StartNewTextualMediaSession(string selectedTextName)
         {
-            var tm = TextualMediaManager?.GetByName(selectedTextName) ?? null;
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            var tm = TextualMediaManager?.GetByName(selectedTextName, lg) ?? null;
 
             if (tm is null)
             {
                 return false;
             }
 
-            if (TextualMediaSessionManager.NewSession(tm))
+            if (TextualMediaSessionManager.NewSession(tm, lg))
             {
                 SessionsChanged?.Invoke(this, EventArgs.Empty);
                 return true;
@@ -57,25 +58,27 @@ namespace Linguine
 
             if (session is null) { return; }
 
-            TextualMediaSessionManager.CloseSession(session); // not the end of the world if we don't have it, 
+            TextualMediaSessionManager.CloseSession(session, lg); // not the end of the world if we don't have it, 
         }
 
         internal List<Tuple<bool, decimal>>? GetSessionInfoByName(string name)
         {
-            TextualMedia? tm = TextualMediaManager?.GetByName(name) ?? null;
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            TextualMedia? tm = TextualMediaManager?.GetByName(name, lg) ?? null;
 
             if (tm is null) { return null; }
 
-            return TextualMediaSessionManager?.SessionInfo(tm) ?? null;
+            return TextualMediaSessionManager?.SessionInfo(tm, lg) ?? null;
         }
 
         internal bool ActivateExistingSessionFor(string selectedTextName, decimal progress)
         {
-            TextualMedia? tm = TextualMediaManager?.GetByName(selectedTextName) ?? null;
+            using LinguineContext lg = new LinguineContext(_linguineConnectionString);
+            TextualMedia? tm = TextualMediaManager?.GetByName(selectedTextName, lg) ?? null;
 
             if (tm is null) { return false; }
 
-            bool b = TextualMediaSessionManager?.ActivateExistingSession(tm, progress) ?? false;
+            bool b = TextualMediaSessionManager?.ActivateExistingSession(tm, progress, lg) ?? false;
 
             if (b)
             {

@@ -46,9 +46,8 @@ namespace Linguine
             return lg.TextualMedia.Where(m => m.Description == text).Any();
         }
 
-        public TextualMedia? GetByName(string selectedText)
+        public TextualMedia? GetByName(string selectedText, LinguineContext lg)
         {
-            using LinguineContext lg = Linguine();
             var possibilities = lg.TextualMedia.Where(m => m.Name == selectedText).ToList();
     
             if (possibilities is null || possibilities.Count == 0)
