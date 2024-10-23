@@ -66,6 +66,7 @@ namespace Linguine.Tabs
         private string _selectedUnitRootedText;
         private ObservableCollection<string> _selectedUnitContextInfo;
         private bool _showSaveWordButton;
+        private string _selectedUnitParsedDefinition;
 
         // right hand pane unit properties
         public String SelectedUnitText
@@ -95,6 +96,16 @@ namespace Linguine.Tabs
             {
                 _selectedUnitDefinition = value;
                 OnPropertyChanged(nameof(SelectedUnitDefinitionText));
+            }
+        }
+
+        public String SelectedUnitParsedDefinitionText
+        {
+            get => _selectedUnitParsedDefinition;
+            set
+            {
+                _selectedUnitParsedDefinition = value;
+                OnPropertyChanged(nameof(SelectedUnitParsedDefinitionText));
             }
         }
 
@@ -203,12 +214,15 @@ namespace Linguine.Tabs
             SelectedUnitDefinitionText = SelectedUnitDefinition?.Definition ?? "";
             SelectedUnitContextInfo = new ObservableCollection<String>(statement.StatementContext);
 
+
             if (SelectedUnitDefinition is null)
                 ShowSaveWordButton = false;
             else
                 ShowSaveWordButton = true;
+                SelectedUnitParsedDefinitionText = _model.GetParsedDictionaryDefinition(SelectedUnitDefinition)?.ParsedDefinition 
+                    ?? "";
 
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
             // the logic to query the parsed definition from the model, and setup a callback if
             // it needs to be recomputed
         }

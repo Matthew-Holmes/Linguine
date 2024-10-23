@@ -25,6 +25,7 @@
                 <TextBlock Text="{Binding SelectedUnitText}"/>
                 <TextBlock Text="{Binding SelectedUnitRootedText}"/>
                 <TextBlock Text="{Binding SelectedUnitDefinitionText}" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding SelectedUnitParsedDefinitionText}" TextWrapping="Wrap"/>
                 <StackPanel Orientation="Horizontal">
                     <Button Content="save word" Command="{Binding SaveWordCommand}"
                             Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
