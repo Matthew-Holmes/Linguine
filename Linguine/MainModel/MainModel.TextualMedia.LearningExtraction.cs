@@ -23,8 +23,8 @@ namespace Linguine
     public partial class MainModel
     {
 
-        private StatementEngine?         StatementEngine         { get;set; }
-        private DefinitionParsingEngine? DefinitionParsingEngine { get; set; }
+        private StatementEngine?         StatementEngine         { get; set; }
+        internal DefinitionParsingEngine? DefinitionParsingEngine { get; set; }
 
 
         // TODO - should this return bool for success?
@@ -105,7 +105,7 @@ namespace Linguine
             String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
 
             AgentBase parsingAgent = AgentFactory.GenerateProcessingAgent(
-                apiKey, AgentTask.DefinitionParsing, ConfigManager.TargetLanguage);
+                apiKey, AgentTask.DefinitionParsing, ConfigManager.NativeLanguage);
 
             DefinitionParsingEngine = new DefinitionParsingEngine(ParsedDictionaryDefinitionManager, parsingAgent);
         }
