@@ -29,7 +29,7 @@ namespace Agents
         {
             { AgentTask.ContextChangeIdentification, "Given the following numbered statements and context, identify when the context changes, if it does. Return each context change on a new line, with a brief description of why the context is changing. Do not include any preamble besides the inline description. return format (x,y, etc line numbers): x: reason\ny: reason\n.... The line number MUST correspond to the line number where the context changes."},
 
-            {AgentTask.ContextUpdating, "Consider the following statements, and context, please update the context to reflect the changes that occur between the lines requested, preserve context elements that are still applicable, but remove and add lines of context so that the subsequent statements are comprehendible using that context. Respond with just the new context, with each item on a new line as before. DO NOT SUMMARISE - provide concise contextual information only. ONLY RESPOND WITH THE NEW CONTEXT, no other information"},
+            {AgentTask.ContextUpdating, "Consider the following statements, and context, please update the context if it has changed. Such as a change of location, time or focus. If you do think the context has changed, preserve context elements that are still applicable. Remove lines that no longer apply. Respond with just the new context, with each item on a new line as before. DO NOT SUMMARISE - provide concise contextual information only. ONLY RESPOND WITH THE NEW CONTEXT, no other information"},
 
             {AgentTask.DefinitionResolution, "Given the following word, context and definition options, determine the most appropriate definition, respond with only a single integer value and nothing else using the indexing of the definitions given, if no definitions match, respond -1" },
 
@@ -39,7 +39,7 @@ namespace Agents
 
             {AgentTask.UnitRooting, "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names and acronyms MUST obey capitalisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unnecessary punctuation and possessive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc." },
 
-            {AgentTask.DefinitionParsing, "parse this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language." }
+            {AgentTask.DefinitionParsing, "parse this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language. Keep your definition succinct." }
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
@@ -56,7 +56,7 @@ namespace Agents
 
             {AgentTask.UnitRooting, "Traitez les lignes suivantes pour supprimer l'inflexion, en convertissant les verbes à l'infinitif et les noms au singulier par exemple. Utilisez des majuscules anglaises standard : les noms propres, les prénoms, les lieux, les noms de lieux et les acronymes DOIVENT obéir aux règles de majuscule, avec la lettre initiale en majuscule, sinon privilégiez les minuscules. Supprimez la ponctuation inutile et les apostrophes possessives. Vous NE DEVEZ PAS omettre de lignes. NE combinez PAS les lignes. NE divisez PAS les lignes. Le nombre de lignes de sortie et d'entrée DOIT être le même. Formater \nmot1\nmot2 etc." },
 
-            {AgentTask.DefinitionParsing, "Analysez cette définition pour un adulte francophone, votre réponse doit être en français et prendre en compte son niveau de compétence dans la langue de la définition." }
+            {AgentTask.DefinitionParsing, "analysez cette définition pour un adulte francophone, votre réponse doit être en français et prendre en compte son niveau de compétence dans la langue de la définition. Gardez votre définition succincte." }
         };
 
         private static Dictionary<AgentTask, String> ChineseSystemMessages = new Dictionary<AgentTask, String>
@@ -73,7 +73,7 @@ namespace Agents
 
             {AgentTask.UnitRooting, "处理以下行以删除词形变化，例如将动词转换为不定式，将名词转换为单数。使用标准英语大写字母，专有名词、姓名、姓氏、地点、地名和首字母缩略词必须遵守大写字母规则，首字母大写，否则请小写。删除不必要的标点符号和所有格撇号。您不得省略行。不要合并行。不要拆分行。输出和输入行的数量必须相同。格式 \n单词1\n单词2 等。" },
 
-            {AgentTask.DefinitionParsing, "为成年中文使用者解析此定义，您的回答应该用中文进行，并考虑他们对该定义语言的熟练程度。" }
+            {AgentTask.DefinitionParsing, "为成年中文使用者解析这个定义，您的回答应该是中文，并考虑他们对定义语言的熟练程度。保持你的定义简洁。" }
         };
     }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Infrastructure
                 .FirstOrDefault();
         }
 
-        public void Add(ParsedDictionaryDefinition pDef)
+        public void Add(ParsedDictionaryDefinition pDef, bool save = true)
         {
             if (_db.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
             {
@@ -34,14 +35,18 @@ namespace Infrastructure
                 throw new ArgumentException("trying to add a parsed definition that already exists!");
             }
             _db.Add(pDef);
-            _db.SaveChanges();
+
+            if (save == true)
+            {
+                _db.SaveChanges();
+            }
         }
 
         public void AddSet(HashSet<ParsedDictionaryDefinition> definitions)
         {
             foreach (var def in definitions)
             {
-                Add(def);  
+                Add(def, false);  
             }
             _db.SaveChanges(); 
         }

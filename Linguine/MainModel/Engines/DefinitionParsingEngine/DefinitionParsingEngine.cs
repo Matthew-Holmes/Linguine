@@ -68,6 +68,9 @@ namespace Linguine
                 builder.Append("level: ");
                 builder.Append(level.ToString());
                 builder.Append('\n');
+                builder.Append("word: ");
+                builder.Append(definition.Word);
+                builder.Append('\n');
                 builder.Append("definition: ");
                 builder.Append(definition.Definition);
 
