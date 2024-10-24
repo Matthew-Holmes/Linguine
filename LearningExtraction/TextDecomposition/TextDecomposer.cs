@@ -40,15 +40,8 @@ namespace LearningExtraction
                 return ret;
             }
 
-            String text_stripped = Regex.Replace(text, @"\t|\n|\r", "");
+            //String text_stripped = Regex.Replace(text, @"\t|\n|\r", ",");
 
-            // first attempt failed, maybe there were too many newlines?
-            // TODO - only do this if there is a high newline density
-            ret = await FromTextUsingAgent(text_stripped, StandardAgent);
-            if (MaintainsInvariants(ret))
-            {
-                return ret;
-            }
 
             // that failed, use more powerful agent (e.g. higher spec LLM)
             ret = await FromTextUsingAgent(text, HighPerformanceAgent);
@@ -57,6 +50,7 @@ namespace LearningExtraction
             {
                 return ret;
             }
+
 
             // do default, recommendation: use dummy agent guaranteed to maintain invariants
             ret = await FromTextUsingAgent(text, FallbackAgent);
