@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Infrastructure
 {
@@ -87,6 +88,21 @@ namespace Infrastructure
                 codes.Add(lc);
             }
             return codes;
+        }
+
+        public static decimal Density(LanguageCode lc)
+        {
+            switch (lc)
+            {
+                case LanguageCode.eng:
+                    return 1.0m;
+                case LanguageCode.fra:
+                    return 1.0m;
+                case LanguageCode.zho:
+                    return 0.2m;
+                default:
+                    return 1.0m;
+            }
         }
     }
 }

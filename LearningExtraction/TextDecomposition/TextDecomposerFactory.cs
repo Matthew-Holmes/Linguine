@@ -16,7 +16,7 @@ namespace LearningExtraction
         {
             TextDecomposer ret = new TextDecomposer();
 
-            ret.MaxVolumeToProcess    = 5000;
+            ret.MaxVolumeToProcess = (int)(5000 * LanguageCodeDetails.Density(lc));
 
             ret.StandardAgent        = AgentFactory.GenerateProcessingAgent(openAI_APIKey, AgentTask.DecompositionToStatements, lc);
 
@@ -31,7 +31,7 @@ namespace LearningExtraction
         {
             TextDecomposer ret = new TextDecomposer();
 
-            ret.MaxVolumeToProcess    = 5000;
+            ret.MaxVolumeToProcess = (int)(5000 * LanguageCodeDetails.Density(lc));
 
             ret.StandardAgent       = AgentFactory.GenerateProcessingAgent(openAI_APIKey,
                 AgentTask.DecompositionToUnits, lc);
