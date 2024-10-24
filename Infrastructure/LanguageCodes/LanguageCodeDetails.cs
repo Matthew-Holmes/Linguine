@@ -99,7 +99,7 @@ namespace Infrastructure
                 case LanguageCode.fra:
                     return 1.0m;
                 case LanguageCode.zho:
-                    return 0.2m;
+                    return 0.1m;
                 default:
                     return 1.0m;
             }
