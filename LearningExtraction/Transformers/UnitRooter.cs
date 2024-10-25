@@ -18,8 +18,10 @@ namespace LearningExtraction
         public async Task<TextDecomposition> RootUnits(TextDecomposition priorDecomposition)
         {
 
-            TextDecomposition ret = await DecompositionTransformerBijective.ApplyAgent(Agent, priorDecomposition, MaxVolumeToProcess, 0);
-
+            TextDecomposition ret = await DecompositionTransformerBijective.ApplyAgent(
+                Agent, priorDecomposition, MaxVolumeToProcess, 0, true);
+            // TODO - domain (Chinese) specific stuff being encoded here - should add some 
+            // sort of policy infrastructure to store this information in a codified way
             return ret;
         }
     }
