@@ -3,6 +3,7 @@ using Infrastructure;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -92,6 +93,7 @@ namespace LearningExtraction
                     }
                 } catch (Exception e)
                 {
+                    Debug.WriteLine($"failed to parse response {response}");
                     defIndex = -1;
                 }
 
