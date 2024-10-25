@@ -32,7 +32,9 @@ namespace Linguine
 
             await FindStatementsAndPopulateBuilders(builders, tm, firstChar);
 
-            // await FormContexts(builders, previousContext);
+            //await FormContexts(builders, previousContext);
+
+            FormEmptyContexts(builders);
 
             await DecomposeStatements(builders);
 
@@ -40,6 +42,7 @@ namespace Linguine
 
             return builders.Select(b => b.ToStatement()).ToList();
         }
+
 
 
         private async Task FindStatementsAndPopulateBuilders(
