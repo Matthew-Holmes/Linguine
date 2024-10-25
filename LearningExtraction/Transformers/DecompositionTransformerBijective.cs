@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Infrastructure;
+using System.Diagnostics;
 
 namespace LearningExtraction
 {
     public static class DecompositionTransformerBijective
     {
-        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int retry = 2)
+        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int retry = 2, bool trim=false)
         {
             // prompts the agent with a prompt derived from each decomposition unit on each line
             // the response is converted to a response decomposition
@@ -25,7 +26,7 @@ namespace LearningExtraction
 
             String response = await GetResponse(agent, prompt, maxCharsToProcess, retry); // agent best at identifying lower --> upper, not the other way around
 
-            return TextDecomposition.FromNewLinedString(source.Total, response);
+            return TextDecomposition.FromNewLinedString(source.Total, response, trim);
         }
 
         private static bool Bijects(String prompt, String response)
@@ -53,6 +54,7 @@ namespace LearningExtraction
                 // bijectivity compromised
                 // revert to identity map
                 newLinedResponse = prompt;
+                Debug.WriteLine("unit rooting reverted to identity map");
             }
 
             return newLinedResponse;
