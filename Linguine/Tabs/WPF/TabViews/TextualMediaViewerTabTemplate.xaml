@@ -21,19 +21,23 @@
 
             <controls:RichTextControl Grid.Row="0" Grid.Column="0"/>
 
-            <StackPanel Grid.Row="0" Grid.Column="1">
-                <TextBlock Text="{Binding SelectedUnitText}"/>
-                <TextBlock Text="{Binding SelectedUnitRootedText}"/>
-                <TextBlock Text="{Binding SelectedUnitDefinitionText}" TextWrapping="Wrap"/>
-                <TextBlock Text="{Binding SelectedUnitParsedDefinitionText}" TextWrapping="Wrap"/>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="save word" Command="{Binding SaveWordCommand}"
-                            Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <Button Content="export saved" Command="{Binding ExportLearnerListCommand}"
-                            Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0" Grid.Column="1">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding SelectedUnitText}"/>
+                    <TextBlock Text="{Binding SelectedUnitRootedText}"/>
+                    <TextBlock Text="{Binding SelectedUnitDefinitionText}" TextWrapping="Wrap" Margin="5,10,0,5"/>
+                    <TextBlock Text="{Binding SelectedUnitParsedDefinitionText}" TextWrapping="Wrap" Margin="5,10,0,5"/>
+                    <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
+                        <Button Content="save word" Command="{Binding SaveWordCommand}"
+                                Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Margin="5" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="80"/>
+                        <Button Content="export saved" Command="{Binding ExportLearnerListCommand}"
+                                Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Margin="5" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="80"/>
+                    </StackPanel>
                 </StackPanel>
-                <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/>
-            </StackPanel>
+                <!-- <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/> /-->
+            </ScrollViewer>
 
 
             <Grid Grid.Row="1" Grid.Column="0">
