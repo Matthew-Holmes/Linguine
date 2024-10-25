@@ -32,7 +32,7 @@ namespace Linguine
 
             await FindStatementsAndPopulateBuilders(builders, tm, firstChar);
 
-            await FormContexts(builders, previousContext);
+            // await FormContexts(builders, previousContext);
 
             await DecomposeStatements(builders);
 
