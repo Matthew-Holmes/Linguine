@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Helpers;
 using Infrastructure;
 
 namespace Agents.DummyAgents
@@ -15,7 +16,7 @@ namespace Agents.DummyAgents
 
             foreach(String s in prompt.Split(null))
             {
-                response += s;
+                response += StringHelper.StripOuterPunctuation(s);
                 response += '\n';
             }
 
