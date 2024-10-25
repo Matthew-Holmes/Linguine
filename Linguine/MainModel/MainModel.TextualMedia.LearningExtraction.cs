@@ -41,17 +41,21 @@ namespace Linguine
             }
 
             StatementManager.AddStatements(ret);
-            
-            if (DefinitionParsingEngine is null)
+
+            if (ConfigManager.TargetLanguage != ConfigManager.NativeLanguage)
             {
-                StartParsingEngine();
+
+                if (DefinitionParsingEngine is null)
+                {
+                    StartParsingEngine();
+                }
+                // TODO - what if it is null?
+
+                HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
+
+                await DefinitionParsingEngine.ParseStatementsDefinitions(
+                    definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
             }
-            // TODO - what if it is null?
-
-            HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
-
-            await DefinitionParsingEngine.ParseStatementsDefinitions(
-                definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
         }
 
 
