@@ -111,7 +111,7 @@ namespace Infrastructure
             }
         }
 
-        public static TextDecomposition FromNewLinedString(String parent, String newLinedDecomposition)
+        public static TextDecomposition FromNewLinedString(String parent, String newLinedDecomposition, bool trim = false)
         {
             String total = parent;
             List<TextDecomposition> decomposition = new List<TextDecomposition>();
@@ -119,6 +119,10 @@ namespace Infrastructure
             foreach (String substring in newLinedDecomposition.Split('\n', StringSplitOptions.RemoveEmptyEntries))
             {
                 String unit = new String(substring);
+                if (trim)
+                {
+                    unit = unit.Trim();
+                }
                 decomposition.Add(new TextDecomposition(unit, null)); // leaves
             }
 
