@@ -34,6 +34,14 @@ namespace Linguine
             }
         }
 
+        private void FormEmptyContexts(List<StatementBuilder> builders)
+        {
+            for (int i = 0; i != builders.Count; i++)
+            {
+                builders[i].Context = new List<String>();
+            }
+        }
+
         private async Task<List<int>> GetStatementsWhereContextChanges(
          List<string> previousContext, List<string> statementTotals)
         {
