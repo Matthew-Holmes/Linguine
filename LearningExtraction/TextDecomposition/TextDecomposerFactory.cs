@@ -37,7 +37,7 @@ namespace LearningExtraction
                 AgentTask.DecompositionToUnits, lc);
 
             ret.HighPerformanceAgent = AgentFactory.GenerateProcessingAgent(openAI_APIKey,
-                AgentTask.DecompositionToUnits, lc, LLM.ChatGPT4o);
+                AgentTask.DecompositionToUnits, lc /*,LLM.ChatGPT4o too expensive*/);
 
             ret.FallbackAgent        = new WhitespaceDecompositionAgent();
 
