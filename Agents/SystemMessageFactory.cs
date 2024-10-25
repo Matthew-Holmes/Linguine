@@ -39,7 +39,7 @@ namespace Agents
 
             {AgentTask.UnitRooting, "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names and acronyms MUST obey capitalisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unnecessary punctuation and possessive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc." },
 
-            {AgentTask.DefinitionParsing, "parse this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language. Keep your definition succinct." }
+            {AgentTask.DefinitionParsing, "produce a short educational translation of this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language. Keep your definition succinct. Include a translation of the word into English. Strictly required response format: English translation of word \n short translation of provided definition" }
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
