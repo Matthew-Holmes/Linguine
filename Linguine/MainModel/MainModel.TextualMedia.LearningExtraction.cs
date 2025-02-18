@@ -98,7 +98,13 @@ namespace Linguine
                 ExternalDictionary dictionary = ExternalDictionaryManager.GetDictionary(dictionaries[0])
                     ?? throw new Exception();
 
-                String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
+                String? apiKey = null;
+                String filePath = ConfigManager.OpenAI_APIKey;
+
+                if (File.Exists(filePath))
+                {
+                    apiKey = File.ReadLines(filePath).FirstOrDefault();
+                }
 
                 StatementEngine = StatementEngineFactory.BuildStatementEngine(apiKey, dictionary);
             }
