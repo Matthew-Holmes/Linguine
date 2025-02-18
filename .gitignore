@@ -7,6 +7,8 @@
 Notebooks/ProcessedData/
 Notebooks/RawData/
 
+Notebooks/uv.lock
+
 # juptyer
 .ipynb_checkpoints
 
