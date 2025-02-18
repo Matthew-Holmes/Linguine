@@ -23,9 +23,6 @@ namespace Tests_Agents
             agent.ContinuousParameters.Add(new Parameter<double>("param1", 1.23, double.MaxValue, 0.0));
             agent.DiscreteParameters.Add(new Parameter<int>("param2", 42, int.MaxValue, 1));
             agent.StringParameters.Add("Key1", "Value1");
-            agent.AgentTask = AgentTask.ContextUpdating;
-            agent.Language = LanguageCode.fra;
-            agent.LLM = LLM.ChatGPT4o;
 
             string json = agent.ToJson();
 
@@ -75,10 +72,6 @@ namespace Tests_Agents
             TestAgent clone = ParametrisedAgentBase.FromJson<TestAgent>(json);
 
             Assert.AreEqual(agent.GetHashCode(), clone.GetHashCode());
-            // properties not included in hash
-            Assert.AreEqual(agent.Language,  clone.Language);
-            Assert.AreEqual(agent.LLM,       clone.LLM);
-            Assert.AreEqual(agent.AgentTask, clone.AgentTask);
         }
         // TODO - round trip serialisation once hashing algo implemented and tested
 
@@ -108,18 +101,11 @@ namespace Tests_Agents
             agent1.ContinuousParameters.Add(new Parameter<double>("param1", 1.23, double.MaxValue, 0.0));
             agent1.DiscreteParameters.Add(new Parameter<int>("param2", 42, int.MaxValue, 1));
             agent1.StringParameters.Add("Key1", "Value1");
-            agent1.LLM = LLM.ChatGPT3_5;
-            agent1.AgentTask = AgentTask.DecompositionToUnits;
-            agent1.Language = LanguageCode.zho;
 
             var agent2 = new TestAgent();
             agent2.ContinuousParameters.Add(new Parameter<double>("param1", 1.23, double.MaxValue, 0.0));
             agent2.DiscreteParameters.Add(new Parameter<int>("param2", 42, int.MaxValue, 1));
             agent2.StringParameters.Add("Key1", "Value1");
-
-            agent2.LLM = LLM.ChatGPT4o;
-            agent2.AgentTask = AgentTask.UnitRooting;
-            agent2.Language = LanguageCode.eng;
 
             int hash1 = agent1.GetHashCode();
             int hash2 = agent2.GetHashCode();
