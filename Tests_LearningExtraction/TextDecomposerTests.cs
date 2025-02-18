@@ -43,7 +43,7 @@ namespace Tests_LearningExtraction
             var textSource = new TextualMedia { Text = "Hello" };
 
             // Act
-            var result = decomposer.DecomposeText(textSource).Result;
+            var result = decomposer.DecomposeText(textSource.Text).Result;
 
             // Assert
             Assert.IsNotNull(result);
@@ -51,6 +51,7 @@ namespace Tests_LearningExtraction
             Assert.IsTrue(result.Total == "Hello");
         }
 
+        // This should actually throw under the new approach!!
         [TestMethod]
         public void DecomposeText_WithLongText_ShouldDecomposeCorrectly()
         {
@@ -61,12 +62,10 @@ namespace Tests_LearningExtraction
             decomposer.HighPerformanceAgent = agent;
             decomposer.FallbackAgent = agent;
             decomposer.MaxVolumeToProcess = 50;
-            decomposer.JoinCharacterCount = 10;
-            decomposer.PaddingCharacterCount = 10;
             var textSource = new TextualMedia { Text = "This is a longer text for testing purposes, lorem ipsum dolor est I don't know the rest" };
 
             // Act
-            var result = decomposer.DecomposeText(textSource).Result;
+            var result = decomposer.DecomposeText(textSource.Text).Result;
 
             // Assert
             Assert.IsNotNull(result);
@@ -75,6 +74,7 @@ namespace Tests_LearningExtraction
             Assert.IsTrue(result.Injects()); // Check if the decomposition correctly injects
         }
 
+        // TODO - this should also throw - the real test mayber needs higher max volume to process?
         [TestMethod]
         public void DecomposeText_WithBijectRequirementNotMet_ShouldThrowException()
         {
@@ -88,12 +88,13 @@ namespace Tests_LearningExtraction
                 decomposer.FallbackAgent = agent;
                 decomposer.MaxVolumeToProcess = 100;
 
-                var textSource = new TextualMedia {Text = "This is a longer text for testing biject requirements" };
+                var textSource = new TextualMedia { Text = "This is a longer text for testing biject requirements" };
 
                 // Act
-                decomposer.DecomposeText(textSource, mustBiject: true).Wait();
+                decomposer.DecomposeText(textSource.Text, mustBiject: true).Wait();
                 Assert.Fail("Expected an invalid decomposition exception");
-            } catch (AggregateException ae)
+            }
+            catch (AggregateException ae)
             {
                 bool expectedExceptionThrown = false;
 
@@ -126,7 +127,7 @@ namespace Tests_LearningExtraction
 
                 var textSource = new TextualMedia { Text = "This text is not expected to inject properly" };
 
-                decomposer.DecomposeText(textSource, mustBiject: true).Wait();
+                decomposer.DecomposeText(textSource.Text, mustBiject: true).Wait();
                 Assert.Fail("Expected an invalid decomposition exception");
             }
             catch (AggregateException ae)
@@ -158,7 +159,7 @@ namespace Tests_LearningExtraction
 
             var textSource = new TextualMedia { Text = "This text is not expected to inject properly first time" };
 
-            decomposer.DecomposeText(textSource).Wait();
+            decomposer.DecomposeText(textSource.Text).Wait();
         }
     }
 }
