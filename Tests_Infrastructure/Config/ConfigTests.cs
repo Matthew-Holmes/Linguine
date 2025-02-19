@@ -38,6 +38,14 @@ namespace Tests_Infrastructure
             Assert.AreNotEqual(originalConfig.OpenAI_APIKeyLocation, copiedConfig.OpenAI_APIKeyLocation);
         }
 
+
+        [TestMethod]
+        public void Copy_DeepSeekAPIIsIndependent()
+        {
+            copiedConfig.DeepSeek_APIKeyLocation = "somethingelse.txt";
+            Assert.AreNotEqual(originalConfig.DeepSeek_APIKeyLocation, copiedConfig.DeepSeek_APIKeyLocation);
+        }
+
         [TestMethod]
         public void Copy_ConnectionStringsAreDeepCopied()
         {

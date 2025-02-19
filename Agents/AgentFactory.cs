@@ -2,12 +2,28 @@
 using Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Agents
 {
+
+    public class MissingAPIKeyException : Exception
+    {
+        public MissingAPIKeyException()
+        { }
+
+        public MissingAPIKeyException(string message)
+            : base(message)
+        { }
+
+        public MissingAPIKeyException(string message, Exception innerException)
+            : base(message, innerException)
+        { }
+    }
+
     public static class AgentFactory
     {
         private static SemaphoreSlim OpenAISemaphore = new SemaphoreSlim(10); // global API lock for OpenAI
@@ -16,14 +32,18 @@ namespace Agents
         // also if a required key is null - then query the config manager and give the user
         // advice on how to resolve the problem
         public static AgentBase GenerateProcessingAgent(
-            String key,
+            API_Keys keys,
             AgentTask task,
             LanguageCode language,
             LLM model = LLM.ChatGPT4o_mini)
         {
             if (model == LLM.ChatGPT3_5 || model == LLM.ChatGPT4o || model == LLM.ChatGPT4o_mini)
             {
-                return GenerateOpenAIProcessingAgent(key, task, language, model);
+                if (keys.OpenAI_APIKey is null)
+                {
+                    throw new MissingAPIKeyException("missing open ai API key!");
+                }
+                return GenerateOpenAIProcessingAgent(keys.OpenAI_APIKey, task, language, model);
             }
             else
             {

@@ -229,7 +229,15 @@ namespace Linguine.Tabs
 
         private async Task ProcessChunk()
         {
-            await _model.ProcessNextChunk(SessionID);
+            try
+            {
+                await _model.ProcessNextChunk(SessionID);
+            }
+            catch (Agents.MissingAPIKeyException e)
+            {
+                _parent.HandleMissingApiKeys(e);
+                await Task.FromResult(false);
+            }
 
             SortedStatementStartIndices = _model.GetSortedStatementStartIndicesFromSessionID(SessionID)
                 ?? throw new Exception("couldn't find session");

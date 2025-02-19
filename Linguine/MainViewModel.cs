@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Threading;
 using System.Windows.Documents;
 using System.Windows.Threading;
+using Agents;
 
 namespace Linguine
 {
@@ -246,6 +247,12 @@ namespace Linguine
             {
                 _UIcomponents.CanMessage.Show("Switching to latest session failed!");
             }
+        }
+
+        internal void HandleMissingApiKeys(MissingAPIKeyException e)
+        {
+            _UIcomponents.CanMessage.Show(e.Message);
+            _UIcomponents.CanMessage.Show("please check these files exist: " + ConfigManager.API_Key_Locations);
         }
         #endregion
     }

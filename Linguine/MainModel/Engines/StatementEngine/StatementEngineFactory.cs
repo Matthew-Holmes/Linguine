@@ -12,27 +12,27 @@ namespace Linguine
 {
     internal static class StatementEngineFactory
     {
-        public static StatementEngine BuildStatementEngine(String? open_ai_apiKey, ExternalDictionary dictionary)
+        public static StatementEngine BuildStatementEngine(API_Keys keys, ExternalDictionary dictionary)
         {
             StatementEngine ret = new StatementEngine();
 
-            ret.ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(open_ai_apiKey, 
+            ret.ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer(keys, 
                 ConfigManager.TargetLanguage);
-            ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(open_ai_apiKey, ConfigManager.TargetLanguage);
+            ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(keys, ConfigManager.TargetLanguage);
 
             ret.ContextChangeIdentificationAgent = AgentFactory.GenerateProcessingAgent(
-                open_ai_apiKey, AgentTask.ContextChangeIdentification, ConfigManager.TargetLanguage);
+                keys, AgentTask.ContextChangeIdentification, ConfigManager.TargetLanguage);
 
             ret.ContextUpdateAgent = AgentFactory.GenerateProcessingAgent(
-                open_ai_apiKey, AgentTask.ContextUpdating, ConfigManager.TargetLanguage);
+                keys, AgentTask.ContextUpdating, ConfigManager.TargetLanguage);
 
             ret.UnitRooter = new UnitRooter();
             ret.UnitRooter.Agent = AgentFactory.GenerateProcessingAgent(
-                open_ai_apiKey, AgentTask.UnitRooting, ConfigManager.TargetLanguage);
+                keys, AgentTask.UnitRooting, ConfigManager.TargetLanguage);
 
             ret.DefinitionResolver = new DefinitionResolver();
             ret.DefinitionResolver.Agent = AgentFactory.GenerateProcessingAgent(
-                open_ai_apiKey, AgentTask.DefinitionResolution, ConfigManager.TargetLanguage);
+                keys, AgentTask.DefinitionResolution, ConfigManager.TargetLanguage);
 
             ret.DefinitionResolver.Dictionary = dictionary;
 

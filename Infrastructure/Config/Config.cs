@@ -10,11 +10,14 @@ using System.Threading.Tasks;
 namespace Infrastructure
 {
 
+    // TODO - could this be a record??
 
     [JsonObject(MemberSerialization.Fields)]
     internal class Config // keep internal: should not be able to instantiate in wider code
     {
         internal string OpenAI_APIKeyLocation;
+        public string DeepSeek_APIKeyLocation;
+
 
         internal Dictionary<LanguageCode, String> ConnectionStrings = new Dictionary<LanguageCode, string>();
 
@@ -27,6 +30,7 @@ namespace Infrastructure
         internal Dictionary<LanguageCode, LearnerLevel> LearnerLevels =
             new Dictionary<LanguageCode, LearnerLevel>();
 
+
         internal Config Copy()
         {
             Config copy = new Config
@@ -34,7 +38,8 @@ namespace Infrastructure
                 NativeLanguage = this.NativeLanguage,
                 TargetLanguage = this.TargetLanguage,
 
-                OpenAI_APIKeyLocation = this.OpenAI_APIKeyLocation,
+                OpenAI_APIKeyLocation   = this.OpenAI_APIKeyLocation,
+                DeepSeek_APIKeyLocation = this.DeepSeek_APIKeyLocation,
 
                 ConnectionStrings = new Dictionary<LanguageCode, String>(),
                 LearnerLevels = new Dictionary<LanguageCode, LearnerLevel>()
@@ -70,7 +75,10 @@ namespace Infrastructure
             bool sameTarget = TargetLanguage == rhs.TargetLanguage;
             bool sameNative = NativeLanguage == rhs.NativeLanguage;
 
-            bool sameAPIKeyLocation = OpenAI_APIKeyLocation == rhs.OpenAI_APIKeyLocation;
+            bool sameOAIAPIKeyLocation = OpenAI_APIKeyLocation   == rhs.OpenAI_APIKeyLocation;
+            bool sameDSAPIKeyLocation = DeepSeek_APIKeyLocation == rhs.DeepSeek_APIKeyLocation;
+
+            bool sameAPIKeyLocation = sameDSAPIKeyLocation && sameDSAPIKeyLocation;
 
             bool sameConnectionStrings = ConnectionStrings.Keys.Count == rhs.ConnectionStrings.Keys.Count;
 

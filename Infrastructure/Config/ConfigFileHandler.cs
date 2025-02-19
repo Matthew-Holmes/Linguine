@@ -24,7 +24,8 @@ namespace Infrastructure
             Config config = new Config();
 
 
-            config.OpenAI_APIKeyLocation = "Filestore/APIKeys/OpenAI.txt";
+            config.OpenAI_APIKeyLocation   = "Filestore/APIKeys/OpenAI.txt";
+            config.DeepSeek_APIKeyLocation = "Filestore/APIKeys/DeepSeek.txt";
 
             config.ConnectionStrings = new Dictionary<LanguageCode, String>();
 

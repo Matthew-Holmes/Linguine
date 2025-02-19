@@ -98,24 +98,19 @@ namespace Linguine
                 ExternalDictionary dictionary = ExternalDictionaryManager.GetDictionary(dictionaries[0])
                     ?? throw new Exception();
 
-                String? apiKey = null;
-                String filePath = ConfigManager.OpenAI_APIKey;
+                API_Keys keys = ConfigManager.API_Keys;
 
-                if (File.Exists(filePath))
-                {
-                    apiKey = File.ReadLines(filePath).FirstOrDefault();
-                }
-
-                StatementEngine = StatementEngineFactory.BuildStatementEngine(apiKey, dictionary);
+                StatementEngine = StatementEngineFactory.BuildStatementEngine(keys, dictionary);
             }
         }
 
         private void StartParsingEngine()
         {
-            String apiKey = File.ReadLines(ConfigManager.OpenAI_APIKey).First();
+
+            API_Keys keys = ConfigManager.API_Keys;
 
             AgentBase parsingAgent = AgentFactory.GenerateProcessingAgent(
-                apiKey, AgentTask.DefinitionParsing, ConfigManager.NativeLanguage);
+                keys, AgentTask.DefinitionParsing, ConfigManager.NativeLanguage);
 
             DefinitionParsingEngine = new DefinitionParsingEngine(ParsedDictionaryDefinitionManager, parsingAgent);
         }
