@@ -134,7 +134,7 @@ namespace Linguine
                 ptr = builder.LastCharIndex + 1 ?? throw new Exception();
             }
         }
-        // TODO - remove the firstchar and tm args once refactor complete!
+
         private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail)
         {
 
