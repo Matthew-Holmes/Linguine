@@ -4,41 +4,42 @@ namespace Linguine
 {
     public class TextualMediaManager : ManagerBase
     {
-        public TextualMediaManager(LinguineDataHandler db) : base(db)
+        public TextualMediaManager(LinguineDbContextFactory dbf) : base(dbf)
         {
         }
 
         public void Add(TextualMedia tm)
         {
-            if (AvailableTextualMediaNames().Contains(tm.Name))
+            using var context = _dbf.CreateDbContext();
+
+            if (AvailableTextualMediaNames(context).Contains(tm.Name))
             {
                 throw new ArgumentException("already have a text of this name");
             }
-
-            _db.TextualMedia.Add(tm);
-            _db.SaveChanges();
+            context.TextualMedia.Add(tm);
+            context.SaveChanges();
         }
 
-        public List<String> AvailableTextualMediaNames()
+        public List<String> AvailableTextualMediaNames(LinguineDbContext context)
         {
-            return _db.TextualMedia.Select(m => m.Name)
-                               .Distinct()
-                               .ToList();
+            return context.TextualMedia.Select(m => m.Name)
+                                 .Distinct()
+                                 .ToList();
         }
 
-        public bool HaveMediaWithSameDescription(String description)
+        public bool HaveMediaWithSameDescription(String description, LinguineDbContext context)
         {
-            return _db.TextualMedia.Where(m => m.Description == description).Any();
+            return context.TextualMedia.Where(m => m.Description == description).Any();
         }
 
-        public bool HaveMediaWithSameContent(String text)
+        public bool HaveMediaWithSameContent(String text, LinguineDbContext context)
         {
-            return _db.TextualMedia.Where(m => m.Description == text).Any();
+            return context.TextualMedia.Where(m => m.Description == text).Any();
         }
 
-        public TextualMedia? GetByName(string selectedText)
+        public TextualMedia? GetByName(string selectedText, LinguineDbContext context)
         {
-            var possibilities = _db.TextualMedia.Where(m => m.Name == selectedText).ToList();
+            var possibilities = context.TextualMedia.Where(m => m.Name == selectedText).ToList();
     
             if (possibilities is null || possibilities.Count == 0)
             {
@@ -50,8 +51,7 @@ namespace Linguine
                 throw new Exception("multiple texts of same name found - database corrupted!");
             }
 
-            return possibilities.First();
-
+            return possibilities.First(); // Warning - Lazy loading will break if this is used later, since dbContext gets disposed
         }
     }
 }

@@ -12,38 +12,41 @@ namespace Infrastructure
 {
     public class TextualMediaSessionManager : ManagerBase
     {
-        public TextualMediaSessionManager(LinguineDataHandler db) : base(db)
+        public TextualMediaSessionManager(LinguineDbContextFactory dbf) : base(dbf)
         {
         }
 
         public void CloseSession(TextualMediaSession session)
         {
+            using var context = _dbf.CreateDbContext();
+
+            context.Attach(session);
+
             if (session.Active)
             {
                 session.LastActive = DateTime.Now;
             }
 
             session.Active = false;
-            _db.SaveChanges();
-
+            context.SaveChanges();
         }
 
         public List<TextualMediaSession> ActiveSessions()
         {
-            return _db.TextualMediaSessions.Where(tms => tms.Active).ToList();
+            using var context = _dbf.CreateDbContext();
+            return context.TextualMediaSessions.Where(tms => tms.Active).ToList();
         }
 
-        public bool NewSession(TextualMedia tm)
+        public bool NewSession(TextualMedia tm, LinguineDbContext context)
         {
             // check if we already have a session with cursor at the start
-
-            TextualMediaSession? alreadyHere = Sessions(tm).Where(s => s.Cursor == 0).FirstOrDefault();
+            TextualMediaSession? alreadyHere = Sessions(tm, context).Where(s => s.Cursor == 0).FirstOrDefault();
 
             if (alreadyHere is not null)
             {
                 alreadyHere.Active = true;
                 alreadyHere.LastActive = DateTime.Now;
-                _db.SaveChanges(); // calling this in context where changes are updates the database
+                context.SaveChanges(); // calling this in context where changes are updates the database
                 return true;
             }
 
@@ -55,20 +58,20 @@ namespace Infrastructure
                 LastActive = DateTime.Now
             };
 
-            _db.TextualMediaSessions.Add(toAdd);
-            _db.SaveChanges();
+            context.TextualMediaSessions.Add(toAdd);
+            context.SaveChanges();
 
             return true;
 
         }
 
-        public List<Tuple<bool,decimal>> SessionInfo(TextualMedia tm)
+        public List<Tuple<bool,decimal>> SessionInfo(TextualMedia tm, LinguineDbContext context)
         {
             // returns if active and progress percentage
 
             TidySessionsFor(tm);
 
-            List<TextualMediaSession> sessions = Sessions(tm);
+            List<TextualMediaSession> sessions = Sessions(tm, context);
 
             List<bool> activities = sessions.Select(s => s.Active).ToList();   
             
@@ -78,23 +81,18 @@ namespace Infrastructure
             return activities.Zip(roundedProgress, (a, p) => new Tuple<bool, decimal>(a, p)).ToList();
         }
 
-        private List<TextualMediaSession> Sessions(TextualMedia tm)
+        private List<TextualMediaSession> Sessions(TextualMedia tm, LinguineDbContext context)
         {
-            return _db.TextualMediaSessions.Where(
+            return context.TextualMediaSessions.Where(
                 s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
-        }
-
-        private void Remove(TextualMediaSession tm)
-        {
-            _db.TextualMediaSessions.Remove(tm);
-            _db.SaveChanges();
         }
 
         private void TidySessionsFor(TextualMedia tm)
         {
+            using var context = _dbf.CreateDbContext();
             // don't want multiple cursors pointing at the same location
 
-            List<TextualMediaSession> sessions = Sessions(tm)
+            List<TextualMediaSession> sessions = Sessions(tm, context)
                 .OrderByDescending(session => session.LastActive).ToList();
             // time order so oldest at the end (so get deleted first)
 
@@ -104,7 +102,7 @@ namespace Infrastructure
             {
                 if (cursors.Contains(session.Cursor))
                 {
-                    Remove(session);
+                    context.TextualMediaSessions.Remove(session);
                 }
                 cursors.Add(session.Cursor);
             }
@@ -115,16 +113,16 @@ namespace Infrastructure
             return (decimal) (100.0 * (double)session.Cursor / (double)session.TextualMedia.Text.Length);
         }
 
-        public void Activate(TextualMediaSession tms)
+        public void Activate(TextualMediaSession tms, LinguineDbContext context)
         {
             tms.Active = true;
             tms.LastActive = DateTime.Now;
-            _db.SaveChanges();
+            context.SaveChanges();
         }
 
-        public bool ActivateExistingSession(TextualMedia text, decimal progress, decimal proximity = 1.0m)
+        public bool ActivateExistingSession(TextualMedia text, LinguineDbContext context, decimal progress, decimal proximity = 1.0m)
         {
-            var sessions = Sessions(text);
+            var sessions = Sessions(text, context);
 
             if (sessions.Count == 0)
             {
@@ -142,7 +140,7 @@ namespace Infrastructure
 
             int closestIndex = progresses.IndexOf(closest);
 
-            Activate(sessions[closestIndex]);
+            Activate(sessions[closestIndex], context);
 
             return true;
         }

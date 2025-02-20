@@ -86,12 +86,12 @@ namespace LearningExtraction
                     {
                         defIndex = int.Parse(response);
                     }
-                    catch (Exception e)
+                    catch (Exception _)
                     {
                         // have another go if the agent returned the whole line, not just an integer
                         defIndex = int.Parse(response.Split('.')[0]);
                     }
-                } catch (Exception e)
+                } catch (Exception _)
                 {
                     Debug.WriteLine($"failed to parse response {response}");
                     defIndex = -1;

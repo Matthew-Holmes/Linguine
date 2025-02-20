@@ -13,9 +13,9 @@ namespace Infrastructure
     {
         private StatementDatabaseEntryManager _databaseManager;
 
-        public StatementManager(LinguineDataHandler db) : base(db)
+        public StatementManager(LinguineDbContextFactory dbf) : base(dbf)
         {
-            _databaseManager = new StatementDatabaseEntryManager(db);
+            _databaseManager = new StatementDatabaseEntryManager(dbf);
         }
 
         public List<Statement> GetAllStatementsFor(TextualMedia tm)
@@ -27,7 +27,9 @@ namespace Infrastructure
 
         public List<int> StatementStartIndices(TextualMedia tm)
         {
-            return _db.Statements.Where(s => s.Parent == tm).Select(s => s.FirstCharIndex).ToList();
+            using var context = _dbf.CreateDbContext();
+            context.Attach(tm);
+            return context.Statements.Where(s => s.Parent == tm).Select(s => s.FirstCharIndex).ToList();
         }
 
         public List<Statement> GetStatementsCoveringRange(TextualMedia tm, int start, int stop)
@@ -47,7 +49,9 @@ namespace Infrastructure
 
         public int IndexOffEndOfLastStatement(TextualMedia tm)
         {
-            var statements = _db.Statements.Where(s => s.Parent == tm);
+            using var context = _dbf.CreateDbContext();
+            context.Attach(tm);
+            var statements = context.Statements.Where(s => s.Parent == tm);
             if (!statements.Any())
             {
                 return -1;
@@ -82,8 +86,10 @@ namespace Infrastructure
             Statement previous = GetStatementsCoveringRange(
                 parent, endOfChain - 1, endOfChain - 1).LastOrDefault() ?? throw new Exception();
 
-            StatementDatabaseEntry previousEntry = _db.Statements.Where(
+            var context = _dbf.CreateDbContext();
+            StatementDatabaseEntry previousEntry = context.Statements.Where(
                 s => s.LastCharIndex == endOfChain - 1).FirstOrDefault() ?? throw new Exception();
+            context.Dispose();
 
             _databaseManager.AddContinuationOfChain(
                 StatementDatabaseEntryFactory.FromStatements(statements, previous, previousEntry));

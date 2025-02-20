@@ -8,11 +8,11 @@ namespace Infrastructure
 { 
     public class ManagerBase
     {
-        protected LinguineDataHandler _db;
+        protected LinguineDbContextFactory _dbf;
 
-        public ManagerBase(LinguineDataHandler db)
+        public ManagerBase(LinguineDbContextFactory dbf)
         {
-            _db = db;
+            _dbf = dbf;
         }
     }
 }

@@ -15,17 +15,18 @@ namespace Infrastructure
         // TODO  - we may want to be able to edit terms; or even merge or insert statements
         // add those methods as reqired
 
-        internal StatementDatabaseEntryManager(LinguineDataHandler db) : base(db)
+        internal StatementDatabaseEntryManager(LinguineDbContextFactory dbf) : base(dbf)
         {
         }
 
         internal List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> AttachDefinitions(List<StatementDatabaseEntry> statements)
         {
+            using var context = _dbf.CreateDbContext();
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> ret = new List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>>();
 
             foreach (StatementDatabaseEntry statement in statements) 
             {
-                List<StatementDefinitionNode> defs = _db.StatementDefinitions
+                List<StatementDefinitionNode> defs = context.StatementDefinitions
                     .Where(d => d.StatementDatabaseEntry == statement)
                     .Include(n => n.DictionaryDefinition).ToList();
                 ret.Add(Tuple.Create(statement, defs));
@@ -36,16 +37,22 @@ namespace Infrastructure
 
         internal List<StatementDatabaseEntry> GetAllStatementsEntriesFor(TextualMedia tm)
         {
-            return _db.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
+            using var context = _dbf.CreateDbContext();
+            context.Attach(tm);
+            return context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
         }
 
         internal List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain)
         {
+            using var context = _dbf.CreateDbContext();
+
+            context.Attach(lastInChain);
+
             List<StatementDatabaseEntry> chain = new List<StatementDatabaseEntry> { lastInChain };
 
             while (chain.Last().ContextCheckpoint is null)
             {
-                _db.Entry(chain.Last()).Reference(e => e.Previous).Load();
+                context.Entry(chain.Last()).Reference(e => e.Previous).Load();
                 StatementDatabaseEntry previous = chain.Last().Previous;
                 chain.Add(chain.Last().Previous); // will throw if first statement doesn't have checkpoint
                 // it should, so a throw is correct
@@ -56,7 +63,9 @@ namespace Infrastructure
 
         internal List<StatementDatabaseEntry> GetStatementsInsideRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
-            return _db.Statements
+            using var context = _dbf.CreateDbContext();
+            context.Attach(tm);
+            return context.Statements
                 .Where(s => s.Parent == tm)
                 .Where(s => s.FirstCharIndex >= start && s.LastCharIndex <= stop)
                 .Include(s => s.Previous)
@@ -65,7 +74,9 @@ namespace Infrastructure
 
         internal List<StatementDatabaseEntry> GetStatementsCoveringRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
-            return _db.Statements
+            using var context = _dbf.CreateDbContext();
+            context.Attach(tm);
+            return context.Statements
                 .Where(s => s.Parent == tm)
                 .Where(s => s.LastCharIndex >= start && s.FirstCharIndex <= stop)
                 .Include(s => s.Previous)
@@ -83,22 +94,22 @@ namespace Infrastructure
             return toPrepend;
         }
 
-        internal void RemoveAllFrom(StatementDatabaseEntry statement, int maxCollateral = 100)
-        {
-            List<StatementDatabaseEntry> toRemove = _db.Statements
-                .Where(s => s.Parent == statement.Parent && s.FirstCharIndex >= statement.FirstCharIndex)
-                .ToList();
+        //internal void RemoveAllFrom(StatementDatabaseEntry statement, int maxCollateral = 100)
+        //{
+        //    List<StatementDatabaseEntry> toRemove = _db.Statements
+        //        .Where(s => s.Parent == statement.Parent && s.FirstCharIndex >= statement.FirstCharIndex)
+        //        .ToList();
 
-            if (toRemove.Count > maxCollateral)
-            {
-                throw new Exception($"attempting to remove more than the allowed {maxCollateral} statements");
-            }
+        //    if (toRemove.Count > maxCollateral)
+        //    {
+        //        throw new Exception($"attempting to remove more than the allowed {maxCollateral} statements");
+        //    }
 
-            _db.Statements.RemoveRange(toRemove);
-            _db.StatementDefinitions.RemoveRange(
-                _db.StatementDefinitions.Where(
-                    d => toRemove.Contains(d.StatementDatabaseEntry)));
-        }
+        //    _db.Statements.RemoveRange(toRemove);
+        //    _db.StatementDefinitions.RemoveRange(
+        //        _db.StatementDefinitions.Where(
+        //            d => toRemove.Contains(d.StatementDatabaseEntry)));
+        //}
 
         internal void AddContinuationOfChain(
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
@@ -138,10 +149,42 @@ namespace Infrastructure
                     }
                 }
             }
+            // now update the database
 
-            _db.Statements.AddRange(statementsChain.Select(s => s.Item1));
-            _db.StatementDefinitions.AddRange(statementsChain.SelectMany(s => s.Item2)); // flattens list
-            _db.SaveChanges();
+            using var context = _dbf.CreateDbContext();
+
+            // Sharp edge - have to attach some properties back to the tracking graph
+            // otherwise this will throw System.InvalidOperationException
+            StatementDatabaseEntry first = statementsChain[0].Item1;
+            context.Attach(first.Parent);
+            if (first.Previous is not null)
+            {
+                context.Attach(first.Previous);
+            }
+
+
+            context.Statements.AddRange(statementsChain.Select(s => s.Item1));
+            context.SaveChanges();
+            context.ChangeTracker.Clear();
+
+            // sharper edge - since the nodes can reference the same definitions
+            // EF will try to load that twice sometimes and throw an Exception
+            // so we go the careful (but slow!) route
+            foreach (Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> pair in statementsChain)
+            {
+                foreach (StatementDefinitionNode node in pair.Item2)
+                {
+                    if (node.DictionaryDefinition is not null)
+                    {
+                        context.Attach(node.DictionaryDefinition);
+                    }
+                    context.Attach(node.StatementDatabaseEntry);
+
+                    context.StatementDefinitions.Add(node);
+                    context.SaveChanges();
+                    context.ChangeTracker.Clear();
+                }
+            }
         }
     }
 }

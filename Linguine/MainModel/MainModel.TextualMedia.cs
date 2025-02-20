@@ -8,7 +8,11 @@ namespace Linguine
     {
         public List<string> AvailableTextualMediaNames
         {
-            get => TextualMediaManager.AvailableTextualMediaNames();
+            get
+            {
+                using var context = LinguineFactory.CreateDbContext();
+                return TextualMediaManager.AvailableTextualMediaNames(context);
+            }
         }
 
         internal string? GetFullTextFromSessionID(int sessionId)

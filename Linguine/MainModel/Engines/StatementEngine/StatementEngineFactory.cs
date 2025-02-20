@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    internal static class StatementEngineFactory
+    public static class StatementEngineFactory
     {
         public static StatementEngine BuildStatementEngine(API_Keys keys, ExternalDictionary dictionary)
         {

@@ -9,23 +9,24 @@ namespace Infrastructure
 {
     public class ParsedDictionaryDefinitionManager : ManagerBase
     {
-        public ParsedDictionaryDefinitionManager(LinguineDataHandler db) : base(db)
+        public ParsedDictionaryDefinitionManager(LinguineDbContextFactory dbf) : base(dbf)
         {
         }
 
         public ParsedDictionaryDefinition? GetParsedDictionaryDefinition(
             DictionaryDefinition core, LearnerLevel level, LanguageCode nativeLanguage)
         {
-            return _db.ParsedDictionaryDefinitions
+            using var context = _dbf.CreateDbContext();
+            return context.ParsedDictionaryDefinitions
                 .Where(d => d.CoreDefinition == core)
                 .Where(d => d.NativeLanguage == nativeLanguage)
                 .Where(d => d.LearnerLevel == level)
                 .FirstOrDefault();
         }
 
-        public void Add(ParsedDictionaryDefinition pDef, bool save = true)
+        public void Add(ParsedDictionaryDefinition pDef, LinguineDbContext context, bool save = true)
         {
-            if (_db.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
+            if (context.DictionaryDefinitions.Contains(pDef.CoreDefinition) is false)
             {
                 throw new ArgumentException("core definition not in the database!");
             }
@@ -34,21 +35,23 @@ namespace Infrastructure
             {
                 throw new ArgumentException("trying to add a parsed definition that already exists!");
             }
-            _db.Add(pDef);
+            context.Add(pDef);
 
             if (save == true)
             {
-                _db.SaveChanges();
+                context.SaveChanges();
             }
         }
 
         public void AddSet(HashSet<ParsedDictionaryDefinition> definitions)
         {
+            using var context = _dbf.CreateDbContext();
+
             foreach (var def in definitions)
             {
-                Add(def, false);  
+                Add(def, context, false);  
             }
-            _db.SaveChanges(); 
+            context.SaveChanges(); 
         }
 
         public HashSet<DictionaryDefinition> FilterOutKnown(

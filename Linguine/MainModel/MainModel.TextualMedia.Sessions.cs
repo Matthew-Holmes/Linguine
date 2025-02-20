@@ -23,14 +23,16 @@ namespace Linguine
 
         internal bool StartNewTextualMediaSession(string selectedTextName)
         {
-            var tm = TextualMediaManager?.GetByName(selectedTextName) ?? null;
+            using var context = LinguineFactory.CreateDbContext();
+
+            var tm = TextualMediaManager?.GetByName(selectedTextName, context) ?? null;
 
             if (tm is null)
             {
                 return false;
             }
 
-            if (TextualMediaSessionManager.NewSession(tm))
+            if (TextualMediaSessionManager.NewSession(tm, context))
             {
                 SessionsChanged?.Invoke(this, EventArgs.Empty);
                 return true;
@@ -41,7 +43,8 @@ namespace Linguine
 
         internal TextualMediaSession? GetSessionFromID(int sessionID)
         {
-            var ret = Linguine.TextualMediaSessions
+            using var context = LinguineFactory.CreateDbContext();
+            var ret = context.TextualMediaSessions
                 .Where(s => s.DatabasePrimaryKey == sessionID)
                 .Include(s => s.TextualMedia)
                 .FirstOrDefault();
@@ -60,20 +63,23 @@ namespace Linguine
 
         internal List<Tuple<bool, decimal>>? GetSessionInfoByName(string name)
         {
-            TextualMedia? tm = TextualMediaManager?.GetByName(name) ?? null;
+            using var context = LinguineFactory.CreateDbContext();
+            TextualMedia? tm = TextualMediaManager?.GetByName(name, context) ?? null;
 
             if (tm is null) { return null; }
 
-            return TextualMediaSessionManager?.SessionInfo(tm) ?? null;
+            return TextualMediaSessionManager?.SessionInfo(tm, context) ?? null;
         }
 
         internal bool ActivateExistingSessionFor(string selectedTextName, decimal progress)
         {
-            TextualMedia? tm = TextualMediaManager?.GetByName(selectedTextName) ?? null;
+            using var context = LinguineFactory.CreateDbContext();
+
+            TextualMedia? tm = TextualMediaManager?.GetByName(selectedTextName, context) ?? null;
 
             if (tm is null) { return false; }
 
-            bool b = TextualMediaSessionManager?.ActivateExistingSession(tm, progress) ?? false;
+            bool b = TextualMediaSessionManager?.ActivateExistingSession(tm, context, progress) ?? false;
 
             if (b)
             {
@@ -92,8 +98,12 @@ namespace Linguine
             var session = GetSessionFromID(sessionID);
             if (session is null) { return false; }
 
+            using var context = LinguineFactory.CreateDbContext();
+
+            context.Attach(session);
+
             session.Cursor = newCursor;
-            Linguine.SaveChanges();
+            context.SaveChanges();
 
             return true;
         }

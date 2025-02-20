@@ -7,12 +7,51 @@ using System.Text;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using Serilog;
+using System.Diagnostics;
 
 namespace Infrastructure
 {
     // one context per target language should be replaced on config change
-    public class LinguineDataHandler : DbContext
+    public class LinguineDbContext : DbContext
     {
+        #region custom dispose with logging
+        private bool _disposed = false;
+
+        protected void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    Log.Information("Context Disposed. StackTrace: {StackTrace}", GetFilteredStackTrace());
+                }
+                _disposed = true;
+            }
+            base.Dispose();
+        }
+        private string GetFilteredStackTrace()
+        {
+            StackTrace stackTrace = new StackTrace(true); // true = include file info
+            return string.Join("\n", stackTrace.GetFrames()
+                .Where(f => f.GetMethod().DeclaringType != null &&
+                            f.GetMethod().DeclaringType.Namespace != null &&
+                            !f.GetMethod().DeclaringType.Namespace.StartsWith("System") &&
+                            !f.GetMethod().DeclaringType.Namespace.StartsWith("MS"))
+                .Select(f => $"{f.GetMethod().DeclaringType}.{f.GetMethod().Name} ({f.GetFileName()}:{f.GetFileLineNumber()})"));
+        }
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~LinguineDbContext()
+        {
+            Dispose(false);
+        }
+        #endregion
         private readonly String _connectionString;
 
         // Tables
@@ -27,7 +66,7 @@ namespace Infrastructure
         public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
      
 
-        public LinguineDataHandler(String connectionString)
+        public LinguineDbContext(String connectionString)
         {
             _connectionString = connectionString;
         }

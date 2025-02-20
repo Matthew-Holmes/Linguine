@@ -20,12 +20,12 @@ namespace Linguine
 
         private void LoadManagers()
         {
-            _externalDictionaryManager          = new ExternalDictionaryManager(Linguine);
-            _textualMediaManager                = new TextualMediaManager(Linguine);
-            _textualMediaSessionManager         = new TextualMediaSessionManager(Linguine);
-            _variantsManager                    = new VariantsManager(Linguine);
-            _statementManager                   = new StatementManager(Linguine);
-            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(Linguine);
+            _externalDictionaryManager          = new ExternalDictionaryManager(LinguineFactory);
+            _textualMediaManager                = new TextualMediaManager(LinguineFactory);
+            _textualMediaSessionManager         = new TextualMediaSessionManager(LinguineFactory);
+            _variantsManager                    = new VariantsManager(LinguineFactory);
+            _statementManager                   = new StatementManager(LinguineFactory);
+            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(LinguineFactory);
 
             HasManagers = true;
         }

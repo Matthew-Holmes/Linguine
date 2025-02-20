@@ -11,7 +11,7 @@ namespace Tests_Infrastructure
     public class ExternalDictionaryTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDataHandler _db;
+        private LinguineDbContext _db;
         //private const string ConnectionString = $"Data Source=:memory:";
 
 
@@ -27,7 +27,7 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDataHandler(ConnectionString);
+            _db = new LinguineDbContext(ConnectionString);
             _db.Database.EnsureCreated();
             _db.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWord", Definition = "TestDefinition", Source="demo" });
             _db.DictionaryDefinitions.Add(new DictionaryDefinition { Word = "TestWordManyDef", Definition = "TestDefinition001", Source = "demo" });

@@ -13,43 +13,47 @@ namespace Infrastructure
     {
         public String Source { get; }
 
-        private LinguineDataHandler _db;
+        private LinguineDbContextFactory _dbf;
 
-        public ExternalDictionary(String source, LinguineDataHandler db)
+        public ExternalDictionary(String source, LinguineDbContextFactory dbf)
         {
             Source = source;
-            _db = db;   
+            _dbf = dbf;   
         }
 
         public List<DictionaryDefinition> TryGetDefinition(String word)
         {
-            return _db.DictionaryDefinitions.Where(def => def.Source == Source).Where(dd => dd.Word == word).ToList();
+            using var context = _dbf.CreateDbContext();
+            return context.DictionaryDefinitions.Where(def => def.Source == Source).Where(dd => dd.Word == word).ToList();
         }
 
         public bool Contains(String word)
         {
-            return _db.DictionaryDefinitions.Where(def => def.Source == Source).Any(dd => dd.Word == word);
+            using var context = _dbf.CreateDbContext();
+            return context.DictionaryDefinitions.Where(def => def.Source == Source).Any(dd => dd.Word == word);
         }
 
-        internal bool Add(DictionaryDefinition definition, bool save = true)
+        internal bool Add(DictionaryDefinition definition, LinguineDbContext context, bool save = true)
         {
             if (definition.Source != Source)
             {
                 return false;
             }
 
-            _db.DictionaryDefinitions.Add(definition);
+            context.DictionaryDefinitions.Add(definition);
 
             if (save)
             {
-                _db.SaveChanges();
+                context.SaveChanges();
             }
 
             return true;
         }
 
         internal bool Add(List<DictionaryDefinition> definitions)
-        {   
+        {
+            using var context = _dbf.CreateDbContext();
+
             if (definitions.Any(def => def.Source != Source))
             {
                 return false;
@@ -57,21 +61,22 @@ namespace Infrastructure
 
             foreach (var def in definitions)
             {
-               Add(def, false);
+               Add(def, context, false);
             }
 
-            _db.SaveChanges();
+            context.SaveChanges();
 
             return true;
         }
 
         public bool DuplicateDefinitions()
         {
-            return _db.DictionaryDefinitions
-                        .Where(def => def.Source == Source)
-                        .GroupBy(p => new { p.Word, p.Definition })
-                        .Where(p => p.Count() > 1)
-                        .Any();
+            using var context = _dbf.CreateDbContext();
+            return context.DictionaryDefinitions
+                          .Where(def => def.Source == Source)
+                          .GroupBy(p => new { p.Word, p.Definition })
+                          .Where(p => p.Count() > 1)
+                          .Any();
         }
 
     }

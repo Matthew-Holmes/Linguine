@@ -12,15 +12,15 @@ namespace Infrastructure
 {
     public class ExternalDictionaryManager : ManagerBase
     {
-        public ExternalDictionaryManager(LinguineDataHandler db) : base(db)
+        public ExternalDictionaryManager(LinguineDbContextFactory db) : base(db)
         {
         }
 
         public List<String> AvailableDictionaries()
         {
-           return _db.DictionaryDefinitions.Select(d => d.Source)
-                                           .Distinct()
-                                           .ToList();
+           return _dbf.CreateDbContext().DictionaryDefinitions.Select(d => d.Source)
+                                               .Distinct()
+                                               .ToList();
         }
 
         public ExternalDictionary? GetDictionary(String source)
@@ -30,7 +30,7 @@ namespace Infrastructure
                 return null;
             }
 
-            return new ExternalDictionary(source, _db);
+            return new ExternalDictionary(source, _dbf);
         }
 
         public void AddNewDictionaryFromCSV(String filename, String source)
@@ -40,7 +40,7 @@ namespace Infrastructure
                 throw new InvalidDataException("naming conflict identified, dictionary adding aborted");
             }
 
-            ExternalDictionary newDictionary = new ExternalDictionary(source, _db); // factory?
+            ExternalDictionary newDictionary = new ExternalDictionary(source, _dbf); // factory?
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(newDictionary, filename, source);
 

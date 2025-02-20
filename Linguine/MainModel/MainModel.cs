@@ -20,27 +20,10 @@ namespace Linguine
     {
         public event EventHandler? Loaded;
         public event EventHandler? LoadingFailed;
+
+        private LinguineDbContextFactory _linguineDbContextFactory;
+        public LinguineDbContextFactory LinguineFactory { get => _linguineDbContextFactory; }
         
-        private LinguineDataHandler? _linguine;
-        private LinguineDataHandler Linguine
-        {
-            get
-            {
-                if (_linguine is null)
-                {
-                    throw new Exception("attempting to access database before model loaded");
-                }
-                return _linguine;
-            }
-            set
-            {
-                if (value is null)
-                {
-                    throw new Exception("don't set the database to null");
-                }
-                _linguine = value;
-            }
-        }
 
         public MainModel()
         {
@@ -65,8 +48,10 @@ namespace Linguine
                     Directory.CreateDirectory(ConfigManager.DatabaseDirectory);
                 }
 
-                Linguine = new LinguineDataHandler(ConfigManager.ConnectionString);
-                Linguine.Database.EnsureCreated();
+                _linguineDbContextFactory = new LinguineDbContextFactory(ConfigManager.ConnectionString);
+                var context = LinguineFactory.CreateDbContext();
+                context.Database.EnsureCreated();
+                context.Dispose();
 
                 LoadManagers(); 
 
@@ -93,8 +78,6 @@ namespace Linguine
             {
                 SessionsChanged -= (EventHandler)d;
             }
-            Linguine.SaveChanges();
-            Linguine.Dispose();
         }
     }
 }

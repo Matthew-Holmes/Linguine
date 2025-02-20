@@ -12,17 +12,18 @@ namespace Infrastructure
     {
         public String Source { get; }
 
-        private LinguineDataHandler _db;
+        private LinguineDbContextFactory _dbf;
 
-        public Variants(String source, LinguineDataHandler db)
+        public Variants(String source, LinguineDbContextFactory dbf)
         {
             Source = source;
-            _db = db;
+            _dbf = dbf;
         }
 
         public IEnumerable<String> GetVariants(String root)
         {
-            return _db.Variants
+            using var context = _dbf.CreateDbContext();
+            return context.Variants
                 .Where(v => v.Source == Source)
                 .Where(v => v.Root.Contains(root))
                 .Select(v => v.Variant)
@@ -32,7 +33,8 @@ namespace Infrastructure
 
         public IEnumerable<String> GetRoots(String variant)
         {
-            return _db.Variants
+            using var context = _dbf.CreateDbContext();
+            return context.Variants
                 .Where(v => v.Source == Source)
                 .Where(v => v.Variant.Contains(variant))
                 .Select(v => v.Root)
@@ -40,7 +42,7 @@ namespace Infrastructure
                 .ToList();
         }
 
-        internal bool Add(VariantRoot variantRoot, bool save = true)
+        internal bool Add(VariantRoot variantRoot, LinguineDbContext context, bool save = true)
         {
             // TODO - test
             if (variantRoot.Source !=  Source)
@@ -48,11 +50,11 @@ namespace Infrastructure
                 return false;
             }
 
-            _db.Variants.Add(variantRoot);
+            context.Variants.Add(variantRoot);
 
             if (save)
             {
-                _db.SaveChanges();
+                context.SaveChanges();
             }
 
             return true;
@@ -60,6 +62,7 @@ namespace Infrastructure
 
         internal bool Add(List<VariantRoot> variantRoots)
         {
+            using var context = _dbf.CreateDbContext();
             // TODO - test
             if (variantRoots.Any(v => v.Source != Source))
             {
@@ -68,18 +71,19 @@ namespace Infrastructure
 
             foreach (var vr in variantRoots)
             {
-                Add(vr, false);
+                Add(vr, context, false);
             }
 
-            _db.SaveChanges();
+            context.SaveChanges();
 
             return true;
         }
 
         internal bool DuplicateEntries()
         {
+            using var context = _dbf.CreateDbContext();
             // TODO - test
-            return _db.Variants
+            return context.Variants
                       .Where(v => v.Source == Source)
                       .GroupBy(p => new { p.Variant, p.Root })
                       .Where(p => p.Count() > 1)

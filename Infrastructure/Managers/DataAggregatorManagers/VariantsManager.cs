@@ -9,13 +9,14 @@ namespace Infrastructure
 {
     public class VariantsManager : ManagerBase
     {
-        public VariantsManager(LinguineDataHandler db) : base(db)
+        public VariantsManager(LinguineDbContextFactory dbf) : base(dbf)
         {
         }
 
         public List<String> AvailableVariantsSources()
         {
-            return _db.Variants.Select(v => v.Source)
+            using var context = _dbf.CreateDbContext();
+            return context.Variants.Select(v => v.Source)
                                .Distinct()
                                .ToList();
         }
@@ -27,7 +28,7 @@ namespace Infrastructure
                 return null;
             }
 
-            return new Variants(source, _db);
+            return new Variants(source, _dbf);
         }
 
         public void AddNewVariantsSourceFromCSV(String filename, String source)
@@ -37,7 +38,7 @@ namespace Infrastructure
                 throw new InvalidDataException("naming conflict identified, variants adding aborted");
             }
 
-            Variants target = new Variants(source, _db);
+            Variants target = new Variants(source, _dbf);
 
             VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, filename, source);
 

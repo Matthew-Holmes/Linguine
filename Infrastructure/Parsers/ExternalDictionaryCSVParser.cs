@@ -57,7 +57,7 @@ namespace Infrastructure
 
                             definitions.Add(definition);
                         }
-                    } catch (Exception e)
+                    } catch (Exception _)
                     {
                         throw new Exception($"Parsing the following line failed {line}");
                     }

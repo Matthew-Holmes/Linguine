@@ -204,13 +204,16 @@ namespace Linguine.Tabs
 
         private bool IsADuplicate(TextualMedia tm, TextualMediaManager manager)
         {
-            if (manager.AvailableTextualMediaNames().Contains(tm.Name))
+            using var context = _parent.Model.LinguineFactory.CreateDbContext();
+
+
+            if (manager.AvailableTextualMediaNames(context).Contains(tm.Name))
             {
                 _uiComponents.CanMessage.Show("Already have a text of this name!");
                 return true;
             }
 
-            if (manager.HaveMediaWithSameDescription(tm.Description))
+            if (manager.HaveMediaWithSameDescription(tm.Description, context))
             {
                 if (!_uiComponents.CanVerify.AskYesNo("already have a text matching this description, proceed?"))
                 {
@@ -218,7 +221,7 @@ namespace Linguine.Tabs
                 }
             }
 
-            if (manager.HaveMediaWithSameContent(tm.Text))
+            if (manager.HaveMediaWithSameContent(tm.Text, context))
             {
                 _uiComponents.CanMessage.Show("already have media with exact same content, aborting!");
                 return true;

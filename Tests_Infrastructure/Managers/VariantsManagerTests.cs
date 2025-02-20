@@ -12,7 +12,7 @@ namespace Tests_Infrastructure
     public class VariantsManagerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDataHandler _db;
+        private LinguineDbContext _db;
 
         private string dummyDataFile;
 
@@ -27,7 +27,7 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDataHandler(ConnectionString);
+            _db = new LinguineDbContext(ConnectionString);
             _db.Database.EnsureCreated();
 
             InitializeDummyDatabases();
@@ -133,7 +133,7 @@ namespace Tests_Infrastructure
         [TestCleanup]
         public void Cleanup()
         {
-            using (var _db = new LinguineDataHandler(ConnectionString))
+            using (var _db = new LinguineDbContext(ConnectionString))
             {
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }
