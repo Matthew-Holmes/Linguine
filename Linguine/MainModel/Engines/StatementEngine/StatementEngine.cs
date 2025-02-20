@@ -11,7 +11,13 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    internal partial class StatementEngine
+    public interface ICanAnalyseText
+    {
+        Task<List<ProtoStatement>> GenerateStatementsFor(String text, List<String> context, bool isTail);
+    }
+
+
+    public partial class StatementEngine : ICanAnalyseText
     {
         public int MaxStatements  { get; set; } = 20;
 
@@ -22,7 +28,7 @@ namespace Linguine
         internal AgentBase          ContextChangeIdentificationAgent    { get; set; }
         internal AgentBase          ContextUpdateAgent                  { get; set; }
 
-        internal async Task<List<ProtoStatement>> GenerateStatementsFor(
+        public async Task<List<ProtoStatement>> GenerateStatementsFor(
             String text, List<String> context, bool isTail)
         {
             List<ProtoStatement> protos = new List<ProtoStatement>();

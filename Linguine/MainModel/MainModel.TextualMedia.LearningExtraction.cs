@@ -25,7 +25,7 @@ namespace Linguine
     public partial class MainModel
     {
 
-        private StatementEngine?         StatementEngine         { get; set; }
+        private ICanAnalyseText?          TextAnalyser            { get; set; }
         internal DefinitionParsingEngine? DefinitionParsingEngine { get; set; }
 
         private int CharsToProcess { get; set; } = 500;
@@ -142,12 +142,12 @@ namespace Linguine
         private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail)
         {
 
-            if (StatementEngine is null)
+            if (TextAnalyser is null)
             {
                 StartStatementEngine();
             }
 
-            List<ProtoStatement> protos = await StatementEngine?.GenerateStatementsFor(text, context, isTail);
+            List<ProtoStatement> protos = await TextAnalyser?.GenerateStatementsFor(text, context, isTail);
 
             return protos;
 
@@ -171,7 +171,7 @@ namespace Linguine
 
                 API_Keys keys = ConfigManager.API_Keys;
 
-                StatementEngine = StatementEngineFactory.BuildStatementEngine(keys, dictionary);
+                TextAnalyser = StatementEngineFactory.BuildStatementEngine(keys, dictionary);
             }
         }
 
