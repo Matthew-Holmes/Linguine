@@ -28,10 +28,24 @@ namespace Agents
     {
         private static SemaphoreSlim OpenAISemaphore = new SemaphoreSlim(10); // global API lock for OpenAI
 
-        // TODO - this should have multiple api options
-        // also if a required key is null - then query the config manager and give the user
-        // advice on how to resolve the problem
+ 
         public static AgentBase GenerateProcessingAgent(
+            API_Keys keys,
+            AgentTask task,
+            LanguageCode language,
+            bool isHighPerformace = false)
+        {
+            LLM model = LLM.ChatGPT4o_mini;
+
+            if (isHighPerformace)
+            {
+                model = LLM.ChatGPT4o;
+            }
+
+            return GenerateProcessingAgentInternal(keys, task, language, model);
+        }
+
+        private static AgentBase GenerateProcessingAgentInternal(
             API_Keys keys,
             AgentTask task,
             LanguageCode language,

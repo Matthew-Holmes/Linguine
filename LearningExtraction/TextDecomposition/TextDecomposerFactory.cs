@@ -20,7 +20,7 @@ namespace LearningExtraction
 
             ret.StandardAgent        = AgentFactory.GenerateProcessingAgent(keys, AgentTask.DecompositionToStatements, lc);
 
-            ret.HighPerformanceAgent = AgentFactory.GenerateProcessingAgent(keys, AgentTask.DecompositionToStatements, lc ,LLM.ChatGPT4o);
+            ret.HighPerformanceAgent = AgentFactory.GenerateProcessingAgent(keys, AgentTask.DecompositionToStatements, lc, true);
 
             ret.FallbackAgent        = new SentenceDecompositionAgent();
 
@@ -37,7 +37,7 @@ namespace LearningExtraction
                 AgentTask.DecompositionToUnits, lc);
 
             ret.HighPerformanceAgent = AgentFactory.GenerateProcessingAgent(keys,
-                AgentTask.DecompositionToUnits, lc ,LLM.ChatGPT4o);
+                AgentTask.DecompositionToUnits, lc, true);
 
             ret.FallbackAgent        = new WhitespaceDecompositionAgent();
 

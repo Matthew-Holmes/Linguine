@@ -61,23 +61,6 @@ namespace Linguine
             return Tuple.Create<String?, List<String>?, bool, int>(chunk, previousContext, isTail, firstChar);
         }
 
-
-        private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)
-        {
-            List<StatementBuilder> builders = protos.Select(p => new StatementBuilder(p)).ToList();
-
-            foreach (StatementBuilder sb in builders)
-            {
-                sb.Parent = tm;
-            }
-
-            SetIndices(builders, firstChar);
-
-            List<Statement> ret = builders.Select(b => b.ToStatement()).ToList();
-
-            return ret;
-        }
-
         // TODO - should this return bool for success?
         internal async Task ProcessNextChunk(int sessionID)
         {
@@ -104,6 +87,21 @@ namespace Linguine
             {
                 await ParseDefinitions(statements);              
             }
+        }
+        private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)
+        {
+            List<StatementBuilder> builders = protos.Select(p => new StatementBuilder(p)).ToList();
+
+            foreach (StatementBuilder sb in builders)
+            {
+                sb.Parent = tm;
+            }
+
+            SetIndices(builders, firstChar);
+
+            List<Statement> ret = builders.Select(b => b.ToStatement()).ToList();
+
+            return ret;
         }
 
         private async Task ParseDefinitions(List<Statement> statements)
