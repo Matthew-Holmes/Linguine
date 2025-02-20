@@ -33,6 +33,15 @@ namespace Linguine
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
+            // TODO - in model: determine the chunk of text to process next
+            // TODO - in model: build the contextual info
+            // TODO - in LearningExtraction: process text - return statements
+            // TODO - in LearningExtraction: process statements - return definitions
+            // TODO - in Model: once all done save the progress to disk
+                // TODO - should there be checks for correctness here??
+
+            // TODO - extract interfaces for this
+
             List<Statement>? ret = await DoProcessingStep(tm);
 
             if (ret is null)
