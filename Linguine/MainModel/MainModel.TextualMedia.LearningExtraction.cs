@@ -20,11 +20,44 @@ using System.Windows.Navigation;
 
 namespace Linguine
 {
+
+    
     public partial class MainModel
     {
 
         private StatementEngine?         StatementEngine         { get; set; }
         internal DefinitionParsingEngine? DefinitionParsingEngine { get; set; }
+
+        private int CharsToProcess { get; set; } = 500;
+
+        private Tuple<String, List<String>>? GetNextChunk(TextualMedia tm)
+        {
+            int end = StatementManager.IndexOffEndOfLastStatement(tm);
+
+            if (end == tm.Text.Length)
+            {
+                return null;
+            }
+            else if (end == -1 /* indicates no statements exist for this TextualMedia */)
+            {
+                end = 0; // ensure no weird stuff
+            }
+
+            int firstChar = end;
+
+            List<String> previousContext = GetPreviousContextSerial(tm);
+
+            int charSpan = CharsToProcess;
+
+            if (tm.Text.Length - firstChar < CharsToProcess)
+            {
+                charSpan = tm.Text.Length - firstChar;
+            }
+
+            String chunk = tm.Text.Substring(firstChar, charSpan);
+
+            return Tuple.Create(chunk, previousContext);
+        }
 
 
         // TODO - should this return bool for success?
@@ -124,6 +157,19 @@ namespace Linguine
             DefinitionParsingEngine = new DefinitionParsingEngine(ParsedDictionaryDefinitionManager, parsingAgent);
         }
 
+        private List<String> GetPreviousContextSerial(TextualMedia tm)
+        {
+            Statement? previousStatement = StatementManager.GetLastStatement(tm);
+
+            if (previousStatement is null)
+            {
+                return FormInitialContextSerial(tm);
+            }
+            else
+            {
+                return previousStatement.StatementContext;
+            }
+        }
 
         private async Task<List<String>> GetPreviousContext(TextualMedia tm)
         {
@@ -148,6 +194,16 @@ namespace Linguine
             ret.Add("called " + tm.Name);
 
             return await Task.FromResult(ret);
+        }
+
+        private List<String> FormInitialContextSerial(TextualMedia tm)
+        {
+            List<String> ret = new List<String>();
+
+            ret.Add(tm.Description);
+            ret.Add("called " + tm.Name);
+
+            return ret;
         }
 
     }
