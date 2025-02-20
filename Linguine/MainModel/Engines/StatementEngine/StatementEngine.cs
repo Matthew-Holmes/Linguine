@@ -13,7 +13,6 @@ namespace Linguine
 {
     internal partial class StatementEngine
     {
-        public int CharsToProcess { get; set; } = 500;
         public int MaxStatements  { get; set; } = 20;
 
         internal TextDecomposer     ToStatementsDecomposer              { get; set; }
