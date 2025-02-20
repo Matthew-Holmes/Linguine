@@ -23,15 +23,19 @@ namespace Linguine
         internal AgentBase          ContextChangeIdentificationAgent    { get; set; }
         internal AgentBase          ContextUpdateAgent                  { get; set; }
 
-        internal async Task<List<Statement>?> GenerateStatementsFor(
-            TextualMedia tm,
-            int firstChar,
-            List<String> previousContext)
+        internal async Task<List<StatementBuilder>> GenerateStatementsFor1(
+            String text, List<String> context, bool isTail)
         {
             List<StatementBuilder> builders = new List<StatementBuilder>();
 
-            await FindStatementsAndPopulateBuilders(builders, tm, firstChar);
+            await FindStatementsAndPopulateBuilders(builders, text, context, isTail);
 
+            return builders;
+        }
+
+
+        internal async Task<List<Statement>?> GenerateStatementsFor2(List<StatementBuilder> builders)
+        {
             //await FormContexts(builders, previousContext);
 
             FormEmptyContexts(builders);
@@ -46,26 +50,21 @@ namespace Linguine
 
 
         private async Task FindStatementsAndPopulateBuilders(
-            List<StatementBuilder> builders, TextualMedia tm, int firstChar)
+            List<StatementBuilder> builders, String text, List<String> context, bool isTail)
         {
-            int charSpan = CharsToProcess;
 
-            if (tm.Text.Length - firstChar < CharsToProcess)
-            {
-                charSpan = tm.Text.Length - firstChar;
-            }
-
-            String chunk = tm.Text.Substring(firstChar, charSpan);
-
-            List<String> statementTexts = await DecomposeIntoStatements(chunk); // 
+            List<String> statementTexts = await DecomposeIntoStatements(text); 
 
             if (statementTexts.Count() < 3)
             {
                 throw new Exception("Failed to generate enough statements");
             }
 
-            // no need to clip if the text is being processed all in one go
-            if (tm.Text.Length != charSpan)
+            if (isTail)
+            {
+                /* no need to clip if the text includes the end */
+            }
+            else
             {
                 statementTexts.RemoveAt(statementTexts.Count() - 1); // remove anything that got clipped
                 statementTexts.RemoveAt(statementTexts.Count() - 1); // and a bit more for good measure
@@ -79,33 +78,12 @@ namespace Linguine
                 }
 
                 builders.Add(new StatementBuilder());
-                builders.Last().Parent = tm;
                 builders.Last().StatementText = total;
 
                 if (builders.Count > MaxStatements) { break; }
             }
-
-            SetIndices(builders, firstChar);
         }
 
-        private void SetIndices(List<StatementBuilder> builders, int startOfStatementsIndex)
-        {
-            if (builders.Select(b => b.Parent).Distinct().Count() != 1)
-            {
-                throw new Exception("something went wrong!");
-            }
 
-            String parentText = builders.FirstOrDefault().Parent.Text;
-
-            int ptr = startOfStatementsIndex;
-
-            foreach (StatementBuilder builder in builders)
-            {
-                builder.FirstCharIndex = parentText.IndexOf(builder.StatementText, ptr);
-                builder.LastCharIndex = builder.FirstCharIndex + builder.StatementText.Length - 1;
-
-                ptr = builder.LastCharIndex + 1 ?? throw new Exception();
-            }
-        }
     }
 }

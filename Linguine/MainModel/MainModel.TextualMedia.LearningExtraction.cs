@@ -30,13 +30,13 @@ namespace Linguine
 
         private int CharsToProcess { get; set; } = 500;
 
-        private Tuple<String, List<String>>? GetNextChunk(TextualMedia tm)
+        private Tuple<String?, List<String>?, bool, int> GetNextChunkInfo(TextualMedia tm)
         {
             int end = StatementManager.IndexOffEndOfLastStatement(tm);
 
             if (end == tm.Text.Length)
             {
-                return null;
+                return Tuple.Create<String?, List<String>?, bool, int>(null, null, false, -1);
             }
             else if (end == -1 /* indicates no statements exist for this TextualMedia */)
             {
@@ -48,15 +48,17 @@ namespace Linguine
             List<String> previousContext = GetPreviousContextSerial(tm);
 
             int charSpan = CharsToProcess;
+            bool isTail = false;
 
             if (tm.Text.Length - firstChar < CharsToProcess)
             {
                 charSpan = tm.Text.Length - firstChar;
+                isTail = true; // TODO - should this be <=??
             }
 
             String chunk = tm.Text.Substring(firstChar, charSpan);
 
-            return Tuple.Create(chunk, previousContext);
+            return Tuple.Create<String?, List<String>?, bool, int>(chunk, previousContext, isTail, firstChar);
         }
 
 
@@ -66,8 +68,10 @@ namespace Linguine
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            // TODO - in model: determine the chunk of text to process next
-            // TODO - in model: build the contextual info
+            // in model: determine the chunk of text to process next
+            (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
+            if (text is null || context is null) { return; }
+
             // TODO - in LearningExtraction: process text - return statements
             // TODO - in LearningExtraction: process statements - return definitions
             // TODO - in Model: once all done save the progress to disk
@@ -75,7 +79,7 @@ namespace Linguine
 
             // TODO - extract interfaces for this
 
-            List<Statement>? ret = await DoProcessingStep(tm);
+            List<Statement>? ret = await DoProcessingStep(text, context, isTail, firstChar, tm);
 
             if (ret is null)
             {
@@ -100,28 +104,45 @@ namespace Linguine
             }
         }
 
-
-        private async Task<List<Statement>?> DoProcessingStep(TextualMedia tm)
+        private void SetIndices(List<StatementBuilder> builders, int startOfStatementsIndex)
         {
-            int end = StatementManager.IndexOffEndOfLastStatement(tm);
-
-            if (end == tm.Text.Length)
+            if (builders.Select(b => b.Parent).Distinct().Count() != 1)
             {
-                return await Task.FromResult<List<Statement>?>(null);
-            }
-            else if (end == -1 /* indicates no statements exist for this TextualMedia */)
-            {
-                end = 0; // ensure no weird stuff
+                throw new Exception("something went wrong!");
             }
 
-            List<String> previousContext = await GetPreviousContext(tm);
+            String parentText = builders.FirstOrDefault().Parent.Text;
+
+            int ptr = startOfStatementsIndex;
+
+            foreach (StatementBuilder builder in builders)
+            {
+                builder.FirstCharIndex = parentText.IndexOf(builder.StatementText, ptr);
+                builder.LastCharIndex = builder.FirstCharIndex + builder.StatementText.Length - 1;
+
+                ptr = builder.LastCharIndex + 1 ?? throw new Exception();
+            }
+        }
+        // TODO - remove the firstchar and tm args once refactor complete!
+        private async Task<List<Statement>?> DoProcessingStep(String text, List<String> context, bool isTail, int firstChar, TextualMedia tm)
+        {
 
             if (StatementEngine is null)
             {
                 StartStatementEngine();
             }
 
-            return await StatementEngine?.GenerateStatementsFor(tm, end, previousContext);
+            List<StatementBuilder> builders = await StatementEngine?.GenerateStatementsFor1(text, context, isTail);
+
+            foreach (StatementBuilder sb in builders)
+            {
+                sb.Parent = tm;
+            }
+
+            SetIndices(builders, firstChar);
+
+            return await StatementEngine?.GenerateStatementsFor2(builders);
+
         }
 
         private void StartStatementEngine()
