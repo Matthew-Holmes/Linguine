@@ -17,9 +17,9 @@ namespace Linguine
             return statementsDecomp.Units;
         }
 
-        private async Task DecomposeStatements(List<StatementBuilder> builders)
+        private async Task DecomposeStatements(List<ProtoStatement> protos)
         {
-            var decompositionTasks = builders.Select(
+            var decompositionTasks = protos.Select(
                 b => FromStatementsDecomposer.DecomposeText(b.StatementText));
 
             TextDecomposition[] injectives = await Task.WhenAll(decompositionTasks);
@@ -29,10 +29,10 @@ namespace Linguine
 
             TextDecomposition[] rooted = await Task.WhenAll(rootingTasks);
 
-            for (int i = 0; i != builders.Count; i++)
+            for (int i = 0; i != protos.Count; i++)
             {
-                builders[i].InjectiveDecomposition = injectives[i];
-                builders[i].RootedDecomposition = rooted[i];
+                protos[i].InjectiveDecomposition = injectives[i];
+                protos[i].RootedDecomposition = rooted[i];
             }
 
             return;

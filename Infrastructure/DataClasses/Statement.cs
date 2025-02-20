@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
+
+
     public class Statement
     {
         private TextualMedia _parent;
@@ -44,4 +46,17 @@ namespace Infrastructure
             _lastCharIndex = lastCharIndex;
         }
     }
+
+    // This is the format used to communicate between the main model and
+    // learning extraction module
+    public class ProtoStatement
+    {
+
+        public String? StatementText { get; set; }
+        public List<String>? StatementContext { get; set; }
+
+        public TextDecomposition? InjectiveDecomposition { get; set; }
+        public TextDecomposition? RootedDecomposition { get; set; }
+
+     }
 }

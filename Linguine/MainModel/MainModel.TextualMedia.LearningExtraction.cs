@@ -79,12 +79,23 @@ namespace Linguine
 
             // TODO - extract interfaces for this
 
-            List<Statement>? ret = await DoProcessingStep(text, context, isTail, firstChar, tm);
+            List<ProtoStatement>? protos = await DoProcessingStep(text, context, isTail);
 
-            if (ret is null)
+            if (protos is null)
             {
                 return;
             }
+
+            List<StatementBuilder> builders = protos.Select(p => new StatementBuilder(p)).ToList();
+
+            foreach (StatementBuilder sb in builders)
+            {
+                sb.Parent = tm;
+            }
+
+            SetIndices(builders, firstChar);
+
+            List<Statement> ret = builders.Select(b => b.ToStatement()).ToList();
 
             StatementManager.AddStatements(ret);
 
@@ -124,7 +135,7 @@ namespace Linguine
             }
         }
         // TODO - remove the firstchar and tm args once refactor complete!
-        private async Task<List<Statement>?> DoProcessingStep(String text, List<String> context, bool isTail, int firstChar, TextualMedia tm)
+        private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail)
         {
 
             if (StatementEngine is null)
@@ -132,16 +143,9 @@ namespace Linguine
                 StartStatementEngine();
             }
 
-            List<StatementBuilder> builders = await StatementEngine?.GenerateStatementsFor1(text, context, isTail);
+            List<ProtoStatement> protos = await StatementEngine?.GenerateStatementsFor(text, context, isTail);
 
-            foreach (StatementBuilder sb in builders)
-            {
-                sb.Parent = tm;
-            }
-
-            SetIndices(builders, firstChar);
-
-            return await StatementEngine?.GenerateStatementsFor2(builders);
+            return protos;
 
         }
 

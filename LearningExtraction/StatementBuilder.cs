@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +35,14 @@ namespace LearningExtraction
         {
             PropertyInfo[] properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
             return properties.Any(prop => prop.GetValue(obj) == null);
+        }
+
+        public StatementBuilder(ProtoStatement proto)
+        {
+            StatementText           = proto.StatementText;
+            Context                 = proto.StatementContext;
+            InjectiveDecomposition  = proto.InjectiveDecomposition;
+            RootedDecomposition     = proto.RootedDecomposition;
         }
     }
 }

@@ -23,34 +23,29 @@ namespace Linguine
         internal AgentBase          ContextChangeIdentificationAgent    { get; set; }
         internal AgentBase          ContextUpdateAgent                  { get; set; }
 
-        internal async Task<List<StatementBuilder>> GenerateStatementsFor1(
+        internal async Task<List<ProtoStatement>> GenerateStatementsFor(
             String text, List<String> context, bool isTail)
         {
-            List<StatementBuilder> builders = new List<StatementBuilder>();
+            List<ProtoStatement> protos = new List<ProtoStatement>();
 
-            await FindStatementsAndPopulateBuilders(builders, text, context, isTail);
+            await FindStatementsAndPopulate(protos, text, context, isTail);
 
-            return builders;
-        }
-
-
-        internal async Task<List<Statement>?> GenerateStatementsFor2(List<StatementBuilder> builders)
-        {
             //await FormContexts(builders, previousContext);
 
-            FormEmptyContexts(builders);
+            FormEmptyContexts(protos);
 
-            await DecomposeStatements(builders);
+            await DecomposeStatements(protos);
 
-            await AttachCorrectDefinitions(builders);
+            await AttachCorrectDefinitions(protos);
 
-            return builders.Select(b => b.ToStatement()).ToList();
+            return protos;
+
         }
 
 
 
-        private async Task FindStatementsAndPopulateBuilders(
-            List<StatementBuilder> builders, String text, List<String> context, bool isTail)
+        private async Task FindStatementsAndPopulate(
+            List<ProtoStatement> protos, String text, List<String> context, bool isTail)
         {
 
             List<String> statementTexts = await DecomposeIntoStatements(text); 
@@ -77,10 +72,10 @@ namespace Linguine
                     continue;
                 }
 
-                builders.Add(new StatementBuilder());
-                builders.Last().StatementText = total;
+                protos.Add(new ProtoStatement());
+                protos.Last().StatementText = total;
 
-                if (builders.Count > MaxStatements) { break; }
+                if (protos.Count > MaxStatements) { break; }
             }
         }
 

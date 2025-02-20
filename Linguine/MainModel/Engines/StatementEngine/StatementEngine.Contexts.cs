@@ -34,11 +34,11 @@ namespace Linguine
             }
         }
 
-        private void FormEmptyContexts(List<StatementBuilder> builders)
+        private void FormEmptyContexts(List<ProtoStatement> protos)
         {
-            for (int i = 0; i != builders.Count; i++)
+            for (int i = 0; i != protos.Count; i++)
             {
-                builders[i].Context = new List<String>();
+                protos[i].StatementContext = new List<String>();
             }
         }
 
