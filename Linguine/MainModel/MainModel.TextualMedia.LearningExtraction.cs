@@ -45,7 +45,7 @@ namespace Linguine
 
             int firstChar = end;
 
-            List<String> previousContext = GetPreviousContextSerial(tm);
+            List<String> previousContext = GetPreviousContext(tm);
 
             int charSpan = CharsToProcess;
             bool isTail = false;
@@ -62,30 +62,8 @@ namespace Linguine
         }
 
 
-        // TODO - should this return bool for success?
-        internal async Task ProcessNextChunk(int sessionID)
+        private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)
         {
-            TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
-            if (tm is null) { return; }
-
-            // in model: determine the chunk of text to process next
-            (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
-            if (text is null || context is null) { return; }
-
-            // TODO - in LearningExtraction: process text - return statements
-            // TODO - in LearningExtraction: process statements - return definitions
-            // TODO - in Model: once all done save the progress to disk
-                // TODO - should there be checks for correctness here??
-
-            // TODO - extract interfaces for this
-
-            List<ProtoStatement>? protos = await DoProcessingStep(text, context, isTail);
-
-            if (protos is null)
-            {
-                return;
-            }
-
             List<StatementBuilder> builders = protos.Select(p => new StatementBuilder(p)).ToList();
 
             foreach (StatementBuilder sb in builders)
@@ -97,23 +75,51 @@ namespace Linguine
 
             List<Statement> ret = builders.Select(b => b.ToStatement()).ToList();
 
-            StatementManager.AddStatements(ret);
+            return ret;
+        }
+
+        // TODO - should this return bool for success?
+        internal async Task ProcessNextChunk(int sessionID)
+        {
+            TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
+            if (tm is null) { return; }
+
+            // determine the chunk of text to process next
+            (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
+            if (text is null || context is null) { return; }
+
+            // TODO - extract interface for this - outsource to the LearningExtraction
+            List<ProtoStatement>? protos = await DoProcessingStep(text, context, isTail);
+
+            if (protos is null)
+            {
+                return;
+            }
+
+            List<Statement> statements = FromProtoStatements(protos, tm, firstChar);
+
+            StatementManager.AddStatements(statements);
 
             if (ConfigManager.TargetLanguage != ConfigManager.NativeLanguage)
             {
-
-                if (DefinitionParsingEngine is null)
-                {
-                    StartParsingEngine();
-                }
-                // TODO - what if it is null?
-
-                HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(ret);
-
-                await DefinitionParsingEngine.ParseStatementsDefinitions(
-                    definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+                await ParseDefinitions(statements);              
             }
         }
+
+        private async Task ParseDefinitions(List<Statement> statements)
+        {
+            if (DefinitionParsingEngine is null)
+            {
+                StartParsingEngine();
+            }
+            // TODO - what if it is null?
+
+            HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
+
+            await DefinitionParsingEngine.ParseStatementsDefinitions(
+                definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+        }
+
 
         private void SetIndices(List<StatementBuilder> builders, int startOfStatementsIndex)
         {
@@ -182,27 +188,13 @@ namespace Linguine
             DefinitionParsingEngine = new DefinitionParsingEngine(ParsedDictionaryDefinitionManager, parsingAgent);
         }
 
-        private List<String> GetPreviousContextSerial(TextualMedia tm)
+        private List<String> GetPreviousContext(TextualMedia tm)
         {
             Statement? previousStatement = StatementManager.GetLastStatement(tm);
 
             if (previousStatement is null)
             {
-                return FormInitialContextSerial(tm);
-            }
-            else
-            {
-                return previousStatement.StatementContext;
-            }
-        }
-
-        private async Task<List<String>> GetPreviousContext(TextualMedia tm)
-        {
-            Statement? previousStatement = StatementManager.GetLastStatement(tm);
-
-            if (previousStatement is null)
-            {
-                return await FormInitialContext(tm);
+                return FormInitialContext(tm);
             }
             else
             {
@@ -211,17 +203,7 @@ namespace Linguine
         }
 
         // TODO - translate the word "called" here to the TargetLanguage!
-        private async Task<List<String>> FormInitialContext(TextualMedia tm)
-        {
-            List<String> ret = new List<String>();
-
-            ret.Add(tm.Description);
-            ret.Add("called " + tm.Name);
-
-            return await Task.FromResult(ret);
-        }
-
-        private List<String> FormInitialContextSerial(TextualMedia tm)
+        private List<String> FormInitialContext(TextualMedia tm)
         {
             List<String> ret = new List<String>();
 
