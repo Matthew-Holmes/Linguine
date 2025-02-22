@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Infrastructure;
 using System.Text.RegularExpressions;
 using Helpers;
+using Serilog;
 
 namespace LearningExtraction
 {
@@ -28,7 +29,6 @@ namespace LearningExtraction
                 throw new ArgumentException("Text too long to process");
             }
 
-            TextDecomposition ret;
             Func<TextDecomposition, bool> MaintainsInvariants = (TextDecomposition td)
                 => (!mustBiject || td.Bijects()) && (!mustInject || td.Injects());
 
@@ -37,59 +37,60 @@ namespace LearningExtraction
 
             // first pass at the decomposition, using StandardAgent
 
+            TextDecomposition ret1;
             for (int i = 1; i != 5; i++)
             {
                 // 4o-min is ~16x cheaper than 4o, thus we should try multiple times before resorting to
                 // the high powered agent
-                ret = await FromTextUsingAgent(text, StandardAgent);
-                if (MaintainsInvariants(ret) & IsNonTrivial(ret))
+                ret1 = await FromTextUsingAgent(text, StandardAgent);
+                if (MaintainsInvariants(ret1) & IsNonTrivial(ret1))
                 {
                     Debug.WriteLine($"successful decomposition after {i} attempts");
-                    return ret;
+                    Log.Debug("Standard agent performed decomposition after {NumAttempts} attempts", i);
+                    return ret1;
                 }
             }
 
+            TextDecomposition ret2;
             for (int i = 1; i != 3; i++)
             {
                 // 4o-min is ~16x cheaper than 4o, thus we should try multiple times before resorting to
                 // the high powered agent
-                ret = await FromTextUsingAgentPunctuationStripped(text, StandardAgent);
-                if (MaintainsInvariants(ret) & IsNonTrivial(ret))
+                ret2 = await FromTextUsingAgentPunctuationStripped(text, StandardAgent);
+                if (MaintainsInvariants(ret2) & IsNonTrivial(ret2))
                 {
-                    Debug.WriteLine($"successful decomposition after {i} attempts, with punctuation stripped");
-                    return ret;
+                    Log.Debug("Standard agent performed decomposition after {NumAttempts} attempts, with punctuation stripped", i);
+                    return ret2;
                 }
             }
 
-            //String text_stripped = Regex.Replace(text, @"\t|\n|\r", ",");
-
-
             // that failed, use more powerful agent (e.g. higher spec LLM)
-            ret = await FromTextUsingAgent(text, HighPerformanceAgent);
+            TextDecomposition ret3 = await FromTextUsingAgent(text, HighPerformanceAgent);
 
-            if (MaintainsInvariants(ret) & IsNonTrivial(ret))
+            if (MaintainsInvariants(ret3) & IsNonTrivial(ret3))
             {
-                Debug.WriteLine($"successful decomposition using high powered agent");
-                return ret;
+                Log.Information("had to use high powered agent for decomposition, hard text: \"{HardText}\"", text);
+                return ret3;
             }
 
-            ret = await FromTextUsingAgent(text, StandardAgent);
-            if (MaintainsInvariants(ret))
+            if (MaintainsInvariants(ret3))
             {
-                Debug.WriteLine($"successful decomposition, potentially trivial");
-                return ret;
+
+                Log.Warning("successful decomposition using high powered agent, potentially trivial, hard text: \"{HardText}\"", text);
+                return ret3;
             }
 
 
             // do default, recommendation: use dummy agent guaranteed to maintain invariants
-            ret = await FromTextUsingAgent(text, FallbackAgent);
-            if (MaintainsInvariants(ret))
+            TextDecomposition ret4 = await FromTextUsingAgent(text, FallbackAgent);
+            if (MaintainsInvariants(ret4))
             {
-                Debug.WriteLine($"had to resort to fall back agent for decomposition");
-                return ret;
+                Log.Warning("had to resort to fallback agent for decomposition, hard text: \"{HardText}\"", text);
+                return ret4;
             }
             else
             {
+                Log.Fatal("fallback agent was not able to maintain invariants, bad text: \"{BadText}\"", text);
                 throw new Exception("Invalid decomposition");
             }
         }
