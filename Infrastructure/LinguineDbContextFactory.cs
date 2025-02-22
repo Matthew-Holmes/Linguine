@@ -20,7 +20,7 @@ namespace Infrastructure
 
         public LinguineDbContext CreateDbContext()
         {
-            Log.Information("Created Context. StackTrace: {StackTrace}", GetFilteredStackTrace());
+            Log.Verbose("Created Context. StackTrace: {StackTrace}", GetFilteredStackTrace());
             return new LinguineDbContext(_connString);
         }
 

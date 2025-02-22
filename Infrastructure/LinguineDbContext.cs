@@ -24,7 +24,7 @@ namespace Infrastructure
             {
                 if (disposing)
                 {
-                    Log.Information("Context Disposed. StackTrace: {StackTrace}", GetFilteredStackTrace());
+                    Log.Verbose("Context Disposed. StackTrace: {StackTrace}", GetFilteredStackTrace());
                 }
                 _disposed = true;
             }
