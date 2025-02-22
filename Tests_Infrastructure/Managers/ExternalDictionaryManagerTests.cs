@@ -11,7 +11,7 @@ namespace Tests_Infrastructure
     public class ExternalDictionaryManagerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDbContextFactory _dbf;
 
         private string dummyDataFile;
 
@@ -29,17 +29,22 @@ namespace Tests_Infrastructure
                 _db.Database.EnsureDeleted(); // use this way as File method doesn't work
             }
 
+
             if (File.Exists("tmp.db"))
             {
                 throw new Exception();
             }
 
-            _db = new LinguineDbContext(ConnectionString);
-            _db.Database.EnsureCreated();
+            _dbf = new LinguineDbContextFactory(ConnectionString);
+
+            var context = _dbf.CreateDbContext();
+            context.Database.EnsureCreated();
 
             dummyDataFile = Path.Combine("dummyRawData.csv");
 
             InitializeDummyDictionaries();
+
+            context.Dispose();
             
         }
 
@@ -62,8 +67,8 @@ namespace Tests_Infrastructure
         private void InitializeDummyDictionaries()
         {
 
-            ExternalDictionary target1 = new ExternalDictionary("English1", _db);
-            ExternalDictionary target2 = new ExternalDictionary("English2", _db);
+            ExternalDictionary target1 = new ExternalDictionary("English1", _dbf);
+            ExternalDictionary target2 = new ExternalDictionary("English2", _dbf);
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(target1, dummyDataFile, "English1");
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(target2, dummyDataFile, "English2");
@@ -74,7 +79,7 @@ namespace Tests_Infrastructure
         public void AvailableDictionaries_ReturnsCorrectDictionaryNames()
         {
             var expected = new List<string> { "English1", "English2" };
-            var manager = new ExternalDictionaryManager(_db);
+            var manager = new ExternalDictionaryManager(_dbf);
             var result = manager.AvailableDictionaries();
             CollectionAssert.AreEqual(expected, result);
         }
@@ -85,7 +90,7 @@ namespace Tests_Infrastructure
         {
             string expectedName = "English1";
 
-            var manager = new ExternalDictionaryManager(_db);
+            var manager = new ExternalDictionaryManager(_dbf);
 
             ExternalDictionary result = manager.GetDictionary(expectedName);
 
@@ -98,7 +103,7 @@ namespace Tests_Infrastructure
         {
             string name = "NonExistingDict";
 
-            var manager = new ExternalDictionaryManager(_db);
+            var manager = new ExternalDictionaryManager(_dbf);
 
             ExternalDictionary result = manager.GetDictionary(name);
 
@@ -112,7 +117,7 @@ namespace Tests_Infrastructure
             string name = "NewDict";
             string csvFileLocation = CreateMockCSVFile();
 
-            var manager = new ExternalDictionaryManager(_db);
+            var manager = new ExternalDictionaryManager(_dbf);
 
             manager.AddNewDictionaryFromCSV(csvFileLocation, name);
 
@@ -127,7 +132,7 @@ namespace Tests_Infrastructure
             string name = "English1"; // Existing name
             string csvFileLocation = CreateMockCSVFile();
 
-            var manager = new ExternalDictionaryManager(_db);
+            var manager = new ExternalDictionaryManager(_dbf);
 
             manager.AddNewDictionaryFromCSV(csvFileLocation, name);
         }
@@ -136,7 +141,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void VerifyIntegrityWith_PassesForValidConfig()
         {
-            var manager = new ExternalDictionaryManager(_db);
+            var manager = new ExternalDictionaryManager(_dbf);
             manager.VerifyIntegrity(manager.GetDictionary("English1"));
         }
 

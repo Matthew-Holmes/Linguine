@@ -14,7 +14,7 @@ namespace Tests_Infrastructure
         private string _name;
 
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDbContextFactory _dbf;
 
 
         [TestInitialize]
@@ -35,8 +35,10 @@ namespace Tests_Infrastructure
             // Create a mock CSV file with test data
             _csvFilePath = CreateMockCSVFile();
 
-            _db = new LinguineDbContext(ConnectionString);
-            _db.Database.EnsureCreated();
+            _dbf = new LinguineDbContextFactory(ConnectionString);
+            var context = _dbf.CreateDbContext();
+            context.Database.EnsureCreated();
+            context.Dispose();
         }
 
         private string CreateMockCSVFile()
@@ -56,7 +58,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void ParseVariantsFromCSV_ValidCSV_Runs()
         {
-            Variants target = new Variants(_name, _db);
+            Variants target = new Variants(_name, _dbf);
 
             VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, _csvFilePath, _name);
         }
@@ -65,7 +67,7 @@ namespace Tests_Infrastructure
         public void ParseVariantsFromCSV_ValidCSV_CreatesDatabase()
         {
 
-            Variants target = new Variants(_name, _db);
+            Variants target = new Variants(_name, _dbf);
 
             VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, _csvFilePath, _name);
 
@@ -91,7 +93,7 @@ namespace Tests_Infrastructure
             // Create an empty CSV file
             string emptyCsvFilePath = CreateEmptyCSVFile();
 
-            Variants target = new Variants(_name, _db);
+            Variants target = new Variants(_name, _dbf);
 
             VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(target, emptyCsvFilePath, _name);
         }

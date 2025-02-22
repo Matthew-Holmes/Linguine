@@ -12,7 +12,7 @@ namespace Tests_Infrastructure
     public class ParsedDictionaryDefinitionManagerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDbContextFactory _dbf;
 
         private DictionaryDefinition? def1 = null;
         private DictionaryDefinition? def2 = null; 
@@ -30,10 +30,15 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDbContext(ConnectionString);
-            _db.Database.EnsureCreated();
+            _dbf = new LinguineDbContextFactory(ConnectionString);
+
+            var context = _dbf.CreateDbContext();
+
+            context.Database.EnsureCreated();
 
             InitializeDummyData();
+
+            context.Dispose();
 
         }
 
@@ -64,9 +69,11 @@ namespace Tests_Infrastructure
             };
 
 
-            _db.DictionaryDefinitions.Add(def1);
-            _db.DictionaryDefinitions.Add(def2);
-            _db.DictionaryDefinitions.Add(def3);
+            using var context = _dbf.CreateDbContext();
+
+            context.DictionaryDefinitions.Add(def1);
+            context.DictionaryDefinitions.Add(def2);
+            context.DictionaryDefinitions.Add(def3);
 
 
             ParsedDictionaryDefinition pdef1 = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.beginner, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a way to check things" };
@@ -77,19 +84,19 @@ namespace Tests_Infrastructure
 
             ParsedDictionaryDefinition pdef4 = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.intermediate, NativeLanguage = LanguageCode.fra, ParsedDefinition = "un examen écrit pour les étudiants" };
 
-            _db.ParsedDictionaryDefinitions.Add(pdef1);
-            _db.ParsedDictionaryDefinitions.Add(pdef2);
-            _db.ParsedDictionaryDefinitions.Add(pdef3);
-            _db.ParsedDictionaryDefinitions.Add(pdef4);
+            context.ParsedDictionaryDefinitions.Add(pdef1);
+            context.ParsedDictionaryDefinitions.Add(pdef2);
+            context.ParsedDictionaryDefinitions.Add(pdef3);
+            context.ParsedDictionaryDefinitions.Add(pdef4);
 
-            _db.SaveChanges();
+            context.SaveChanges();
 
         }
 
         [TestMethod]
         public void GetParsedDictionaryDefinition_ReturnsExisting()
         {
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
             Assert.IsNotNull(def1);
 
@@ -104,7 +111,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void GetParsedDictionaryDefinition_ReturnsNullIfNonexisting()
         {
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
             Assert.IsNotNull(def1);
 
@@ -120,9 +127,10 @@ namespace Tests_Infrastructure
         {
             ParsedDictionaryDefinition pdef1_again = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.beginner, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
-            manager.Add(pdef1_again);
+            using var context = _dbf.CreateDbContext();
+            manager.Add(pdef1_again, context);
         }
 
 
@@ -140,9 +148,10 @@ namespace Tests_Infrastructure
 
             ParsedDictionaryDefinition pdef = new ParsedDictionaryDefinition { CoreDefinition = def, LearnerLevel = LearnerLevel.beginner, NativeLanguage = LanguageCode.eng, ParsedDefinition = "not known" };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
-            manager.Add(pdef);
+            using var context = _dbf.CreateDbContext();
+            manager.Add(pdef, context);
         }
 
         [TestMethod]
@@ -150,9 +159,10 @@ namespace Tests_Infrastructure
         {
             ParsedDictionaryDefinition pdef1_again = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
-            manager.Add(pdef1_again);
+            using var context = _dbf.CreateDbContext();
+            manager.Add(pdef1_again, context);
         }
 
         [TestMethod]
@@ -160,9 +170,10 @@ namespace Tests_Infrastructure
         {
             ParsedDictionaryDefinition pdef = new ParsedDictionaryDefinition { CoreDefinition = def1, LearnerLevel = LearnerLevel.elementary, NativeLanguage = LanguageCode.eng, ParsedDefinition = "a method to check things" };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
-            manager.Add(pdef);
+            using var context = _dbf.CreateDbContext();
+            manager.Add(pdef, context);
 
             ParsedDictionaryDefinition? found = manager.GetParsedDictionaryDefinition(def1, LearnerLevel.elementary, LanguageCode.eng);
 
@@ -180,7 +191,7 @@ namespace Tests_Infrastructure
 
             HashSet<ParsedDictionaryDefinition> toAdd = new HashSet<ParsedDictionaryDefinition> { pdef1_again, pdef };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
             manager.AddSet(toAdd);
 
@@ -195,7 +206,7 @@ namespace Tests_Infrastructure
 
             HashSet<ParsedDictionaryDefinition> toAdd = new HashSet<ParsedDictionaryDefinition> { pdef1, pdef2 };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
             manager.AddSet(toAdd);
 
@@ -210,7 +221,7 @@ namespace Tests_Infrastructure
 
             HashSet<ParsedDictionaryDefinition> toAdd = new HashSet<ParsedDictionaryDefinition> { pdef1, pdef2 };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
             manager.AddSet(toAdd);
 
@@ -228,7 +239,7 @@ namespace Tests_Infrastructure
         {
             HashSet<DictionaryDefinition> defs = new HashSet<DictionaryDefinition> { def1, def2 };
 
-            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_db);
+            ParsedDictionaryDefinitionManager manager = new ParsedDictionaryDefinitionManager(_dbf);
 
             HashSet<DictionaryDefinition> filtered = manager.FilterOutKnown(defs, LearnerLevel.intermediate, LanguageCode.fra);
 

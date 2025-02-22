@@ -13,15 +13,17 @@ namespace Tests_Infrastructure
     public class ExternalDictionaryCSVParserTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDbContextFactory _dbf;
 
         private string _csvFilePath;
         private string _testDictionaryName;
 
         private void SeedData()
         {
-        _db = new LinguineDbContext(ConnectionString);
-        _db.Database.EnsureCreated();
+            _dbf = new LinguineDbContextFactory(ConnectionString);
+            var context = _dbf.CreateDbContext();
+            context.Database.EnsureCreated();
+            context.Dispose();
         }
 
         [TestInitialize]
@@ -63,7 +65,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void ParseNewDictionaryFromCSV_ValidCSV_Runs()
         {
-            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _db);
+            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _dbf);
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dictionary, _csvFilePath, _testDictionaryName);
         }
@@ -71,7 +73,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void ParseNewDictionaryFromCSV_ValidCSV_AddsDefinitions()
         {
-            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _db);
+            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _dbf);
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dictionary, _csvFilePath, _testDictionaryName);
 
@@ -98,7 +100,7 @@ namespace Tests_Infrastructure
             // Create an empty CSV file
             string emptyCsvFilePath = CreateEmptyCSVFile();
 
-            ExternalDictionary target = new ExternalDictionary("newDict", _db);
+            ExternalDictionary target = new ExternalDictionary("newDict", _dbf);
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(target, emptyCsvFilePath, "anotherDict");
         }
@@ -110,7 +112,7 @@ namespace Tests_Infrastructure
             // Create an empty CSV file
             string emptyCsvFilePath = CreateEmptyCSVFile();
 
-            ExternalDictionary target = new ExternalDictionary("newDict", _db);
+            ExternalDictionary target = new ExternalDictionary("newDict", _dbf);
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(target, emptyCsvFilePath, "newDict");
         }
@@ -122,7 +124,7 @@ namespace Tests_Infrastructure
             // Create an empty CSV file
             string emptyCsvFilePath = CreateCompletelyEmptyCSVFile();
 
-            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _db);
+            ExternalDictionary dictionary = new ExternalDictionary(_testDictionaryName, _dbf);
 
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(dictionary, emptyCsvFilePath, _testDictionaryName);
         }

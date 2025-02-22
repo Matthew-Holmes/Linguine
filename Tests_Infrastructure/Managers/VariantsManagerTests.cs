@@ -12,26 +12,32 @@ namespace Tests_Infrastructure
     public class VariantsManagerTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDbContextFactory _dbf;
 
         private string dummyDataFile;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _db?.Database.EnsureDeleted();
-            _db?.Dispose();
+
+            _dbf = new LinguineDbContextFactory(ConnectionString);
+
+            var oldContext = _dbf.CreateDbContext();
+            oldContext?.Database.EnsureDeleted();
+            oldContext?.Dispose();
+
 
             if (File.Exists("tmp.db"))
             {
                 throw new Exception();
             }
 
-            _db = new LinguineDbContext(ConnectionString);
-            _db.Database.EnsureCreated();
+            var context = _dbf.CreateDbContext();
+            context.Database.EnsureCreated();
 
             InitializeDummyDatabases();
             dummyDataFile = Path.Combine("dummyVariantsData.csv");
+            context.Dispose();
         }
 
 
@@ -53,8 +59,8 @@ namespace Tests_Infrastructure
         {
             String dummyData = CreateMockCSVFile();
 
-            var variants1 = new Variants("EnglishVariants1", _db);
-            var variants2 = new Variants("EnglishVariants2", _db);
+            var variants1 = new Variants("EnglishVariants1", _dbf);
+            var variants2 = new Variants("EnglishVariants2", _dbf);
 
             VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(variants1, dummyData, "EnglishVariants1");
             VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(variants2, dummyData, "EnglishVariants2");
@@ -65,7 +71,7 @@ namespace Tests_Infrastructure
         {
             var expected = new List<string> { "EnglishVariants1", "EnglishVariants2" };
 
-            var manager = new VariantsManager(_db);
+            var manager = new VariantsManager(_dbf);
 
             var result = manager.AvailableVariantsSources();
             CollectionAssert.AreEqual(expected, result);
@@ -77,7 +83,7 @@ namespace Tests_Infrastructure
         {
             string expectedName = "EnglishVariants1";
 
-            var manager = new VariantsManager(_db);
+            var manager = new VariantsManager(_dbf);
 
             var result = manager.GetVariantsSource(expectedName);
 
@@ -89,7 +95,7 @@ namespace Tests_Infrastructure
         public void GetVariants_ReturnsNullIfVariantsDoesNotExist()
         {
             string name = "NonExistingVariants";
-            var manager = new VariantsManager(_db);
+            var manager = new VariantsManager(_dbf);
 
             var result = manager.GetVariantsSource(name);
 
@@ -102,7 +108,7 @@ namespace Tests_Infrastructure
             string name = "NewVariants";
             string csvFileLocation = CreateMockCSVFile();
 
-            var manager = new VariantsManager(_db);
+            var manager = new VariantsManager(_dbf);
 
             manager.AddNewVariantsSourceFromCSV(csvFileLocation, name);
 
@@ -117,7 +123,7 @@ namespace Tests_Infrastructure
             string name = "EnglishVariants1"; // Existing name
             string csvFileLocation = CreateMockCSVFile();
 
-            var manager = new VariantsManager(_db);
+            var manager = new VariantsManager(_dbf);
 
             manager.AddNewVariantsSourceFromCSV(csvFileLocation, name);
         }
@@ -126,7 +132,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void VerifyIntegrityWith_PassesForValidConfig()
         {
-            var manager = new VariantsManager(_db);
+            var manager = new VariantsManager(_dbf);
             manager.VerifyIntegrity(manager.GetVariantsSource("EnglishVariants1"));
         }
 

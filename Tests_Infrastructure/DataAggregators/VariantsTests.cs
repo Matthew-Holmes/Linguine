@@ -11,7 +11,7 @@ namespace Tests_Infrastructure
     public class VariantsTests
     {
         private const string ConnectionString = $"Data Source=tmp.db;";
-        private LinguineDbContext _db;
+        private LinguineDbContextFactory _dbf;
         private Variants _variants;
 
 
@@ -28,18 +28,23 @@ namespace Tests_Infrastructure
                 throw new Exception();
             }
 
-            _db = new LinguineDbContext(ConnectionString);
-            _db.Database.EnsureCreated();
+            _dbf = new LinguineDbContextFactory(ConnectionString);
+
+            using var context = _dbf.CreateDbContext();
+
+            context.Database.EnsureCreated();
 
 
             // Add test data
-           _db.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root1", Source = "variants1" });
-           _db.Variants.Add(new VariantRoot { Variant = "variant2", Root = "root1", Source = "variants1" });
-           _db.Variants.Add(new VariantRoot { Variant = "variant3", Root = "root2", Source = "variants1" });
-           _db.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root3", Source = "variants1" });
-           _db.SaveChanges();
+           context.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root1", Source = "variants1" });
+           context.Variants.Add(new VariantRoot { Variant = "variant2", Root = "root1", Source = "variants1" });
+           context.Variants.Add(new VariantRoot { Variant = "variant3", Root = "root2", Source = "variants1" });
+           context.Variants.Add(new VariantRoot { Variant = "variant1", Root = "root3", Source = "variants1" });
+           context.SaveChanges();
 
-            _variants = new Variants("variants1", _db);
+            context.Dispose();
+            _variants = new Variants("variants1", _dbf);
+
         }
 
         [TestMethod]
@@ -84,8 +89,8 @@ namespace Tests_Infrastructure
                 Variant = "variant4",
                 Source = "variants1"
             };
-
-            var result = _variants.Add(variantRoot);
+            using var context = _dbf.CreateDbContext();
+            var result = _variants.Add(variantRoot, context);
 
             Assert.IsTrue(result);
         }
@@ -100,7 +105,8 @@ namespace Tests_Infrastructure
                 Source = "variants1"
             };
 
-            var result = _variants.Add(variantRoot);
+            using var context = _dbf.CreateDbContext();
+            var result = _variants.Add(variantRoot, context);
 
             Assert.IsTrue(result);
 
@@ -117,7 +123,8 @@ namespace Tests_Infrastructure
                 Source = "variants1"
             };
 
-            var result = _variants.Add(variantRoot);
+            using var context = _dbf.CreateDbContext();
+            var result = _variants.Add(variantRoot, context);
 
             Assert.IsTrue(result);
         }
@@ -132,7 +139,8 @@ namespace Tests_Infrastructure
                 Source = "variants1"
             };
 
-            var result = _variants.Add(variantRoot);
+            using var context = _dbf.CreateDbContext();
+            var result = _variants.Add(variantRoot, context);
 
             Assert.IsTrue(result);
 
@@ -149,7 +157,8 @@ namespace Tests_Infrastructure
                 Source = "InvalidSource"
             };
 
-            var result = _variants.Add(variantRoot);
+            using var context = _dbf.CreateDbContext();
+            var result = _variants.Add(variantRoot, context);
 
             Assert.IsFalse(result);
             Assert.IsFalse(_variants.GetRoots("variant4").Any());
@@ -221,7 +230,7 @@ namespace Tests_Infrastructure
                 new VariantRoot { Root = "root1", Variant = "variant2", Source = "variants2" }
             };
 
-            Variants variants2 = new Variants("variants2", _db);
+            Variants variants2 = new Variants("variants2", _dbf);
 
 
             var tmp = variants2.Add(variantRoots);
