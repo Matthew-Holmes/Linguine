@@ -39,6 +39,8 @@ namespace Tests_LearningExtraction
             var agent = new DummyTextDecompositionAgent();
             var decomposer = new TextDecomposer(); // Set a max volume to process that is larger than the text
             decomposer.StandardAgent = agent;
+            decomposer.HighPerformanceAgent = agent;
+            decomposer.FallbackAgent = agent;
             decomposer.MaxVolumeToProcess = 10;
             var textSource = new TextualMedia { Text = "Hello" };
 
@@ -51,9 +53,9 @@ namespace Tests_LearningExtraction
             Assert.IsTrue(result.Total == "Hello");
         }
 
-        // This should actually throw under the new approach!!
         [TestMethod]
-        public void DecomposeText_WithLongText_ShouldDecomposeCorrectly()
+        [ExpectedException(typeof(ArgumentException))]
+        public void DecomposeText_WithLongText_ShouldThrow()
         {
             // Arrange
             var agent = new WhitespaceDecompositionAgent();
@@ -65,13 +67,13 @@ namespace Tests_LearningExtraction
             var textSource = new TextualMedia { Text = "This is a longer text for testing purposes, lorem ipsum dolor est I don't know the rest" };
 
             // Act
-            var result = decomposer.DecomposeText(textSource.Text).Result;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(textSource.Text, result.Total);
-            Assert.IsTrue(result.Decomposition != null && result.Decomposition.Count > 0); // Ensure decomposition happened
-            Assert.IsTrue(result.Injects()); // Check if the decomposition correctly injects
+            try
+            {
+                var result = decomposer.DecomposeText(textSource.Text).Result;
+            } catch (AggregateException e)
+            {
+                throw e.InnerException; // bit hacky but showcases the desired behaviour
+            }
         }
 
         // TODO - this should also throw - the real test mayber needs higher max volume to process?
@@ -86,7 +88,7 @@ namespace Tests_LearningExtraction
                 decomposer.StandardAgent = agent;
                 decomposer.HighPerformanceAgent = agent;
                 decomposer.FallbackAgent = agent;
-                decomposer.MaxVolumeToProcess = 100;
+                decomposer.MaxVolumeToProcess = 1000;
 
                 var textSource = new TextualMedia { Text = "This is a longer text for testing biject requirements" };
 
