@@ -35,6 +35,8 @@ namespace Infrastructure
             {
                 throw new ArgumentException("trying to add a parsed definition that already exists!");
             }
+
+            context.Attach(pDef.CoreDefinition);
             context.Add(pDef);
 
             if (save == true)
