@@ -339,8 +339,17 @@ namespace Tests_Infrastructure
                     },
                 injective2, rooted2);
 
-            var ret = StatementDatabaseEntryFactory.FromStatements(new List<Statement> { statement1, statement2 }, null);
+            Statement statement3 = new Statement(
+                           parentText, 44, 44,
+                           "",
+                           new List<string>
+                           {
+                           },
+                           injective2, rooted2);
 
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement1, statement2, statement3 }, null);
             StatementDatabaseEntry entry2 = ret[1].Item1;
 
             Assert.IsNull(entry2.ContextCheckpoint);
@@ -721,7 +730,7 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_SecondNoCheckpoints()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_SecondCheckpoints()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -757,50 +766,9 @@ namespace Tests_Infrastructure
 
             var entry2 = ret[1].Item1;
 
-            Assert.IsNull(entry2.ContextCheckpoint);
+            Assert.IsNotNull(entry2.ContextCheckpoint);
         }
 
-
-        [TestMethod]
-        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_SecondTwoRemovals()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
-            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-            parentText.Text = "no decomposition, and now something unrelated";
-
-            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
-            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
-
-            Statement statement1 = new Statement(
-                parentText, 0, 15,
-                "no decomposition",
-                new List<string>
-                    {
-                        "in testing code",
-                        "used to test a factory method involving text broken into units"
-                    },
-                injective1, rooted1);
-
-            TextDecomposition injective2 = new TextDecomposition("and now something unrelated", null);
-            TextDecomposition rooted2 = new TextDecomposition("and now something unrelated", null);
-
-            Statement statement2 = new Statement(
-                parentText, 18, 44,
-                "and now something unrelated",
-                new List<string>
-                {
-                },
-                injective2, rooted2);
-
-            var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
-
-            var entry2 = ret[1].Item1;
-
-            Assert.IsNull(entry2.ContextCheckpoint);
-            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex.Count, 2);
-        }
 
         [TestMethod]
         public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_RemovalsDescending()
@@ -850,7 +818,7 @@ namespace Tests_Infrastructure
         }
 
         [TestMethod]
-        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_RemovalsCorrect()
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_NoRemovalsBecauseTieOffAtEnd()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -883,6 +851,59 @@ namespace Tests_Infrastructure
 
             var ret = StatementDatabaseEntryFactory.FromStatements(
                 new List<Statement> { statement1, statement2 }, null);
+
+            var entry2 = ret[1].Item1;
+
+            List<int> removals = entry2.ContextDeltaRemovalsDescendingIndex;
+
+            Assert.AreEqual(removals.Count, 0); // we tie off at the end of any checkpoint so don't have removals?
+        }
+
+        [TestMethod]
+        public void FromStatement_TwoStatementsNoDecompositionContextChangesAllGone_RemovalsCorrect()
+        {
+            TextualMedia parentText = new TextualMedia();
+            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
+            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            parentText.Text = "no decomposition, and now something unrelated, the end";
+
+            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
+            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
+
+            Statement statement1 = new Statement(
+                parentText, 0, 15,
+                "no decomposition",
+                new List<string>
+                    {
+                        "in testing code",
+                        "used to test a factory method involving text broken into units"
+                    },
+                injective1, rooted1);
+
+            TextDecomposition injective2 = new TextDecomposition("and now something unrelated", null);
+            TextDecomposition rooted2 = new TextDecomposition("and now something unrelated", null);
+
+            Statement statement2 = new Statement(
+                parentText, 18, 44,
+                "and now something unrelated",
+                new List<string>
+                {
+                },
+                injective2, rooted2);
+
+
+            TextDecomposition injective3 = new TextDecomposition("then end", null);
+            TextDecomposition rooted3 = new TextDecomposition("the end", null);
+            Statement statement3 = new Statement(
+                parentText, 47, 53,
+                "the end",
+                new List<string>
+                {
+                },
+                injective3, rooted3);
+
+            var ret = StatementDatabaseEntryFactory.FromStatements(
+                new List<Statement> { statement1, statement2, statement3 }, null);
 
             var entry2 = ret[1].Item1;
 
@@ -1016,133 +1037,8 @@ namespace Tests_Infrastructure
             Assert.AreEqual(entry1.ContextCheckpoint[1], "used to test a factory method involving text broken into units");
         }
 
-        [TestMethod]
-        public void FromStatement_TwoStatementsNoDecompositionContextChangesLastOneGone_SecondNoCheckpoint()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
-            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-            parentText.Text = "no decomposition, and now something unrelated";
-
-            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
-            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
-
-            Statement statement1 = new Statement(
-                parentText, 0, 15,
-                "no decomposition",
-                new List<string>
-                    {
-                        "in testing code",
-                        "used to test a factory method involving text broken into units"
-                    },
-                injective1, rooted1);
-
-            TextDecomposition injective2 = new TextDecomposition("and now something unrelated", null);
-            TextDecomposition rooted2 = new TextDecomposition("and now something unrelated", null);
-
-            Statement statement2 = new Statement(
-                parentText, 18, 44,
-                "and now something unrelated",
-                new List<string>
-                {
-                    "in testing code",
-                },
-                injective2, rooted2);
-
-            var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
-
-            var entry2 = ret[1].Item1;
-
-            Assert.IsNull(entry2.ContextCheckpoint);
-        }
-
-        [TestMethod]
-        public void FromStatement_TwoStatementsNoDecompositionContextChangesLastOneGone_RemovalsCorrect()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
-            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-            parentText.Text = "no decomposition, and now something unrelated";
-
-            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
-            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
-
-            Statement statement1 = new Statement(
-                parentText, 0, 15,
-                "no decomposition",
-                new List<string>
-                    {
-                        "in testing code",
-                        "used to test a factory method involving text broken into units"
-                    },
-                injective1, rooted1);
-
-            TextDecomposition injective2 = new TextDecomposition("and now something unrelated", null);
-            TextDecomposition rooted2 = new TextDecomposition("and now something unrelated", null);
-
-            Statement statement2 = new Statement(
-                parentText, 18, 44,
-                "and now something unrelated",
-                new List<string>
-                {
-                    "in testing code",
-                },
-                injective2, rooted2);
-
-            var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
-
-            var entry2 = ret[1].Item1;
-
-            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex.Count, 1);
-            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex[0], 1);
-
-        }
-
-        [TestMethod]
-        public void FromStatement_TwoStatementsNoDecompositionContextChangesFirstOneGone_RemovalsCorrect()
-        {
-            TextualMedia parentText = new TextualMedia();
-            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
-            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-            parentText.Text = "no decomposition, and now something unrelated";
-
-            TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
-            TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
-
-            Statement statement1 = new Statement(
-                parentText, 0, 15,
-                "no decomposition",
-                new List<string>
-                    {
-                        "in testing code",
-                        "used to test a factory method involving text broken into units"
-                    },
-                injective1, rooted1);
-
-            TextDecomposition injective2 = new TextDecomposition("and now something unrelated", null);
-            TextDecomposition rooted2 = new TextDecomposition("and now something unrelated", null);
-
-            Statement statement2 = new Statement(
-                parentText, 18, 44,
-                "and now something unrelated",
-                new List<string>
-                {
-                    "used to test a factory method involving text broken into units",
-                },
-                injective2, rooted2);
-
-            var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
-
-            var entry2 = ret[1].Item1;
-
-            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex.Count, 1);
-            Assert.AreEqual(entry2.ContextDeltaRemovalsDescendingIndex[0], 0);
-
-        }
-
+       
+  
         [TestMethod]
         public void FromStatement_MultipleStatementsNoDecompositionContextChangesDestructivelyA_CorrectCheckpoints()
         {
@@ -1229,7 +1125,7 @@ namespace Tests_Infrastructure
             Assert.IsNull(entry2.ContextCheckpoint);
             Assert.IsNull(entry3.ContextCheckpoint);
             Assert.IsNull(entry4.ContextCheckpoint);
-            Assert.IsNull(entry5.ContextCheckpoint);
+            Assert.IsNotNull(entry5.ContextCheckpoint);
         }
 
         [TestMethod]
@@ -1290,6 +1186,7 @@ namespace Tests_Infrastructure
                     },
                 injective4, rooted4);
 
+
             TextDecomposition injective5 = new TextDecomposition("and this", null);
             TextDecomposition rooted5 = new TextDecomposition("and this", null);
 
@@ -1301,8 +1198,17 @@ namespace Tests_Infrastructure
                 },
                 injective5, rooted5);
 
+            Statement statement6 = new Statement(
+                parentText, 88, 88,
+                "",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+            // add dummy statement at the end because of tie off checkpointing
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2, statement3, statement4, statement5 }, null);
+                new List<Statement> { statement1, statement2, statement3, statement4, statement5, statement6 }, null);
 
             var entry1 = ret[0].Item1;
             var entry2 = ret[1].Item1;
@@ -1400,8 +1306,17 @@ namespace Tests_Infrastructure
                 },
                 injective5, rooted5);
 
+            Statement statement6 = new Statement(
+                parentText, 88, 88,
+                "",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+            // add dummy statement at the end because of tie off checkpointing
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2, statement3, statement4, statement5 }, null);
+                new List<Statement> { statement1, statement2, statement3, statement4, statement5, statement6 }, null);
 
             var entry1 = ret[0].Item1;
             var entry2 = ret[1].Item1;
@@ -1590,8 +1505,17 @@ namespace Tests_Infrastructure
                     },
                 injective5, rooted5);
 
+            Statement statement6 = new Statement(
+                parentText, 88, 88,
+                "",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+            // add dummy statement at the end because of tie off checkpointing
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2, statement3, statement4, statement5 }, null);
+                new List<Statement> { statement1, statement2, statement3, statement4, statement5, statement6 }, null);
 
             var entry1 = ret[0].Item1;
             var entry2 = ret[1].Item1;
@@ -1869,8 +1793,17 @@ namespace Tests_Infrastructure
                 },
                 injective2, rooted2);
 
+            Statement statement3 = new Statement(
+                           parentText, 44, 44,
+                           "",
+                           new List<string>
+                           {
+                           },
+                           injective2, rooted2);
+
+
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
+                new List<Statement> { statement1, statement2, statement3 }, null);
 
             var entry2 = ret[1].Item1;
 
@@ -1917,8 +1850,17 @@ namespace Tests_Infrastructure
                 },
                 injective2, rooted2);
 
+            Statement statement3 = new Statement(
+                           parentText, 44, 44,
+                           "",
+                           new List<string>
+                           {
+                           },
+                           injective2, rooted2);
+
+
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
+                new List<Statement> { statement1, statement2, statement3 }, null);
 
             var entry2 = ret[1].Item1;
 
@@ -1968,8 +1910,17 @@ namespace Tests_Infrastructure
                 },
                 injective2, rooted2);
 
+            Statement statement3 = new Statement(
+                           parentText, 44, 44,
+                           "",
+                           new List<string>
+                           {
+                           },
+                           injective2, rooted2);
+
+
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
+                new List<Statement> { statement1, statement2, statement3 }, null);
 
             var entry2 = ret[1].Item1;
 
@@ -2019,8 +1970,17 @@ namespace Tests_Infrastructure
                 },
                 injective2, rooted2);
 
+            Statement statement3 = new Statement(
+                parentText, 44, 44,
+                "",
+                new List<string>
+                {
+                },
+                injective2, rooted2);
+
+
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement1, statement2 }, null);
+                new List<Statement> { statement1, statement2, statement3 }, null);
 
             var entry2 = ret[1].Item1;
 
@@ -2256,7 +2216,7 @@ namespace Tests_Infrastructure
 
 
         [TestMethod]
-        public void FromStatement_MultipleStatementsNoDecompositionContextChanges_WithPrevious_NoCheckpoints()
+        public void FromStatement_MultipleStatementsNoDecompositionContextChanges_WithPrevious_NoCheckpointsUntilTieOff()
         {
             TextualMedia parentText = new TextualMedia();
             //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
@@ -2342,16 +2302,16 @@ namespace Tests_Infrastructure
             Assert.IsNull(entry1.ContextCheckpoint);
             Assert.IsNull(entry2.ContextCheckpoint);
             Assert.IsNull(entry3.ContextCheckpoint);
-            Assert.IsNull(entry4.ContextCheckpoint);
+            Assert.IsNotNull(entry4.ContextCheckpoint);
         }
 
         [TestMethod]
         public void FromStatement_MultipleStatementsNoDecompositionContextChanges_WithPrevious_CorrectDeltas()
         {
             TextualMedia parentText = new TextualMedia();
-            //-----------------000000000011111111112222222222333333333344444444445555555555666666666677777777778888888888
-            //-----------------012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-            parentText.Text = "no decomposition, but now there are multiple statements, such as this, this one, and this";
+            //-----------------0000000000111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999
+            //-----------------0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            parentText.Text = "no decomposition, but now there are multiple statements, such as this, this one, and this, the end";
 
             TextDecomposition injective1 = new TextDecomposition("no decomposition", null);
             TextDecomposition rooted1 = new TextDecomposition("no decomposition", null);
@@ -2420,25 +2380,37 @@ namespace Tests_Infrastructure
                 injective5, rooted5);
 
 
+            Statement statement6 = new Statement(
+                parentText, 91, 97,
+                "the end",
+                new List<string>
+                {
+                },
+                injective5, rooted5);
+
+
             StatementDatabaseEntry previousEntry = StatementDatabaseEntryFactory.FromStatements(
                 new List<Statement> { statement1 }, null)[0].Item1; // begin the chain
             var ret = StatementDatabaseEntryFactory.FromStatements(
-                new List<Statement> { statement2, statement3, statement4, statement5 }, statement1, previousEntry);
+                new List<Statement> { statement2, statement3, statement4, statement5, statement6 }, statement1, previousEntry);
 
             var entry1 = ret[0].Item1;
             var entry2 = ret[1].Item1;
             var entry3 = ret[2].Item1;
             var entry4 = ret[3].Item1;
+            var entry5 = ret[4].Item1;
 
             var insertions1 = entry1.ContextDeltaInsertionsDescendingIndex;
             var insertions2 = entry2.ContextDeltaInsertionsDescendingIndex;
             var insertions3 = entry3.ContextDeltaInsertionsDescendingIndex;
             var insertions4 = entry4.ContextDeltaInsertionsDescendingIndex;
+            var insertions5 = entry5.ContextDeltaInsertionsDescendingIndex;
 
             var removals1 = entry1.ContextDeltaRemovalsDescendingIndex;
             var removals2 = entry2.ContextDeltaRemovalsDescendingIndex;
             var removals3 = entry3.ContextDeltaRemovalsDescendingIndex;
             var removals4 = entry4.ContextDeltaRemovalsDescendingIndex;
+            var removals5 = entry5.ContextDeltaRemovalsDescendingIndex;
 
             Assert.AreEqual(insertions1.Count, 0);
             Assert.AreEqual(removals1.Count, 0);
