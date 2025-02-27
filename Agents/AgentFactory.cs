@@ -41,7 +41,7 @@ namespace Agents
 
             if (isHighPerformace)
             {
-                model = LLM.DeepSeek_chat; // cheaper
+                model = LLM.DeepSeek_chat; // cheaper than 4o (and mayber even cheaper than mini in off hours!)
             }
 
             return GenerateProcessingAgentInternal(keys, task, language, model);

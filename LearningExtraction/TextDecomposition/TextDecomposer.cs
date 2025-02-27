@@ -36,12 +36,11 @@ namespace LearningExtraction
                 => (td.Decomposition?.Count ?? 1) > 1;
 
             // first pass at the decomposition, using StandardAgent
+            // now have access to deepseek so can use different numbers of fallbacks
 
             TextDecomposition ret1;
-            for (int i = 1; i != 5; i++)
+            for (int i = 1; i != 2; i++) /* TODO - should this be a policy codified somewhere */
             {
-                // 4o-min is ~16x cheaper than 4o, thus we should try multiple times before resorting to
-                // the high powered agent
                 ret1 = await FromTextUsingAgent(text, StandardAgent);
                 if (MaintainsInvariants(ret1) & IsNonTrivial(ret1))
                 {
@@ -51,35 +50,39 @@ namespace LearningExtraction
                 }
             }
 
-            TextDecomposition ret2;
-            for (int i = 1; i != 3; i++)
+            // if that didn't work then lets just always uses the high powered agent
+            // since it is rougly 2x more expensive, so not too much of a problem
+
+            TextDecomposition? ret2 = null;
+            for (int i = 1; i != 2; i++) /* TODO - should this be a policy codified somewhere */
             {
-                // 4o-min is ~16x cheaper than 4o, thus we should try multiple times before resorting to
-                // the high powered agent
-                ret2 = await FromTextUsingAgentPunctuationStripped(text, StandardAgent);
+                ret2 = await FromTextUsingAgent(text, HighPerformanceAgent);
                 if (MaintainsInvariants(ret2) & IsNonTrivial(ret2))
                 {
-                    Log.Debug("Standard agent performed decomposition after {NumAttempts} attempts, with punctuation stripped", i);
+                    Debug.WriteLine($"successful decomposition after {i} attempts");
+                    Log.Debug("High performance agent performed decomposition after {NumAttempts} attempts", i);
                     return ret2;
                 }
             }
 
-            // that failed, use more powerful agent (e.g. higher spec LLM)
-            TextDecomposition ret3 = await FromTextUsingAgent(text, HighPerformanceAgent);
 
-            if (MaintainsInvariants(ret3) & IsNonTrivial(ret3))
+            TextDecomposition ret3;
+            for (int i = 1; i != 2; i++)
             {
-                Log.Information("had to use high powered agent for decomposition, hard text: \"{HardText}\"", text);
-                return ret3;
+                ret3 = await FromTextUsingAgentPunctuationStripped(text, HighPerformanceAgent);
+                if (MaintainsInvariants(ret3) & IsNonTrivial(ret3))
+                {
+                    Log.Debug("High performance agent performed decomposition after {NumAttempts} attempts, with punctuation stripped", i);
+                    return ret3;
+                }
             }
 
-            if (MaintainsInvariants(ret3))
+            if (ret2 is not null && MaintainsInvariants(ret2))
             {
 
                 Log.Warning("successful decomposition using high powered agent, potentially trivial, hard text: \"{HardText}\"", text);
-                return ret3;
+                return ret2;
             }
-
 
             // do default, recommendation: use dummy agent guaranteed to maintain invariants
             TextDecomposition ret4 = await FromTextUsingAgent(text, FallbackAgent);
