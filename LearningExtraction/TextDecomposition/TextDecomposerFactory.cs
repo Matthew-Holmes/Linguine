@@ -18,9 +18,11 @@ namespace LearningExtraction
 
             ret.MaxVolumeToProcess = (int)(5000 * LanguageCodeDetails.Density(lc));
 
-            ret.StandardAgent        = AgentFactory.GenerateProcessingAgent(keys, AgentTask.DecompositionToStatements, lc);
+            ret.StandardAgent        = AgentFactory.GenerateProcessingAgent(keys,
+                AgentTask.DecompositionToStatements, lc);
 
-            ret.HighPerformanceAgent = AgentFactory.GenerateProcessingAgent(keys, AgentTask.DecompositionToStatements, lc, true);
+            ret.HighPerformanceAgent = AgentFactory.GenerateProcessingAgent(keys,
+                AgentTask.DecompositionToStatements, lc, true);
 
             ret.FallbackAgent        = new SentenceDecompositionAgent();
 
