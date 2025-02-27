@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Agents.OpenAI
+namespace Agents
 {
     public class ApiException : Exception
     {

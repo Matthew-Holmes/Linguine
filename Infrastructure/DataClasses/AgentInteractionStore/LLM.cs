@@ -12,6 +12,7 @@ namespace Infrastructure
         ChatGPT3_5,
         ChatGPT4o,
         ChatGPT4o_mini,
+        DeepSeek_chat,
         Dummy,
     }
 }

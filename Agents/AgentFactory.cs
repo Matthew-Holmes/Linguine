@@ -1,5 +1,7 @@
-﻿using Agents.OpenAI;
+﻿using Agents.DeepSeek;
+using Agents.OpenAI;
 using Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,8 +28,8 @@ namespace Agents
 
     public static class AgentFactory
     {
-        private static SemaphoreSlim OpenAISemaphore = new SemaphoreSlim(10); // global API lock for OpenAI
-
+        private static SemaphoreSlim OpenAISemaphore   = new SemaphoreSlim(10); // global API lock for OpenAI
+        private static SemaphoreSlim DeepSeekSemaphore = new SemaphoreSlim(10); // "" deepseek
  
         public static AgentBase GenerateProcessingAgent(
             API_Keys keys,
@@ -39,7 +41,7 @@ namespace Agents
 
             if (isHighPerformace)
             {
-                model = LLM.ChatGPT4o;
+                model = LLM.DeepSeek_chat; // cheaper
             }
 
             return GenerateProcessingAgentInternal(keys, task, language, model);
@@ -59,10 +61,51 @@ namespace Agents
                 }
                 return GenerateOpenAIProcessingAgent(keys.OpenAI_APIKey, task, language, model);
             }
+            else if (model == LLM.DeepSeek_chat)
+            {
+                if (keys.DeepSeek_APIKey is null)
+                {
+                    throw new MissingAPIKeyException("missing deepseek API key!");
+                }
+                return GenerateDeepSeekProcessingAgent(keys.DeepSeek_APIKey, task, language, model);
+            }
             else
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private static AgentBase GenerateDeepSeekProcessingAgent(
+            String key, AgentTask task,
+            LanguageCode language, LLM model)
+        {
+            DeepSeekBase ret = new DeepSeekBase(key, DeepSeekSemaphore);
+
+            // processing, so no history and allows concurrency
+            ret.DiscreteParameter("PromptDepth").Value = 0;
+            ret.MaxConcurrentResponses = 5; // local concurrency limit
+
+            ret.StringParameters["system"] = SystemMessageFactory.SystemMessageFor(task, language);
+
+            if (model == LLM.DeepSeek_chat)
+            {
+                ret.StringParameters["model"] = "deepseek-chat";
+
+                ret.DiscreteParameter("ContextTokens").Value = 16000; // TODO - what are these
+                ret.DiscreteParameter("ResponseTokens").Value = 4000; // TODO - ""
+
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            // TODO - employed agent 
+            //ret.AgentTask = task;
+            //ret.LLM       = model;
+            //ret.Language  = language;
+
+            return ret;
         }
 
         private static AgentBase GenerateOpenAIProcessingAgent(
