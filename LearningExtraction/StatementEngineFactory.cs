@@ -12,10 +12,6 @@ namespace LearningExtraction
 {
     public static class StatementEngineFactory
     {
-
-        // TODO - move as much of this stuff, especially to do with agent creation
-        // to the learning extraction module
-
         public static StatementEngine BuildStatementEngine(API_Keys keys, ExternalDictionary dictionary)
         {
             StatementEngine ret = new StatementEngine();

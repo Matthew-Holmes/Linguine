@@ -16,7 +16,6 @@ namespace LearningExtraction
                 keys, AgentTask.DefinitionParsing, ConfigManager.NativeLanguage);
 
             return new DefinitionParsingEngine(parsingAgent);
-
         }
     }
 }

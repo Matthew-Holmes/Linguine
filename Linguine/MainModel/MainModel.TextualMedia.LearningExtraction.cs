@@ -76,7 +76,6 @@ namespace Linguine
             (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
             if (text is null || context is null) { return; }
 
-            // TODO - extract interface for this - outsource to the LearningExtraction
             List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail);
 
             if (builders is null)
@@ -158,13 +157,18 @@ namespace Linguine
 
         private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail)
         {
-
             if (TextAnalyser is null)
             {
                 StartStatementEngine();
             }
 
-            List<ProtoStatement> protos = await TextAnalyser?.GenerateStatementsFor(text, context, isTail);
+            if (TextAnalyser is null)
+            {
+                Log.Fatal("couldn't start statement engine");
+                throw new Exception("couldn't start statement engine");
+            }
+
+            List<ProtoStatement> protos = await TextAnalyser.GenerateStatementsFor(text, context, isTail);
 
             return protos;
 
