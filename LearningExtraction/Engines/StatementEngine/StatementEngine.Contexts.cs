@@ -10,7 +10,7 @@ namespace LearningExtraction
 {
     public partial class StatementEngine
     {
-        private async Task FormContexts(List<StatementBuilder> builders, List<String> previousContext)
+        private async Task FormContexts(List<ProtoStatementBuilder> builders, List<String> previousContext)
         {
             List<String> statementTotals = builders.Select(
                     b => b.StatementText ?? throw new Exception()).ToList();
