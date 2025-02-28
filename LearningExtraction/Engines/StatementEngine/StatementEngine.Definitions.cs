@@ -1,5 +1,6 @@
 ﻿using Infrastructure;
 using LearningExtraction;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,12 @@ namespace LearningExtraction
             {
                 if (correctIndices[i] == -1)
                 {
+                    TextDecomposition badWord     = textDecomposition.Decomposition[i];
+                    String            badWordText = badWord.Total;
+                    List<String>      options     = possibleDefs[i].Select(def => def.Definition).ToList();
+
+                    Log.Warning("Couldn't find definition for {BadWordText}, possibilities were {Options}",
+                                badWordText, string.Join("|", options));
                     continue;
                 }
                 textDecomposition.Decomposition[i].Definition = possibleDefs[i][correctIndices[i]];
