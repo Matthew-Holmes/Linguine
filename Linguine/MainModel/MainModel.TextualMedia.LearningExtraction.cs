@@ -1,26 +1,10 @@
-﻿using Agents;
-using Infrastructure;
+﻿using Infrastructure;
 using LearningExtraction;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Printing;
-using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Navigation;
-using LearningExtraction;
-using Serilog.Core;
 using Serilog;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Linguine
 {
@@ -33,7 +17,7 @@ namespace Linguine
 
         private ICanParseDefinitions? DefinitionParser { get; set; }
 
-        private int CharsToProcess { get; set; } = 500;
+        private int CharsToProcess { get; set; } = 1_000;
 
         private Tuple<String?, List<String>?, bool, int> GetNextChunkInfo(TextualMedia tm)
         {

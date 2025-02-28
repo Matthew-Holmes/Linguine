@@ -53,7 +53,7 @@ namespace LearningExtraction
 
             List<String> statementTexts = await DecomposeIntoStatements(text); 
 
-            if (statementTexts.Count() < 3)
+            if (statementTexts.Count() < 2)
             {
                 throw new Exception("Failed to generate enough statements");
             }
@@ -65,7 +65,6 @@ namespace LearningExtraction
             else
             {
                 statementTexts.RemoveAt(statementTexts.Count() - 1); // remove anything that got clipped
-                statementTexts.RemoveAt(statementTexts.Count() - 1); // and a bit more for good measure
             }
 
             foreach (String total in statementTexts)

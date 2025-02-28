@@ -11,7 +11,7 @@ namespace LearningExtraction
 {
     public static class DecompositionTransformerBijective
     {
-        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int maxCharsToProcess, int retry = 2, bool trim=false)
+        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int retry = 2, bool trim=false)
         {
             // prompts the agent with a prompt derived from each decomposition unit on each line
             // the response is converted to a response decomposition
@@ -24,7 +24,7 @@ namespace LearningExtraction
 
             String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total));
 
-            String response = await GetResponse(agent, prompt, maxCharsToProcess, retry); // agent best at identifying lower --> upper, not the other way around
+            String response = await GetResponse(agent, prompt, retry); // agent best at identifying lower --> upper, not the other way around
 
             return TextDecomposition.FromNewLinedString(source.Total, response, trim);
         }
@@ -34,14 +34,8 @@ namespace LearningExtraction
             return prompt.Split('\n').Count() == response.Split('\n').Count();
         }
 
-        private static async Task<String> GetResponse(AgentBase agent, string prompt, int maxCharsToProcess, int retry)
+        private static async Task<String> GetResponse(AgentBase agent, string prompt, int retry)
         {
-            // parallel windows strategy
-            if (prompt.Length > maxCharsToProcess)
-            {
-                throw new ArgumentException("prompt too long");
-            }
-
             String newLinedResponse = await agent.GetResponse(prompt);
 
             for (int j = 0; j != retry && !Bijects(prompt, newLinedResponse); j++)

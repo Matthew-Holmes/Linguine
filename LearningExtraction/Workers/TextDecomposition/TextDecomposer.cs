@@ -16,6 +16,8 @@ namespace LearningExtraction
 {
     public class TextDecomposer
     {
+        private static List<char> ProblemChars = new List<char> { '\n', '\r' };
+
         public int MaxVolumeToProcess { get; set; }  // if given text larger than this, chunk it
 
         public AgentBase StandardAgent { get; set; }
@@ -65,15 +67,18 @@ namespace LearningExtraction
                 }
             }
 
-
-            TextDecomposition ret3;
-            for (int i = 1; i != 2; i++)
+            // TODO - keep an eye on the logs; if this isn't helping then remove it
+            if (!mustBiject) /* stripping punctuation will definitiely impede bijectivity */
             {
-                ret3 = await FromTextUsingAgentPunctuationStripped(text, HighPerformanceAgent);
-                if (MaintainsInvariants(ret3) & IsNonTrivial(ret3))
+                TextDecomposition ret3;
+                for (int i = 1; i != 2; i++)
                 {
-                    Log.Debug("High performance agent performed decomposition after {NumAttempts} attempts, with punctuation stripped", i);
-                    return ret3;
+                    ret3 = await FromTextUsingAgentPunctuationStripped(text, HighPerformanceAgent);
+                    if (MaintainsInvariants(ret3) & IsNonTrivial(ret3))
+                    {
+                        Log.Debug("High performance agent performed decomposition after {NumAttempts} attempts, with punctuation stripped", i);
+                        return ret3;
+                    }
                 }
             }
 
@@ -100,13 +105,23 @@ namespace LearningExtraction
 
         private async Task<TextDecomposition> FromTextUsingAgent(String text, AgentBase agent)
         {
-            return TextDecomposition.FromNewLinedString(text, await agent.GetResponse(text), true);
+            TextDecomposition ret = TextDecomposition.FromNewLinedString(text, await agent.GetResponse(text), true);
+
+            // fixup weird /r/n newlines 
+            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemChars);
+
+            return ret;
         }
 
         private async Task<TextDecomposition> FromTextUsingAgentPunctuationStripped(String text, AgentBase agent)
         {
             String strippedText = StringHelper.StripPunctuation(text);
-            return TextDecomposition.FromNewLinedString(text, await agent.GetResponse(strippedText), true);
+            TextDecomposition ret = TextDecomposition.FromNewLinedString(text, await agent.GetResponse(strippedText), true);
+
+            // fixup weird /r/n newlines 
+            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemChars);
+
+            return ret;
         }
 
 
