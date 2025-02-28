@@ -194,15 +194,8 @@ namespace Linguine
 
         private void StartParsingEngine()
         {
-
-            // TODO - get this into a factory method in learning extraction
-
-            API_Keys keys = ConfigManager.API_Keys;
-
-            AgentBase parsingAgent = AgentFactory.GenerateProcessingAgent(
-                keys, AgentTask.DefinitionParsing, ConfigManager.NativeLanguage);
-
-            DefinitionParser = new DefinitionParsingEngine(parsingAgent);
+            DefinitionParser = DefinitionParserFactory.BuildParsingEngine(
+                ConfigManager.API_Keys, ConfigManager.NativeLanguage);
         }
 
         private List<String> GetPreviousContext(TextualMedia tm)
