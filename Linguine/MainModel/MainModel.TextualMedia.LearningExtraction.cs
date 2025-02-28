@@ -17,6 +17,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
+using LearningExtraction;
+using Serilog.Core;
+using Serilog;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Linguine
 {
@@ -25,8 +29,9 @@ namespace Linguine
     public partial class MainModel
     {
 
-        private ICanAnalyseText?          TextAnalyser            { get; set; }
-        internal DefinitionParsingEngine? DefinitionParsingEngine { get; set; }
+        private ICanAnalyseText?      TextAnalyser     { get; set; }
+
+        private ICanParseDefinitions? DefinitionParser { get; set; }
 
         private int CharsToProcess { get; set; } = 500;
 
@@ -72,14 +77,14 @@ namespace Linguine
             if (text is null || context is null) { return; }
 
             // TODO - extract interface for this - outsource to the LearningExtraction
-            List<ProtoStatement>? protos = await DoProcessingStep(text, context, isTail);
+            List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail);
 
-            if (protos is null)
+            if (builders is null)
             {
                 return;
             }
 
-            List<Statement> statements = FromProtoStatements(protos, tm, firstChar);
+            List<Statement> statements = FromProtoStatements(builders, tm, firstChar);
 
             StatementManager.AddStatements(statements);
 
@@ -106,16 +111,28 @@ namespace Linguine
 
         private async Task ParseDefinitions(List<Statement> statements)
         {
-            if (DefinitionParsingEngine is null)
+            if (DefinitionParser is null)
             {
                 StartParsingEngine();
             }
-            // TODO - what if it is null?
+            
+            if (DefinitionParser is null)
+            {
+                Log.Fatal("Couldn't start parsing engine!");
+                throw new Exception("failed to start parsing engine");
+            }
 
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
 
-            await DefinitionParsingEngine.ParseStatementsDefinitions(
-                definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+            HashSet<DictionaryDefinition> newDefinitionsSet = 
+                ParsedDictionaryDefinitionManager.FilterOutKnown(
+                    definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+
+            HashSet<ParsedDictionaryDefinition> parsedDefinitions = 
+                await DefinitionParser.ParseStatementsDefinitions(
+                    newDefinitionsSet, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+
+            ParsedDictionaryDefinitionManager.AddSet(parsedDefinitions);
         }
 
 
@@ -178,12 +195,14 @@ namespace Linguine
         private void StartParsingEngine()
         {
 
+            // TODO - get this into a factory method in learning extraction
+
             API_Keys keys = ConfigManager.API_Keys;
 
             AgentBase parsingAgent = AgentFactory.GenerateProcessingAgent(
                 keys, AgentTask.DefinitionParsing, ConfigManager.NativeLanguage);
 
-            DefinitionParsingEngine = new DefinitionParsingEngine(ParsedDictionaryDefinitionManager, parsingAgent);
+            DefinitionParser = new DefinitionParsingEngine(parsingAgent);
         }
 
         private List<String> GetPreviousContext(TextualMedia tm)

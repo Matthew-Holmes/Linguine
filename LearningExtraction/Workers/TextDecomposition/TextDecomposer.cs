@@ -109,6 +109,7 @@ namespace LearningExtraction
             return TextDecomposition.FromNewLinedString(text, await agent.GetResponse(strippedText), true);
         }
 
+
         public TextDecomposer()
         {
         }

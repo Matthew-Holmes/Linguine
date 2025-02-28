@@ -66,8 +66,6 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                _model.DefinitionParsingEngine = null; // will need to update it next time we parse definitions
-
                 UpdateNativeLanguageInConfig(_languageCodes[value]);
                 _nativeLanguageIndex = value;
 

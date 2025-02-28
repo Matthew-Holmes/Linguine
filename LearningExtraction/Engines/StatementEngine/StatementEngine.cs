@@ -5,11 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Linguine
+namespace LearningExtraction
 {
     public interface ICanAnalyseText
     {
@@ -31,26 +30,25 @@ namespace Linguine
         public async Task<List<ProtoStatement>> GenerateStatementsFor(
             String text, List<String> context, bool isTail)
         {
-            List<ProtoStatement> protos = new List<ProtoStatement>();
+            List<ProtoStatementBuilder> builders = new List<ProtoStatementBuilder>();
 
-            await FindStatementsAndPopulate(protos, text, context, isTail);
+            await FindStatementsAndPopulate(builders, text, context, isTail);
 
             //await FormContexts(builders, previousContext);
 
-            FormEmptyContexts(protos);
+            FormEmptyContexts(builders);
 
-            await DecomposeStatements(protos);
+            await DecomposeStatements(builders);
 
-            await AttachCorrectDefinitions(protos);
+            await AttachCorrectDefinitions(builders);
 
-            return protos;
+            return builders.Select(b => b.ToProtoStatement()).ToList();
 
         }
 
 
-
         private async Task FindStatementsAndPopulate(
-            List<ProtoStatement> protos, String text, List<String> context, bool isTail)
+            List<ProtoStatementBuilder> builders, String text, List<String> context, bool isTail)
         {
 
             List<String> statementTexts = await DecomposeIntoStatements(text); 
@@ -77,10 +75,10 @@ namespace Linguine
                     continue;
                 }
 
-                protos.Add(new ProtoStatement());
-                protos.Last().StatementText = total;
+                builders.Add(new ProtoStatementBuilder());
+                builders.Last().StatementText = total;
 
-                if (protos.Count > MaxStatements) { break; }
+                if (builders.Count > MaxStatements) { break; }
             }
         }
 

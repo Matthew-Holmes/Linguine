@@ -27,6 +27,7 @@ namespace Infrastructure
         [JsonIgnore]
         public List<String>? Units => Decomposition?.Select(x => x.Total).ToList() ?? null;
 
+        // TODO - remove this in case when units have new lines in?
         [JsonIgnore]
         public String NewLinedUnitsString => Units is not null ? String.Join('\n', Units) : "";
 

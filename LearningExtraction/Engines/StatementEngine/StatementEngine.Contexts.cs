@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Linguine
+namespace LearningExtraction
 {
     public partial class StatementEngine
     {
@@ -34,11 +34,11 @@ namespace Linguine
             }
         }
 
-        private void FormEmptyContexts(List<ProtoStatement> protos)
+        private void FormEmptyContexts(List<ProtoStatementBuilder> builders)
         {
-            for (int i = 0; i != protos.Count; i++)
+            for (int i = 0; i != builders.Count; i++)
             {
-                protos[i].StatementContext = new List<String>();
+                builders[i].Context = new List<String>();
             }
         }
 

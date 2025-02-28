@@ -7,27 +7,32 @@ using System.Threading.Tasks;
 using Agents;
 
 
-namespace Linguine
+namespace LearningExtraction
 {
-    internal class DefinitionParsingEngine
+    public interface ICanParseDefinitions
     {
-        private ParsedDictionaryDefinitionManager PDefManager { get; set; }
+        public Task<HashSet<ParsedDictionaryDefinition>> ParseStatementsDefinitions(
+           HashSet<DictionaryDefinition> definitions,
+           LearnerLevel level,
+           LanguageCode native);
+    }
+
+    public class DefinitionParsingEngine : ICanParseDefinitions
+    {
 
         private AgentBase ParsingAgent { get; set; }
 
-        internal DefinitionParsingEngine(ParsedDictionaryDefinitionManager pdefManager, AgentBase parsingAgent) 
+        public DefinitionParsingEngine(AgentBase parsingAgent) 
         {
-            PDefManager  = pdefManager;
             ParsingAgent = parsingAgent;
         }
 
-        internal async Task ParseStatementsDefinitions(
+        public async Task<HashSet<ParsedDictionaryDefinition>> ParseStatementsDefinitions(
             HashSet<DictionaryDefinition> definitions,
             LearnerLevel level,
             LanguageCode native)
         {
-            HashSet<DictionaryDefinition> newDefinitionsSet = PDefManager.FilterOutKnown(definitions, level, native);
-            List<DictionaryDefinition> newDefinitions = newDefinitionsSet.ToList();
+            List<DictionaryDefinition> newDefinitions = definitions.ToList();
 
             List<String> prompts = FormPrompts(newDefinitions, level);
 
@@ -54,7 +59,7 @@ namespace Linguine
                 toAddSet.Add(pdef);
             }
 
-            PDefManager.AddSet(toAddSet);
+            return toAddSet;
         }
 
 

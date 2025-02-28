@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Linguine
+namespace LearningExtraction
 {
     public partial class StatementEngine
     {
@@ -17,9 +17,9 @@ namespace Linguine
             return statementsDecomp.Units;
         }
 
-        private async Task DecomposeStatements(List<ProtoStatement> protos)
+        private async Task DecomposeStatements(List<ProtoStatementBuilder> builders)
         {
-            var decompositionTasks = protos.Select(
+            var decompositionTasks = builders.Select(
                 b => FromStatementsDecomposer.DecomposeText(b.StatementText));
 
             TextDecomposition[] injectives = await Task.WhenAll(decompositionTasks);
@@ -29,10 +29,10 @@ namespace Linguine
 
             TextDecomposition[] rooted = await Task.WhenAll(rootingTasks);
 
-            for (int i = 0; i != protos.Count; i++)
+            for (int i = 0; i != builders.Count; i++)
             {
-                protos[i].InjectiveDecomposition = injectives[i];
-                protos[i].RootedDecomposition = rooted[i];
+                builders[i].InjectiveDecomposition = injectives[i];
+                builders[i].RootedDecomposition = rooted[i];
             }
 
             return;

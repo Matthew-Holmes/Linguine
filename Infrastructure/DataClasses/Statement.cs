@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace Infrastructure
 {
 
-
     public class Statement
     {
         private TextualMedia _parent;
@@ -51,12 +50,26 @@ namespace Infrastructure
     // learning extraction module
     public class ProtoStatement
     {
+        private String _statementText;
+        private List<String> _context;
+        private TextDecomposition _injectiveDecomposition;
+        private TextDecomposition _rootedDecomposition;
 
-        public String? StatementText { get; set; }
-        public List<String>? StatementContext { get; set; }
+        public String StatementText { get => _statementText; }
+        public List<String> StatementContext { get => _context; }
 
-        public TextDecomposition? InjectiveDecomposition { get; set; }
-        public TextDecomposition? RootedDecomposition { get; set; }
+        public TextDecomposition InjectiveDecomposition { get => _injectiveDecomposition; }
+        public TextDecomposition RootedDecomposition { get => _rootedDecomposition; }
+
+        public ProtoStatement(
+            String text, List<String> context, 
+            TextDecomposition injective, TextDecomposition rooted)
+        {
+            _statementText = text;
+            _context = context;
+            _injectiveDecomposition = injective;
+            _rootedDecomposition = rooted;
+        }
 
      }
 }

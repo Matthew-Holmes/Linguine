@@ -6,30 +6,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Linguine
+namespace LearningExtraction
 {
     public partial class StatementEngine
     {
-        private async Task AttachCorrectDefinitions(List<ProtoStatement> protos)
+        private async Task AttachCorrectDefinitions(List<ProtoStatementBuilder> builders)
         {
-            List<Tuple<ProtoStatement, List<List<DictionaryDefinition>>>> taskData = new List<Tuple<ProtoStatement, List<List<DictionaryDefinition>>>>();
+            List<Tuple<ProtoStatementBuilder, List<List<DictionaryDefinition>>>> taskData = new List<Tuple<ProtoStatementBuilder, List<List<DictionaryDefinition>>>>();
 
-            foreach (ProtoStatement proto in protos)
+            foreach (ProtoStatementBuilder builder in builders)
             {
                 taskData.Add(Tuple.Create(
-                    proto,
-                    DefinitionResolver.GetPossibleDefinitions(proto.RootedDecomposition)));
+                    builder,
+                    DefinitionResolver.GetPossibleDefinitions(builder.RootedDecomposition)));
             }
 
             var correctDefTask = taskData.Select(items => DefinitionResolver.IdentifyCorrectDefinitions(
-                items.Item2, items.Item1.RootedDecomposition, items.Item1.InjectiveDecomposition, items.Item1.StatementContext));
+                items.Item2, items.Item1.RootedDecomposition, items.Item1.InjectiveDecomposition, items.Item1.Context));
 
             List<int>[] correct = await Task.WhenAll(correctDefTask);
 
-            for (int i = 0; i != protos.Count; i++)
+            for (int i = 0; i != builders.Count; i++)
             {
                 // will pass by reference and fill in the definitions
-                SetCorrectDefinitions(protos[i].RootedDecomposition, correct[i], taskData[i].Item2);
+                SetCorrectDefinitions(builders[i].RootedDecomposition, correct[i], taskData[i].Item2);
             }
         }
 
