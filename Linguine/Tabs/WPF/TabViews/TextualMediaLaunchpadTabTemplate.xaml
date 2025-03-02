@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Linguine.Tabs.WPF">
+                    xmlns:local="clr-namespace:Linguine.Tabs.WPF"
+                    xmlns:controls="clr-namespace:Linguine.Tabs.WPF.Controls">
     <!-- any template like this must be referenced in App.xaml too! -->
     <DataTemplate x:Key="TextualMediaLaunchpadTabTemplate">
         <DataTemplate.Resources>
@@ -20,16 +21,44 @@
                 <Button Content="Import" Command="{Binding ImportNewCommand}" Margin="30"/>
             </StackPanel>
 
-            <StackPanel Name="Sessions" Grid.Column="1">
-                <TextBlock Text="Sessions" Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                <ListBox ItemsSource= "{Binding AvailableSessions}"
-                         SelectedItem="{Binding SelectedSession}"
-                         Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                <Button Content="New Session"
-                        Command="{Binding NewSessionCommand}"
-                        Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
-            </StackPanel>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="3*"/>
+                </Grid.RowDefinitions>
+                
+                <StackPanel Name="Sessions" Grid.Row="0">
+                    <TextBlock Text="Sessions" Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <ListBox ItemsSource= "{Binding AvailableSessions}"
+                             SelectedItem="{Binding SelectedSession}"
+                             Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <Button Content="New Session"
+                            Command="{Binding NewSessionCommand}"
+                            Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
 
+                <Grid Grid.Row="1">
+                    <Button Content="{Binding SelectedTextName}" ContentStringFormat="Process {0}"
+                            Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Command="{Binding ProcessSelectedTextCommand}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Padding="10,5"/>        
+                </Grid>
+
+
+                <StackPanel Grid.Row="2">
+                    <ItemsControl ItemsSource="{Binding ProcessingJobs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <controls:TextProcessingControl/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+
+            </Grid>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
