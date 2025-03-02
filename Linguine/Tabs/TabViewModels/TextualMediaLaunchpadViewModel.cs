@@ -4,8 +4,11 @@ using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
@@ -25,6 +28,9 @@ namespace Linguine.Tabs
         private string _selectedTextName;
         private List<string> _availableSessions;
         private List<Tuple<bool, decimal>> _sessionInfo;
+
+        private ObservableCollection<ProcessingJobViewModel> _processingJobs = new();
+
 
         public ICommand ImportNewCommand { get; private set; }
         public ICommand NewSessionCommand { get; private set; }
@@ -73,6 +79,8 @@ namespace Linguine.Tabs
                 OnPropertyChanged(nameof(AvailableSessions));
             }
         }
+
+        public ObservableCollection<ProcessingJobViewModel> ProcessingJobs => _processingJobs;
 
         public String SelectedSession
         {
@@ -152,6 +160,15 @@ namespace Linguine.Tabs
             ImportNewCommand = new RelayCommand(() => ImportNew());
 
             NewSessionCommand = new RelayCommand(() => NewSession());
+
+            _processingJobs.Add(new ProcessingJobViewModel(
+                "Moby Dick",
+                20.0m,
+                false));
+            _processingJobs.Add(new ProcessingJobViewModel(
+                "Pride and Prejudice",
+                25.0m,
+                true));
         }
 
         private void NewSession()
@@ -236,5 +253,63 @@ namespace Linguine.Tabs
             throw new NotImplementedException();
         }
     }
-    
+
+    internal class ProcessingJobViewModel : ViewModelBase
+    {
+        private decimal _processedPercentage;
+        private decimal _stopAtPercentage = 100m;
+        private bool   _isProcessing;
+        private string _textName;
+
+        public ProcessingJobViewModel(string textName, decimal currentPct, bool isProcessing)
+        {
+            _textName            = textName;
+            _processedPercentage = currentPct;
+            _isProcessing        = isProcessing;
+
+            ToggleProcessingCommand = new RelayCommand(ToggleProcessing);
+            
+        }
+
+        public string TextName { get => _textName; }
+
+        public decimal ProcessedPercentage
+        {
+            get => _processedPercentage;
+            set { _processedPercentage = value; OnPropertyChanged(); }
+        }
+
+        public decimal StopAtPercentage
+        {
+            get => _stopAtPercentage;
+            set { _stopAtPercentage = value; OnPropertyChanged(); }
+        }
+
+        public bool IsProcessing
+        {
+            get => _isProcessing;
+            private set { _isProcessing = value; OnPropertyChanged(); OnPropertyChanged(nameof(ButtonText)); }
+        }
+
+        public string ButtonText => IsProcessing ? "Stop" : "Start";
+
+        public ICommand ToggleProcessingCommand { get; }
+
+
+        private async void ToggleProcessing()
+        {
+            IsProcessing = !IsProcessing;
+
+            if (IsProcessing)
+            {
+                while (IsProcessing && ProcessedPercentage < StopAtPercentage)
+                {
+                    await Task.Delay(500);
+                    ProcessedPercentage += 5;
+                }
+                IsProcessing = false;
+            }
+        }
+    }
+
 }
