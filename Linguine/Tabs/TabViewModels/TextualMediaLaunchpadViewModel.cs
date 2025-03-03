@@ -20,7 +20,7 @@ using UserInputInterfaces;
 namespace Linguine.Tabs
 {
 
-    internal class TextualMediaLaunchpadViewModel : TabViewModelBase
+    internal partial class TextualMediaLaunchpadViewModel : TabViewModelBase
     {
         private TextualMediaImporter _loader;
 
@@ -161,11 +161,15 @@ namespace Linguine.Tabs
 
             NewSessionCommand = new RelayCommand(() => NewSession());
 
+            //_processingJobs = _model.GetProcessingJobs();
+
             _processingJobs.Add(new ProcessingJobViewModel(
+                _model,
                 "Moby Dick",
                 20.0m,
                 false));
             _processingJobs.Add(new ProcessingJobViewModel(
+                _model,
                 "Pride and Prejudice",
                 25.0m,
                 true));
@@ -253,63 +257,4 @@ namespace Linguine.Tabs
             throw new NotImplementedException();
         }
     }
-
-    internal class ProcessingJobViewModel : ViewModelBase
-    {
-        private decimal _processedPercentage;
-        private decimal _stopAtPercentage = 100m;
-        private bool   _isProcessing;
-        private string _textName;
-
-        public ProcessingJobViewModel(string textName, decimal currentPct, bool isProcessing)
-        {
-            _textName            = textName;
-            _processedPercentage = currentPct;
-            _isProcessing        = isProcessing;
-
-            ToggleProcessingCommand = new RelayCommand(ToggleProcessing);
-            
-        }
-
-        public string TextName { get => _textName; }
-
-        public decimal ProcessedPercentage
-        {
-            get => _processedPercentage;
-            set { _processedPercentage = value; OnPropertyChanged(); }
-        }
-
-        public decimal StopAtPercentage
-        {
-            get => _stopAtPercentage;
-            set { _stopAtPercentage = value; OnPropertyChanged(); }
-        }
-
-        public bool IsProcessing
-        {
-            get => _isProcessing;
-            private set { _isProcessing = value; OnPropertyChanged(); OnPropertyChanged(nameof(ButtonText)); }
-        }
-
-        public string ButtonText => IsProcessing ? "Stop" : "Start";
-
-        public ICommand ToggleProcessingCommand { get; }
-
-
-        private async void ToggleProcessing()
-        {
-            IsProcessing = !IsProcessing;
-
-            if (IsProcessing)
-            {
-                while (IsProcessing && ProcessedPercentage < StopAtPercentage)
-                {
-                    await Task.Delay(500);
-                    ProcessedPercentage += 5;
-                }
-                IsProcessing = false;
-            }
-        }
-    }
-
 }

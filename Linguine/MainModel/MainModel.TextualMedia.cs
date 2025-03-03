@@ -1,6 +1,8 @@
 ﻿using Infrastructure;
+using Linguine.Tabs;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Linguine
 {
@@ -55,7 +57,6 @@ namespace Linguine
             LearnerLevel level  = ConfigManager.GetLearnerLevel(ConfigManager.TargetLanguage); // TODO - just a property
             return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core, level, native);
         }
-          
 
     }
 }
