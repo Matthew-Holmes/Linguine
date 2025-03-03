@@ -51,9 +51,11 @@ namespace Infrastructure
 
             foreach (var def in definitions)
             {
-                Add(def, context, false);  
+                Add(def, context, false);
+                context.SaveChanges(); // TODO - fix like in statement manager
+                context.ChangeTracker.Clear();
             }
-            context.SaveChanges(); 
+
         }
 
         public HashSet<DictionaryDefinition> FilterOutKnown(
@@ -61,11 +63,21 @@ namespace Infrastructure
         {
             HashSet<DictionaryDefinition> ret = new HashSet<DictionaryDefinition>();
 
+            HashSet<int> ids = new(); // mayber I need to add a hashcode method to definition to get this to work
+
             foreach (DictionaryDefinition def in definitions)
             {
                 if (GetParsedDictionaryDefinition(def, level, native) is null)
                 {
-                    ret.Add(def);
+                    if (ids.Contains(def.ID))
+                    {
+                        /* do nothing */
+                    }
+                    else
+                    {
+                        ret.Add(def);
+                        ids.Add(def.ID);
+                    }
                 }
             }
 
