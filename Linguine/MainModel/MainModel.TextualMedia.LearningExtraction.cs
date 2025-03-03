@@ -37,9 +37,12 @@ namespace Linguine
             List<String> previousContext = GetPreviousContext(tm);
 
             int charSpan = CharsToProcess;
+
+            // TODO - tidy
+            charSpan = (int)(charSpan * LanguageCodeDetails.Density(ConfigManager.TargetLanguage));
             bool isTail = false;
 
-            if (tm.Text.Length - firstChar < CharsToProcess)
+            if (tm.Text.Length - firstChar < charSpan)
             {
                 charSpan = tm.Text.Length - firstChar;
                 isTail = true; // TODO - should this be <=??
