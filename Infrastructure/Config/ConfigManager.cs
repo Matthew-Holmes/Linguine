@@ -24,12 +24,22 @@ namespace Infrastructure
             // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/change-tokens?view=aspnetcore-9.0
             ChangeToken.OnChange(
                 () => _configuration.GetReloadToken(),
-                () => ConfigChanged?.Invoke());
+                () => OnConfigChanged());
         }
 
         public static Config Config => _configuration.Get<Config>() ?? new Config();
 
         public static event Action ConfigChanged;
+
+        private static void OnConfigChanged()
+        {
+            lock (_lock)
+            {
+                // get the _lock so we know that the file writing has finished
+                // (if that was the source of the change)
+                ConfigChanged?.Invoke();
+            }
+        }
 
         public static void SaveConfig(Config config)
         {
