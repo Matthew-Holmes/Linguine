@@ -36,23 +36,8 @@ namespace Linguine
                 new MessageUserService()
                 ); ; ;
 
-            MainModel model;
-            try
-            {
-                model = new MainModel();
-            }
-            catch (FileNotFoundException e)
-            {
-                if (MissingConfigHelper.TryFindConfig(uiComponents))
-                { 
-                    /* success */
-                } else
-                {
-                    throw new Exception("Startup failed due to lack of config!");
-                }
-
-                model = new MainModel();
-            }
+            MainModel model = new();
+     
             this.DataContext = new MainViewModel(uiComponents, model);
         }
     }
