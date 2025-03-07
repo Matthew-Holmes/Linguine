@@ -51,10 +51,8 @@ namespace Linguine
 
         internal ParsedDictionaryDefinition? GetParsedDictionaryDefinition(DictionaryDefinition core)
         {
-            // TODO - how to treat the learner level in config - since this will evolve/change
-            // so must be in the model somehow?
-            LanguageCode native = ConfigManager.NativeLanguage;
-            LearnerLevel level  = ConfigManager.GetLearnerLevel(ConfigManager.TargetLanguage); // TODO - just a property
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+            LearnerLevel level  = ConfigManager.Config.GetLearnerLevel();
             return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core, level, native);
         }
 

@@ -45,11 +45,11 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                // ********************* model replacement *******************
-                ConfigManager.TargetLanguage = _languageCodes[value];
+                Config config = ConfigManager.Config;
+                config.Languages.TargetLanguage = _languageCodes[value];
+                ConfigManager.SaveConfig(config);
+
                 _targetLanguageIndex = value;
-                _parent.Model = new MainModel(); // build a new one
-                // ******* this should be the only time it is changed ********
 
                 OnPropertyChanged(nameof(LearnerLevel));
                 OnPropertyChanged(nameof(TargetLanguage));
@@ -77,7 +77,7 @@ namespace Linguine.Tabs
 
         public int LearnerLevelIndex
         {
-            get => _learnerLevels.IndexOf(ConfigManager.GetLearnerLevel(_languageCodes[_targetLanguageIndex]));
+            get => _learnerLevels.IndexOf(ConfigManager.Config.GetLearnerLevel());
             set
             {
                 if (value == -1)
@@ -85,7 +85,10 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                ConfigManager.SetLearnerLevel(_languageCodes[_targetLanguageIndex], _learnerLevels[value]);
+                Config config = ConfigManager.Config;
+                config.SetLearnerLevel(_learnerLevels[value]);
+                ConfigManager.SaveConfig(config);
+
                 _learnerLevelIndex = value;
 
                 OnPropertyChanged(nameof(LearnerLevel));
@@ -94,9 +97,12 @@ namespace Linguine.Tabs
 
         private void UpdateNativeLanguageInConfig(LanguageCode newNative)
         {
-            if (newNative != ConfigManager.NativeLanguage)
+            Config config = ConfigManager.Config;
+
+            if (newNative != config.Languages.NativeLanguage)
             {
-                ConfigManager.NativeLanguage = newNative;
+                config.Languages.NativeLanguage = newNative;
+                ConfigManager.SaveConfig(config);
 
                 LanguageOptions = LanguageCodeDetails.LanguageNames(newNative);
             }
@@ -104,13 +110,14 @@ namespace Linguine.Tabs
 
         private void SetupLanguageSelection()
         {
-            _languageOptions = LanguageCodeDetails.LanguageNames(ConfigManager.NativeLanguage);
+            Config config = ConfigManager.Config;
+
+            _languageOptions     = LanguageCodeDetails.LanguageNames(config.Languages.NativeLanguage);
             _learnerLevelOptions = LearnerLevelDetails.LearnerLevelNames();
 
-            _nativeLanguageIndex = _languageCodes.IndexOf(ConfigManager.NativeLanguage);
-            _targetLanguageIndex = _languageCodes.IndexOf(ConfigManager.TargetLanguage);
-            _learnerLevelIndex = _learnerLevels.IndexOf(
-                ConfigManager.GetLearnerLevel(ConfigManager.TargetLanguage));
+            _nativeLanguageIndex = _languageCodes.IndexOf(config.Languages.NativeLanguage);
+            _targetLanguageIndex = _languageCodes.IndexOf(config.Languages.TargetLanguage);
+            _learnerLevelIndex   = _learnerLevels.IndexOf(config.GetLearnerLevel());
         }
         #endregion
 

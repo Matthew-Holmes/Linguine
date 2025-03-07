@@ -38,8 +38,9 @@ namespace Linguine
 
             int charSpan = CharsToProcess;
 
-            // TODO - tidy
-            charSpan = (int)(charSpan * LanguageCodeDetails.Density(ConfigManager.TargetLanguage));
+            LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
+            charSpan = (int)(charSpan * LanguageCodeDetails.Density(target));
+
             bool isTail = false;
 
             if (tm.Text.Length - firstChar < charSpan)
@@ -74,7 +75,7 @@ namespace Linguine
 
             StatementManager.AddStatements(statements);
 
-            if (ConfigManager.TargetLanguage != ConfigManager.NativeLanguage)
+            if (ConfigManager.Config.LearningForeignLanguage())
             {
                 await ParseDefinitions(statements);              
             }
@@ -110,13 +111,16 @@ namespace Linguine
 
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
 
+            LearnerLevel level  = ConfigManager.Config.GetLearnerLevel();
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+
             HashSet<DictionaryDefinition> newDefinitionsSet = 
                 ParsedDictionaryDefinitionManager.FilterOutKnown(
-                    definitions, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+                    definitions, level, native);
 
             HashSet<ParsedDictionaryDefinition> parsedDefinitions = 
                 await DefinitionParser.ParseStatementsDefinitions(
-                    newDefinitionsSet, ConfigManager.LearnerLevel, ConfigManager.NativeLanguage);
+                    newDefinitionsSet, level, native);
 
             ParsedDictionaryDefinitionManager.AddSet(parsedDefinitions);
         }
@@ -177,16 +181,15 @@ namespace Linguine
                 ExternalDictionary dictionary = ExternalDictionaryManager.GetDictionary(dictionaries[0])
                     ?? throw new Exception();
 
-                API_Keys keys = ConfigManager.API_Keys;
+                APIKeysConfig keys = ConfigManager.Config.APIKeys;
 
-                TextAnalyser = StatementEngineFactory.BuildStatementEngine(keys, dictionary);
+                TextAnalyser = StatementEngineFactory.BuildStatementEngine(dictionary);
             }
         }
 
         private void StartParsingEngine()
         {
-            DefinitionParser = DefinitionParserFactory.BuildParsingEngine(
-                ConfigManager.API_Keys, ConfigManager.NativeLanguage);
+            DefinitionParser = DefinitionParserFactory.BuildParsingEngine();
         }
 
         private List<String> GetPreviousContext(TextualMedia tm)

@@ -17,17 +17,17 @@ namespace Tests_Infrastructure
                 throw new InvalidOperationException("Tests must be run in a directory containing 'Tests_Infrastructure'");
             }
 
-            ConfigFileHandler.SetConfigToDefault();
+            ConfigManager.SetConfigToDefault();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            ConfigFileHandler.SetConfigToDefault();
+            ConfigManager.SetConfigToDefault();
 
-            if (File.Exists(ConfigFileHandler.ConfigPath))
+            if (File.Exists(ConfigManager.ConfigPath))
             {
-                File.Delete(ConfigFileHandler.ConfigPath);
+                File.Delete(ConfigManager.ConfigPath);
             }
         }
 
@@ -36,24 +36,24 @@ namespace Tests_Infrastructure
         public void TestNativeLanguageGetSet()
         {
             LanguageCode testValue = LanguageCode.eng;
-            ConfigManager.NativeLanguage = testValue;
-            Assert.AreEqual(testValue, ConfigManager.NativeLanguage);
+            ConfigManagerOld.NativeLanguage = testValue;
+            Assert.AreEqual(testValue, ConfigManagerOld.NativeLanguage);
         }
 
         [TestMethod]
         public void TestTargetLanguageGetSet()
         {
             LanguageCode testValue = LanguageCode.fra;
-            ConfigManager.TargetLanguage = testValue;
-            Assert.AreEqual(testValue, ConfigManager.TargetLanguage);
+            ConfigManagerOld.TargetLanguage = testValue;
+            Assert.AreEqual(testValue, ConfigManagerOld.TargetLanguage);
         }
 
         [TestMethod]
         public void TestLearnerLevelGetSet()
         {
             LearnerLevel testValue = LearnerLevel.intermediate;
-            ConfigManager.SetLearnerLevel(LanguageCode.eng, testValue);
-            Assert.AreEqual(testValue, ConfigManager.GetLearnerLevel(LanguageCode.eng));
+            ConfigManagerOld.SetLearnerLevel(LanguageCode.eng, testValue);
+            Assert.AreEqual(testValue, ConfigManagerOld.GetLearnerLevel(LanguageCode.eng));
         }
 
         [TestMethod]
@@ -61,10 +61,10 @@ namespace Tests_Infrastructure
         {
             LanguageCode lc = LanguageCode.zho;
 
-            ConfigManager.ReplaceConnectionString(lc, "yi xin db");
-            ConfigManager.TargetLanguage = LanguageCode.zho;
+            ConfigManagerOld.ReplaceConnectionString(lc, "yi xin db");
+            ConfigManagerOld.TargetLanguage = LanguageCode.zho;
 
-            Assert.AreEqual(ConfigManager.ConnectionString, "yi xin db");
+            Assert.AreEqual(ConfigManagerOld.ConnectionString, "yi xin db");
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace Tests_Infrastructure
             string connectionString = "data source=C:\\MyDatabase\\mydatabase.db";
 
             // Act
-            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+            string result = ConfigManagerOld.GetDatabaseSubdirectory(connectionString);
 
             // Assert
             Assert.AreEqual("C:\\MyDatabase", result);
@@ -87,7 +87,7 @@ namespace Tests_Infrastructure
             string connectionString = "invalid connection string";
 
             // Act
-            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+            string result = ConfigManagerOld.GetDatabaseSubdirectory(connectionString);
 
             // Assert
             Assert.IsNull(result);
@@ -100,7 +100,7 @@ namespace Tests_Infrastructure
             string connectionString = "some other key=value";
 
             // Act
-            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+            string result = ConfigManagerOld.GetDatabaseSubdirectory(connectionString);
 
             // Assert
             Assert.IsNull(result);
@@ -113,7 +113,7 @@ namespace Tests_Infrastructure
             string connectionString = null;
 
             // Act
-            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+            string result = ConfigManagerOld.GetDatabaseSubdirectory(connectionString);
 
             // Assert
             Assert.IsNull(result);
@@ -126,7 +126,7 @@ namespace Tests_Infrastructure
             string connectionString = "";
 
             // Act
-            string result = ConfigManager.GetDatabaseSubdirectory(connectionString);
+            string result = ConfigManagerOld.GetDatabaseSubdirectory(connectionString);
 
             // Assert
             Assert.IsNull(result);
@@ -141,7 +141,7 @@ namespace Tests_Infrastructure
             string connectionString = $"data source={relativePath}";
 
             // Act
-            string result =ConfigManager.GetDatabaseSubdirectory(connectionString);
+            string result =ConfigManagerOld.GetDatabaseSubdirectory(connectionString);
 
             // Assert
             Assert.AreEqual("MyDatabase", result);

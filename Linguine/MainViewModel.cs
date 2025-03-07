@@ -88,6 +88,8 @@ namespace Linguine
             Tabs.CollectionChanged += Tabs_CollectionChanged;
 
             Model = model;
+
+            ConfigManager.ConfigChanged += (() => Model = new MainModel()); // reload main model on config change
         }
 
         private void RunOnUIThread(Action action)
@@ -252,7 +254,7 @@ namespace Linguine
         internal void HandleMissingApiKeys(MissingAPIKeyException e)
         {
             _UIcomponents.CanMessage.Show(e.Message);
-            _UIcomponents.CanMessage.Show("please check these files exist: " + ConfigManager.API_Key_Locations);
+            _UIcomponents.CanMessage.Show("please check these files exist: " + e.missingLocation);
         }
         #endregion
     }

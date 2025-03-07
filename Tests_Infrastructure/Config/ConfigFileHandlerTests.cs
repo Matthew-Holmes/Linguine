@@ -34,11 +34,11 @@ namespace Tests_Infrastructure
                 throw new InvalidOperationException("Tests must be run in a directory containing 'Tests_Infrastructure'");
             }
 
-            ConfigFileHandler.SetConfigToDefault();
+            ConfigManager.SetConfigToDefault();
 
-            if (File.Exists(ConfigFileHandler.ConfigPath))
+            if (File.Exists(ConfigManager.ConfigPath))
             {
-                File.Delete(ConfigFileHandler.ConfigPath);
+                File.Delete(ConfigManager.ConfigPath);
             }
             if (File.Exists("customConfig.json"))
             {
@@ -49,11 +49,11 @@ namespace Tests_Infrastructure
         [TestCleanup]
         public void Cleanup()
         {
-            ConfigFileHandler.SetConfigToDefault();
+            ConfigManager.SetConfigToDefault();
 
-            if (File.Exists(ConfigFileHandler.ConfigPath))
+            if (File.Exists(ConfigManager.ConfigPath))
             {
-                File.Delete(ConfigFileHandler.ConfigPath);
+                File.Delete(ConfigManager.ConfigPath);
             }
             if (File.Exists("customConfig.json"))
             {
@@ -65,27 +65,27 @@ namespace Tests_Infrastructure
         [ExpectedException(typeof(FileNotFoundException))]
         public void LoadConfig_WithNonExistingPath_ShouldThrowFileNotFoundException()
         {
-            if (File.Exists(ConfigFileHandler.ConfigPath))
+            if (File.Exists(ConfigManager.ConfigPath))
             {
-                File.Delete(ConfigFileHandler.ConfigPath);
+                File.Delete(ConfigManager.ConfigPath);
             }
-            ConfigFileHandler.LoadConfig();
+            ConfigManager.LoadConfig();
         }
 
         [TestMethod]
         public void UpdateConfig_Filestore_Runs()
         {
             var newConfig = new Config();
-            ConfigFileHandler.UpdateConfig(newConfig);
+            ConfigManager.UpdateConfig(newConfig);
         }
 
         [TestMethod]
         public void UpdateConfig_WithValidConfig_ShouldCreateFile()
         {
             var newConfig = new Config();
-            ConfigFileHandler.UpdateConfig(newConfig);
+            ConfigManager.UpdateConfig(newConfig);
 
-            Assert.IsTrue(File.Exists(ConfigFileHandler.ConfigPath));
+            Assert.IsTrue(File.Exists(ConfigManager.ConfigPath));
         }
 
 
@@ -93,9 +93,9 @@ namespace Tests_Infrastructure
         public void LoadConfig_WithValidPath_ShouldReturnTrue()
         {
             var config = new Config();
-            ConfigFileHandler.UpdateConfig(config);
+            ConfigManager.UpdateConfig(config);
 
-            bool loadedConfig = ConfigFileHandler.LoadConfig();
+            bool loadedConfig = ConfigManager.LoadConfig();
             Assert.IsTrue(loadedConfig);
         }
 
@@ -103,27 +103,27 @@ namespace Tests_Infrastructure
         public void LoadConfig_WithValidPath_ShouldLoadTheSame()
         {
             var config = new Config();
-            ConfigFileHandler.UpdateConfig(config);
+            ConfigManager.UpdateConfig(config);
 
-            ConfigFileHandler.LoadConfig();
-            Assert.IsTrue(ConfigFileHandler.Copy.Equals(config));
+            ConfigManager.LoadConfig();
+            Assert.IsTrue(ConfigManager.Copy.Equals(config));
         }
 
         [TestMethod]
         public void LoadCustomConfig_WithValidPath_ShouldReturnTrue()
         {
             var config = new Config();
-            ConfigFileHandler.UpdateConfig(config);
+            ConfigManager.UpdateConfig(config);
 
-            File.Copy(ConfigFileHandler.ConfigPath, "customConfig.json");
-            File.Delete(ConfigFileHandler.ConfigPath);
+            File.Copy(ConfigManager.ConfigPath, "customConfig.json");
+            File.Delete(ConfigManager.ConfigPath);
 
             if (!File.Exists("customConfig.json"))
             {
                 throw new Exception();
             }
 
-            bool loadedConfig = ConfigFileHandler.SetCustomConfig("customConfig.json");
+            bool loadedConfig = ConfigManager.SetCustomConfig("customConfig.json");
 
             Assert.IsTrue(loadedConfig);
         }
@@ -132,14 +132,14 @@ namespace Tests_Infrastructure
         public void LoadCustomConfig_WithValidPath_ShouldLoadTheSame()
         {
             var config = new Config();
-            ConfigFileHandler.UpdateConfig(config);
+            ConfigManager.UpdateConfig(config);
 
-            File.Copy(ConfigFileHandler.ConfigPath, "customConfig.json");
-            File.Delete(ConfigFileHandler.ConfigPath);
+            File.Copy(ConfigManager.ConfigPath, "customConfig.json");
+            File.Delete(ConfigManager.ConfigPath);
 
-            ConfigFileHandler.SetCustomConfig("customConfig.json");
+            ConfigManager.SetCustomConfig("customConfig.json");
 
-            Assert.IsTrue(ConfigFileHandler.Copy.Equals(config));
+            Assert.IsTrue(ConfigManager.Copy.Equals(config));
         }
     }
 

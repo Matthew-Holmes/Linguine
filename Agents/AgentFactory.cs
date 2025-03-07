@@ -14,16 +14,24 @@ namespace Agents
 
     public class MissingAPIKeyException : Exception
     {
-        public MissingAPIKeyException()
-        { }
+        public string missingLocation;
 
-        public MissingAPIKeyException(string message)
+        public MissingAPIKeyException(string missingLocation)
+        {
+            this.missingLocation = missingLocation;
+        }
+
+        public MissingAPIKeyException(string missingLocation, string message)
             : base(message)
-        { }
+        {
+            this.missingLocation = missingLocation;
+        }
 
-        public MissingAPIKeyException(string message, Exception innerException)
+        public MissingAPIKeyException(string missingLocation, string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+            this.missingLocation = missingLocation;
+        }
     }
 
     public static class AgentFactory
@@ -32,42 +40,31 @@ namespace Agents
         private static SemaphoreSlim DeepSeekSemaphore = new SemaphoreSlim(10); // "" deepseek
  
         public static AgentBase GenerateProcessingAgent(
-            API_Keys keys,
             AgentTask task,
             LanguageCode language,
-            bool isHighPerformace = false)
+            bool isHighPerformance = false)
         {
             LLM model = LLM.ChatGPT4o_mini;
 
-            if (isHighPerformace)
+            if (isHighPerformance)
             {
                 model = LLM.DeepSeek_chat; // cheaper than 4o (and mayber even cheaper than mini in off hours!)
             }
 
-            return GenerateProcessingAgentInternal(keys, task, language, model);
+            return GenerateProcessingAgentInternal(task, language, model);
         }
 
         private static AgentBase GenerateProcessingAgentInternal(
-            API_Keys keys,
-            AgentTask task,
-            LanguageCode language,
-            LLM model = LLM.ChatGPT4o_mini)
+            AgentTask task, LanguageCode language, LLM model = LLM.ChatGPT4o_mini)
         {
             if (model == LLM.ChatGPT3_5 || model == LLM.ChatGPT4o || model == LLM.ChatGPT4o_mini)
             {
-                if (keys.OpenAI_APIKey is null)
-                {
-                    throw new MissingAPIKeyException("missing open ai API key!");
-                }
-                return GenerateOpenAIProcessingAgent(keys.OpenAI_APIKey, task, language, model);
+                return GenerateOpenAIProcessingAgent(task, language, model);
             }
             else if (model == LLM.DeepSeek_chat)
             {
-                if (keys.DeepSeek_APIKey is null)
-                {
-                    throw new MissingAPIKeyException("missing deepseek API key!");
-                }
-                return GenerateDeepSeekProcessingAgent(keys.DeepSeek_APIKey, task, language, model);
+
+                return GenerateDeepSeekProcessingAgent(task, language, model);
             }
             else
             {
@@ -76,10 +73,18 @@ namespace Agents
         }
 
         private static AgentBase GenerateDeepSeekProcessingAgent(
-            String key, AgentTask task,
-            LanguageCode language, LLM model)
+            AgentTask task, LanguageCode language, LLM model)
         {
-            DeepSeekBase ret = new DeepSeekBase(key, DeepSeekSemaphore);
+            String? apiKey = ConfigManager.APIKeys.DeepSeek_APIKey;
+
+            if (apiKey is null)
+            {
+                throw new MissingAPIKeyException(
+                    ConfigManager.Config.APIKeys.DeepSeek_APIKeyLocation,
+                    "missing deepseek API key!");
+            }
+
+            DeepSeekBase ret = new DeepSeekBase(apiKey, DeepSeekSemaphore);
 
             // processing, so no history and allows concurrency
             ret.DiscreteParameter("PromptDepth").Value = 0;
@@ -109,10 +114,18 @@ namespace Agents
         }
 
         private static AgentBase GenerateOpenAIProcessingAgent(
-            String key, AgentTask task, 
-            LanguageCode language, LLM model)
+            AgentTask task, LanguageCode language, LLM model)
         {
-            OpenAIBase ret = new OpenAIBase(key, OpenAISemaphore);
+            String? apiKey = ConfigManager.APIKeys.OpenAI_APIKey;
+
+            if (apiKey is null)
+            {
+                throw new MissingAPIKeyException(
+                    ConfigManager.Config.APIKeys.OpenAI_APIKeyLocation,
+                    "missing open ai API key!");
+            }
+
+            OpenAIBase ret = new OpenAIBase(apiKey, OpenAISemaphore);
 
             // processing, so no history and allows concurrency
             ret.DiscreteParameter("PromptDepth").Value = 0;
@@ -136,6 +149,7 @@ namespace Agents
             } else if (model == LLM.ChatGPT4o_mini)
             {
                 ret.StringParameters["model"] = "gpt-4o-mini";
+
                 ret.DiscreteParameter("ContextTokens").Value  = 128000;
                 ret.DiscreteParameter("ResponseTokens").Value = 4000;
             }

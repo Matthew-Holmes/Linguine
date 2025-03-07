@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,28 +13,29 @@ namespace LearningExtraction
 {
     public static class StatementEngineFactory
     {
-        public static StatementEngine BuildStatementEngine(API_Keys keys, ExternalDictionary dictionary)
+        public static StatementEngine BuildStatementEngine(ExternalDictionary dictionary)
         {
+            LanguageCode targetLanguage = ConfigManager.Config.Languages.TargetLanguage;
+
             StatementEngine ret = new StatementEngine();
 
-            ret.ToStatementsDecomposer   = TextDecomposerFactory.MakeStatementsDecomposer(keys, ConfigManager.TargetLanguage);
-            ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(keys, ConfigManager.TargetLanguage);
+            ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(targetLanguage);
 
             // these aren't actually used any more!
             ret.ContextChangeIdentificationAgent = AgentFactory.GenerateProcessingAgent(
-                keys, AgentTask.ContextChangeIdentification, ConfigManager.TargetLanguage);
+                AgentTask.ContextChangeIdentification, targetLanguage);
 
             ret.ContextUpdateAgent = AgentFactory.GenerateProcessingAgent(
-                keys, AgentTask.ContextUpdating, ConfigManager.TargetLanguage);
+                AgentTask.ContextUpdating, targetLanguage);
 
             ret.UnitRooter = new UnitRooter();
             ret.UnitRooter.Agent = AgentFactory.GenerateProcessingAgent(
-                keys, AgentTask.UnitRooting, ConfigManager.TargetLanguage, true);
+                AgentTask.UnitRooting, targetLanguage, true);
 
             // keep this on the cheaper API for now (?) since is the most expensive part
             ret.DefinitionResolver = new DefinitionResolver();
             ret.DefinitionResolver.Agent = AgentFactory.GenerateProcessingAgent(
-                keys, AgentTask.DefinitionResolution, ConfigManager.TargetLanguage);
+                AgentTask.DefinitionResolution, targetLanguage);
 
             ret.DefinitionResolver.Dictionary = dictionary; // maybe make an interface for what the dictionary is used for here
 

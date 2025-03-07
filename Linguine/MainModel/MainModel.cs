@@ -25,14 +25,7 @@ namespace Linguine
         public LinguineDbContextFactory LinguineFactory { get => _linguineDbContextFactory; }
         
 
-        public MainModel()
-        {
-            if (!ConfigFileHandler.LoadConfig())
-            {
-                // this is the only exception that should be possibly to be thrown during main model construction
-                throw new FileNotFoundException("Couldn't find config");
-            }
-        }
+        public MainModel() { }
 
         public void BeginLoading()
         {
@@ -43,12 +36,14 @@ namespace Linguine
         {
             try
             {
-                if (ConfigManager.DatabaseDirectory != null)
+                Config config = ConfigManager.Config;
+
+                if (config.DatabaseDirectory != null)
                 {
-                    Directory.CreateDirectory(ConfigManager.DatabaseDirectory);
+                    Directory.CreateDirectory(config.DatabaseDirectory);
                 }
 
-                _linguineDbContextFactory = new LinguineDbContextFactory(ConfigManager.ConnectionString);
+                _linguineDbContextFactory = new LinguineDbContextFactory(config.GetDatabaseString());
                 var context = LinguineFactory.CreateDbContext();
                 context.Database.EnsureCreated();
                 context.Dispose();
