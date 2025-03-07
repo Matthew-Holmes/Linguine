@@ -54,11 +54,16 @@ namespace Linguine
             return Tuple.Create<String?, List<String>?, bool, int>(chunk, previousContext, isTail, firstChar);
         }
 
-        // TODO - should this return bool for success?
-        internal async Task ProcessNextChunk(int sessionID)
+        internal async Task ProcessNextChunkForSession(int sessionID)
         {
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
+
+            await ProcessNextChunk(tm);
+        }
+
+        internal async Task ProcessNextChunk(TextualMedia tm)
+        {
 
             // determine the chunk of text to process next
             (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
@@ -77,9 +82,10 @@ namespace Linguine
 
             if (ConfigManager.Config.LearningForeignLanguage())
             {
-                await ParseDefinitions(statements);              
+                await ParseDefinitions(statements);
             }
         }
+
         private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)
         {
             List<StatementBuilder> builders = protos.Select(p => new StatementBuilder(p)).ToList();

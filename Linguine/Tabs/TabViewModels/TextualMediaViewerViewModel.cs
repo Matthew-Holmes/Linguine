@@ -231,7 +231,7 @@ namespace Linguine.Tabs
         {
             try
             {
-                await _model.ProcessNextChunk(SessionID);
+                await _model.ProcessNextChunkForSession(SessionID);
             }
             catch (Agents.MissingAPIKeyException e)
             {
