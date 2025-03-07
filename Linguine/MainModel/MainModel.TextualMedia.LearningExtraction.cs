@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
+using System.Threading;
+using System.Windows.Controls;
 
 namespace Linguine
 {
@@ -54,36 +56,54 @@ namespace Linguine
             return Tuple.Create<String?, List<String>?, bool, int>(chunk, previousContext, isTail, firstChar);
         }
 
+        // TODO - make use of the cancellation token?
         internal async Task ProcessNextChunkForSession(int sessionID)
         {
             TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
             if (tm is null) { return; }
 
-            await ProcessNextChunk(tm);
+            await ProcessNextChunk(tm, new CancellationToken());
         }
 
-        internal async Task ProcessNextChunk(TextualMedia tm)
+        internal async Task<decimal> ProcessNextChunk(TextualMedia tm, CancellationToken token)
         {
 
             // determine the chunk of text to process next
             (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
-            if (text is null || context is null) { return; }
+            if (text is null || context is null) { return 0.0m; }
 
-            List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail);
+            List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail, token);
+
+            if (token.IsCancellationRequested)
+            {
+                Log.Information("cancelled processing step before forming proto statements");
+                return 0.0m;
+            }
 
             if (builders is null)
             {
-                return;
+                return 0.0m;
             }
 
             List<Statement> statements = FromProtoStatements(builders, tm, firstChar);
 
             StatementManager.AddStatements(statements);
 
+            if (token.IsCancellationRequested)
+            {
+                Log.Warning("processing step added statements, but didn't parse definitions!, cancellation requested too early");
+                   
+                // throw new NotImplementedException("can't resolve this yet!");
+
+                // lets just carry on, since throwing is a bit much
+            }
+
             if (ConfigManager.Config.LearningForeignLanguage())
             {
                 await ParseDefinitions(statements);
             }
+
+            return 100.0m * (decimal)((float)(statements.Last().LastCharIndex) / (float)(tm.Text.Length));
         }
 
         private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)
@@ -152,7 +172,7 @@ namespace Linguine
             }
         }
 
-        private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail)
+        private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail, CancellationToken token)
         {
             if (TextAnalyser is null)
             {
@@ -165,7 +185,12 @@ namespace Linguine
                 throw new Exception("couldn't start statement engine");
             }
 
-            List<ProtoStatement> protos = await TextAnalyser.GenerateStatementsFor(text, context, isTail);
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            List<ProtoStatement>? protos = await TextAnalyser.GenerateStatementsFor(text, context, isTail, token);
 
             return protos;
 

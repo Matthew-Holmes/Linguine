@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices.ObjectiveC;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Infrastructure
     {
         // TODO  - we may want to be able to edit terms; or even merge or insert statements
         // add those methods as reqired
-
+        private object _lock = new();
         internal StatementDatabaseEntryManager(LinguineDbContextFactory dbf) : base(dbf)
         {
         }
@@ -132,57 +133,60 @@ namespace Infrastructure
 
         internal void AddInternal(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
         {
-            // do rigorous checking so that we know the database maintains integrity
-
-            for (int i = 1; i < statementsChain.Count; i++)
+            lock (_lock)
             {
-                if (statementsChain[i].Item1.Previous != statementsChain[i - 1].Item1)
-                {
-                    throw new ArgumentException("Statements must chain");
-                }
+                // do rigorous checking so that we know the database maintains integrity
 
-                foreach (StatementDefinitionNode node in statementsChain[i].Item2)
+                for (int i = 1; i < statementsChain.Count; i++)
                 {
-                    if (node.StatementDatabaseEntry != statementsChain[i].Item1)
+                    if (statementsChain[i].Item1.Previous != statementsChain[i - 1].Item1)
                     {
-                        throw new ArgumentException("Definitions must be for respective Statements");
+                        throw new ArgumentException("Statements must chain");
+                    }
+
+                    foreach (StatementDefinitionNode node in statementsChain[i].Item2)
+                    {
+                        if (node.StatementDatabaseEntry != statementsChain[i].Item1)
+                        {
+                            throw new ArgumentException("Definitions must be for respective Statements");
+                        }
                     }
                 }
-            }
-            // now update the database
+                // now update the database
 
-            using var context = _dbf.CreateDbContext();
+                using var context = _dbf.CreateDbContext();
 
-            // Sharp edge - have to attach some properties back to the tracking graph
-            // otherwise this will throw System.InvalidOperationException
-            StatementDatabaseEntry first = statementsChain[0].Item1;
-            context.Attach(first.Parent);
-            if (first.Previous is not null)
-            {
-                context.Attach(first.Previous);
-            }
-
-
-            context.Statements.AddRange(statementsChain.Select(s => s.Item1));
-            context.SaveChanges();
-            context.ChangeTracker.Clear();
-
-            // sharper edge - since the nodes can reference the same definitions
-            // EF will try to load that twice sometimes and throw an Exception
-            // so we go the careful (but slow!) route
-            foreach (Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> pair in statementsChain)
-            {
-                foreach (StatementDefinitionNode node in pair.Item2)
+                // Sharp edge - have to attach some properties back to the tracking graph
+                // otherwise this will throw System.InvalidOperationException
+                StatementDatabaseEntry first = statementsChain[0].Item1;
+                context.Attach(first.Parent);
+                if (first.Previous is not null)
                 {
-                    if (node.DictionaryDefinition is not null)
-                    {
-                        context.Attach(node.DictionaryDefinition);
-                    }
-                    context.Attach(node.StatementDatabaseEntry);
+                    context.Attach(first.Previous);
+                }
 
-                    context.StatementDefinitions.Add(node);
-                    context.SaveChanges();
-                    context.ChangeTracker.Clear();
+
+                context.Statements.AddRange(statementsChain.Select(s => s.Item1));
+                context.SaveChanges();
+                context.ChangeTracker.Clear();
+
+                // sharper edge - since the nodes can reference the same definitions
+                // EF will try to load that twice sometimes and throw an Exception
+                // so we go the careful (but slow!) route
+                foreach (Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> pair in statementsChain)
+                {
+                    foreach (StatementDefinitionNode node in pair.Item2)
+                    {
+                        if (node.DictionaryDefinition is not null)
+                        {
+                            context.Attach(node.DictionaryDefinition);
+                        }
+                        context.Attach(node.StatementDatabaseEntry);
+
+                        context.StatementDefinitions.Add(node);
+                        context.SaveChanges();
+                        context.ChangeTracker.Clear();
+                    }
                 }
             }
         }

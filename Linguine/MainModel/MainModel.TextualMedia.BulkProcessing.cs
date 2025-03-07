@@ -1,35 +1,97 @@
 ﻿using Infrastructure;
 using Linguine.Tabs;
+using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Linguine
 {
     public partial class MainModel
     {
-        internal void StartBulkProcessing(string textName)
+        private ConcurrentDictionary<string, CancellationTokenSource> _bulkCancellations = new();
+
+        internal async Task StartBulkProcessing(string textName, Action<decimal>? progressCallback = null)
         {
             using var context = LinguineFactory.CreateDbContext();
             TextualMedia? tm = TextualMediaManager?.GetByName(textName, context) ?? null;
 
             if (tm is null)
             {
-                throw new Exception("missing textual media manager");
+                throw new Exception("Missing textual media manager");
             }
 
-            //StartBulkProcessing(tm);
+            var newCts = new CancellationTokenSource();
+
+            var oldCts = _bulkCancellations.AddOrUpdate(
+                textName,
+                _ => newCts, // if key does not exist, add new token
+                (_, existingCts) =>
+                {
+                    if (!existingCts.Token.IsCancellationRequested)
+                    {
+                        return existingCts; // already processing, do nothing
+                    }
+
+                    existingCts.Dispose(); // dispose of old token before replacing
+                    return newCts;
+                });
+
+            if (oldCts != newCts)
+            {
+                return; // a process is already running, so exit
+            }
+
+            var cts = newCts.Token;
+            var stopwatch = new Stopwatch();
+
+            try
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    stopwatch.Restart();
+                    decimal percentageComplete = await ProcessNextChunk(tm, cts);
+                    stopwatch.Stop();
+
+                    double stepTime_ms = stopwatch.Elapsed.TotalMilliseconds;
+                    double stepTime_s = stepTime_ms / 1_000.0;
+
+                    progressCallback?.Invoke(percentageComplete);
+
+                    Log.Information("Done processing step for {textName}", textName);
+                    Log.Information("Step took {stepTime_s}s", stepTime_s);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during bulk processing for {textName}", textName);
+            }
+            finally
+            {
+                _bulkCancellations.TryRemove(textName, out _);
+                newCts.Dispose();
+            }
         }
 
         internal void StopBulkProcessing(string textName)
         {
-            throw new NotImplementedException();
+            if (_bulkCancellations.TryRemove(textName, out var cts))
+            {
+                cts.Cancel();
+                cts.Dispose();
+                Log.Information("Stopped bulk processing for {textName}", textName);
+            }
+            else
+            {
+                Log.Warning("Stop bulk processing requested, but no text found: {textName}", textName);
+            }
         }
 
-        //StatementManager.IndexOffEndOfLastStatement(tm);
-       
     }
 }

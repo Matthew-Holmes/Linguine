@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,7 +63,12 @@ namespace Linguine.Tabs
 
                 if (IsProcessing)
                 {
-                    _model.StartBulkProcessing(_textName);
+                    await Task.Run(() => _model.StartBulkProcessing(
+                        _textName,
+                        progress =>
+                        { 
+                            ProcessedPercentage = PercentageHelper.TunePrecision(progress);
+                        }));
                 }
                 else
                 {

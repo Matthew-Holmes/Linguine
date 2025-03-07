@@ -8,6 +8,20 @@ namespace Helpers
 {
     public static class PercentageHelper
     {
+        public static decimal TunePrecision(decimal rawPercentage)
+        {
+            if (rawPercentage == 0m)
+                return 0m;
+
+            int oom = (int)Math.Floor(Math.Log10((double)Math.Abs(rawPercentage)));
+
+            // scale to three significant figures
+            decimal scale = (decimal)Math.Pow(10, oom);
+            decimal unscaled = Math.Round(rawPercentage / scale, 2);
+
+            return unscaled * scale;
+        }
+
         public static List<decimal> RoundDistinctPercentages(List<decimal> percentages)
         {
             // Step 1: Round to the nearest integer

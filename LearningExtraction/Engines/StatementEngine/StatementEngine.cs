@@ -12,7 +12,7 @@ namespace LearningExtraction
 {
     public interface ICanAnalyseText
     {
-        Task<List<ProtoStatement>> GenerateStatementsFor(String text, List<String> context, bool isTail);
+        Task<List<ProtoStatement>?> GenerateStatementsFor(String text, List<String> context, bool isTail, CancellationToken token);
     }
 
 
@@ -27,12 +27,14 @@ namespace LearningExtraction
         internal AgentBase          ContextChangeIdentificationAgent    { get; set; }
         internal AgentBase          ContextUpdateAgent                  { get; set; }
 
-        public async Task<List<ProtoStatement>> GenerateStatementsFor(
-            String text, List<String> context, bool isTail)
+        public async Task<List<ProtoStatement>?> GenerateStatementsFor(
+            String text, List<String> context, bool isTail, CancellationToken token)
         {
             List<ProtoStatementBuilder> builders = new List<ProtoStatementBuilder>();
 
             await FindStatementsAndPopulate(builders, text, context, isTail);
+
+            if (token.IsCancellationRequested) { return null; }
 
             //await FormContexts(builders, previousContext);
 
@@ -40,7 +42,11 @@ namespace LearningExtraction
 
             await DecomposeStatements(builders);
 
+            if (token.IsCancellationRequested) { return null; }
+
             await AttachCorrectDefinitions(builders);
+
+            if (token.IsCancellationRequested) { return null; }
 
             return builders.Select(b => b.ToProtoStatement()).ToList();
 
