@@ -31,8 +31,10 @@ namespace LearningExtraction
             return ret;
         }
 
-        public static TextDecomposer MakeUnitsDecomposer(LanguageCode lc)
+        public static TextDecomposer MakeUnitsDecomposer()
         {
+            LanguageCode lc = ConfigManager.Config.Languages.TargetLanguage;
+
             TextDecomposer ret = new TextDecomposer();
 
             ret.MaxVolumeToProcess = (int)(5000 * LanguageCodeDetails.Density(lc));

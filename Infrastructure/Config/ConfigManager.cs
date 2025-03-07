@@ -31,6 +31,8 @@ namespace Infrastructure
             ChangeToken.OnChange(
                 () => _configuration.GetReloadToken(),
                 () => OnConfigChanged());
+
+            LoadAPIKeys();
         }
 
         public static Config  Config  => _config;
@@ -55,12 +57,12 @@ namespace Infrastructure
             }
         }
 
-        private static APIKeys LoadAPIKeys()
+        private static void LoadAPIKeys()
         {
             String? openAIKey   = ReadApiKeyFromFile(_config.APIKeys.OpenAI_APIKeyLocation);
             String? deepSeekKey = ReadApiKeyFromFile(_config.APIKeys.DeepSeek_APIKeyLocation);
 
-            return new APIKeys(openAIKey, deepSeekKey);
+            _apiKeys = new APIKeys(openAIKey, deepSeekKey);
         }
 
         private static String? ReadApiKeyFromFile(string filePath)

@@ -19,7 +19,8 @@ namespace LearningExtraction
 
             StatementEngine ret = new StatementEngine();
 
-            ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer(targetLanguage);
+            ret.ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer();
+            ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer();
 
             // these aren't actually used any more!
             ret.ContextChangeIdentificationAgent = AgentFactory.GenerateProcessingAgent(
