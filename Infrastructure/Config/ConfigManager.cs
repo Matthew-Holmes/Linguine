@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
@@ -106,6 +107,22 @@ namespace Infrastructure
 
                 Log.Information("config file updated");
             }
+        }
+
+        public static Config WithNewLearnerLevel(LearnerLevel learnerLevel)
+        {
+            Dictionary<LanguageCode, LearnerLevel > toAdd = _config.Languages.LearnerLevels.ToDictionary();
+            toAdd[_config.Languages.TargetLanguage] = learnerLevel;
+
+            IReadOnlyDictionary<LanguageCode, LearnerLevel> toAddImm = toAdd.ToImmutableDictionary();
+
+            return _config with 
+            { 
+                Languages = _config.Languages with 
+                { 
+                    LearnerLevels = toAddImm
+                } 
+            };
         }
     }
 }

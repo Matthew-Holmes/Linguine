@@ -3,23 +3,18 @@ using System.Collections.Generic;
 
 namespace Infrastructure
 {
-    public class Config
+    public record Config
     {
         public APIKeysConfig                    APIKeys            { get; set; } = new();
         public LanguageConfig                   Languages          { get; set; } = new();
-        public Dictionary<LanguageCode, string> ConnectionStrings  { get; set; } = new();
-
         public String                           DatabaseDirectory  { get; }      = "Store";
         public String                           FilestoreDirectory { get; }      = "Filestore";
+
+        public IReadOnlyDictionary<LanguageCode, string> ConnectionStrings { get; set; } = new Dictionary<LanguageCode, string>();
 
         public LearnerLevel GetLearnerLevel()
         {
             return Languages.LearnerLevels[Languages.TargetLanguage];
-        }
-
-        public void SetLearnerLevel(LearnerLevel ll)
-        {
-            Languages.LearnerLevels[Languages.TargetLanguage] = ll;
         }
 
         public String GetDatabaseString()
@@ -34,7 +29,7 @@ namespace Infrastructure
 
     }
 
-    public class APIKeysConfig
+    public record APIKeysConfig
     {
         public string OpenAI_APIKeyLocation   { get; set; } = string.Empty;
         public string DeepSeek_APIKeyLocation { get; set; } = string.Empty;
@@ -42,10 +37,10 @@ namespace Infrastructure
         public string APIKeyDirectory         { get; }      = "Filestore/APIKeys";
     }
 
-    public class LanguageConfig
+    public record LanguageConfig
     {
         public LanguageCode                           NativeLanguage { get; set; }
         public LanguageCode                           TargetLanguage { get; set; }
-        public Dictionary<LanguageCode, LearnerLevel> LearnerLevels  { get; set; } = new();
+        public IReadOnlyDictionary<LanguageCode, LearnerLevel> LearnerLevels  { get; set; } = new Dictionary<LanguageCode, LearnerLevel>();
     }
 }

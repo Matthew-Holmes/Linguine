@@ -1,5 +1,6 @@
 ﻿using Infrastructure;
 using Linguine.Helpers;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.CodeDom.Compiler;
@@ -45,9 +46,15 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                Config config = ConfigManager.Config;
-                config.Languages.TargetLanguage = _languageCodes[value];
-                ConfigManager.SaveConfig(config);
+                Config newconfig = ConfigManager.Config with
+                {
+                    Languages = ConfigManager.Config.Languages with
+                    {
+                        TargetLanguage = _languageCodes[value]
+                    }
+                };
+
+                ConfigManager.SaveConfig(newconfig);
 
                 _targetLanguageIndex = value;
 
@@ -85,9 +92,8 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                Config config = ConfigManager.Config;
-                config.SetLearnerLevel(_learnerLevels[value]);
-                ConfigManager.SaveConfig(config);
+                Config newConfig = ConfigManager.WithNewLearnerLevel(_learnerLevels[value]);
+                ConfigManager.SaveConfig(newConfig);
 
                 _learnerLevelIndex = value;
 
@@ -101,8 +107,15 @@ namespace Linguine.Tabs
 
             if (newNative != config.Languages.NativeLanguage)
             {
-                config.Languages.NativeLanguage = newNative;
-                ConfigManager.SaveConfig(config);
+                Config newconfig = config with
+                {
+                    Languages = config.Languages with
+                    {
+                        NativeLanguage = newNative
+                    }
+                };
+
+                ConfigManager.SaveConfig(newconfig);
 
                 LanguageOptions = LanguageCodeDetails.LanguageNames(newNative);
             }
