@@ -1,5 +1,6 @@
 ﻿using Infrastructure;
 using Linguine.Tabs;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
@@ -7,15 +8,49 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.SocialInfo;
 
 namespace Linguine
 {
     public partial class MainModel
     {
         private ConcurrentDictionary<string, CancellationTokenSource> _bulkCancellations = new();
+        
+        internal record ProcessingJobInfo(String TextName, decimal CurrentPct, bool IsProcessing);
+
+        internal ProcessingJobInfo GetProcessingInfo(String name, bool isProcessing, LinguineDbContext context)
+        {
+            TextualMedia? tm = TextualMediaManager.GetByName(name, context);
+
+            if (tm is null)
+            {
+                throw new Exception($"unexpected textual media name: {name}");
+            }
+
+            int sofar = StatementManager.IndexOffEndOfLastStatement(tm, context);
+            decimal pct = 100.0m * ((decimal)(sofar) / (decimal)(tm.Text.Length));
+
+            return new ProcessingJobInfo(name, pct, isProcessing);
+        }
+
+        internal List<ProcessingJobInfo> GetProcessingJobs()
+        {
+            List<ProcessingJobInfo> ret = new();
+
+            using LinguineDbContext context = LinguineFactory.CreateDbContext();
+
+            foreach (KeyValuePair<string, CancellationTokenSource> kvp in _bulkCancellations)
+            {
+                bool isProcessing = !kvp.Value.IsCancellationRequested;
+
+                ret.Add(GetProcessingInfo(kvp.Key, isProcessing, context));
+            }
+            return ret;
+        }
 
         internal async Task StartBulkProcessing(string textName, Action<decimal>? progressCallback = null)
         {
@@ -31,12 +66,12 @@ namespace Linguine
 
             var oldCts = _bulkCancellations.AddOrUpdate(
                 textName,
-                _ => newCts, // if key does not exist, add new token
+                 _               => newCts, // if key does not exist, add new token
                 (_, existingCts) =>
                 {
                     if (!existingCts.Token.IsCancellationRequested)
                     {
-                        return existingCts; // already processing, do nothing
+                        return existingCts; // already processing, do nothing, will short circuit next
                     }
 
                     existingCts.Dispose(); // dispose of old token before replacing
@@ -45,7 +80,8 @@ namespace Linguine
 
             if (oldCts != newCts)
             {
-                return; // a process is already running, so exit
+                // short circuit, since don't need to do anything!
+                return;
             }
 
             var cts = newCts.Token;

@@ -38,14 +38,6 @@
                             Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </StackPanel>
 
-                <Grid Grid.Row="1">
-                    <Button Content="{Binding SelectedTextName}" ContentStringFormat="Process {0}"
-                            Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"
-                            Command="{Binding ProcessSelectedTextCommand}"
-                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Padding="10,5"/>        
-                </Grid>
-
 
                 <StackPanel Grid.Row="2">
                     <ItemsControl ItemsSource="{Binding ProcessingJobs}">

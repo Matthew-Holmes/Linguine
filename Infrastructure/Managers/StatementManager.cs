@@ -47,9 +47,8 @@ namespace Infrastructure
             return StatementFactory.FromDatabaseEntries(raw).Skip(bookMark).ToList();
         }
 
-        public int IndexOffEndOfLastStatement(TextualMedia tm)
+        public int IndexOffEndOfLastStatement(TextualMedia tm, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
             context.Attach(tm);
             var statements = context.Statements.Where(s => s.Parent == tm);
             if (!statements.Any())
@@ -57,6 +56,12 @@ namespace Infrastructure
                 return -1;
             }
             return statements.Max(s => s.LastCharIndex) + 1;
+        }
+
+        public int IndexOffEndOfLastStatement(TextualMedia tm)
+        {
+            using var context = _dbf.CreateDbContext();
+            return IndexOffEndOfLastStatement(tm, context);
         }
 
         public void AddInitialStatements(List<Statement> statements)

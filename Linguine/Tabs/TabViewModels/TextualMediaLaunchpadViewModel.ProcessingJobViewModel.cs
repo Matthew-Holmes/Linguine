@@ -10,6 +10,7 @@ namespace Linguine.Tabs
 {
     internal partial class TextualMediaLaunchpadViewModel
     {
+
         internal class ProcessingJobViewModel : ViewModelBase
         {
             private decimal   _processedPercentage;
@@ -29,14 +30,19 @@ namespace Linguine.Tabs
                 _isProcessing        = isProcessing;
 
                 ToggleProcessingCommand = new RelayCommand(ToggleProcessing);
+            }
 
+            public ProcessingJobViewModel(MainModel model, MainModel.ProcessingJobInfo info)
+                : this(model, info.TextName, info.CurrentPct, info.IsProcessing)
+            {
+                
             }
 
             public string TextName { get => _textName; }
 
             public decimal ProcessedPercentage
             {
-                get => _processedPercentage;
+                get => PercentageHelper.TunePrecision(_processedPercentage);
                 set { _processedPercentage = value; OnPropertyChanged(); }
             }
 
@@ -67,7 +73,7 @@ namespace Linguine.Tabs
                         _textName,
                         progress =>
                         { 
-                            ProcessedPercentage = PercentageHelper.TunePrecision(progress);
+                            ProcessedPercentage = progress;
                         }));
                 }
                 else

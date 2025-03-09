@@ -24,13 +24,12 @@ namespace Linguine.Tabs
     {
         private TextualMediaImporter _loader;
 
-        private bool _showNewSessionButton = false;
-        private string _selectedTextName;
-        private List<string> _availableSessions;
-        private List<Tuple<bool, decimal>> _sessionInfo;
+        private bool                        _showNewSessionButton = false;
+        private string                      _selectedTextName;
+        private List<string>                _availableSessions;
+        private List<Tuple<bool, decimal>>  _sessionInfo;
 
         private ObservableCollection<ProcessingJobViewModel> _processingJobs = new();
-
 
         public ICommand ImportNewCommand { get; private set; }
         public ICommand NewSessionCommand { get; private set; }
@@ -46,8 +45,27 @@ namespace Linguine.Tabs
                 LoadSessionsFor(value);
                 OnPropertyChanged(nameof(SelectedTextName));
                 ShowSessions = true;
+                BulkProcessingViewLogicFor(value);
             }
         }
+
+        private void BulkProcessingViewLogicFor(String textName)
+        {
+            if (ProcessingJobs.Any(vm => vm.TextName == textName))
+            {
+                return;
+            }
+            else
+            {
+                using var context = _model.LinguineFactory.CreateDbContext();
+                MainModel.ProcessingJobInfo info = _model.GetProcessingInfo(textName, false, context);
+                var newVm = new ProcessingJobViewModel(_model, info);
+
+                _processingJobs.Insert(0, newVm);
+                OnPropertyChanged(nameof(ProcessingJobs));
+            }
+        }
+
 
         public bool ShowSessions
         {
@@ -161,18 +179,10 @@ namespace Linguine.Tabs
 
             NewSessionCommand = new RelayCommand(() => NewSession());
 
-            //_processingJobs = _model.GetProcessingJobs();
-
-            _processingJobs.Add(new ProcessingJobViewModel(
-                _model,
-                "Moby Dick",
-                20.0m,
-                false));
-            _processingJobs.Add(new ProcessingJobViewModel(
-                _model,
-                "Pride and Prejudice",
-                25.0m,
-                true));
+            _processingJobs = new ObservableCollection<ProcessingJobViewModel>(
+                _model.GetProcessingJobs()
+                      .Select(info => new ProcessingJobViewModel(model, info))
+                      .ToList());
         }
 
         private void NewSession()
