@@ -7,6 +7,8 @@ namespace Infrastructure
     {
         public APIKeysConfig                    APIKeys            { get; set; } = new();
         public LanguageConfig                   Languages          { get; set; } = new();
+
+        public GimmicksConfig                   Gimmicks           { get; set; } = new();
         public String                           DatabaseDirectory  { get; }      = "Store";
         public String                           FilestoreDirectory { get; }      = "Filestore";
 
@@ -43,4 +45,11 @@ namespace Infrastructure
         public LanguageCode                           TargetLanguage { get; set; }
         public IReadOnlyDictionary<LanguageCode, LearnerLevel> LearnerLevels  { get; set; } = new Dictionary<LanguageCode, LearnerLevel>();
     }
+
+    public record GimmicksConfig
+    {
+        public IReadOnlyDictionary<LanguageCode, decimal> TimeToProcessSeconds { get; set; } = new Dictionary<LanguageCode, decimal>();
+        public IReadOnlyDictionary<LanguageCode, int> CharsProcessedPerStep { get; set; } = new Dictionary<LanguageCode, int>();
+    }
+
 }

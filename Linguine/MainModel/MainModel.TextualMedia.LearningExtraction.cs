@@ -65,24 +65,24 @@ namespace Linguine
             await ProcessNextChunk(tm, new CancellationToken());
         }
 
-        internal async Task<decimal> ProcessNextChunk(TextualMedia tm, CancellationToken token)
+        internal async Task<int> ProcessNextChunk(TextualMedia tm, CancellationToken token)
         {
 
             // determine the chunk of text to process next
             (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
-            if (text is null || context is null) { return 0.0m; }
+            if (text is null || context is null) { return 0; }
 
             List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail, token);
 
             if (token.IsCancellationRequested)
             {
                 Log.Information("cancelled processing step before forming proto statements");
-                return 0.0m;
+                return 0;
             }
 
             if (builders is null)
             {
-                return 0.0m;
+                return 0;
             }
 
             List<Statement> statements = FromProtoStatements(builders, tm, firstChar);
@@ -103,7 +103,7 @@ namespace Linguine
                 await ParseDefinitions(statements);
             }
 
-            return 100.0m * (decimal)((float)(statements.Last().LastCharIndex) / (float)(tm.Text.Length));
+            return statements.Last().LastCharIndex;
         }
 
         private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)

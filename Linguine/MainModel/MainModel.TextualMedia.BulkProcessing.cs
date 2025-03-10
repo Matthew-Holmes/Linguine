@@ -20,9 +20,9 @@ namespace Linguine
     {
         private ConcurrentDictionary<string, CancellationTokenSource> _bulkCancellations = new();
         
-        internal record ProcessingJobInfo(String TextName, decimal CurrentPct, bool IsProcessing);
+        internal record ProcessingJobInfo(String TextName, int Total, int Complete, decimal SecondsPerStep, int CharPerStep, bool IsProcessing);
 
-        internal ProcessingJobInfo GetProcessingInfo(String name, bool isProcessing, LinguineDbContext context)
+        internal ProcessingJobInfo GetProcessingInfo(String name, bool isProcessing, decimal secondsPerStep, int charPerStep, LinguineDbContext context)
         {
             TextualMedia? tm = TextualMediaManager.GetByName(name, context);
 
@@ -32,9 +32,9 @@ namespace Linguine
             }
 
             int sofar = StatementManager.IndexOffEndOfLastStatement(tm, context);
-            decimal pct = 100.0m * ((decimal)(sofar) / (decimal)(tm.Text.Length));
 
-            return new ProcessingJobInfo(name, pct, isProcessing);
+
+            return new ProcessingJobInfo(name, tm.Text.Length, sofar, secondsPerStep, charPerStep, isProcessing);
         }
 
         internal List<ProcessingJobInfo> GetProcessingJobs()
@@ -43,16 +43,21 @@ namespace Linguine
 
             using LinguineDbContext context = LinguineFactory.CreateDbContext();
 
+            LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
+
+            decimal timePerStep = ConfigManager.Config.Gimmicks.TimeToProcessSeconds[target];
+            int     charPerStep = ConfigManager.Config.Gimmicks.CharsProcessedPerStep[target];
+
             foreach (KeyValuePair<string, CancellationTokenSource> kvp in _bulkCancellations)
             {
                 bool isProcessing = !kvp.Value.IsCancellationRequested;
 
-                ret.Add(GetProcessingInfo(kvp.Key, isProcessing, context));
+                ret.Add(GetProcessingInfo(kvp.Key, isProcessing, timePerStep, charPerStep, context));
             }
             return ret;
         }
 
-        internal async Task StartBulkProcessing(string textName, Action<decimal>? progressCallback = null)
+        internal async Task StartBulkProcessing(string textName, Action<int>? progressCallback = null)
         {
             using var context = LinguineFactory.CreateDbContext();
             TextualMedia? tm = TextualMediaManager?.GetByName(textName, context) ?? null;
@@ -92,13 +97,13 @@ namespace Linguine
                 while (!cts.IsCancellationRequested)
                 {
                     stopwatch.Restart();
-                    decimal percentageComplete = await ProcessNextChunk(tm, cts);
+                    int completed = await ProcessNextChunk(tm, cts);
                     stopwatch.Stop();
 
                     double stepTime_ms = stopwatch.Elapsed.TotalMilliseconds;
                     double stepTime_s = stepTime_ms / 1_000.0;
 
-                    progressCallback?.Invoke(percentageComplete);
+                    progressCallback?.Invoke(completed);
 
                     Log.Information("Done processing step for {textName}", textName);
                     Log.Information("Step took {stepTime_s}s", stepTime_s);

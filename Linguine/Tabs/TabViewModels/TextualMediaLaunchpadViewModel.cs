@@ -57,8 +57,14 @@ namespace Linguine.Tabs
             }
             else
             {
+                LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
+
+                decimal timePerStep = ConfigManager.Config.Gimmicks.TimeToProcessSeconds[target];
+                int charPerStep = ConfigManager.Config.Gimmicks.CharsProcessedPerStep[target];
+
                 using var context = _model.LinguineFactory.CreateDbContext();
-                MainModel.ProcessingJobInfo info = _model.GetProcessingInfo(textName, false, context);
+                MainModel.ProcessingJobInfo info = _model.GetProcessingInfo(
+                    textName, false, timePerStep, charPerStep, context);
                 var newVm = new ProcessingJobViewModel(_model, info);
 
                 _processingJobs.Insert(0, newVm);
