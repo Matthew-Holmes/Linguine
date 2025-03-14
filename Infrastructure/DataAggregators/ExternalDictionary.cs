@@ -21,6 +21,29 @@ namespace Infrastructure
             _dbf = dbf;   
         }
 
+        public DictionaryDefinition GetRandomDefinition()
+        {
+            using var context = _dbf.CreateDbContext();
+            int minId = context.DictionaryDefinitions.Min(t => t.ID);
+            int maxId = context.DictionaryDefinitions.Max(t => t.ID);
+
+            Random rnd = new Random();
+            int randomId = rnd.Next(minId, maxId + 1);
+
+            DictionaryDefinition? ret = null;
+
+            do
+            {
+                // will handle missing data
+                randomId = rnd.Next(minId, maxId + 1);
+                ret = context.DictionaryDefinitions.FirstOrDefault(t => t.ID == randomId);
+            }
+            while (ret == null);
+
+
+            return ret;
+        }
+
         public List<DictionaryDefinition> TryGetDefinition(String word)
         {
             using var context = _dbf.CreateDbContext();

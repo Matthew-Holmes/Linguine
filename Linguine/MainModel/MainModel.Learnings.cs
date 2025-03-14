@@ -1,17 +1,78 @@
 ﻿using Infrastructure;
+using Learning;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Linguine
 {
+    public record DefinitionForTesting(String prompt, String correctAnswer);
+
     public partial class MainModel
     {
         // TODO - this should be a lot more fleshed out
         // but for now we'll just a basic add and export functionality
+
+        private DefinitionLearningService? _defLearningService = null;
+
+        private void InitialiseDefinitionLearningService()
+        {
+            if (HasManagers == false)
+            {
+                LoadManagers();
+            }
+
+            List<String> dictionaries = ExternalDictionaryManager.AvailableDictionaries();
+
+            if (dictionaries.Count > 1)
+            {
+                throw new NotImplementedException("need to implement multiple dictionaries");
+            }
+
+            if (dictionaries.Count == 0)
+            {
+                Log.Error("tried to initialise definition service, but no definitions!");
+                return;
+            }
+
+            ExternalDictionary? dictionary = ExternalDictionaryManager.GetDictionary(dictionaries.First());
+
+            if (dictionary is null)
+            {
+                Log.Error("failed to load the dictionary");
+                return;
+            }
+
+
+            _defLearningService = new DefinitionLearningService(
+                dictionary, ParsedDictionaryDefinitionManager, StatementManager);
+
+        }
+
+
+        public DefinitionForTesting GetRandomDefinitionForTesting()
+        {
+            if (_defLearningService is null)
+            {
+                InitialiseDefinitionLearningService();
+            }
+
+            if (_defLearningService is null)
+            {
+                Log.Error("tried and failed to load definition learning service");
+                throw new Exception();
+            }
+
+            DictionaryDefinition toTest = _defLearningService.GetRandomDefinition();
+
+            return new DefinitionForTesting(toTest.Word, toTest.Definition);
+        }
+
 
         public List<DictionaryDefinition> LearnerList { get; private set; } = new List<DictionaryDefinition>();
 

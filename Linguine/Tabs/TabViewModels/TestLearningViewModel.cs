@@ -25,11 +25,18 @@ namespace Linguine.Tabs
             SubmitAnswerCommand        = new RelayCommand(() => SubmitAnswer());
             SubmissionCorrectCommand   = new RelayCommand(() => HandleAnswerWasCorrect());
             SubmissionIncorrectCommand = new RelayCommand(() => HandleAnswerWasIncorrect());
+
+            _definitionForTesting = model.GetRandomDefinitionForTesting();
+
+            Prompt = _definitionForTesting.prompt;
+            CorrectAnswer = _definitionForTesting.correctAnswer;
         }
 
         private String _prompt;
         private String _correctAnswer;
-        private string usersAnswer;
+        private String _usersAnswer;
+
+        private DefinitionForTesting _definitionForTesting;
 
         public String Prompt
         {
@@ -53,10 +60,10 @@ namespace Linguine.Tabs
 
         public String UsersAnswer
         {
-            get => usersAnswer;
+            get => _usersAnswer;
             set 
             { 
-                usersAnswer = value;
+                _usersAnswer = value;
                 OnPropertyChanged(nameof(UsersAnswer));
             }
         }
