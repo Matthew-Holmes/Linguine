@@ -21,7 +21,12 @@ namespace Linguine.Tabs.WPF
 
             if (item is Tabs.TextualMediaViewerViewModel)
                 return element.FindResource("TextualMediaViewerTabTemplate") as DataTemplate;
-            return null;
+
+            if (item is Tabs.TestLearningViewModel)
+                return element.FindResource("TestLearningTabTemplate") as DataTemplate;
+
+            if (item is null)
+                return null;
 
             throw new NotImplementedException();
         }

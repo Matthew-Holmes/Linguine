@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="Tabs/WPF/TabViews/ConfigManagerTabTemplate.xaml"/>
                 <ResourceDictionary Source="Tabs/WPF/TabViews/TextualMediaViewerTabTemplate.xaml"/>
                 <ResourceDictionary Source="Tabs/WPF/TabViews/TextualMediaLaunchpadTabTemplate.xaml"/>
+                <ResourceDictionary Source="Tabs/WPF/TabViews/TestLearningTabTemplate.xaml"/>
                 <!-- Add other Resource Dictionaries as needed -->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

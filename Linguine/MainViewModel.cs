@@ -150,10 +150,13 @@ namespace Linguine
                 new RelayCommand(() => Add(new TextualMediaLaunchpadViewModel(_UIcomponents, Model, this)));
             OpenConfigManagerTabCommand  = 
                 new RelayCommand(() => AddUniquely<ConfigManagerViewModel>(_UIcomponents,Model, this));
+            OpenTestLearningTabCommand =
+                new RelayCommand(() => AddUniquely<TestLearningViewModel>(_UIcomponents, Model, this));
 
             OnPropertyChanged(nameof(OpenHomeTabCommand));
             OnPropertyChanged(nameof(OpenTextualMediaViewerTabCommand));
             OnPropertyChanged(nameof(OpenConfigManagerTabCommand));
+            OnPropertyChanged(nameof(OpenTestLearningTabCommand));
         }
 
         private void SelectTab(TabViewModelBase tab)
@@ -166,6 +169,7 @@ namespace Linguine
         public ICommand? OpenHomeTabCommand { get; private set; }
         public ICommand? OpenConfigManagerTabCommand { get; private set; }
         public ICommand? OpenTextualMediaViewerTabCommand { get; private set; }
+        public ICommand? OpenTestLearningTabCommand { get; private set; }
         #endregion
 
         #region tab opening
