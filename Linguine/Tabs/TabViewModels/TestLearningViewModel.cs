@@ -37,10 +37,7 @@ namespace Linguine.Tabs
             SubmissionIncorrectCommand = new RelayCommand(() => HandleAnswerWasIncorrect());
             SetFocusCommand            = new RelayCommand<object>(SetFocus);
 
-            _definitionForTesting = model.GetRandomDefinitionForTesting();
-
-            Prompt = _definitionForTesting.prompt;
-            CorrectAnswer = _definitionForTesting.correctAnswer;
+            Reset();
         }
 
         private String _prompt;
@@ -117,12 +114,27 @@ namespace Linguine.Tabs
 
         private void HandleAnswerWasCorrect()
         {
-            _uiComponents.CanMessage.Show("Well done!");
+            //_uiComponents.CanMessage.Show("Well done!");
+            Reset();
         }
 
         private void HandleAnswerWasIncorrect()
         {
-            _uiComponents.CanMessage.Show("Failure");
+            //_uiComponents.CanMessage.Show("Failure");
+            Reset();
+        }
+
+        private void Reset()
+        {
+            _definitionForTesting = _model.GetRandomDefinitionForTesting();
+
+            AnswerSubmitted = false;
+            AllowSubmission = true;
+
+            UserAnswer = "";
+
+            Prompt        = _definitionForTesting.prompt;
+            CorrectAnswer = _definitionForTesting.correctAnswer;
         }
 
     }

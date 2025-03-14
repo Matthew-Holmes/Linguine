@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Infrastructure.DataClasses;
 using Learning;
 using Serilog;
 using System;
@@ -48,6 +49,8 @@ namespace Linguine
                 return;
             }
 
+            using var context = _linguineDbContextFactory.CreateDbContext();
+            DefinitionFrequencyEngine.UpdateDefinitionFrequencies(context);
 
             _defLearningService = new DefinitionLearningService(
                 dictionary, ParsedDictionaryDefinitionManager, StatementManager);
@@ -68,7 +71,8 @@ namespace Linguine
                 throw new Exception();
             }
 
-            DictionaryDefinition toTest = _defLearningService.GetRandomDefinition();
+            //DictionaryDefinition toTest = _defLearningService.GetRandomDefinition();
+            DictionaryDefinition toTest = _defLearningService.GetFrequentDefinition();
 
             return new DefinitionForTesting(toTest.Word, toTest.Definition);
         }

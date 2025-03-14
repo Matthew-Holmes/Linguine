@@ -50,6 +50,12 @@ namespace Infrastructure
             return context.DictionaryDefinitions.Where(def => def.Source == Source).Where(dd => dd.Word == word).ToList();
         }
 
+        public DictionaryDefinition? TryGetDefinitionByKey(int key)
+        {
+            using var context = _dbf.CreateDbContext();
+            return context.DictionaryDefinitions.Where(def => def.DatabasePrimaryKey == key).SingleOrDefault();
+        }
+
         public bool Contains(String word)
         {
             using var context = _dbf.CreateDbContext();
