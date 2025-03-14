@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using UserInputInterfaces;
+using System.Windows;
 
 namespace Linguine.Tabs
 {
@@ -13,7 +15,15 @@ namespace Linguine.Tabs
         public ICommand SubmitAnswerCommand        { get; private set; }
         public ICommand SubmissionCorrectCommand   { get; private set; }
         public ICommand SubmissionIncorrectCommand { get; private set; }
+        public ICommand SetFocusCommand            { get; private set; }
 
+        private void SetFocus(object param)
+        {
+            if (param is Button button)
+            {
+                Application.Current.Dispatcher.InvokeAsync(() => button.Focus());
+            }
+        }
 
         public TestLearningViewModel(UIComponents  uiComponents, 
                                      MainModel     model, 
@@ -25,6 +35,7 @@ namespace Linguine.Tabs
             SubmitAnswerCommand        = new RelayCommand(() => SubmitAnswer());
             SubmissionCorrectCommand   = new RelayCommand(() => HandleAnswerWasCorrect());
             SubmissionIncorrectCommand = new RelayCommand(() => HandleAnswerWasIncorrect());
+            SetFocusCommand            = new RelayCommand<object>(SetFocus);
 
             _definitionForTesting = model.GetRandomDefinitionForTesting();
 
@@ -62,13 +73,13 @@ namespace Linguine.Tabs
             }
         }
 
-        public String UsersAnswer
+        public String UserAnswer
         {
             get => _usersAnswer;
             set 
             { 
                 _usersAnswer = value;
-                OnPropertyChanged(nameof(UsersAnswer));
+                OnPropertyChanged(nameof(UserAnswer));
             }
         }
 
@@ -95,6 +106,11 @@ namespace Linguine.Tabs
 
         private void SubmitAnswer()
         {
+            if (UserAnswer == "" || UserAnswer is null)
+            {
+                return; // don't allow accidentaly non-input
+            }
+
             AnswerSubmitted = true;
             AllowSubmission = false;
         }

@@ -87,19 +87,30 @@
                         Visibility="{Binding AnswerSubmitted, Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <!-- Tick Button (Correct Submission) -->
-                <Button Content="✔"
+                <Button x:Name="TickButton"
+                        Content="✔"
                         FontSize="18"
                         Width="50"
                         Height="40"
                         Margin="5"
                         Command="{Binding SubmissionCorrectCommand}">
                     <Button.InputBindings>
-                        <KeyBinding Command="{Binding SubmissionCorrectCommand}" Key="Enter"/>
+                        <KeyBinding Command="{Binding SubmissionIncorrectCommand}" Key="Back"/>
                     </Button.InputBindings>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AnswerSubmitted}" Value="True">
+                                    <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=TickButton}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
 
                 <!-- Cross Button (Incorrect Submission) -->
-                <Button Content="✖"
+                <Button x:Name="CrossButton"
+                        Content="✖"
                         FontSize="18"
                         Width="50"
                         Height="40"
@@ -110,7 +121,6 @@
                         <KeyBinding Command="{Binding SubmissionIncorrectCommand}" Key="Back"/>
                     </Button.InputBindings>
                 </Button>
-
             </StackPanel>
 
         </Grid>
