@@ -101,12 +101,12 @@ namespace Linguine.Tabs
 
         private void HandleAnswerWasCorrect()
         {
-            throw new NotImplementedException();
+            _uiComponents.CanMessage.Show("Well done!");
         }
 
         private void HandleAnswerWasIncorrect()
         {
-            throw new NotImplementedException();
+            _uiComponents.CanMessage.Show("Failure");
         }
 
     }
