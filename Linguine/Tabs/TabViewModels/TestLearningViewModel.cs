@@ -35,6 +35,10 @@ namespace Linguine.Tabs
         private String _prompt;
         private String _correctAnswer;
         private String _usersAnswer;
+        private bool   _answerSubmitted = false;
+        private bool  _allowSubmission = true;
+
+
 
         private DefinitionForTesting _definitionForTesting;
 
@@ -68,9 +72,31 @@ namespace Linguine.Tabs
             }
         }
 
+        public bool AnswerSubmitted 
+        {   get => _answerSubmitted;
+            set 
+            { 
+                _answerSubmitted = value;
+                OnPropertyChanged(nameof(AnswerSubmitted));
+            }
+        }
+
+        public bool AllowSubmission
+        {
+            get => _allowSubmission;
+            set 
+            { 
+                _allowSubmission = value;
+                OnPropertyChanged(nameof(AllowSubmission));
+            }
+        }
+
+
+
         private void SubmitAnswer()
         {
-            throw new NotImplementedException();
+            AnswerSubmitted = true;
+            AllowSubmission = false;
         }
 
         private void HandleAnswerWasCorrect()
