@@ -65,6 +65,10 @@ namespace Infrastructure
 
         public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
      
+        public LinguineDbContext()
+        {
+            _connectionString = "dummy_for_migrations";
+        }
 
         public LinguineDbContext(String connectionString)
         {
