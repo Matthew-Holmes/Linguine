@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace Infrastructure
 {
-    public class LinguineDbContextFactory
+    public class LinguineDbContextFactory 
     {
         private readonly String _connString;
 

@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using Serilog;
 using System.Diagnostics;
+using Infrastructure.DataClasses;
 
 namespace Infrastructure
 {
@@ -64,7 +65,8 @@ namespace Infrastructure
         public DbSet<StatementDefinitionNode> StatementDefinitions { get; set; }
 
         public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
-     
+        public DbSet<TestRecord> TestRecords { get; set; }
+
         public LinguineDbContext()
         {
             _connectionString = "dummy_for_migrations";
@@ -149,6 +151,11 @@ namespace Infrastructure
                 .ValueGeneratedOnAdd();
             modelBuilder.Entity<ParsedDictionaryDefinition>()
                 .HasOne(e => e.CoreDefinition)
+                .WithMany()
+                .HasForeignKey(e => e.DictionaryDefinitionKey);
+
+            modelBuilder.Entity<TestRecord>()
+                .HasOne(e => e.Definition)
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
 
