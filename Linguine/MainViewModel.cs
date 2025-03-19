@@ -151,7 +151,7 @@ namespace Linguine
             OpenConfigManagerTabCommand  = 
                 new RelayCommand(() => AddUniquely<ConfigManagerViewModel>(_UIcomponents,Model, this));
             OpenTestLearningTabCommand =
-                new RelayCommand(() => AddUniquely<TestLearningViewModel>(_UIcomponents, Model, this));
+                new RelayCommand(() => AddUniquely<TestLearningLaunchpadViewModel>(_UIcomponents, Model, this));
 
             OnPropertyChanged(nameof(OpenHomeTabCommand));
             OnPropertyChanged(nameof(OpenTextualMediaViewerTabCommand));

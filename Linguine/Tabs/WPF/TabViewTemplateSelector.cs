@@ -25,6 +25,9 @@ namespace Linguine.Tabs.WPF
             if (item is Tabs.TestLearningViewModel)
                 return element.FindResource("TestLearningTabTemplate") as DataTemplate;
 
+            if (item is Tabs.TestLearningLaunchpadViewModel)
+                return element.FindResource("TestLearningLaunchpadTabTemplate") as DataTemplate;
+
             if (item is null)
                 return null;
 
