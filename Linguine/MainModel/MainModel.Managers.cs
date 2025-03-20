@@ -30,6 +30,11 @@ namespace Linguine
             HasManagers = true;
         }
 
+        private void LoadServices()
+        {
+            InitialiseDefinitionLearningService();
+        }
+
         public TextualMediaManager TextualMediaManager
         {
             get

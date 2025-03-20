@@ -17,7 +17,12 @@ namespace Infrastructure.DataClasses
             // TODO - when this gets slow, we should cache them per textual media
             // then only update the ones that have changed (timestamps/change tracker)
 
-            SaveDefinitionFrequenciesToCsv(context, "freqs.csv"); // TODO - remove when finished analysis!
+            //SaveDefinitionFrequenciesToCsv(context, "freqs.csv"); // TODO - remove when finished analysis!
+
+            if (!context.StatementDefinitions.Any())
+            {
+                DefinitionFrequencies = new Dictionary<int, int>().AsReadOnly();
+            }
 
             var frequencyTable = context.StatementDefinitions
                 .GroupBy(node => node.DefinitionKey)

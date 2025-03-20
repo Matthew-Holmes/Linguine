@@ -48,7 +48,8 @@ namespace Linguine
                 context.Database.EnsureCreated();
                 context.Dispose();
 
-                LoadManagers(); 
+                LoadManagers();
+                LoadServices();
 
                 Loaded?.Invoke(this, EventArgs.Empty);
             }
@@ -57,6 +58,8 @@ namespace Linguine
                 LoadingFailed?.Invoke(this, EventArgs.Empty);
             }
         }
+
+
 
         public void Dispose()
         {

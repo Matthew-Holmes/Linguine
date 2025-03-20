@@ -19,7 +19,13 @@ namespace Linguine
         // TODO - this should be a lot more fleshed out
         // but for now we'll just a basic add and export functionality
 
+        // TODO - this is getting a handful, need to sort out the lazy loading stuff
+        // currently I added a LoadServices method in the main loading sequence
         private DefinitionLearningService? _defLearningService = null;
+
+        public bool NeedToImportADictionary { get; private set; } = true;
+
+
         private DefinitionLearningService DefLearningService
         {
             get
@@ -42,13 +48,23 @@ namespace Linguine
 
         internal bool EnoughDataForWordFrequencies()
         {
+            if (NeedToImportADictionary) { return false; }
+
             return DefLearningService.EnoughDataForWordFrequencies();
         }
 
 
+        internal bool AnyDataForWordFrequencies()
+        {
+            if (NeedToImportADictionary) { return false; }
+
+            return DefLearningService.AnyDataForWordFrequencies();
+        }
 
         internal bool NeedToBurnInVocabularyData()
         {
+            if (NeedToImportADictionary) { return true; }
+
             return DefLearningService.NeedToBurnInVocabularyData();
         }
 
@@ -69,9 +85,11 @@ namespace Linguine
 
             if (dictionaries.Count == 0)
             {
-                Log.Error("tried to initialise definition service, but no definitions!");
+                NeedToImportADictionary = true;
                 return;
             }
+
+            NeedToImportADictionary = false; // TODO - random flags not great
 
             ExternalDictionary? dictionary = ExternalDictionaryManager.GetDictionary(dictionaries.First());
 

@@ -21,9 +21,11 @@ namespace Infrastructure
         public int DistinctDefinitionsTested()
         {
             using var context = _dbf.CreateDbContext();
-            return context.TestRecords
-                          .DistinctBy(tr => tr.DictionaryDefinitionKey)
-                          .Count();
+            return context.TestRecords.Any()
+                ? context.TestRecords
+                         .GroupBy(tr => tr.DictionaryDefinitionKey)
+                         .Count()
+                : 0; 
         }
     }
 }

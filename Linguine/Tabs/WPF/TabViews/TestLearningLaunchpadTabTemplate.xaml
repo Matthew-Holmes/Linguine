@@ -11,12 +11,38 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="1" Orientation="Horizontal">
-                <Button Content="Free Study" Command="{Binding FreeStudyCommand}"/>
-                <Button Content="Targeted Study" Command="{Binding TargetedStudyCommand}"/>
+            <!-- Message Display -->
+            <StackPanel Grid.Row="1" Margin="10" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding NeedMoreDataText}" 
+                           Visibility="{Binding TellUserToProcessMoreData, Converter={StaticResource BoolToVisibilityConverter}}"
+                           Foreground="DarkRed" FontWeight="Bold" TextAlignment="Center"/>
+
+                <TextBlock Text="{Binding NeedVocabBurnInText}" 
+                           Visibility="{Binding TellUserToDoVocabBurnin, Converter={StaticResource BoolToVisibilityConverter}}"
+                           Foreground="DarkRed" FontWeight="Bold" TextAlignment="Center"/>
+
+                <TextBlock Text="{Binding NeedADictionaryText}"
+                           Visibility="{Binding NeedADictionary, Converter={StaticResource BoolToVisibilityConverter}}"
+                           Foreground="DarkRed" FontWeight="Bold" TextAlignment="Center"/>
+
+                <Button Content="Begin Vocabulary Assessment" 
+                        Command="{Binding StartVocabAssessmentCommand}"
+                        Visibility="{Binding TellUserToDoVocabBurnin, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Padding="8,4" Margin="5"/>
+                
+            </StackPanel>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                <Button Content="Free Study" Command="{Binding FreeStudyCommand}" 
+                        IsEnabled="{Binding FreeStudyIsEnabled}" Padding="10,5" Margin="5"/>
+                <Button Content="Targeted Study" Command="{Binding TargetedStudyCommand}"
+                        IsEnabled="{Binding TargetedStudyEnabled}"
+                        Padding="10,5" Margin="5"/>
             </StackPanel>
 
         </Grid>

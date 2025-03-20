@@ -25,12 +25,17 @@ namespace Learning
                 throw new Exception();
             }
 
+            if (DefinitionFrequencyEngine.DefinitionFrequencies.Count == 0)
+            {
+                return false;
+            }
+
             return DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum() >= _minWordsProcessed;
         }
 
         public bool NeedToBurnInVocabularyData()
         {
-            return _testRecords.DistinctDefinitionsTested() >= _minWordsTested;
+            return _testRecords.DistinctDefinitionsTested() < _minWordsTested;
         }
 
 
@@ -86,6 +91,20 @@ namespace Learning
             return def;
         }
 
+        public bool AnyDataForWordFrequencies()
+        {
+            if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
+            {
+                Log.Error("need to compute the definition frequencies!");
+                throw new Exception();
+            }
 
+            if (DefinitionFrequencyEngine.DefinitionFrequencies.Count == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
