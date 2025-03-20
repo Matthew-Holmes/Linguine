@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -27,6 +28,7 @@ namespace Infrastructure
         {
             if (!AvailableDictionaries().Contains(source))
             {
+                Log.Warning("requested non-existent dictionary");
                 return null;
             }
 
