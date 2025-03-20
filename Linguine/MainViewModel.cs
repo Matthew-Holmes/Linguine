@@ -260,6 +260,21 @@ namespace Linguine
             _UIcomponents.CanMessage.Show(e.Message);
             _UIcomponents.CanMessage.Show("please check these files exist: " + e.missingLocation);
         }
+
+        // TODO - logic to distinguish these behaviours
+        internal void CloseThisAndBeginTargetedStudy(TestLearningLaunchpadViewModel toRemove)
+        {
+            Tabs.Remove(toRemove);
+            Tabs.Add(new TestLearningViewModel(_UIcomponents, _model, this));
+            SelectTab(Tabs.Last());
+        }
+
+        internal void CloseThisAndBeginFreeStudy(TestLearningLaunchpadViewModel toRemove)
+        {
+            Tabs.Remove(toRemove);
+            Tabs.Add(new TestLearningViewModel(_UIcomponents, _model, this));
+            SelectTab(Tabs.Last());
+        }
         #endregion
     }
 }
