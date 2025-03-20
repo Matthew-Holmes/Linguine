@@ -28,17 +28,25 @@ namespace Learning
             return DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum() >= _minWordsProcessed;
         }
 
+        public bool NeedToBurnInVocabularyData()
+        {
+            return _testRecords.DistinctDefinitionsTested() >= _minWordsTested;
+        }
+
 
         private ExternalDictionary                _dictionary;
+        private TestRecords                       _testRecords;
         private ParsedDictionaryDefinitionManager _pdefManager;
         private StatementManager                  _statementManager;
 
         public DefinitionLearningService(
             ExternalDictionary                dictionary,
+            TestRecords                       testRecords,
             ParsedDictionaryDefinitionManager pdefManager,
             StatementManager                  statementManager)
         {
             _dictionary       = dictionary;
+            _testRecords      = testRecords;
             _pdefManager      = pdefManager;
             _statementManager = statementManager;
         }
@@ -77,5 +85,7 @@ namespace Learning
 
             return def;
         }
+
+
     }
 }

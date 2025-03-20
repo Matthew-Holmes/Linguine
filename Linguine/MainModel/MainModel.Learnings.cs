@@ -49,6 +49,7 @@ namespace Linguine
 
         internal bool NeedToBurnInVocabularyData()
         {
+            return DefLearningService.NeedToBurnInVocabularyData();
         }
 
 
@@ -80,11 +81,13 @@ namespace Linguine
                 return;
             }
 
+            TestRecords testRecords = new TestRecords(dictionary, _linguineDbContextFactory);
+
             using var context = _linguineDbContextFactory.CreateDbContext();
             DefinitionFrequencyEngine.UpdateDefinitionFrequencies(context);
 
             _defLearningService = new DefinitionLearningService(
-                dictionary, ParsedDictionaryDefinitionManager, StatementManager);
+                dictionary, testRecords, ParsedDictionaryDefinitionManager, StatementManager);
 
         }
 

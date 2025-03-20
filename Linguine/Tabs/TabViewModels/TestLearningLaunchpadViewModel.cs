@@ -11,8 +11,6 @@ namespace Linguine.Tabs
 { 
     public class TestLearningLaunchpadViewModel : TabViewModelBase
     {
-        private bool _enoughDataForWordFrequencies;
-
         public ICommand FreeStudyCommand     { get; private set; }
         public ICommand TargetedStudyCommand { get; private set; }
 
@@ -32,7 +30,7 @@ namespace Linguine.Tabs
         private void ValidateSufficentData()
         {
             EnoughDataForWordFrequencies = _model.EnoughDataForWordFrequencies();
-            NeedToBurnInVocabularyData = _model.NeedToBurnInVocabularyData();
+            NeedToBurnInVocabularyData   = _model.NeedToBurnInVocabularyData();
         }
 
         private void BeginTargetedStudy()
