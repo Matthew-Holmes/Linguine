@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using UserInputInterfaces;
 using System.Windows;
+using Windows.UI.Input;
 
 namespace Linguine.Tabs
 {
@@ -16,6 +17,10 @@ namespace Linguine.Tabs
         public ICommand SubmissionCorrectCommand   { get; private set; }
         public ICommand SubmissionIncorrectCommand { get; private set; }
         public ICommand SetFocusCommand            { get; private set; }
+
+
+        private bool _isVocabTest       { get; set; }
+        private int _vocabTestRemaining { get; set; }
 
         private void SetFocus(object param)
         {
@@ -27,10 +32,16 @@ namespace Linguine.Tabs
 
         public TestLearningViewModel(UIComponents  uiComponents, 
                                      MainModel     model, 
-                                     MainViewModel parent) 
+                                     MainViewModel parent,
+                                     bool          isVocabTest = false) 
             : base(uiComponents, model, parent)
         {
             Title = "Test";
+
+            if (isVocabTest)
+            {
+                SetupVocabTest();
+            }
 
             SubmitAnswerCommand        = new RelayCommand(() => SubmitAnswer());
             SubmissionCorrectCommand   = new RelayCommand(() => HandleAnswerWasCorrect());
@@ -38,6 +49,14 @@ namespace Linguine.Tabs
             SetFocusCommand            = new RelayCommand<object>(SetFocus);
 
             Reset();
+        }
+
+        private void SetupVocabTest()
+        {
+            _isVocabTest = true;
+            _vocabTestRemaining = _model.DefLearning?.VocabTestWordCount ?? throw new Exception("couldn't access definition learning service");
+
+            Title = $"Remaining: {_vocabTestRemaining}";
         }
 
         private String _prompt;
@@ -126,6 +145,18 @@ namespace Linguine.Tabs
 
         private void Reset()
         {
+            if (_isVocabTest)
+            {
+                Title = $"Remaining: {_vocabTestRemaining}";
+                if (_vocabTestRemaining == 0)
+                {
+                    Title = "Thank you";
+                    _uiComponents.CanMessage.Show("Thank you for completing the initial assessment");
+                    _parent.CloseThisAndOpenTestLaunchPad(this);
+                }
+                _vocabTestRemaining--;
+            }
+
             _definitionForTesting = _model.GetRandomDefinitionForTesting();
 
             AnswerSubmitted = false;

@@ -16,7 +16,17 @@ namespace Linguine.Tabs
         protected MainViewModel _parent;
         protected MainModel _model;
 
-        public String Title { get; protected set; }
+        private String _title;
+        public String Title
+        {
+            get => _title;
+            protected set
+            {
+                _title = value;
+                OnPropertyChanged(nameof(Title));
+            }
+        }
+           
 
         public ICommand CloseCommand { get; private set; }
 

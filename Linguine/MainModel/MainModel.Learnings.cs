@@ -23,6 +23,8 @@ namespace Linguine
         // currently I added a LoadServices method in the main loading sequence
         private DefinitionLearningService? _defLearningService = null;
 
+        public DefinitionLearningService? DefLearning => _defLearningService;
+
         public bool NeedToImportADictionary { get; private set; } = true;
 
 

@@ -21,7 +21,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Testing Tab" 
+            <TextBlock Text="{Binding Title}" 
                        FontSize="18" 
                        FontWeight="Bold" 
                        Foreground="DarkSlateBlue" 

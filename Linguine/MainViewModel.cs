@@ -275,6 +275,20 @@ namespace Linguine
             Tabs.Add(new TestLearningViewModel(_UIcomponents, _model, this));
             SelectTab(Tabs.Last());
         }
+
+        internal void CloseThisAndBeginVocabAssessment(TestLearningLaunchpadViewModel toRemove)
+        {
+            Tabs.Remove(toRemove);
+            Tabs.Add(new TestLearningViewModel(_UIcomponents, _model, this, isVocabTest: true));
+            SelectTab(Tabs.Last());
+        }
+
+        internal void CloseThisAndOpenTestLaunchPad(TestLearningViewModel toRemove)
+        {
+            Tabs.Remove(toRemove);
+            Tabs.Add(new TestLearningLaunchpadViewModel(_UIcomponents, _model, this));
+            SelectTab(Tabs.Last());
+        }
         #endregion
     }
 }

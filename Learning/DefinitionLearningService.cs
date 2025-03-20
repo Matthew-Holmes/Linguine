@@ -14,8 +14,12 @@ namespace Learning
 
         // only need these to be satisfied for free study
         // text based study can work, even for very small texts (?)
+
+        // TODO - should these be in the config?
         private int _minWordsProcessed = 1_000;
-        private int _minWordsTested    = 100;
+        private int _minWordsTested    = 50;
+
+        public int VocabTestWordCount => _minWordsTested;
 
         public bool EnoughDataForWordFrequencies()
         {

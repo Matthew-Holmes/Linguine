@@ -11,8 +11,9 @@ namespace Linguine.Tabs
 { 
     public class TestLearningLaunchpadViewModel : TabViewModelBase
     {
-        public ICommand FreeStudyCommand     { get; private set; }
-        public ICommand TargetedStudyCommand { get; private set; }
+        public ICommand FreeStudyCommand            { get; private set; }
+        public ICommand TargetedStudyCommand        { get; private set; }
+        public ICommand StartVocabAssessmentCommand { get; private set; }
 
         public bool EnoughDataForWordFrequencies { get; private set; }
         public bool AnyDataForWordFrequencies    { get; private set; }
@@ -34,11 +35,14 @@ namespace Linguine.Tabs
         {
             Title = "Test";
 
-            FreeStudyCommand     = new RelayCommand(() => BeginFreeStudy());
-            TargetedStudyCommand = new RelayCommand(() => BeginTargetedStudy());
+            FreeStudyCommand            = new RelayCommand(() => BeginFreeStudy());
+            TargetedStudyCommand        = new RelayCommand(() => BeginTargetedStudy());
+            StartVocabAssessmentCommand = new RelayCommand(() => BeginVocabAssessment());
 
             ValidateSufficentData();
         }
+
+
 
         private void ValidateSufficentData()
         {
@@ -56,6 +60,11 @@ namespace Linguine.Tabs
         private void BeginFreeStudy()
         {
             _parent.CloseThisAndBeginFreeStudy(this);
+        }
+
+        private void BeginVocabAssessment()
+        {
+            _parent.CloseThisAndBeginVocabAssessment(this);
         }
     }
 }
