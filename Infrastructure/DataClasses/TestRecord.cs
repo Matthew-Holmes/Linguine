@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.DataClasses
 {
+    // TODO - should these be parsed dictionary definitions if second language??
     public class TestRecord
     {
         [Key]

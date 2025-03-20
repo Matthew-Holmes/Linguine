@@ -20,6 +20,37 @@ namespace Linguine
         // but for now we'll just a basic add and export functionality
 
         private DefinitionLearningService? _defLearningService = null;
+        private DefinitionLearningService DefLearningService
+        {
+            get
+            {
+                if (_defLearningService is null)
+                {
+                    InitialiseDefinitionLearningService();
+                }
+
+                if (_defLearningService is null)
+                {
+                    Log.Error("tried and failed to load definition learning service");
+                    throw new Exception();
+                }
+
+                return _defLearningService;
+            }
+        }
+
+
+        internal bool EnoughDataForWordFrequencies()
+        {
+            return DefLearningService.EnoughDataForWordFrequencies();
+        }
+
+
+
+        internal bool NeedToBurnInVocabularyData()
+        {
+        }
+
 
         private void InitialiseDefinitionLearningService()
         {
@@ -60,19 +91,7 @@ namespace Linguine
 
         public DefinitionForTesting GetRandomDefinitionForTesting()
         {
-            if (_defLearningService is null)
-            {
-                InitialiseDefinitionLearningService();
-            }
-
-            if (_defLearningService is null)
-            {
-                Log.Error("tried and failed to load definition learning service");
-                throw new Exception();
-            }
-
-            //DictionaryDefinition toTest = _defLearningService.GetRandomDefinition();
-            DictionaryDefinition toTest = _defLearningService.GetFrequentDefinition();
+            DictionaryDefinition toTest = DefLearningService.GetFrequentDefinition();
 
             return new DefinitionForTesting(toTest.Word, toTest.Definition);
         }

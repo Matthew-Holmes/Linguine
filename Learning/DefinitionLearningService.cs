@@ -11,6 +11,24 @@ namespace Learning
 {
     public class DefinitionLearningService
     {
+
+        // only need these to be satisfied for free study
+        // text based study can work, even for very small texts (?)
+        private int _minWordsProcessed = 1_000;
+        private int _minWordsTested    = 100;
+
+        public bool EnoughDataForWordFrequencies()
+        {
+            if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
+            {
+                Log.Error("need to compute the definition frequencies!");
+                throw new Exception();
+            }
+
+            return DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum() >= _minWordsProcessed;
+        }
+
+
         private ExternalDictionary                _dictionary;
         private ParsedDictionaryDefinitionManager _pdefManager;
         private StatementManager                  _statementManager;
