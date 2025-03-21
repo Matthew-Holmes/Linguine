@@ -155,9 +155,13 @@ namespace Linguine.Tabs
                     _parent.CloseThisAndOpenTestLaunchPad(this);
                 }
                 _vocabTestRemaining--;
-            }
 
-            _definitionForTesting = _model.GetRandomDefinitionForTesting();
+                _definitionForTesting = _model.GetHighInformationDefinition();
+            }
+            else
+            {
+                _definitionForTesting = _model.GetRandomDefinitionForTesting();
+            }
 
             AnswerSubmitted = false;
             AllowSubmission = true;

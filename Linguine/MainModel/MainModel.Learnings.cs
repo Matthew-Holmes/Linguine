@@ -119,6 +119,14 @@ namespace Linguine
             return new DefinitionForTesting(toTest.Word, toTest.Definition);
         }
 
+        internal DefinitionForTesting GetHighInformationDefinition()
+        {
+            DictionaryDefinition toTest = DefLearningService.GetHighVocabEstimateInformationDefinition();
+
+            return new DefinitionForTesting(toTest.Word, toTest.Definition);
+
+        }
+
 
         public List<DictionaryDefinition> LearnerList { get; private set; } = new List<DictionaryDefinition>();
 

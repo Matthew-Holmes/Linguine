@@ -110,5 +110,25 @@ namespace Learning
 
             return true;
         }
+
+        public DictionaryDefinition GetHighVocabEstimateInformationDefinition()
+        {
+            // First build the Zipf-Score model, say 5 definitions per 
+            // possible zipf score
+                // If new data then can access further along the zipf range
+                // use most recent test per word??
+
+            // two ways to improve model
+                // 1. higher resolution bins
+                // 2. more datapoints per bin
+
+            // probabilities decay 
+
+            // break ties by random from new
+            // then repeat existing
+
+
+            throw new NotImplementedException();
+        }
     }
 }
