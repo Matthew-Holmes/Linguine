@@ -24,10 +24,21 @@ namespace Infrastructure.DataClasses
                 DefinitionFrequencies = new Dictionary<int, int>().AsReadOnly();
             }
 
-            var frequencyTable = context.StatementDefinitions
+            // include zero counted words in the frequency dictionary too
+
+            var frequencyTable = context.DictionaryDefinitions
+                .Select(node => new { DefinitionKey = node.DatabasePrimaryKey, Count = 0 })
+                .ToDictionary(x=> x.DefinitionKey, x=>x.Count);
+
+            var counts = context.StatementDefinitions
                 .GroupBy(node => node.DefinitionKey)
                 .Select(group => new { DefinitionKey = group.Key, Count = group.Count() })
                 .ToDictionary(x => x.DefinitionKey, x => x.Count);
+
+            foreach (KeyValuePair<int, int> item in counts)
+            {
+                frequencyTable[item.Key] = item.Value;
+            }
 
             DefinitionFrequencies = frequencyTable.AsReadOnly();
         }
