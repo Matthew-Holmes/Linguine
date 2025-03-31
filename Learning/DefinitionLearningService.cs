@@ -69,7 +69,7 @@ namespace Learning
             return _dictionary.GetRandomDefinition();
         }
 
-        public DictionaryDefinition GetFrequentDefinition()
+        public DictionaryDefinition GetFrequentDefinition(int freq = 5)
         {
             if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
             {
@@ -78,7 +78,7 @@ namespace Learning
             }
 
             var eligibleKeys = DefinitionFrequencyEngine.DefinitionFrequencies
-                .Where(kvp => kvp.Value > 2) // Filter for counts > 5
+                .Where(kvp => kvp.Value > freq) 
                 .Select(kvp => kvp.Key)
                 .ToList();
 
@@ -186,7 +186,12 @@ namespace Learning
             if (candidates.Count == 0)
             {
                 // have filled our bins a decent amount, lets just randomly sample
-                return GetRandomDefinition();
+                DictionaryDefinition? ret = GetFrequentDefinition(1);
+                if (ret is null)
+                {
+                    return GetRandomDefinition();
+                }
+                return ret;
             }
 
             chosenId = candidates[rng.Next(candidates.Count())].Key;
