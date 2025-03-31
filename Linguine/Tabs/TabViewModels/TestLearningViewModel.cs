@@ -9,6 +9,8 @@ using UserInputInterfaces;
 using System.Windows;
 using Windows.UI.Input;
 using Infrastructure.DataClasses;
+using System.Diagnostics.Tracing;
+using System.Text.RegularExpressions;
 
 namespace Linguine.Tabs
 {
@@ -18,6 +20,8 @@ namespace Linguine.Tabs
         public ICommand SubmissionCorrectCommand   { get; private set; }
         public ICommand SubmissionIncorrectCommand { get; private set; }
         public ICommand SetFocusCommand            { get; private set; }
+        public ICommand NextContextCommand         { get; private set; }
+        public ICommand PreviousContextCommand     { get; private set; }
 
 
         private bool _isVocabTest       { get; set; }
@@ -53,7 +57,28 @@ namespace Linguine.Tabs
             SubmissionIncorrectCommand = new RelayCommand(() => HandleAnswerWasIncorrect());
             SetFocusCommand            = new RelayCommand<object>(SetFocus);
 
+            PreviousContextCommand = new RelayCommand(() => PreviousContext());
+            NextContextCommand     = new RelayCommand(() => NextContext());
+
+
             Reset();
+        }
+
+        private void NextContext()
+        {
+            _currentContextId += 1;
+            _currentContextId = _currentContextId % Contexts.Count;
+
+            CurrentContext = Contexts[_currentContextId];
+        }
+
+        private void PreviousContext()
+        {
+            _currentContextId -= 1;
+            _currentContextId += Contexts.Count; // avoid remainder not mod issue
+            _currentContextId = _currentContextId % Contexts.Count;
+
+            CurrentContext = Contexts[_currentContextId];
         }
 
         private void SetupVocabTest()
@@ -75,6 +100,40 @@ namespace Linguine.Tabs
 
 
         private DefinitionForTesting _definitionForTesting;
+        private List<Tuple<string, string, string>> _contexts;
+        private Tuple<string, string, string> _currentContext;
+        private int _currentContextId = 0;
+
+        public List<Tuple<string, string, string>> Contexts
+        {
+            get => _contexts;
+            set
+            {
+                _contexts = value;
+                OnPropertyChanged(nameof(Contexts));
+
+                if (Contexts.Count > 0)
+                {
+                    CurrentContext = Contexts.FirstOrDefault();
+                } else
+                {
+                    CurrentContext = null;
+                }
+
+                _currentContextId = 0;
+            }
+        }
+
+        public Tuple<string, string, string> CurrentContext
+        {
+            get => _currentContext;
+            set
+            {
+                _currentContext = value;
+                OnPropertyChanged(nameof(CurrentContext));
+            }
+        }
+       
 
         public String Prompt
         {
@@ -183,7 +242,43 @@ namespace Linguine.Tabs
             Prompt        = _definitionForTesting.Prompt;
             CorrectAnswer = _definitionForTesting.CorrectAnswer;
 
+            Contexts = _definitionForTesting.Contexts.Select(wic => AsRun(wic)).ToList();
+
             _posed = DateTime.Now;
+        }
+
+        private Tuple<string, string, string> AsRun(WordInContext wic)
+        {
+            string prepend;
+
+            if (wic.WordStart == 0)
+            {
+                prepend = "";
+            } else
+            {
+                prepend = wic.StatementText.Substring(0, wic.WordStart - 1);
+            }
+            
+            string word    = wic.StatementText.Substring(wic.WordStart, wic.Len);
+
+            int appendIndex = wic.WordStart + wic.Len + 1;
+            string append;
+            if (appendIndex >= wic.StatementText.Length)
+            {
+                append = "";
+            } else
+            {
+                append = wic.StatementText.Substring(appendIndex);
+            }
+            // remove newlines since they make it look weird
+            // TODO - what about song lyrics/subtitles etc
+            // should we have a "meaningul newlines" flag??
+            prepend = Regex.Replace(prepend, @"\t|\n|\r", " ");
+            word    = Regex.Replace(word,    @"\t|\n|\r", " ");
+            append  = Regex.Replace(append,  @"\t|\n|\r", " ");
+
+            return Tuple.Create(prepend, word, append);
+             
         }
 
     }

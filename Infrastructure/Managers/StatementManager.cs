@@ -29,7 +29,18 @@ namespace Infrastructure
         {
             List<StatementDatabaseEntry> entries = _databaseManager.GetNStatementsFor(def, n);
 
-            return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
+            List<Statement> ret = new List<Statement>();
+
+            using var context = _dbf.CreateDbContext();
+
+            foreach (StatementDatabaseEntry entry in entries)
+            {
+                List<StatementDefinitionNode> nodes = _databaseManager.AttachDefinition(entry, context).Item2;
+                
+                ret.Add(StatementFactory.FromDatabaseEntry(entry, nodes));
+            }
+
+            return ret;
         }
 
         public List<int> StatementStartIndices(TextualMedia tm)

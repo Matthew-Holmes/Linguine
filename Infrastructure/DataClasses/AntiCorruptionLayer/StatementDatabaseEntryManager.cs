@@ -23,6 +23,15 @@ namespace Infrastructure
         {
         }
 
+
+        internal Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> AttachDefinition(StatementDatabaseEntry statement, LinguineDbContext context)
+        {
+            List<StatementDefinitionNode> defs = context.StatementDefinitions
+                   .Where(d => d.StatementDatabaseEntry == statement)
+                   .Include(n => n.DictionaryDefinition).ToList();
+            return Tuple.Create(statement, defs);
+        }
+
         internal List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> AttachDefinitions(List<StatementDatabaseEntry> statements)
         {
             using var context = _dbf.CreateDbContext();
@@ -30,10 +39,7 @@ namespace Infrastructure
 
             foreach (StatementDatabaseEntry statement in statements) 
             {
-                List<StatementDefinitionNode> defs = context.StatementDefinitions
-                    .Where(d => d.StatementDatabaseEntry == statement)
-                    .Include(n => n.DictionaryDefinition).ToList();
-                ret.Add(Tuple.Create(statement, defs));
+                ret.Add(AttachDefinition(statement, context));
             }
 
             return ret;

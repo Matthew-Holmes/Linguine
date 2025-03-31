@@ -16,6 +16,51 @@ namespace Infrastructure
 {
     public static class StatementFactory
     {
+        public static Statement FromDatabaseEntry(
+            StatementDatabaseEntry entry,
+            List<StatementDefinitionNode> nodes,
+            JsonSerializerSettings? settings = null,
+            List<String>? context = null)
+        {
+            if (settings is null)
+            {
+                settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                };
+            }
+
+            if (context is null)
+            {
+                context = new List<string>();
+            }
+
+            String statement = entry.Parent.Text.Substring(
+            entry.FirstCharIndex,
+            entry.LastCharIndex - entry.FirstCharIndex + 1);
+
+            TextDecomposition? injectiveDecompTmp = JsonConvert.DeserializeObject<TextDecomposition>(
+                entry.HeadlessInjectiveDecompositionJSON, settings);
+            TextDecomposition? rootedDecompTmp = JsonConvert.DeserializeObject<TextDecomposition>(
+                entry.HeadlessRootedDecompositionJSON, settings);
+
+            if (injectiveDecompTmp is null || rootedDecompTmp is null)
+            {
+                throw new Exception("text decomposition deserialization failed");
+            }
+
+            // add the totals
+            TextDecomposition injectiveDecomp = new TextDecomposition(statement, injectiveDecompTmp.Decomposition);
+            TextDecomposition rootedDecomp = new TextDecomposition(statement, rootedDecompTmp.Decomposition);
+
+            AddDefinitions(rootedDecomp, nodes);
+
+            Statement ret = new Statement(entry.Parent, entry.FirstCharIndex, entry.LastCharIndex, statement, context, injectiveDecomp, rootedDecomp);
+
+            return ret;
+
+        }
+
         public static List<Statement> FromDatabaseEntries(
             List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> entries)
         {
@@ -38,28 +83,10 @@ namespace Infrastructure
             for(int i = 0; i < contexts.Count; i++)
             {
                 StatementDatabaseEntry entry = entries[i].Item1;
+                List<StatementDefinitionNode> nodes = entries[i].Item2;
+                List<String> context = contexts[i];
 
-                String statement = entry.Parent.Text.Substring(
-                    entry.FirstCharIndex,
-                    entry.LastCharIndex - entry.FirstCharIndex + 1);
-
-                TextDecomposition? injectiveDecompTmp = JsonConvert.DeserializeObject<TextDecomposition>(
-                    entry.HeadlessInjectiveDecompositionJSON, settings);
-                TextDecomposition? rootedDecompTmp   = JsonConvert.DeserializeObject<TextDecomposition>(
-                    entry.HeadlessRootedDecompositionJSON,    settings);
-
-                if (injectiveDecompTmp is null || rootedDecompTmp is null)
-                {
-                    throw new Exception("text decomposition deserialization failed");
-                }
-
-                // add the totals
-                TextDecomposition injectiveDecomp = new TextDecomposition(statement, injectiveDecompTmp.Decomposition);
-                TextDecomposition rootedDecomp    = new TextDecomposition(statement, rootedDecompTmp.Decomposition);
-
-                AddDefinitions(rootedDecomp, entries[i].Item2);
-
-                Statement toAdd = new Statement(entry.Parent, entry.FirstCharIndex, entry.LastCharIndex, statement, contexts[i], injectiveDecomp, rootedDecomp);
+                Statement toAdd = FromDatabaseEntry(entry, nodes, settings, context);
 
                 ret.Add(toAdd);
             }
