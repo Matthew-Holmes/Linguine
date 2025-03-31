@@ -29,6 +29,28 @@ namespace Infrastructure
                 : 0; 
         }
 
+        public void AddRecord(DictionaryDefinition definition,
+            DateTime posed, DateTime answered, DateTime finished,
+            bool correct)
+        {
+            using var context = _dbf.CreateDbContext();
+
+            context.Attach(definition);
+
+            TestRecord toAdd = new TestRecord
+            {
+                DictionaryDefinitionKey = definition.DatabasePrimaryKey,
+                Definition              = definition,
+                Posed                   = posed,
+                Answered                = answered,
+                Finished                = finished,
+                Correct                 = correct
+            };
+            
+            context.TestRecords.Add(toAdd);
+            context.SaveChanges();
+        }
+
         public IReadOnlyDictionary<int, TestRecord> LatestTestRecords()
         {
             using var context = _dbf.CreateDbContext();

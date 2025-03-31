@@ -181,6 +181,14 @@ namespace Learning
                 return GetInitialVocabEstimationDefinition();
             }
 
+            candidates = candidates.Where(kvp => !latest.ContainsKey(kvp.Key)).ToList();
+
+            if (candidates.Count == 0)
+            {
+                // have filled our bins a decent amount, lets just randomly sample
+                return GetRandomDefinition();
+            }
+
             chosenId = candidates[rng.Next(candidates.Count())].Key;
 
             return _dictionary.TryGetDefinitionByKey(chosenId) ?? throw new Exception();

@@ -4,6 +4,7 @@ using Learning;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    public record DefinitionForTesting(String prompt, String correctAnswer);
+    public record DefinitionForTesting(String prompt, String correctAnswer, DictionaryDefinition parent);
 
     public partial class MainModel
     {
@@ -22,6 +23,9 @@ namespace Linguine
         // TODO - this is getting a handful, need to sort out the lazy loading stuff
         // currently I added a LoadServices method in the main loading sequence
         private DefinitionLearningService? _defLearningService = null;
+        private TestRecords? _testRecords;
+
+        public int DistintWordsTested => _testRecords?.DistinctDefinitionsTested() ?? 0;
 
         public DefinitionLearningService? DefLearning => _defLearningService;
 
@@ -102,6 +106,7 @@ namespace Linguine
             }
 
             TestRecords testRecords = new TestRecords(dictionary, _linguineDbContextFactory);
+            _testRecords = testRecords;
 
             using var context = _linguineDbContextFactory.CreateDbContext();
             DefinitionFrequencyEngine.UpdateDefinitionFrequencies(context);
@@ -116,17 +121,34 @@ namespace Linguine
         {
             DictionaryDefinition toTest = DefLearningService.GetFrequentDefinition();
 
-            return new DefinitionForTesting(toTest.Word, toTest.Definition);
+            return new DefinitionForTesting(toTest.Word, toTest.Definition, toTest);
         }
 
         internal DefinitionForTesting GetHighInformationDefinition()
         {
             DictionaryDefinition toTest = DefLearningService.GetInitialVocabEstimationDefinition();
 
-            return new DefinitionForTesting(toTest.Word, toTest.Definition);
+            return new DefinitionForTesting(toTest.Word, toTest.Definition, toTest);
 
         }
 
+        internal void RecordTest(DefinitionForTesting definitionForTesting, 
+            DateTime posed, DateTime answered, DateTime finished,
+            bool correct)
+        {
+            if (_testRecords is null)
+            {
+                Log.Warning("test records should not be null, initialising");
+                InitialiseDefinitionLearningService();
+            }
+            if (_testRecords is null)
+            {
+                Log.Fatal("failed to innitialise test records");
+                throw new Exception();
+            }
+
+            _testRecords.AddRecord(definitionForTesting.parent, posed, answered, finished, correct);
+        }
 
         public List<DictionaryDefinition> LearnerList { get; private set; } = new List<DictionaryDefinition>();
 

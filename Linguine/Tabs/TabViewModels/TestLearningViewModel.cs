@@ -8,6 +8,7 @@ using System.Windows.Input;
 using UserInputInterfaces;
 using System.Windows;
 using Windows.UI.Input;
+using Infrastructure.DataClasses;
 
 namespace Linguine.Tabs
 {
@@ -21,6 +22,10 @@ namespace Linguine.Tabs
 
         private bool _isVocabTest       { get; set; }
         private int _vocabTestRemaining { get; set; }
+
+        private DateTime _posed;
+        private DateTime _answered;
+        private DateTime _finished;
 
         private void SetFocus(object param)
         {
@@ -55,6 +60,8 @@ namespace Linguine.Tabs
         {
             _isVocabTest = true;
             _vocabTestRemaining = _model.DefLearning?.VocabTestWordCount ?? throw new Exception("couldn't access definition learning service");
+
+            _vocabTestRemaining -= _model.DistintWordsTested;
 
             Title = $"Remaining: {_vocabTestRemaining}";
         }
@@ -129,17 +136,22 @@ namespace Linguine.Tabs
 
             AnswerSubmitted = true;
             AllowSubmission = false;
+            _answered = DateTime.Now;
         }
 
         private void HandleAnswerWasCorrect()
         {
             //_uiComponents.CanMessage.Show("Well done!");
+            _finished = DateTime.Now;
+            _model.RecordTest(_definitionForTesting, _posed, _answered, _finished, correct: true);
             Reset();
         }
 
         private void HandleAnswerWasIncorrect()
         {
             //_uiComponents.CanMessage.Show("Failure");
+            _finished = DateTime.Now;
+            _model.RecordTest(_definitionForTesting, _posed, _answered, _finished, correct: false);
             Reset();
         }
 
@@ -148,7 +160,7 @@ namespace Linguine.Tabs
             if (_isVocabTest)
             {
                 Title = $"Remaining: {_vocabTestRemaining}";
-                if (_vocabTestRemaining == 0)
+                if (_vocabTestRemaining <= 0)
                 {
                     Title = "Thank you";
                     _uiComponents.CanMessage.Show("Thank you for completing the initial assessment");
@@ -170,6 +182,8 @@ namespace Linguine.Tabs
 
             Prompt        = _definitionForTesting.prompt;
             CorrectAnswer = _definitionForTesting.correctAnswer;
+
+            _posed = DateTime.Now;
         }
 
     }
