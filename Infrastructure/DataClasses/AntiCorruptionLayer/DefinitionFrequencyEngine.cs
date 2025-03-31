@@ -96,14 +96,19 @@ namespace Infrastructure.DataClasses
                     freqPerBillion = 1.0; // dummy value keep it low score so we don't
                                           // inundate the user with random definitions
                 }
-
-                freqPerBillion = (frequency / totalFrequency) * 1_000_000_000.0;
+                else
+                {
+                    freqPerBillion = (frequency / totalFrequency) * 1_000_000_000.0;
+                }
                 double zipf = Math.Log10(freqPerBillion) + 3;
                 zipfScores[definitionId] = zipf;
 
                 // track range we are confident in
-                ZipfHi = Math.Max(ZipfHi, zipf);
-                ZipfLo = Math.Min(ZipfLo, zipf);
+                if (frequency != 0)
+                {
+                    ZipfHi = Math.Max(ZipfHi, zipf);
+                    ZipfLo = Math.Min(ZipfLo, zipf);
+                }
             }
 
             DefinitionZipfScores = zipfScores.AsReadOnly();

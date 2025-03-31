@@ -16,9 +16,12 @@ namespace Learning
         // text based study can work, even for very small texts (?)
 
         // TODO - should these be in the config?
-        private int _minWordsProcessed = 1_000;
-        private int _minWordsTested    = 50;
+        private int  _minWordsProcessed = 1_000;
+        private int  _minWordsTested    = 50;
+        private int  _zipfBinCount      = 1;
+        private bool _frozenBinCount    = false;
 
+        private Random rng = new Random();
         public int VocabTestWordCount => _minWordsTested;
 
         public bool EnoughDataForWordFrequencies()
@@ -118,28 +121,69 @@ namespace Learning
 
         public DictionaryDefinition GetInitialVocabEstimationDefinition()
         {
-            if (DefinitionFrequencyEngine.SortedDefinitionFrequencies is null)
+            // adaptive binning approach to get good coverage
+            int chosenId;
+
+            if (DefinitionFrequencyEngine.DefinitionZipfScores is null)
             {
-                Log.Error("need to compute the definition frequencies!");
+                Log.Error("need to compute the definition Zipf scores");
                 throw new Exception();
             }
 
-            // First build the Zipf-Score model, say 5 definitions per 
-            // possible zipf score
-            // If new data then can access further along the zipf range
-            // use most recent test per word??
+            IReadOnlyDictionary<int, TestRecord> latest = _testRecords.LatestTestRecords();
 
-            // two ways to improve model
-            // 1. higher resolution bins
-            // 2. more datapoints per bin
+            IReadOnlyDictionary<int, double> zipfScores = DefinitionFrequencyEngine.DefinitionZipfScores;
 
-            // probabilities decay 
-
-            // break ties by random from new
-            // then repeat existing
+            if (zipfScores == null || zipfScores.Count == 0)
+            {
+                Log.Error("no data!");
+                throw new Exception();
+            }
 
 
-            throw new NotImplementedException();
+            double minZipf = DefinitionFrequencyEngine.ZipfLo;
+            double maxZipf = DefinitionFrequencyEngine.ZipfHi;
+
+            double binWidth = (maxZipf - minZipf) / _zipfBinCount;
+
+            var bins = Enumerable.Range(0, _zipfBinCount)
+                .ToDictionary(i => i, _ => new List<int>());
+
+            foreach (var (id, tr) in latest)
+            {
+                double zipfScore = zipfScores[id];
+                int binIndex = (int)((zipfScore - minZipf) / binWidth);
+                if (binIndex == _zipfBinCount) binIndex--; // handle max edge case
+                if (binIndex < 0) continue; // below ZipfLo, i.e. never seen
+                bins[binIndex].Add(id);
+            }
+
+            // check if all bins have at least `binCount` items
+            if (!_frozenBinCount && bins.All(b => b.Value.Count >= _zipfBinCount))
+            {
+                _zipfBinCount++;
+            }
+
+            binWidth = (maxZipf - minZipf) / _zipfBinCount;
+
+            int leastPopulatedBindex = bins
+                   .OrderBy(b => b.Value.Count)
+                   .First().Key;
+
+            var candidates = zipfScores.Where(
+                kvp => (int)((kvp.Value - minZipf) / binWidth) == leastPopulatedBindex).ToList();
+
+            if (candidates.Count() == 0)
+            {
+                _zipfBinCount--;
+                _frozenBinCount = true;
+
+                return GetInitialVocabEstimationDefinition();
+            }
+
+            chosenId = candidates[rng.Next(candidates.Count())].Key;
+
+            return _dictionary.TryGetDefinitionByKey(chosenId) ?? throw new Exception();
         }
     }
 }
