@@ -58,6 +58,7 @@ namespace Learning
             _testRecords      = testRecords;
             _pdefManager      = pdefManager;
             _statementManager = statementManager;
+
         }
 
         public DictionaryDefinition GetRandomDefinition()
@@ -110,17 +111,27 @@ namespace Learning
 
             return true;
         }
+        // three methods:
+            // initial estimation - use bins to get a broad range of estimates
+            // improve vocab estimation error 
+            // maximise learning - i.e. max increase in P(know a random word)
 
-        public DictionaryDefinition GetHighVocabEstimateInformationDefinition()
+        public DictionaryDefinition GetInitialVocabEstimationDefinition()
         {
+            if (DefinitionFrequencyEngine.SortedDefinitionFrequencies is null)
+            {
+                Log.Error("need to compute the definition frequencies!");
+                throw new Exception();
+            }
+
             // First build the Zipf-Score model, say 5 definitions per 
             // possible zipf score
-                // If new data then can access further along the zipf range
-                // use most recent test per word??
+            // If new data then can access further along the zipf range
+            // use most recent test per word??
 
             // two ways to improve model
-                // 1. higher resolution bins
-                // 2. more datapoints per bin
+            // 1. higher resolution bins
+            // 2. more datapoints per bin
 
             // probabilities decay 
 
