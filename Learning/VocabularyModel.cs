@@ -13,7 +13,7 @@ namespace Learning
 {
     class VocabularyModel
     {
-        IReadOnlyDictionary<int, int> WordFrequencies;
+        IReadOnlyDictionary<int, int>        WordFrequencies;
         IReadOnlyDictionary<int, TestRecord> LatestTestRecords;
 
         public VocabularyModel(
@@ -27,8 +27,9 @@ namespace Learning
         public IReadOnlyDictionary<int, Tuple<double,double>> GetPKnownWithError()
         {
             // use a kernel
-            // loop through kernel parameters (linear for now, could be in frequency space though)
-            // reduce kernel while preserving monotonicity
+                // TODO 
+                // loop through kernel parameters (linear for now, could be in frequency space though)
+                // reduce kernel while preserving monotonicity
             // if monotonicity not possible with large kernel then so be it
                 // set a max threshold
 
@@ -40,7 +41,7 @@ namespace Learning
             // this is good, because we get high error around p=0.5
             // which intuitively is the region we are most interested in
 
-            // TODO - update the kernel is bad monotonicity score!
+            // TODO - update the kernel if bad monotonicity score!
 
             int totalWordsCnt = WordFrequencies.Count;
             double maxKernelSigma = (double)totalWordsCnt / 10.0;

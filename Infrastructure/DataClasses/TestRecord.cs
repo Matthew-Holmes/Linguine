@@ -18,6 +18,5 @@ namespace Infrastructure.DataClasses
         public DateTime             Answered                { get; set; }
         public DateTime             Finished                { get; set; }
         public bool                 Correct                 { get; set; }
-        // TODO - migrate, rollback then apply this one
     }
 }
