@@ -180,8 +180,8 @@ namespace Linguine.Tabs
 
             UserAnswer = "";
 
-            Prompt        = _definitionForTesting.prompt;
-            CorrectAnswer = _definitionForTesting.correctAnswer;
+            Prompt        = _definitionForTesting.Prompt;
+            CorrectAnswer = _definitionForTesting.CorrectAnswer;
 
             _posed = DateTime.Now;
         }

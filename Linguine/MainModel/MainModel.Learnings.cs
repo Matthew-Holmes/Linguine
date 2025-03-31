@@ -3,6 +3,7 @@ using Infrastructure.DataClasses;
 using Learning;
 using Serilog;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IO;
@@ -13,7 +14,12 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    public record DefinitionForTesting(String prompt, String correctAnswer, DictionaryDefinition parent);
+    public record WordInContext(string StatementText, int WordStart, int Len);
+    public record DefinitionForTesting(
+        String Prompt, 
+        String CorrectAnswer, 
+        List<WordInContext> Contexts,
+        DictionaryDefinition Parent);
 
     public partial class MainModel
     {
@@ -24,6 +30,7 @@ namespace Linguine
         // currently I added a LoadServices method in the main loading sequence
         private DefinitionLearningService? _defLearningService = null;
         private TestRecords? _testRecords;
+        private int MaxContextExamples = 5;
 
         public int DistintWordsTested => _testRecords?.DistinctDefinitionsTested() ?? 0;
 
@@ -116,19 +123,40 @@ namespace Linguine
 
         }
 
+        private WordInContext AsWordInContext(DictionaryDefinition def, Statement context)
+        {
+            Tuple<int, int> startLen = StatementHelper.GetStartLenOfDefinition(context, def);
+
+            WordInContext ret = new WordInContext(
+                context.StatementText,
+                startLen.Item1,
+                startLen.Item2
+            );
+            return ret;
+        }
+
+        public DefinitionForTesting AsDefinitionForTesting(DictionaryDefinition def)
+        {
+            List<Statement> uses = _statementManager.GetNStatementsFor(def, MaxContextExamples);
+
+            List<WordInContext> contexts = uses.Select(use => AsWordInContext(def, use)).ToList();
+
+            return new DefinitionForTesting(def.Word, def.Definition, contexts, def);
+        }
+
 
         public DefinitionForTesting GetRandomDefinitionForTesting()
         {
             DictionaryDefinition toTest = DefLearningService.GetFrequentDefinition();
 
-            return new DefinitionForTesting(toTest.Word, toTest.Definition, toTest);
+            return AsDefinitionForTesting(toTest);
         }
 
         internal DefinitionForTesting GetHighInformationDefinition()
         {
             DictionaryDefinition toTest = DefLearningService.GetInitialVocabEstimationDefinition();
 
-            return new DefinitionForTesting(toTest.Word, toTest.Definition, toTest);
+            return AsDefinitionForTesting(toTest);
 
         }
 
@@ -147,7 +175,7 @@ namespace Linguine
                 throw new Exception();
             }
 
-            _testRecords.AddRecord(definitionForTesting.parent, posed, answered, finished, correct);
+            _testRecords.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct);
         }
 
         public List<DictionaryDefinition> LearnerList { get; private set; } = new List<DictionaryDefinition>();

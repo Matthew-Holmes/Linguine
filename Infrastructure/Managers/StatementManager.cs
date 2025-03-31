@@ -25,6 +25,13 @@ namespace Infrastructure
             return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
         }
 
+        public List<Statement> GetNStatementsFor(DictionaryDefinition def, int n)
+        {
+            List<StatementDatabaseEntry> entries = _databaseManager.GetNStatementsFor(def, n);
+
+            return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
+        }
+
         public List<int> StatementStartIndices(TextualMedia tm)
         {
             using var context = _dbf.CreateDbContext();

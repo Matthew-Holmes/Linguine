@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Helpers;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -13,6 +14,8 @@ namespace Infrastructure
 {
     internal class StatementDatabaseEntryManager : ManagerBase
     {
+        private static readonly Random rng = new Random();
+
         // TODO  - we may want to be able to edit terms; or even merge or insert statements
         // add those methods as reqired
         private object _lock = new();
@@ -41,6 +44,28 @@ namespace Infrastructure
             using var context = _dbf.CreateDbContext();
             context.Attach(tm);
             return context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
+        }
+
+        internal List<StatementDatabaseEntry> GetNStatementsFor(DictionaryDefinition def, int n)
+        {
+            using var context = _dbf.CreateDbContext();
+            context.Attach(def);
+
+            List<StatementDefinitionNode> nodes = context.StatementDefinitions
+                .Where(n => n.DictionaryDefinition == def)
+                .Include(n => n.StatementDatabaseEntry)
+                .Include(n => n.StatementDatabaseEntry.Parent)
+                .ToList();
+
+            if (nodes.Count == 0)
+            {
+                return new List<StatementDatabaseEntry>();
+            }
+
+            List<StatementDefinitionNode> sample = SelectionSampler.Sample(nodes, n, rng);
+
+            return sample.Select(n => n.StatementDatabaseEntry).ToList();
+
         }
 
         internal List<StatementDatabaseEntry> FindChainFromContextCheckpoint(StatementDatabaseEntry lastInChain)
