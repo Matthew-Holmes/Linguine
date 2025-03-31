@@ -18,7 +18,8 @@ namespace Infrastructure.Migrations
                     DictionaryDefinitionKey = table.Column<int>(type: "INTEGER", nullable: false),
                     Posed = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Answered = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Finished = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Finished = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Correct = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

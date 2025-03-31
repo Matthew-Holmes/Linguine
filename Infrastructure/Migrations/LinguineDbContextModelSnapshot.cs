@@ -26,6 +26,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("Answered")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("Correct")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("DictionaryDefinitionKey")
                         .HasColumnType("INTEGER");
 

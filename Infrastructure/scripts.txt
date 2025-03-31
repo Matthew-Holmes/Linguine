@@ -17,3 +17,10 @@ dotnet ef database update -- "Data Source=..\Linguine\bin\Debug\net8.0-windows10
 dotnet ef database update -- "Data Source=..\Linguine\bin\Debug\net8.0-windows10.0.19041.0\Store\zho.db;"
 
 
+## see migrations
+
+dotnet ef migrations list -- "Data Source=..\Linguine\bin\Debug\net8.0-windows10.0.19041.0\Store\eng.db;"
+
+## return to specific migration:
+
+dotnet ef database update MigrationName -- "Data Source=..\Linguine\bin\Debug\net8.0-windows10.0.19041.0\Store\eng.db;"

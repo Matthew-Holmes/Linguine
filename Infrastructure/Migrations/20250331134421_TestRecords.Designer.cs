@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LinguineDbContext))]
-    [Migration("20250319162411_TestRecords")]
+    [Migration("20250331134421_TestRecords")]
     partial class TestRecords
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,6 +27,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime>("Answered")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Correct")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("DictionaryDefinitionKey")
                         .HasColumnType("INTEGER");
