@@ -5,21 +5,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Infrastructure.DataClasses    
 {
-    using DefinitionId       = System.Int32;
-    using Frequency          = System.Int32;
-    using FrequencyMap       = System.Collections.Generic.IReadOnlyDictionary<int, int>;
-    using FrequencyBucketMap = System.Collections.Generic.IReadOnlyDictionary<int, System.Collections.Generic.HashSet<int>>;
+    using DefinitionId       = Int32;
+    using Frequency          = Int32;
+    using FrequencyMap       = IReadOnlyDictionary<int, int>;
+    using FrequencyBucketMap = IReadOnlyDictionary<int, HashSet<int>>;
+    using ZipfMap            = IReadOnlyDictionary<int, double>;
 
     public static class DefinitionFrequencyEngine
     {
         public static FrequencyMap?       DefinitionFrequencies       { get; private set; }
         public static FrequencyBucketMap? SortedDefinitionFrequencies { get; private set; }
+        public static ZipfMap?            DefinitionZipfScores        { get; private set; }
+        public static double              ZipfLo                      { get; private set; }
+        public static double              ZipfHi                      { get; private set; }
 
         public static void UpdateDefinitionFrequencies(LinguineDbContext context)
         {
+            // basic frequencies
+
             if (!context.StatementDefinitions.Any())
             {
                 DefinitionFrequencies = new Dictionary<DefinitionId, Frequency>().AsReadOnly();
@@ -43,6 +50,8 @@ namespace Infrastructure.DataClasses
 
             DefinitionFrequencies = frequencyTable.AsReadOnly();
 
+            // sorted and binned frequencies
+
             var sortedFrequencies = new Dictionary<Frequency, HashSet<DefinitionId>>();
 
             foreach (var (definitionId, freq) in frequencyTable)
@@ -60,6 +69,44 @@ namespace Infrastructure.DataClasses
                 .OrderByDescending(kvp => kvp.Key)
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 .AsReadOnly();
+
+            // Zipf scores
+
+            double totalFrequency = frequencyTable.Values.Sum();
+
+            var zipfScores = new Dictionary<DefinitionId, double>();
+            if (totalFrequency == 0)
+            {
+                DefinitionZipfScores = frequencyTable.Keys.ToDictionary(id => id, _ => 0.0).AsReadOnly();
+                Log.Error("total frequency zero when computing Zipf scores!");
+                return;
+            }
+
+            // TODO - as outlined in notebooks, this falls victim to survivorship bias
+            // we should account for this as described
+            ZipfLo = double.MaxValue;
+            ZipfHi = double.MinValue;
+
+            foreach (var (definitionId, frequency) in frequencyTable)
+            {
+                double freqPerBillion;
+
+                if (frequency == 0)
+                {
+                    freqPerBillion = 1.0; // dummy value keep it low score so we don't
+                                          // inundate the user with random definitions
+                }
+
+                freqPerBillion = (frequency / totalFrequency) * 1_000_000_000.0;
+                double zipf = Math.Log10(freqPerBillion) + 3;
+                zipfScores[definitionId] = zipf;
+
+                // track range we are confident in
+                ZipfHi = Math.Max(ZipfHi, zipf);
+                ZipfLo = Math.Min(ZipfLo, zipf);
+            }
+
+            DefinitionZipfScores = zipfScores.AsReadOnly();
         }
 
 
