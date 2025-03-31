@@ -8,40 +8,61 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.DataClasses    
 {
+    using DefinitionId       = System.Int32;
+    using Frequency          = System.Int32;
+    using FrequencyMap       = System.Collections.Generic.IReadOnlyDictionary<int, int>;
+    using FrequencyBucketMap = System.Collections.Generic.IReadOnlyDictionary<int, System.Collections.Generic.HashSet<int>>;
+
     public static class DefinitionFrequencyEngine
     {
-        public static IReadOnlyDictionary<int, int>? DefinitionFrequencies { get; private set; } 
+        public static FrequencyMap?       DefinitionFrequencies       { get; private set; }
+        public static FrequencyBucketMap? SortedDefinitionFrequencies { get; private set; }
 
         public static void UpdateDefinitionFrequencies(LinguineDbContext context)
         {
-            // TODO - when this gets slow, we should cache them per textual media
-            // then only update the ones that have changed (timestamps/change tracker)
-
-            //SaveDefinitionFrequenciesToCsv(context, "freqs.csv"); // TODO - remove when finished analysis!
-
             if (!context.StatementDefinitions.Any())
             {
-                DefinitionFrequencies = new Dictionary<int, int>().AsReadOnly();
+                DefinitionFrequencies = new Dictionary<DefinitionId, Frequency>().AsReadOnly();
+                SortedDefinitionFrequencies = new Dictionary<Frequency, HashSet<DefinitionId>>().AsReadOnly();
+                return;
             }
-
-            // include zero counted words in the frequency dictionary too
 
             var frequencyTable = context.DictionaryDefinitions
                 .Select(node => new { DefinitionKey = node.DatabasePrimaryKey, Count = 0 })
-                .ToDictionary(x=> x.DefinitionKey, x=>x.Count);
+                .ToDictionary(x => x.DefinitionKey, x => x.Count);
 
             var counts = context.StatementDefinitions
                 .GroupBy(node => node.DefinitionKey)
                 .Select(group => new { DefinitionKey = group.Key, Count = group.Count() })
                 .ToDictionary(x => x.DefinitionKey, x => x.Count);
 
-            foreach (KeyValuePair<int, int> item in counts)
+            foreach (KeyValuePair<DefinitionId, Frequency> item in counts)
             {
                 frequencyTable[item.Key] = item.Value;
             }
 
             DefinitionFrequencies = frequencyTable.AsReadOnly();
+
+            var sortedFrequencies = new Dictionary<Frequency, HashSet<DefinitionId>>();
+
+            foreach (var (definitionId, freq) in frequencyTable)
+            {
+                if (!sortedFrequencies.TryGetValue(freq, out var idSet))
+                {
+                    idSet = new HashSet<DefinitionId>();
+                    sortedFrequencies[freq] = idSet;
+                }
+
+                idSet.Add(definitionId);
+            }
+
+            SortedDefinitionFrequencies = sortedFrequencies
+                .OrderByDescending(kvp => kvp.Key)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+                .AsReadOnly();
         }
+
+
 
         public static void SaveDefinitionFrequenciesToCsv(LinguineDbContext context, string filePath)
         {
