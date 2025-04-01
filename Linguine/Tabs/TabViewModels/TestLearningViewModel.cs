@@ -231,7 +231,7 @@ namespace Linguine.Tabs
             }
             else
             {
-                _definitionForTesting = _model.GetRandomDefinitionForTesting();
+                _definitionForTesting = _model.GetHighLearningDefinition();
             }
 
             AnswerSubmitted = false;

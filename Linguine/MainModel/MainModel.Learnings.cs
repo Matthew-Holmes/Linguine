@@ -146,8 +146,24 @@ namespace Linguine
             return new DefinitionForTesting(def.Word, def.Definition, contexts, def);
         }
 
+        public DefinitionForTesting GetHighLearningDefinition()
+        {
+            if (VocabModel is null)
+            {
+                BuildVocabularyModel();
+            }
 
-        public DefinitionForTesting GetRandomDefinitionForTesting()
+            if (VocabModel is null)
+            {
+                throw new Exception("failed to build vocabulary model");
+            }
+
+            DictionaryDefinition toTest = DefLearningService.GetHighLearningDefinition(VocabModel);
+
+            return AsDefinitionForTesting(toTest);
+        }
+
+        public DefinitionForTesting GetRandomDefinition()
         {
             DictionaryDefinition toTest = DefLearningService.GetFrequentDefinition();
 

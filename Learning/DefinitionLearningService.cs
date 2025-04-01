@@ -119,6 +119,43 @@ namespace Learning
             // improve vocab estimation error 
             // maximise learning - i.e. max increase in P(know a random word)
 
+        public DictionaryDefinition GetHighLearningDefinition(VocabularyModel model, int topK = 5)
+        {
+            // pass vocab model since we know that this must have all the required data
+
+            if (model.PKnownWithError is null)
+            {
+                model.ComputeGetPKnownWithError();
+            }
+
+            IReadOnlyDictionary<int, double>? pKnown = model.PKnownWithError?
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Item1);
+
+            if (pKnown is null)
+            {
+                throw new Exception("failed to word known probabilities");
+            }
+
+            Dictionary<int, double> expectedUnknown = model.WordFrequencies
+                .Where(kvp => pKnown.ContainsKey(kvp.Key))
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value * (1.0 - pKnown[kvp.Key])
+                 );
+
+            var topKKeys = expectedUnknown
+                .OrderByDescending(kvp => kvp.Value)                     // primary sort by value
+                .ThenBy(kvp => rng.Next())                               // randomize within ties
+                .Take(topK)
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            int selectedKey = topKKeys[rng.Next(topKKeys.Count)];
+
+            return _dictionary.TryGetDefinitionByKey(selectedKey) ?? throw new Exception();
+
+        }
+
         public DictionaryDefinition GetInitialVocabEstimationDefinition()
         {
             // adaptive binning approach to get good coverage

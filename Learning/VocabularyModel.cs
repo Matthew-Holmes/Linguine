@@ -5,12 +5,12 @@ namespace Learning
 {
     public class VocabularyModel
     {
-        IReadOnlyDictionary<int, int>        WordFrequencies;
+        public IReadOnlyDictionary<int, int> WordFrequencies { get; set; }
         IReadOnlyDictionary<int, TestRecord> LatestTestRecords;
         IReadOnlyDictionary<int, double>     ZipfScores;
         double ZipfHi; double ZipfLo;
 
-        IReadOnlyDictionary<int, Tuple<double, double>>? _pKnownWithError;
+        public IReadOnlyDictionary<int, Tuple<double, double>>? PKnownWithError { get; set; }
 
         public VocabularyModel(
             IReadOnlyDictionary<int, int> wordFrequencies, 
@@ -29,9 +29,9 @@ namespace Learning
         public Tuple<double[], double[]>? GetPKnownByBinnedZipf()
         {
 
-            if (_pKnownWithError is null) { ComputeGetPKnownWithError(); }
+            if (PKnownWithError is null) { ComputeGetPKnownWithError(); }
 
-            if (_pKnownWithError is null)
+            if (PKnownWithError is null)
             {
                 throw new Exception("failed to compute p knowns and errors");
             }
@@ -91,7 +91,7 @@ namespace Learning
 
                         double pKnown; double se;
 
-                        (pKnown, se) = _pKnownWithError[kvp.Key];
+                        (pKnown, se) = PKnownWithError[kvp.Key];
 
                         binPknowns[i].Add(pKnown);
                         binSes[i].Add(se);
@@ -265,7 +265,7 @@ namespace Learning
                 continue;
             }
 
-            _pKnownWithError = ret.AsReadOnly();
+            PKnownWithError = ret.AsReadOnly();
         }
 
 

@@ -10,8 +10,12 @@ namespace Helpers
     {
         public static List<T> Sample<T>(IList<T> input, int k, Random rng)
         {
-            if (k < 0 || k > input.Count)
-                throw new ArgumentOutOfRangeException(nameof(k), "k must be between 0 and the size of the input");
+            k = Math.Min(k, input.Count);
+
+            if (k == 0)
+            {
+                return new List<T>();
+            }
 
             List<T> result = new List<T>(k);
 
