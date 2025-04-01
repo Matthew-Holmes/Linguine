@@ -87,10 +87,22 @@ namespace Linguine.Tabs
 
 
         #region plots 
+        private bool _showPlot = false;
+
+        public bool ShowPlot
+        {
+            get => _showPlot;
+            set
+            {
+                _showPlot = value;
+                OnPropertyChanged(nameof(_showPlot));
+            }
+        }
 
         private Tuple<double[], double[]> toGraph;
 
         private PlotModel _plotModel;
+
         public PlotModel PlotModel
         {
             get => _plotModel;
@@ -162,6 +174,7 @@ namespace Linguine.Tabs
             model.Axes.Add(yAxis);
 
             PlotModel = model;
+            ShowPlot = true;
         }
         #endregion
     }

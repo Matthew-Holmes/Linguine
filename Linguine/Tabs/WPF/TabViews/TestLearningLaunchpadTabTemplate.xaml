@@ -16,7 +16,8 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
-            <oxy:PlotView Model="{Binding PlotModel}" Grid.Row="0" Margin="30,5,30,5"/>
+            <oxy:PlotView Model="{Binding PlotModel}" Grid.Row="0" Margin="30,5,30,5"
+                          Visibility="{Binding ShowPlot, Converter={StaticResource BoolToVisibilityConverter}}"/>
             
             <!-- Message Display -->
             <StackPanel Grid.Row="1" Margin="10" HorizontalAlignment="Center">
