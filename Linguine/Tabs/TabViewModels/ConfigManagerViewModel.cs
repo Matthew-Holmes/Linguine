@@ -1,5 +1,6 @@
 ﻿using Infrastructure;
 using Linguine.Helpers;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -192,13 +193,18 @@ namespace Linguine.Tabs
                     _uiComponents.CanMessage.Show(e.Message);
                 }
             }
-
+            
             RefreshAvailableDictionaries();
         }
 
         private void RefreshAvailableDictionaries()
         {
             TargetLanguageDictionaries = _model.ExternalDictionaryManager.AvailableDictionaries();
+
+            if (TargetLanguageDictionaries.Count != 0)
+            {
+                _model.NeedToImportADictionary = false;
+            }
 
             OnPropertyChanged(nameof(TargetLanguageDictionaries));
         }
