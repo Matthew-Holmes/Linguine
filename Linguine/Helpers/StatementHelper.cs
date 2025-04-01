@@ -22,6 +22,7 @@ namespace Linguine
             while (index < flatInjective.Decomposition.Count)
             {
                 String toFind = flatInjective.Decomposition[index].Total;
+
                 if (statement.StatementText.Substring(start, toFind.Length) != toFind)
                 {
                     start++; continue;
