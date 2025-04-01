@@ -70,7 +70,7 @@ namespace Linguine
 
             // determine the chunk of text to process next
             (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
-            if (text is null || context is null) { return 0; }
+            if (text is null || context is null) { return -1; }
 
             List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail, token);
 

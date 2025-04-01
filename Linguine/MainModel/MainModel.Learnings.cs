@@ -36,7 +36,7 @@ namespace Linguine
 
         public DefinitionLearningService? DefLearning => _defLearningService;
 
-        public bool NeedToImportADictionary { get; private set; } = true;
+        public bool NeedToImportADictionary { get; set; } = true;
 
 
         private DefinitionLearningService DefLearningService
