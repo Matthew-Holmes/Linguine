@@ -138,15 +138,16 @@
                        Margin="25,10,0,0"
                        Visibility="{Binding AnswerSubmitted, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-            <TextBlock Text="{Binding CorrectAnswer}" 
-                       FontSize="16" 
-                       FontWeight="SemiBold" 
-                       Foreground="Green" 
-                       Grid.Row="3"
-                       Margin="150,10,10,10"
-                       TextWrapping="Wrap"
-                       MaxWidth="400"
-                       Visibility="{Binding AnswerSubmitted, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3">
+                <TextBlock Text="{Binding CorrectAnswer}" 
+                           FontSize="16" 
+                           FontWeight="SemiBold" 
+                           Foreground="Green" 
+                           Margin="150,10,10,10"
+                           TextWrapping="Wrap"
+                           MaxWidth="400"
+                           Visibility="{Binding AnswerSubmitted, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            </ScrollViewer>
 
             <!-- Tick and Cross Buttons (Appear Only After Submission) -->
             <StackPanel Grid.Row="4"
