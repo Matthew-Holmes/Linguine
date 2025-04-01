@@ -100,6 +100,11 @@ namespace Linguine
                     int completed = await ProcessNextChunk(tm, cts);
                     stopwatch.Stop();
 
+                    if (completed == -1)
+                    {
+                        throw new Exception("no more text to process");
+                    }
+
                     double stepTime_ms = stopwatch.Elapsed.TotalMilliseconds;
                     double stepTime_s = stepTime_ms / 1_000.0;
 
