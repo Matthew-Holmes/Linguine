@@ -205,6 +205,39 @@ namespace Linguine
             return true;
         }
 
+        public VocabularyModel? VocabModel {get; set;}
 
+        internal void BuildVocabularyModel()
+        {
+            if (DefinitionFrequencyEngine.DefinitionZipfScores is null)
+            {
+                using var context = _linguineDbContextFactory.CreateDbContext();
+                DefinitionFrequencyEngine.UpdateDefinitionFrequencies(context);
+            }
+
+            IReadOnlyDictionary<int, int>? freqs = DefinitionFrequencyEngine.DefinitionFrequencies;
+            IReadOnlyDictionary<int, double>? zipfs = DefinitionFrequencyEngine.DefinitionZipfScores;
+
+            if (freqs is null || zipfs is null)
+            {
+                throw new Exception("couldn't generate Zipf scores!");
+            }
+
+            IReadOnlyDictionary<int, TestRecord>? testRecords = _testRecords?.LatestTestRecords();
+            
+            if (testRecords is null)
+            {
+                throw new Exception("couldn't obtain latest test records!");
+            }
+
+            VocabModel = new VocabularyModel(
+                freqs,
+                testRecords,
+                zipfs,
+                DefinitionFrequencyEngine.ZipfHi,
+                DefinitionFrequencyEngine.ZipfLo);
+
+            VocabModel.ComputeGetPKnownWithError();
+        }
     }
 }

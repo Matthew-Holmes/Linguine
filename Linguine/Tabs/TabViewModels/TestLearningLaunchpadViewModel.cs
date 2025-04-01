@@ -31,6 +31,8 @@ namespace Linguine.Tabs
         public String NeedVocabBurnInText { get; } = "Please complete an initial vocabulary assessment";
 
 
+        private Tuple<double[], double[]> toGraph;
+
         public TestLearningLaunchpadViewModel(UIComponents uiComponents, MainModel model, MainViewModel parent) : base(uiComponents, model, parent)
         {
             Title = "Test";
@@ -40,6 +42,15 @@ namespace Linguine.Tabs
             StartVocabAssessmentCommand = new RelayCommand(() => BeginVocabAssessment());
 
             ValidateSufficentData();
+
+            if (AnyDataForWordFrequencies)
+            {
+                if (_model.VocabModel is null)
+                {
+                    _model.BuildVocabularyModel();
+                }
+                toGraph = _model.VocabModel.GetPKnownByBinnedZipf();
+            }
         }
 
 

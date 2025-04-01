@@ -1,30 +1,141 @@
 ﻿using Infrastructure.DataClasses;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
 
 namespace Learning
 {
-    class VocabularyModel
+    public class VocabularyModel
     {
         IReadOnlyDictionary<int, int>        WordFrequencies;
         IReadOnlyDictionary<int, TestRecord> LatestTestRecords;
+        IReadOnlyDictionary<int, double>     ZipfScores;
+        double ZipfHi; double ZipfLo;
+
+        IReadOnlyDictionary<int, Tuple<double, double>>? _pKnownWithError;
 
         public VocabularyModel(
             IReadOnlyDictionary<int, int> wordFrequencies, 
-            IReadOnlyDictionary<int, TestRecord> latestTestRecords)
+            IReadOnlyDictionary<int, TestRecord> latestTestRecords,
+            IReadOnlyDictionary<int, double> zipfScores,
+            double zipfHi,
+            double zipfLo)
         {
             WordFrequencies = wordFrequencies;
             LatestTestRecords = latestTestRecords;
+            ZipfScores = zipfScores;
+            ZipfHi = zipfHi;
+            ZipfLo = zipfLo;
         }
 
-        public IReadOnlyDictionary<int, Tuple<double,double>> GetPKnownWithError()
+        public Tuple<double[], double[]>? GetPKnownByBinnedZipf()
+        {
+
+            if (_pKnownWithError is null) { ComputeGetPKnownWithError(); }
+
+            if (_pKnownWithError is null)
+            {
+                throw new Exception("failed to compute p knowns and errors");
+            }
+
+            // cube root so that we aim for n bins with n^2 items in each
+            int initialBinCount = (int)Math.Pow(
+                (double)(LatestTestRecords.Count), 1.0 / 3.0);
+
+            // using Zipf scores so these will be fine
+            List<double> binSnapValue = new List<double> { 0.05, 0.1, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0 };
+
+            double snapStarter = (ZipfHi - ZipfLo) / initialBinCount;
+            double binSnap = 1.0;
+            foreach (double d in binSnapValue)
+            {
+                if (d > snapStarter)
+                {
+                    binSnap = d; break;
+                }
+            }
+
+            double binMid = 0;
+            List<Tuple<double, double>> bins = new List<Tuple<double, double>>();
+
+            while (true)
+            {
+                if (binMid > ZipfHi)
+                {
+                    break;
+                }
+
+                if (binMid + binSnap / 2.0 > ZipfLo)
+                {
+                    bins.Add(Tuple.Create(binMid - binSnap / 2.0, binMid + binSnap / 2.0));
+                }
+
+                binMid += binSnap;
+            }
+
+            var binPknowns = new Dictionary<int, List<double>>(); // temp list of values per bin
+            var binSes     = new Dictionary<int, List<double>>(); // temp list of values per bin
+
+            foreach (var kvp in ZipfScores)
+            {
+                double score = kvp.Value;
+
+                for (int i = 0; i < bins.Count; i++)
+                {
+                    var (low, high) = bins[i];
+                    if (score >= low && score < high)
+                    {
+                        if (!binPknowns.ContainsKey(i))
+                        {
+                            binPknowns[i] = new List<double>();
+                            binSes[i]     = new List<double>();
+                        }
+
+                        double pKnown; double se;
+
+                        (pKnown, se) = _pKnownWithError[kvp.Key];
+
+                        binPknowns[i].Add(pKnown);
+                        binSes[i].Add(se);
+                        break;
+                    }
+                }
+            }
+
+            var binStats = new Dictionary<int, Tuple<double, double>>(); // bin index -> (mean, std dev)
+
+            foreach (var kvp in binPknowns)
+            {
+                var values = kvp.Value;
+                var mean = values.Average();
+
+                List<double> ses = binSes[kvp.Key];
+                // don't divide by sample size since these were bootstrapped
+                double stdDev = Math.Sqrt(ses.Select(v => Math.Pow(v, 2)).Average());
+
+                double mid = (bins[kvp.Key].Item2 + bins[kvp.Key].Item1) / 2.0;
+
+                binStats[kvp.Key] = Tuple.Create(mean, stdDev);
+
+                Log.Information("estimated p known for Zipf: {Zipf}, to be {mean} with stddev {stddev}", mid, mean, stdDev);
+            }
+
+            var midpoints = new List<double>();
+            var means     = new List<double>();
+
+            foreach (var kvp in binStats.OrderBy(kvp => kvp.Key))
+            {
+                var (low, high) = bins[kvp.Key];
+                var midpoint = (low + high) / 2.0;
+                var mean = kvp.Value.Item1;
+
+                midpoints.Add(midpoint);
+                means.Add(mean);
+            }
+
+            return Tuple.Create(midpoints.ToArray(), means.ToArray());
+
+        }
+
+        public void ComputeGetPKnownWithError()
         {
             // use a kernel
                 // TODO 
@@ -46,7 +157,7 @@ namespace Learning
             int totalWordsCnt = WordFrequencies.Count;
             double maxKernelSigma = (double)totalWordsCnt / 10.0;
 
-            int nonZeroWordCnt = WordFrequencies.Select(kvp => kvp.Value != 0).Count();
+            int nonZeroWordCnt = WordFrequencies.Where(kvp => kvp.Value != 0).Count();
             double initialKernelSigma = 3.0 * ((double)totalWordsCnt / (double)nonZeroWordCnt);
 
             double sigma = initialKernelSigma;
@@ -61,17 +172,22 @@ namespace Learning
 
             Dictionary<int, Tuple<double, double>> ret = new Dictionary<int, Tuple<double,double>>();
 
-            foreach (Tuple<int, double> t in sortedRanks)
+            double thisRank = 0.0;
+            double cacheMean = 0.0; double cacheStd = 0.0;
+
+            foreach ((int index, double rank) in sortedRanks)
             {
-                if (LatestTestRecords.ContainsKey(t.Item1))
+
+                // optimisation
+                if (Math.Abs(rank - thisRank) < 0.25) /* ranks either natural numbers or n.5 */
                 {
-                    // no error because we know it
-                    // maybe later we can use historic records to estimate error?
-                    ret[t.Item1] = Tuple.Create(LatestTestRecords[t.Item1].Correct ? 1.0 : 0.0, 0.0);
+                    ret[index] = Tuple.Create(cacheMean, cacheStd);
                     continue;
                 }
-
-                double rank = t.Item2;
+                else
+                {
+                    thisRank = rank;
+                }
 
                 int i = left;
 
@@ -90,7 +206,7 @@ namespace Learning
                 if (i == WordFrequencies.Count)
                 {
                     Log.Warning("overran doing p known");
-                    ret[t.Item1] = Tuple.Create(0.0, 1.0);
+                    ret[index] = Tuple.Create(0.0, 1.0);
                 }
 
 
@@ -125,7 +241,7 @@ namespace Learning
                 if (totalWeight <= 0.00001)
                 {
                     Log.Warning("no weight - adjust kernel sigma!");
-                    ret[t.Item1] = Tuple.Create(0.0, 1.0);
+                    ret[index] = Tuple.Create(0.0, 1.0);
                     continue;
                 }
 
@@ -134,10 +250,22 @@ namespace Learning
 
                 double se = Math.Sqrt(muhat * (1.0 - muhat) * sumWeightsSquared);
 
-                ret[t.Item1] = Tuple.Create(muhat, se);
+                ret[index] = Tuple.Create(muhat, se);
+
+                cacheMean = muhat;
+                cacheStd = se;
             }
 
-            return ret.AsReadOnly();
+            // overwrite the values we know correctly
+            foreach (var kvp in LatestTestRecords) { 
+
+                // no error because we know it
+                // maybe later we can use historic records to estimate error?
+                ret[kvp.Key] = Tuple.Create(kvp.Value.Correct ? 1.0 : 0.0, 0.0);
+                continue;
+            }
+
+            _pKnownWithError = ret.AsReadOnly();
         }
 
 
@@ -169,7 +297,7 @@ namespace Learning
                 for (int k = i; k < j; k++)
                 {
                     int wordId = sorted[k].Key;
-                    ranks.Add(Tuple.Create(sorted[i].Key, meanRank));
+                    ranks.Add(Tuple.Create(wordId, meanRank));
                 }
 
                 currentRank += count;
