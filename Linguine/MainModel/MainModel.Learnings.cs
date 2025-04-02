@@ -167,6 +167,11 @@ namespace Linguine
                 defText = def.Definition;
             }
 
+            if (def.RomanisedPronuncation is not null)
+            {
+                defText = def.RomanisedPronuncation + '\n' + defText;
+            }
+
             return new DefinitionForTesting(def.Word, defText, contexts, def);
         }
 
