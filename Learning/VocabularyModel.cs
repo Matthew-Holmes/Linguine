@@ -29,7 +29,7 @@ namespace Learning
         public Tuple<double[], double[]>? GetPKnownByBinnedZipf()
         {
 
-            if (PKnownWithError is null) { ComputeGetPKnownWithError(); }
+            if (PKnownWithError is null) { ComputePKnownWithError(); }
 
             if (PKnownWithError is null)
             {
@@ -135,7 +135,7 @@ namespace Learning
 
         }
 
-        public void ComputeGetPKnownWithError()
+        public void ComputePKnownWithError()
         {
             // use a kernel
                 // TODO 

@@ -45,7 +45,7 @@ namespace Linguine.Tabs
                                      bool          isVocabTest = false) 
             : base(uiComponents, model, parent)
         {
-            Title = "Test";
+            Title = "Learn";
 
             if (isVocabTest)
             {

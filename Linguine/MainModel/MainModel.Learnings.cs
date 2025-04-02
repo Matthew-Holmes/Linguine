@@ -277,7 +277,7 @@ namespace Linguine
                 DefinitionFrequencyEngine.ZipfHi,
                 DefinitionFrequencyEngine.ZipfLo);
 
-            VocabModel.ComputeGetPKnownWithError();
+            VocabModel.ComputePKnownWithError();
         }
     }
 }

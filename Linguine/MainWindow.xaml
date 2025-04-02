@@ -26,7 +26,7 @@
             <Button Content="+Home+" Command="{Binding OpenHomeTabCommand}" Grid.Column="0"/>
             <Button Content="+Config+" Command="{Binding OpenConfigManagerTabCommand}" Grid.Column="2"/>
             <Button Content="+Text Viewer+" Command="{Binding OpenTextualMediaViewerTabCommand}" Grid.Column="4"/>
-            <Button Content="+Test+" Command="{Binding OpenTestLearningTabCommand}" Grid.Column="6"/>
+            <Button Content="+Learn+" Command="{Binding OpenTestLearningTabCommand}" Grid.Column="6"/>
         </Grid>
         <TabControl ItemsSource="{Binding Tabs}" SelectedItem ="{Binding SelectedTab}" Grid.Row="1">
             <TabControl.ItemTemplate>

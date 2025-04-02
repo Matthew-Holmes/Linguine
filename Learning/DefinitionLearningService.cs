@@ -131,7 +131,7 @@ namespace Learning
 
             if (model.PKnownWithError is null)
             {
-                model.ComputeGetPKnownWithError();
+                model.ComputePKnownWithError();
             }
 
             IReadOnlyDictionary<int, double>? pKnown = model.PKnownWithError?
@@ -139,7 +139,7 @@ namespace Learning
 
             if (pKnown is null)
             {
-                throw new Exception("failed to word known probabilities");
+                throw new Exception("failed to compute word known probabilities");
             }
 
             Dictionary<int, double> expectedUnknown = model.WordFrequencies
@@ -149,7 +149,7 @@ namespace Learning
                     kvp => kvp.Value * (1.0 - pKnown[kvp.Key])
                  );
 
-            var debug = expectedUnknown.OrderByDescending(kvp => kvp.Value);
+            //var debug = expectedUnknown.OrderByDescending(kvp => kvp.Value);
 
             var topKKeys = expectedUnknown
                 .OrderByDescending(kvp => kvp.Value)                     // primary sort by value

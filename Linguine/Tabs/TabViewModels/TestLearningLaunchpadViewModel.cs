@@ -24,7 +24,7 @@ namespace Linguine.Tabs
 
         public TestLearningLaunchpadViewModel(UIComponents uiComponents, MainModel model, MainViewModel parent) : base(uiComponents, model, parent)
         {
-            Title = "Test";
+            Title = "Learn";
 
             FreeStudyCommand            = new RelayCommand(() => BeginFreeStudy());
             TargetedStudyCommand        = new RelayCommand(() => BeginTargetedStudy());
