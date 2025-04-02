@@ -16,7 +16,7 @@ namespace Learning
         // text based study can work, even for very small texts (?)
 
         // TODO - should these be in the config?
-        private int  _minWordsProcessed = 1_000;
+        private int  _minWordsProcessed = 300; // TODO - increase later
         private int  _minWordsTested    = 50;
         private int  _zipfBinCount      = 1;
         private bool _frozenBinCount    = false;
@@ -37,7 +37,13 @@ namespace Learning
                 return false;
             }
 
-            return DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum() >= _minWordsProcessed;
+            int total  = DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum();
+            int unique = DefinitionFrequencyEngine.DefinitionFrequencies.Where(kvp => kvp.Value != 0).Count();
+
+            bool enoughTotalText   = total  >= _minWordsProcessed;
+            bool enoughUniqueWords = unique >= _minWordsTested;
+
+            return enoughTotalText && enoughUniqueWords;
         }
 
         public bool NeedToBurnInVocabularyData()
@@ -143,6 +149,8 @@ namespace Learning
                     kvp => kvp.Value * (1.0 - pKnown[kvp.Key])
                  );
 
+            var debug = expectedUnknown.OrderByDescending(kvp => kvp.Value);
+
             var topKKeys = expectedUnknown
                 .OrderByDescending(kvp => kvp.Value)                     // primary sort by value
                 .ThenBy(kvp => rng.Next())                               // randomize within ties
@@ -210,6 +218,7 @@ namespace Learning
             var candidates = zipfScores.Where(
                 kvp => (int)((kvp.Value - minZipf) / binWidth) == leastPopulatedBindex).ToList();
 
+
             if (candidates.Count() == 0)
             {
                 _zipfBinCount--;
@@ -224,10 +233,27 @@ namespace Learning
             {
                 // have filled our bins a decent amount, lets just randomly sample
                 DictionaryDefinition? ret = GetFrequentDefinition(1);
+
+                int cnt = 0;
+                while (ret is not null && latest.ContainsKey(ret.DatabasePrimaryKey))
+                {
+                    ret = GetFrequentDefinition(1);
+                    cnt++;
+                    if (cnt > _minWordsTested)
+                    {
+                        Log.Warning("couldn't find a definition to test, even though we should have enough data");
+                        ret = null;
+                        break;
+                    }
+                }
+
+                Log.Information("took {count} cycles to find a unseen word", cnt);
+
                 if (ret is null)
                 {
                     return GetRandomDefinition();
                 }
+
                 return ret;
             }
 
