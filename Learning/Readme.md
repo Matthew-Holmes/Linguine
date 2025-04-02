@@ -18,8 +18,6 @@ For example a user interested in reading books in their target language, will pr
 Instead of a system that presents a fixed amount of study per day, I opted to have an endless cycle of flashcards, and the user can choose to study for as long/as little as they like. 
 Later I may add policy systems to direct how time should be allocated (however there are currently no other activities)
 
-## Key idea
-
 Below is a table of the issues with existing SRS systems, and how Linguine mitigates them:
 
 
