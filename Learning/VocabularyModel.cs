@@ -58,7 +58,7 @@ namespace Learning
 
             while (true)
             {
-                if (binMid > ZipfHi)
+                if (binMid - binSnap / 2.0 > ZipfHi)
                 {
                     break;
                 }
