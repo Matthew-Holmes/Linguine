@@ -9,6 +9,8 @@ When learning a second language, the definitions are parsed to their native lang
 <img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Learning/SampleImages/LearningDemo001.png?raw=true" width="400"><img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Learning/SampleImages/LearningDemo002.png?raw=true" width="400">
 <img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Learning/SampleImages/LearningDemo003.png?raw=true" width="400"><img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Learning/SampleImages/LearningDemo004.png?raw=true" width="400">
 
+We see the context can use an inflected usage of the word.
+
 ## Motivation
 
 A lot of the work on this has been inspired by spaced repition systems (SRSs) such as Anki or Memrise. These are very useful, and help optimise what is presented to the user.
