@@ -137,9 +137,6 @@ namespace Linguine.Tabs
             var sortedXs = xs.Distinct().OrderBy(v => v).ToList();
 
             double xMargin = (sortedXs.Last() - sortedXs.First()) * 0.05;
-            double yMin = ys.Min();
-            double yMax = ys.Max();
-            double yMargin = (yMax - yMin) * 0.05;
 
             var xAxis = new LinearAxis
             {
@@ -165,8 +162,8 @@ namespace Linguine.Tabs
                 IsZoomEnabled = false,
                 MinorTickSize = 0,
                 TickStyle = TickStyle.Inside,
-                Minimum = yMin - yMargin,
-                Maximum = yMax + yMargin
+                Minimum = 0,
+                Maximum = 1.05
             };
 
 
