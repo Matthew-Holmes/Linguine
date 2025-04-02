@@ -9,7 +9,9 @@
         DecompositionToStatements,
         DecompositionToUnits,
         UnitRooting,
-        DefinitionParsing
+        DefinitionParsing,
+        DefinitionIPAPronouncing,
+        DefinitionRomanisedPronouncing
     }
 
 }

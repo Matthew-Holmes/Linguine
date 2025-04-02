@@ -8,7 +8,13 @@ using System.Threading.Tasks;
 
 namespace LearningExtraction
 {
-    class DefinitionPronunciationEngine
+    public interface ICanPronounce
+    {
+        public Task<List<Tuple<String, String>>> GetDefinitionPronunciations(
+            List<DictionaryDefinition> definitions);
+    }
+
+    class DefinitionPronunciationEngine : ICanPronounce
     {
         private AgentBase IPAPronunciationAgent       { get; set; }
         private AgentBase RomanisedPronunciationAgent { get; set; }

@@ -39,7 +39,11 @@ namespace Agents
 
             {AgentTask.UnitRooting, "process the following lines to remove inflection, converting verbs to the infinitive and nouns to the singular for example. Use standard English capitalisation, proper nouns, names, surnames, locations, place names and acronyms MUST obey capitalisation rules, with the initial letter capitalised, otherwise favour lowercase. Remove unnecessary punctuation and possessive apostrophes. You MUST NOT omit lines. DO NOT combine lines. DO NOT split lines. The number of output and input lines MUST be the same. Format \nword1\nword2 etc." },
 
-            {AgentTask.DefinitionParsing, "produce a short educational translation of this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language. Keep your definition succinct. Include a translation of the word into English. Strictly required response format: English translation of word \n short translation of provided definition" }
+            {AgentTask.DefinitionParsing, "produce a short educational translation of this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language. Keep your definition succinct. Include a translation of the word into English. Strictly required response format: English translation of word \n short translation of provided definition" },
+
+            {AgentTask.DefinitionIPAPronouncing, "given the following word (definition also provided) provide the word's pronunciation using the International Phonetic Alphabet IPA" },
+
+            {AgentTask.DefinitionRomanisedPronouncing, "given the following word (definition also provided) provide the word's romanised pronunciation" },
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
@@ -56,7 +60,12 @@ namespace Agents
 
             {AgentTask.UnitRooting, "Traitez les lignes suivantes pour supprimer l'inflexion, en convertissant les verbes à l'infinitif et les noms au singulier par exemple. Utilisez des majuscules anglaises standard : les noms propres, les prénoms, les lieux, les noms de lieux et les acronymes DOIVENT obéir aux règles de majuscule, avec la lettre initiale en majuscule, sinon privilégiez les minuscules. Supprimez la ponctuation inutile et les apostrophes possessives. Vous NE DEVEZ PAS omettre de lignes. NE combinez PAS les lignes. NE divisez PAS les lignes. Le nombre de lignes de sortie et d'entrée DOIT être le même. Formater \nmot1\nmot2 etc." },
 
-            {AgentTask.DefinitionParsing, "analysez cette définition pour un adulte francophone, votre réponse doit être en français et prendre en compte son niveau de compétence dans la langue de la définition. Gardez votre définition succincte." }
+            {AgentTask.DefinitionParsing, "analysez cette définition pour un adulte francophone, votre réponse doit être en français et prendre en compte son niveau de compétence dans la langue de la définition. Gardez votre définition succincte." },
+
+            {AgentTask.DefinitionIPAPronouncing, "étant donné le mot suivant (définition également fournie), fournissez la prononciation du mot en utilisant l'alphabet phonétique international (API)" },
+
+            {AgentTask.DefinitionRomanisedPronouncing, "étant donné le mot suivant (définition également fournie), fournissez la prononciation romanisée du mot" },
+
         };
 
         private static Dictionary<AgentTask, String> ChineseSystemMessages = new Dictionary<AgentTask, String>
@@ -73,7 +82,11 @@ namespace Agents
 
             {AgentTask.UnitRooting, "处理以下行以删除词形变化，例如将动词转换为不定式，将名词转换为单数。删除不必要的标点符号。您不得省略行。不要合并行。不要拆分行。输出和输入行的数量必须相同。你必须用中文回答，不要翻译任何东西。格式 \n单词1\n单词2 等。" },
 
-            {AgentTask.DefinitionParsing, "为成年中文使用者解析这个定义，您的回答应该是中文，并考虑他们对定义语言的熟练程度。保持你的定义简洁。" }
+            {AgentTask.DefinitionParsing, "为成年中文使用者解析这个定义，您的回答应该是中文，并考虑他们对定义语言的熟练程度。保持你的定义简洁。" },
+
+            {AgentTask.DefinitionIPAPronouncing, "给出以下单词（也提供定义）使用国际音标（IPA）提供该单词的发音" },
+
+            {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（同时提供定义）提供该单词的拼音发音" }
         };
     }
 
