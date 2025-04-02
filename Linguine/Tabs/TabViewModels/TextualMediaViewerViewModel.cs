@@ -64,6 +64,7 @@ namespace Linguine.Tabs
         private string _selectedUnitText;
         private string _selectedUnitDefinition;
         private string _selectedUnitRootedText;
+        private string _selectedUnitRootedPronunciation;
         private ObservableCollection<string> _selectedUnitContextInfo;
         private bool _showSaveWordButton;
         private string _selectedUnitParsedDefinition;
@@ -86,6 +87,16 @@ namespace Linguine.Tabs
             {
                 _selectedUnitRootedText = value;
                 OnPropertyChanged(nameof(SelectedUnitRootedText));
+            }
+        }
+
+        public String SelectedUnitRootedPronunciation
+        {
+            get => _selectedUnitRootedPronunciation;
+            set
+            {
+                _selectedUnitRootedPronunciation = value;
+                OnPropertyChanged(nameof(SelectedUnitRootedPronunciation));
             }
         }
 
@@ -218,10 +229,12 @@ namespace Linguine.Tabs
             if (SelectedUnitDefinition is null)
                 ShowSaveWordButton = false;
             else
+            {
                 ShowSaveWordButton = true;
-                SelectedUnitParsedDefinitionText = _model.GetParsedDictionaryDefinition(SelectedUnitDefinition)?.ParsedDefinition 
-                    ?? "";
-
+                SelectedUnitParsedDefinitionText = _model.GetParsedDictionaryDefinition(SelectedUnitDefinition)?.ParsedDefinition
+                        ?? "";
+                SelectedUnitRootedPronunciation = SelectedUnitDefinition.RomanisedPronuncation ?? "";
+            }
             //throw new NotImplementedException();
             // the logic to query the parsed definition from the model, and setup a callback if
             // it needs to be recomputed

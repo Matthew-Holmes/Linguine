@@ -17,6 +17,5 @@ namespace Infrastructure
         public String Source { get; set; }
         public String? IPAPronunciation { get; set; }
         public String? RomanisedPronuncation { get; set; }
-
     }
 }
