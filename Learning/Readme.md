@@ -51,7 +51,7 @@ public DictionaryDefinition GetHighLearningDefinition(VocabularyModel model, int
 
     if (model.PKnownWithError is null)
     {
-        model.ComputeGetPKnownWithError();
+        model.ComputePKnownWithError();
     }
 
     IReadOnlyDictionary<int, double>? pKnown = model.PKnownWithError?
