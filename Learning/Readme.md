@@ -1,5 +1,13 @@
 # Learning 
 
+This Project contains the logic underpinning the `Learn` tab in the app, which tests the user on the definition of words seen in the text they provide.
+
+Example statements containing the word are given, to aid word sense disambiguation, in the case where one word has various uses.
+
+When learning a second language, the definitions are parsed to their native language.
+
+## Motivation
+
 A lot of the work on this has been inspired by spaced repition systems (SRSs) such as Anki or Memrise. These are very useful, and help optimise what is presented to the user.
 
 However, there are some drawbacks, some of which occur only after long periods of use. One way to combat a lot of these is to have access to the underlying distribution of words that the user is learning.
@@ -33,8 +41,47 @@ The key observation that enables an improved learning system, is that learning o
 
 ## The learning model
 
-This is yet to be fully implemented, so far the only component is the `VocabularyModel` which models the probability that a user knows a given word's meaning.
-Even with just this simple model, we can already produce quite powerful learning algorithms, that optimise for the probability a user knows a given word in the text provided.
+This is yet to be fully implemented, so far the only component is the `VocabularyModel` which models the probability that a user knows a given word's meaning. A mathematical analysis of these sorts of models can be found int eh `Notebooks` folder.
+Even with just this simple model, we can already produce quite powerful learning algorithms, that optimise for the probability a user knows a given word in the text provided. `VocabularyLearningService` holds this logic, for example:
+
+```C#
+public DictionaryDefinition GetHighLearningDefinition(VocabularyModel model, int topK = 5)
+{
+    // pass vocab model since we know that this must have all the required data
+
+    if (model.PKnownWithError is null)
+    {
+        model.ComputeGetPKnownWithError();
+    }
+
+    IReadOnlyDictionary<int, double>? pKnown = model.PKnownWithError?
+        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Item1);
+
+    if (pKnown is null)
+    {
+        throw new Exception("failed to compute word known probabilities");
+    }
+
+    Dictionary<int, double> expectedUnknown = model.WordFrequencies
+        .Where(kvp => pKnown.ContainsKey(kvp.Key))
+        .ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value * (1.0 - pKnown[kvp.Key])
+         );
+
+    var topKKeys = expectedUnknown
+        .OrderByDescending(kvp => kvp.Value)                     // primary sort by value
+        .ThenBy(kvp => rng.Next())                               // randomize within ties
+        .Take(topK)
+        .Select(kvp => kvp.Key)
+        .ToList();
+
+    int selectedKey = topKKeys[rng.Next(topKKeys.Count)];
+
+    return _dictionary.TryGetDefinitionByKey(selectedKey) ?? throw new Exception();
+
+}
+```
 
 The next step will be to consider time effects of exposures both via the flashcard system, and from passive exposures to vocabulary.
 
