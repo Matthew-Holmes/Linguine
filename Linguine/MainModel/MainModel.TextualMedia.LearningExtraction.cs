@@ -101,12 +101,16 @@ namespace Linguine
                 // lets just carry on, since throwing is a bit much
             }
 
+            var tasks = new List<Task>();
+
             if (ConfigManager.Config.LearningForeignLanguage())
             {
-                await ParseDefinitions(statements);
+                tasks.Add(ParseDefinitions(statements));
             }
 
-            await PronounceDefinitions(statements);
+            tasks.Add(PronounceDefinitions(statements));
+
+            await Task.WhenAll(tasks);
 
             return statements.Last().LastCharIndex;
         }
