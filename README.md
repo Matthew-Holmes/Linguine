@@ -18,6 +18,8 @@ The app can import and store pieces of text, and the user can return to previous
 
 The text that has been processed is highlighted and the user can interact with it, selecting words to see their root form and definition when it has been found.
 
+This processing is then used to drive the vocabulary learning system, see the `Learning` folder.
+
 
 <img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Linguine/SampleImages/LinguineDemo001.png?raw=true" width="400"> <img src="https://github.com/Matthew-Holmes/Linguine/blob/master/Linguine/SampleImages/LinguineDemo002.png?raw=true" width="400">
 <p align="center">
