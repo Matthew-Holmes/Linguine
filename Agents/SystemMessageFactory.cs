@@ -41,9 +41,9 @@ namespace Agents
 
             {AgentTask.DefinitionParsing, "produce a short educational translation of this definition for an adult English speaker, your response should be in English and take into account their proficiency level in the definition's language. Keep your definition succinct. Include a translation of the word into English. Strictly required response format: English translation of word \n short translation of provided definition" },
 
-            {AgentTask.DefinitionIPAPronouncing, "given the following word (definition also provided) provide the word's pronunciation using the International Phonetic Alphabet IPA" },
+            {AgentTask.DefinitionIPAPronouncing, "given the following word (definition also provided) provide the word's pronunciation using the International Phonetic Alphabet IPA in British English, only reply with the pronunciation, nothing else" },
 
-            {AgentTask.DefinitionRomanisedPronouncing, "given the following word (definition also provided) provide the word's romanised pronunciation" },
+            {AgentTask.DefinitionRomanisedPronouncing, "given the following word (definition also provided) provide a simple pronunciation, using only alphabet letters, no IPA or diacritics, only reply with the word's pronunciation, nothing else" },
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
