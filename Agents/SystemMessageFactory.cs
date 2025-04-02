@@ -62,9 +62,9 @@ namespace Agents
 
             {AgentTask.DefinitionParsing, "analysez cette définition pour un adulte francophone, votre réponse doit être en français et prendre en compte son niveau de compétence dans la langue de la définition. Gardez votre définition succincte." },
 
-            {AgentTask.DefinitionIPAPronouncing, "étant donné le mot suivant (définition également fournie), fournissez la prononciation du mot en utilisant l'alphabet phonétique international (API)" },
+            {AgentTask.DefinitionIPAPronouncing, "étant donné le mot suivant (définition également fournie), fournissez la prononciation du mot en utilisant l'alphabet phonétique international (API), répondez uniquement avec la prononciation du mot, rien d'autre" },
 
-            {AgentTask.DefinitionRomanisedPronouncing, "étant donné le mot suivant (définition également fournie), fournissez la prononciation romanisée du mot" },
+            {AgentTask.DefinitionRomanisedPronouncing, "étant donné le mot suivant (définition également fournie), fournissez une prononciation simple du mot, n'utilisez pas l'API, répondez uniquement avec la prononciation simple du mot, rien d'autre" },
 
         };
 
