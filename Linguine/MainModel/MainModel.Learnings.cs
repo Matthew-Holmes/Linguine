@@ -143,7 +143,31 @@ namespace Linguine
 
             List<WordInContext> contexts = uses.Where(use => use is not null).Select(use => AsWordInContext(def, use)).ToList();
 
-            return new DefinitionForTesting(def.Word, def.Definition, contexts, def);
+            contexts = contexts.Where(c => c is not null).ToList();
+
+            String? defText = null;
+
+            if (ConfigManager.Config.LearningForeignLanguage())
+            {
+                // TODO - should these be implicit in the parsed dictionary definition manager?
+                ParsedDictionaryDefinition? pdef = ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(
+                    def, ConfigManager.Config.GetLearnerLevel(), ConfigManager.Config.Languages.NativeLanguage);
+
+                // TODO - once have multiple parsing levels - use a fallback to neares parsed level if the correct one is not available
+                // but then spin off a thread to go do the parsing at the right level for future uses
+
+                if (pdef is not null)
+                {
+                    defText = pdef.ParsedDefinition;
+                } 
+            } 
+
+            if (defText is null)
+            {
+                defText = def.Definition;
+            }
+
+            return new DefinitionForTesting(def.Word, defText, contexts, def);
         }
 
         public DefinitionForTesting GetHighLearningDefinition()
