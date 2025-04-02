@@ -84,9 +84,9 @@ namespace Agents
 
             {AgentTask.DefinitionParsing, "为成年中文使用者解析这个定义，您的回答应该是中文，并考虑他们对定义语言的熟练程度。保持你的定义简洁。" },
 
-            {AgentTask.DefinitionIPAPronouncing, "给出以下单词（也提供定义）使用国际音标（IPA）提供该单词的发音" },
+            {AgentTask.DefinitionIPAPronouncing, "给出以下单词（也为您提供了一个定义），使用国际音标 (IPA) 提供该单词的发音。仅回复发音，无需其他" },
 
-            {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（同时提供定义）提供该单词的拼音发音" }
+            {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（也为你提供了一个定义）提供该单词的拼音，只用该单词的拼音回复，不用其他内容" }
         };
     }
 
