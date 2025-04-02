@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Serilog;
 using System.Threading;
 using System.Windows.Controls;
+using System.Net.Mime;
 
 namespace Linguine
 {
@@ -18,6 +19,8 @@ namespace Linguine
         private ICanAnalyseText?      TextAnalyser     { get; set; }
 
         private ICanParseDefinitions? DefinitionParser { get; set; }
+
+        private ICanPronounce?        Pronouncer       { get; set; }
 
         private int CharsToProcess { get; set; } = 1_000;
 
@@ -103,7 +106,52 @@ namespace Linguine
                 await ParseDefinitions(statements);
             }
 
+            await PronounceDefinitions(statements);
+
             return statements.Last().LastCharIndex;
+        }
+
+        private async Task PronounceDefinitions(List<Statement> statements)
+        {
+            if (Pronouncer is null)
+            {
+                StartPronunciationEngine();
+            }
+
+            if (Pronouncer is null)
+            {
+                Log.Fatal("Couldn't start pronunciation engine!");
+                throw new Exception("failed to start pronunciation engine");
+            }
+
+            HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
+
+
+            List<DictionaryDefinition> newDefinitionsList = definitions.Where(
+                d => (d.IPAPronunciation is null) || (d.RomanisedPronuncation is null)).ToList();
+
+            if (newDefinitionsList.Count == 0)
+            {
+                return;
+            }
+
+            List<Tuple<String, String>> pronunciations = await Pronouncer.GetDefinitionPronunciations(newDefinitionsList);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+            context.ChangeTracker.Clear();
+
+            for (int i = 0; i != newDefinitionsList.Count; i++)
+            {
+                DictionaryDefinition def = newDefinitionsList[i];
+
+                def.IPAPronunciation      = pronunciations[i].Item1;
+                def.RomanisedPronuncation = pronunciations[i].Item2;
+
+                context.Update(def);
+                await context.SaveChangesAsync();
+
+                context.ChangeTracker.Clear();
+            }
         }
 
         private List<Statement> FromProtoStatements(List<ProtoStatement> protos, TextualMedia tm, int firstChar)
@@ -221,6 +269,11 @@ namespace Linguine
         private void StartParsingEngine()
         {
             DefinitionParser = DefinitionParserFactory.BuildParsingEngine();
+        }
+
+        private void StartPronunciationEngine()
+        {
+            Pronouncer = DefinitionPronouncerFactory.BuildPronunciationEngine();
         }
 
         private List<String> GetPreviousContext(TextualMedia tm)
