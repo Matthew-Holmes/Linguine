@@ -159,6 +159,11 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
 
+            modelBuilder.Entity<VocalisedDefinitionFile>()
+                .HasOne(e => e.Definition)
+                .WithMany()
+                .HasForeignKey(e => e.DictionaryDefinitionKey);
+
             // Other configurations...
         }
     }
