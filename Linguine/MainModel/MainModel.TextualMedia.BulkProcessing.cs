@@ -1,18 +1,13 @@
 ﻿using Infrastructure;
-using Linguine.Tabs;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.SocialInfo;
+using DataClasses;
+using Config;
 
 namespace Linguine
 {

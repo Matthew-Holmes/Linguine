@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Agents\Agents.csproj" />
+    <ProjectReference Include="..\DataClasses\DataClasses.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,16 +1,8 @@
-﻿using ExternalMedia;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Agents;
+﻿using Agents;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure;
-using System.Text.RegularExpressions;
 using Helpers;
 using Serilog;
+using DataClasses;
 
 namespace LearningExtraction
 {

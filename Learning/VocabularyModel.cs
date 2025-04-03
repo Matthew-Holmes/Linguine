@@ -1,5 +1,5 @@
-﻿using Infrastructure.DataClasses;
-using Serilog;
+﻿using Serilog;
+using DataClasses;
 
 namespace Learning
 {

@@ -3,10 +3,6 @@ using OxyPlot.Axes;
 using OxyPlot.Series;
 using System.Linq;
 using System;
-using System.Collections.Generic;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using UserInputInterfaces;
 

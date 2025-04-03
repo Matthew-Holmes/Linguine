@@ -1,11 +1,5 @@
 ﻿using Agents;
-using Agents.OpenAI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Infrastructure;
+using DataClasses;
 
 namespace LearningExtraction
 {

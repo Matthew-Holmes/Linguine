@@ -1,16 +1,8 @@
 ﻿using Infrastructure;
-using Linguine.Helpers;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using DataClasses;
+using Config;
 using System.Windows.Input;
 using UserInputInterfaces;
 
@@ -47,7 +39,7 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                Config newconfig = ConfigManager.Config with
+                Config.Config newconfig = ConfigManager.Config with
                 {
                     Languages = ConfigManager.Config.Languages with
                     {
@@ -93,7 +85,7 @@ namespace Linguine.Tabs
                     return;
                 }
 
-                Config newConfig = ConfigManager.WithNewLearnerLevel(_learnerLevels[value]);
+                Config.Config newConfig = ConfigManager.WithNewLearnerLevel(_learnerLevels[value]);
                 ConfigManager.SaveConfig(newConfig);
 
                 _learnerLevelIndex = value;
@@ -104,11 +96,11 @@ namespace Linguine.Tabs
 
         private void UpdateNativeLanguageInConfig(LanguageCode newNative)
         {
-            Config config = ConfigManager.Config;
+            Config.Config config = ConfigManager.Config;
 
             if (newNative != config.Languages.NativeLanguage)
             {
-                Config newconfig = config with
+                Config.Config newconfig = config with
                 {
                     Languages = config.Languages with
                     {
@@ -124,7 +116,7 @@ namespace Linguine.Tabs
 
         private void SetupLanguageSelection()
         {
-            Config config = ConfigManager.Config;
+            Config.Config config = ConfigManager.Config;
 
             _languageOptions     = LanguageCodeDetails.LanguageNames(config.Languages.NativeLanguage);
             _learnerLevelOptions = LearnerLevelDetails.LearnerLevelNames();

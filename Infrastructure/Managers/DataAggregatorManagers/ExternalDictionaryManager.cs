@@ -1,13 +1,4 @@
-﻿using Infrastructure;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Net.Security;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Serilog;
 
 namespace Infrastructure
 {

@@ -1,6 +1,6 @@
-﻿using Infrastructure;
+﻿using DataClasses;
 
-namespace Linguine
+namespace Infrastructure
 {
     public class TextualMediaManager : ManagerBase
     {

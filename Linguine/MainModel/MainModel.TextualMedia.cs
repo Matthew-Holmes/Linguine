@@ -1,8 +1,7 @@
 ﻿using Infrastructure;
-using Linguine.Tabs;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using DataClasses;
+using Config;
 
 namespace Linguine
 {

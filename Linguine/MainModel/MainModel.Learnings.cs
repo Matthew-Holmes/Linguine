@@ -1,16 +1,12 @@
 ﻿using Infrastructure;
-using Infrastructure.DataClasses;
 using Learning;
 using Serilog;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using DataClasses;
+using Config;
 
 namespace Linguine
 {

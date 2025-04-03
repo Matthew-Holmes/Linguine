@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+// TODO - this uses pre-refactor stuff - be careful
+
 #nullable disable
 
 namespace Infrastructure.Migrations

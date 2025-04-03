@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-
-//using Agents;
-//using Agents.DummyAgents;
 using Infrastructure;
-using Linguine.Tabs;
-using UserInputInterfaces;
-//using LearningExtraction;
+using Config;
 
 namespace Linguine
 {
@@ -36,7 +26,7 @@ namespace Linguine
         {
             try
             {
-                Config config = ConfigManager.Config;
+                Config.Config config = ConfigManager.Config;
 
                 if (config.DatabaseDirectory != null)
                 {

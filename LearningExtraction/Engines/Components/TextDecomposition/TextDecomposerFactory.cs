@@ -1,12 +1,7 @@
 ﻿using Agents;
 using Agents.DummyAgents;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DataClasses;
+using Config;
 
 namespace LearningExtraction
 {

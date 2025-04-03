@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UserInputInterfaces;
-using ExternalMedia;
-using Infrastructure;
 using Linguine.Tabs;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Collections.Specialized;
-using System.Windows.Media.Imaging;
 using System.Threading;
-using System.Windows.Documents;
-using System.Windows.Threading;
 using Agents;
+using Config;
 
 namespace Linguine
 {

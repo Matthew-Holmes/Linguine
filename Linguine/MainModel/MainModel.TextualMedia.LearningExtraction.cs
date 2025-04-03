@@ -6,8 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 using System.Threading;
-using System.Windows.Controls;
-using System.Net.Mime;
+using DataClasses;
+using Config;
 
 namespace Linguine
 {

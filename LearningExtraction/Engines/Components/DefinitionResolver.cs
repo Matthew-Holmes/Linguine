@@ -1,12 +1,8 @@
 ﻿using Agents;
 using Infrastructure;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using DataClasses;
 
 namespace LearningExtraction
 {

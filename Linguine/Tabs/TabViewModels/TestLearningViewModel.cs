@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UserInputInterfaces;
 using System.Windows;
-using Windows.UI.Input;
-using Infrastructure.DataClasses;
-using System.Diagnostics.Tracing;
 using System.Text.RegularExpressions;
 
 namespace Linguine.Tabs

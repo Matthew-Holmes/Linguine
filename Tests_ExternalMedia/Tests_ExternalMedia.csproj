@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataClasses\DataClasses.csproj" />
     <ProjectReference Include="..\ExternalMedia\ExternalMedia.csproj" />
   </ItemGroup>
 

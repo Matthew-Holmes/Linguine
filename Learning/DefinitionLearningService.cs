@@ -1,11 +1,6 @@
 ﻿using Infrastructure;
-using Infrastructure.DataClasses;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DataClasses;
 
 namespace Learning
 {
@@ -67,7 +62,6 @@ namespace Learning
             _testRecords      = testRecords;
             _pdefManager      = pdefManager;
             _statementManager = statementManager;
-
         }
 
         public DictionaryDefinition GetRandomDefinition()
@@ -120,10 +114,6 @@ namespace Learning
 
             return true;
         }
-        // three methods:
-            // initial estimation - use bins to get a broad range of estimates
-            // improve vocab estimation error 
-            // maximise learning - i.e. max increase in P(know a random word)
 
         public DictionaryDefinition GetHighLearningDefinition(VocabularyModel model, int topK = 5)
         {

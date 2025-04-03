@@ -1,22 +1,10 @@
-﻿//using Agents.OpenAI;
-using ExternalMedia;
-using Infrastructure;
-using Newtonsoft.Json.Linq;
-using SQLitePCL;
-
-//using LearningExtraction;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Printing;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Navigation;
 using UserInputInterfaces;
+using DataClasses;
 
 namespace Linguine.Tabs
 {

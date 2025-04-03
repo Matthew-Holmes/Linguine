@@ -1,13 +1,7 @@
 ﻿using Agents.DeepSeek;
 using Agents.OpenAI;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DataClasses;
+using Config;
 
 namespace Agents
 {
