@@ -5,12 +5,13 @@ namespace Infrastructure
 {
     public record Config
     {
-        public APIKeysConfig                    APIKeys            { get; set; } = new();
-        public LanguageConfig                   Languages          { get; set; } = new();
+        public APIKeysConfig                    APIKeys             { get; set; } = new();
+        public LanguageConfig                   Languages           { get; set; } = new();
 
-        public GimmicksConfig                   Gimmicks           { get; set; } = new();
-        public String                           DatabaseDirectory  { get; }      = "Store";
-        public String                           FilestoreDirectory { get; }      = "Filestore";
+        public GimmicksConfig                   Gimmicks            { get; set; } = new();
+        public String                           DatabaseDirectory   { get; }      = "Store";
+        public String                           FilestoreDirectory  { get; }      = "Filestore";
+        public String                           AudioStoreDirectory { get; }      = "Filestore/Audio";
 
         public IReadOnlyDictionary<LanguageCode, string> ConnectionStrings { get; set; } = new Dictionary<LanguageCode, string>();
 
@@ -51,5 +52,4 @@ namespace Infrastructure
         public IReadOnlyDictionary<LanguageCode, decimal> TimeToProcessSeconds { get; set; } = new Dictionary<LanguageCode, decimal>();
         public IReadOnlyDictionary<LanguageCode, int> CharsProcessedPerStep { get; set; } = new Dictionary<LanguageCode, int>();
     }
-
 }
