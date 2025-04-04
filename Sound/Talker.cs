@@ -5,7 +5,14 @@ namespace Sound
 {
     public static class Talker
     {
-        public static byte[] TextToSpeech(String text, DataClasses.Voice voice, LanguageCode lc, decimal speed)
+        // fix the speed at 1.0 since the google API hasn't got variable speeds for the 
+        // voices I'm interested in yet
+
+        public static byte[] TextToSpeech(String text, DataClasses.Voice voice, LanguageCode lc)
+        {
+            return _TextToSpeech(text, voice, lc, 1.0m);
+        }
+        private static byte[] _TextToSpeech(String text, DataClasses.Voice voice, LanguageCode lc, decimal speed)
         {
             TextToSpeechClient client = TextToSpeechClient.Create();
 
