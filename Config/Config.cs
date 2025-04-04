@@ -35,6 +35,7 @@ namespace Config
     {
         public string OpenAI_APIKeyLocation   { get; set; } = string.Empty;
         public string DeepSeek_APIKeyLocation { get; set; } = string.Empty;
+        public string Google_ServiceAccountKeyLocation { get; set; } = string.Empty;
 
         public string APIKeyDirectory         { get; }      = "Filestore/APIKeys";
     }

@@ -60,6 +60,17 @@ namespace Config
             String? openAIKey   = ReadApiKeyFromFile(_config.APIKeys.OpenAI_APIKeyLocation);
             String? deepSeekKey = ReadApiKeyFromFile(_config.APIKeys.DeepSeek_APIKeyLocation);
 
+            String googleKeyPath = _config.APIKeys.Google_ServiceAccountKeyLocation;
+
+            if (!string.IsNullOrEmpty(googleKeyPath) && File.Exists(googleKeyPath))
+            {
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleKeyPath);
+            }
+            else
+            {
+                Log.Warning("Warning: Google TTS API key file not found or not configured.");
+            }
+
             _apiKeys = new APIKeys(openAIKey, deepSeekKey);
         }
 
