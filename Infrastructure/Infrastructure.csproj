@@ -37,6 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Config\Config.csproj" />
 	  <ProjectReference Include="..\DataClasses\DataClasses.csproj" />
 	  <ProjectReference Include="..\Helpers\Helpers.csproj" />
 	</ItemGroup>
