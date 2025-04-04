@@ -59,6 +59,8 @@ namespace Infrastructure
         public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
         public DbSet<TestRecord> TestRecords { get; set; }
 
+        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFiles { get; set; }
+
         public LinguineDbContext()
         {
             _connectionString = "dummy_for_migrations";
