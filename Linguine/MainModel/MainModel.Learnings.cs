@@ -185,7 +185,17 @@ namespace Linguine
 
             DictionaryDefinition toTest = DefLearningService.GetHighLearningDefinition(VocabModel);
 
-            return AsDefinitionForTesting(toTest);
+            DefinitionForTesting forTesting = AsDefinitionForTesting(toTest);
+
+            if (forTesting.Contexts.Count == 0)
+            {
+                // edge case where user knows every word every seen
+                return AsDefinitionForTesting(DefLearningService.GetFrequentDefinition(1));
+            } 
+            else
+            {
+                return forTesting;
+            }
         }
 
         public DefinitionForTesting GetRandomDefinition()

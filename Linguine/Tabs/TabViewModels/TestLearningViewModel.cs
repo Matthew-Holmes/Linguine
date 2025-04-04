@@ -62,18 +62,18 @@ namespace Linguine.Tabs
         private void NextContext()
         {
             _currentContextId += 1;
-            _currentContextId = _currentContextId % Contexts.Count;
+            _currentContextId = _currentContextId % Math.Max(Contexts.Count, 1);
 
-            CurrentContext = Contexts[_currentContextId];
+            CurrentContext = Contexts.Count != 0 ? Contexts[_currentContextId] : Tuple.Create("", "", "");
         }
 
         private void PreviousContext()
         {
             _currentContextId -= 1;
             _currentContextId += Contexts.Count; // avoid remainder not mod issue
-            _currentContextId = _currentContextId % Contexts.Count;
+            _currentContextId = _currentContextId % Math.Max(Contexts.Count, 0);
 
-            CurrentContext = Contexts[_currentContextId];
+            CurrentContext = Contexts.Count != 0 ? Contexts[_currentContextId] : Tuple.Create("", "", "");
         }
 
         private void SetupVocabTest()
