@@ -82,6 +82,14 @@ namespace Infrastructure
                           .Any();
         }
 
+        public bool HasAnyFilesSpecificVoice(DictionaryDefinition def, Voice voice, LinguineDbContext context)
+        {
+            return context.VocalisedDefinitionFile
+                .Where(v => v.DictionaryDefinitionKey == def.ID)
+                .Where(v => v.Voice == voice)
+                .Any();
+        }   
+
         public async Task<bool> RemoveVocalisationAsync(int primaryKey)
         {
             using var context = _dbf.CreateDbContext();

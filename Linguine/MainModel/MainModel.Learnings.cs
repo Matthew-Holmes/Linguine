@@ -158,6 +158,48 @@ namespace Linguine
                 soundFile = Path.Combine(ConfigManager.Config.AudioStoreDirectory, soundFile);
             }
 
+            if (soundFiles.Count != Enum.GetNames(typeof(Voice)).Length)
+            {
+                var voices = Enum.GetValues(typeof(Voice));
+
+                HashSet<Voice> heard = soundFiles.Select(
+                    sf => sf.Voice).ToHashSet();
+
+                List<Voice> unheard = new List<Voice>();
+
+                foreach (Voice voice in voices)
+                {
+                    if (heard.Contains(voice))
+                    {
+                        continue;
+                    } 
+                    else
+                    {
+                        unheard.Add(voice);
+                    }
+                }
+
+                Voice newVoice = unheard[_rng.Next(unheard.Count)];
+
+                // go off in the background and get another sound file
+                // since we probably care about this definition
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await VocaliseDefinition(def, newVoice);
+                        
+                        // uncomment to tidy - TODO - add a button somewhere??
+                        //await DefinitionVocalisationManager.CleanupMissingFilesAsync();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"Exception in background vocalisation task for definition {def.Word}: {ex.Message}");
+                    }
+                });
+            }
+
             if (ConfigManager.Config.LearningForeignLanguage())
             {
                 // TODO - should these be implicit in the parsed dictionary definition manager?

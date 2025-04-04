@@ -119,6 +119,45 @@ namespace Linguine
             return statements.Last().LastCharIndex;
         }
 
+        private async Task VocaliseDefinition(DictionaryDefinition definition, Voice voice)
+        {
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            if (DefinitionVocalisationManager.HasAnyFilesSpecificVoice(definition, voice, context))
+            {
+                return;
+            }
+
+            try
+            {
+                LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
+
+                string fileName = Path.Combine(
+                    target.ToString(),
+                    "Definitions",
+                    voice.ToString(),
+                    definition.GetSafeFileName() + ".wav");
+
+                byte[] audio = await Talker.TextToSpeech(definition.Word, voice, target);
+
+                var record = await DefinitionVocalisationManager.AddVocalisationAsync(
+                    audio,
+                    definition,
+                    voice,
+                    fileName);
+
+                await context.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                context.ChangeTracker.Clear();
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to vocalise definition {definition.ID}: {ex.Message}");
+            }
+        }
+
+
         private async Task VocaliseDefinitions(List<Statement> statements)
         {
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
@@ -147,8 +186,8 @@ namespace Linguine
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    try
-                    {
+                try
+                {
                         string fileName = Path.Combine(target.ToString(),
                                                        "Definitions",
                                                        voice.ToString(),

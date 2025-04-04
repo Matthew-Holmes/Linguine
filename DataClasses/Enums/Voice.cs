@@ -2,13 +2,13 @@
 {
     public enum Voice
     {
-        Aode,
+        Aoede,
         Charon,
         Fenrir,
         Kore,
         Leda,
         Orus,
         Puck,
-        Zephry       
+        Zephyr       
     }
 }

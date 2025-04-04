@@ -30,8 +30,8 @@ namespace DataClasses
         {
             switch (voice)
             {
-                case Voice.Aode:
-                    return "Aode";
+                case Voice.Aoede:
+                    return "Aoede";
                 case Voice.Charon:
                     return "Charon";
                 case Voice.Fenrir:
@@ -44,8 +44,8 @@ namespace DataClasses
                     return "Orus";
                 case Voice.Puck:
                     return "Puck";
-                case Voice.Zephry:
-                    return "Zephry";
+                case Voice.Zephyr:
+                    return "Zephyr";
                 default:
                     throw new NotImplementedException();
             }
