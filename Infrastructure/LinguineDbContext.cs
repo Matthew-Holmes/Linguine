@@ -59,7 +59,8 @@ namespace Infrastructure
         public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
         public DbSet<TestRecord> TestRecords { get; set; }
 
-        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFiles { get; set; }
+        // TODO - pluralise this next migration
+        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFile { get; set; }
 
         public LinguineDbContext()
         {
@@ -153,6 +154,8 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
 
+            modelBuilder.Entity<VocalisedDefinitionFile>()
+                .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<VocalisedDefinitionFile>()
                 .HasOne(e => e.Definition)
                 .WithMany()

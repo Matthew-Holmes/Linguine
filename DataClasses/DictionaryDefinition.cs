@@ -18,7 +18,7 @@ namespace DataClasses
         
         public string GetSafeFileName()
         {
-            var sanitizedChars = Definition
+            var sanitizedChars = Word
                     .Select(c =>
                         char.IsLetterOrDigit(c) || CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.OtherLetter
                             ? c
@@ -38,7 +38,7 @@ namespace DataClasses
                 shortPart += '_';
             }
 
-            return $"{shortPart}{ID}".ToLowerInvariant();
+            return $"{shortPart}{DatabasePrimaryKey}".ToLowerInvariant();
         }
 
     }

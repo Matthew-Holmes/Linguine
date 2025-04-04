@@ -10,6 +10,8 @@ using DataClasses;
 using Config;
 using Sound;
 using System.IO;
+using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
 
 namespace Linguine
 {
@@ -128,6 +130,8 @@ namespace Linguine
             List<DictionaryDefinition> newDefinitions = definitions.Where(
                 d => DefinitionVocalisationManager.HasAnyFiles(d, context) == false).ToList();
 
+            context.Dispose();
+
             if (newDefinitions.Count == 0)
             {
                 return;
@@ -139,6 +143,8 @@ namespace Linguine
 
             Voice voice = Voice.Fenrir; // TODO - cycle these?
 
+            var recordsToSave = new ConcurrentBag<VocalisedDefinitionFile>();
+
             foreach (var def in newDefinitions)
             {
                 tasks.Add(Task.Run(async () =>
@@ -146,19 +152,14 @@ namespace Linguine
                     try
                     {
                         string fileName = Path.Combine(target.ToString(),
+                                                       "Definitions",
                                                        voice.ToString(),
                                                        def.GetSafeFileName() + ".wav");
 
                         byte[] audio = await Talker.TextToSpeech(def.Word, voice, target);
 
-                        VocalisedDefinitionFile record = new VocalisedDefinitionFile
-                        {
-                            Definition = def,
-                            Voice      = voice,
-                            FileName   = fileName,
-                        };
-
-                        await DefinitionVocalisationManager.AddVocalisationAsync(audio, record);
+                        var record = await DefinitionVocalisationManager.AddVocalisationAsync(audio, def, voice, fileName);
+                        recordsToSave.Add(record);
                     }
                     catch (Exception ex)
                     {
@@ -169,6 +170,15 @@ namespace Linguine
 
             await Task.WhenAll(tasks);
 
+            using var contextTmp = _linguineDbContextFactory.CreateDbContext();
+
+            foreach (VocalisedDefinitionFile record in recordsToSave)
+            {
+                await contextTmp.AddAsync(record);
+                await contextTmp.SaveChangesAsync();
+
+                contextTmp.ChangeTracker.Clear();
+            }
         }
 
         private async Task PronounceDefinitions(List<Statement> statements)

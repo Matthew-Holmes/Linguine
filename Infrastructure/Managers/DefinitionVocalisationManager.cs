@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DataClasses;
 using Serilog;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure
 {
@@ -20,7 +21,7 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            var allVocalised = await context.VocalisedDefinitionFiles.ToListAsync();
+            var allVocalised = await context.VocalisedDefinitionFile.ToListAsync();
 
             foreach (var record in allVocalised)
             {
@@ -28,40 +29,46 @@ namespace Infrastructure
 
                 if (!File.Exists(fullPath))
                 {
-                    context.VocalisedDefinitionFiles.Remove(record);
+                    context.VocalisedDefinitionFile.Remove(record);
                 }
             }
 
             await context.SaveChangesAsync();
         }
 
-        public async Task AddVocalisationAsync(byte[] audioData, VocalisedDefinitionFile toAdd)
+        public async Task<VocalisedDefinitionFile> AddVocalisationAsync(byte[] audioData,
+                                               DictionaryDefinition def,
+                                               Voice voice,
+                                               string fileName)
         {
-            var fullPath = Path.Combine(ConfigManager.Config.AudioStoreDirectory, toAdd.FileName);
+            var fullPath = Path.Combine(ConfigManager.Config.AudioStoreDirectory, fileName);
 
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 
-            using var context = _dbf.CreateDbContext();
-
-            context.VocalisedDefinitionFiles.Add(toAdd);
-
-            await context.SaveChangesAsync();
-
             await File.WriteAllBytesAsync(fullPath, audioData);
+
+            VocalisedDefinitionFile toAdd = new VocalisedDefinitionFile
+            {
+                DictionaryDefinitionKey = def.DatabasePrimaryKey,
+                Voice = voice,
+                FileName = fileName,
+            };
+
+            return toAdd;
         }
 
         public async Task<List<VocalisedDefinitionFile>> GetAudioFilesForDefinitionAsync(int definitionId)
         {
             using var context = _dbf.CreateDbContext();
 
-            return await context.VocalisedDefinitionFiles
+            return await context.VocalisedDefinitionFile
                 .Where(v => v.DictionaryDefinitionKey == definitionId)
                 .ToListAsync();
         }
 
         public bool HasAnyFiles(DictionaryDefinition def, LinguineDbContext context)
         {
-            return context.VocalisedDefinitionFiles
+            return context.VocalisedDefinitionFile
                           .Where(v => v.DictionaryDefinitionKey == def.ID)
                           .Any();
         }
@@ -70,7 +77,7 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            var record = await context.VocalisedDefinitionFiles.FindAsync(primaryKey);
+            var record = await context.VocalisedDefinitionFile.FindAsync(primaryKey);
             if (record == null)
                 return false;
 
@@ -88,7 +95,7 @@ namespace Infrastructure
                 }
             }
 
-            context.VocalisedDefinitionFiles.Remove(record);
+            context.VocalisedDefinitionFile.Remove(record);
             await context.SaveChangesAsync();
 
             return true;
