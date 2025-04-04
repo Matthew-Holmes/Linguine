@@ -8,6 +8,13 @@ namespace DataClasses
 {
     public static class VoiceDetails
     {
+        public static Voice RandomVoice(Random rng)
+        {
+            var values = Enum.GetValues(typeof(Voice));
+            int index = rng.Next(values.Length);
+            return (Voice)values.GetValue(index)!;
+        }
+
         public static String VoiceName(Voice voice, LanguageCode lc)
         {
             StringBuilder sb = new StringBuilder();

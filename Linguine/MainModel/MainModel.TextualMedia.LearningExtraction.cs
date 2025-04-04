@@ -139,9 +139,9 @@ namespace Linguine
 
             LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
 
-            Voice voice = Voice.Fenrir; // TODO - cycle these?
-
             var recordsToSave = new ConcurrentBag<VocalisedDefinitionFile>();
+
+            Voice voice = Voice.Fenrir;
 
             foreach (var def in newDefinitions)
             {
