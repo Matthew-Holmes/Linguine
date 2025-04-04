@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\LearningExtraction\LearningExtraction.csproj" />
     <ProjectReference Include="..\Learning\Learning.csproj" />
+    <ProjectReference Include="..\Sound\Sound.csproj" />
     <ProjectReference Include="..\UserInputInterfaces\UserInputInterfaces.csproj" />
   </ItemGroup>
 

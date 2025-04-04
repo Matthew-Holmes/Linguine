@@ -8,6 +8,8 @@ using Serilog;
 using System.Threading;
 using DataClasses;
 using Config;
+using Sound;
+using System.IO;
 
 namespace Linguine
 {
@@ -110,9 +112,63 @@ namespace Linguine
 
             tasks.Add(PronounceDefinitions(statements));
 
+            tasks.Add(VocaliseDefinitions(statements));
+
             await Task.WhenAll(tasks);
 
             return statements.Last().LastCharIndex;
+        }
+
+        private async Task VocaliseDefinitions(List<Statement> statements)
+        {
+            HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            List<DictionaryDefinition> newDefinitions = definitions.Where(
+                d => DefinitionVocalisationManager.HasAnyFiles(d, context) == false).ToList();
+
+            if (newDefinitions.Count == 0)
+            {
+                return;
+            }
+
+            var tasks = new List<Task>();
+
+            LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
+
+            Voice voice = Voice.Fenrir; // TODO - cycle these?
+
+            foreach (var def in newDefinitions)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        string fileName = Path.Combine(target.ToString(),
+                                                       voice.ToString(),
+                                                       def.GetSafeFileName() + ".wav");
+
+                        byte[] audio = await Talker.TextToSpeech(def.Word, voice, target);
+
+                        VocalisedDefinitionFile record = new VocalisedDefinitionFile
+                        {
+                            Definition = def,
+                            Voice      = voice,
+                            FileName   = fileName,
+                        };
+
+                        await DefinitionVocalisationManager.AddVocalisationAsync(audio, record);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"Failed to vocalise definition {def.ID}: {ex.Message}");
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+
         }
 
         private async Task PronounceDefinitions(List<Statement> statements)

@@ -10,7 +10,7 @@ using Serilog;
 
 namespace Infrastructure
 {
-    class DefinitionVocalisationManager : ManagerBase
+    public class DefinitionVocalisationManager : ManagerBase
     {
         public DefinitionVocalisationManager(LinguineDbContextFactory dbf) : base(dbf)
         {
@@ -57,6 +57,13 @@ namespace Infrastructure
             return await context.VocalisedDefinitionFiles
                 .Where(v => v.DictionaryDefinitionKey == definitionId)
                 .ToListAsync();
+        }
+
+        public bool HasAnyFiles(DictionaryDefinition def, LinguineDbContext context)
+        {
+            return context.VocalisedDefinitionFiles
+                          .Where(v => v.DictionaryDefinitionKey == def.ID)
+                          .Any();
         }
 
         public async Task<bool> RemoveVocalisationAsync(int primaryKey)

@@ -13,7 +13,7 @@ namespace Linguine
         private TextualMediaSessionManager?         _textualMediaSessionManager;
         private StatementManager?                   _statementManager;
         private ParsedDictionaryDefinitionManager?  _parsedDictionaryDefinitionManager;
-
+        private DefinitionVocalisationManager?      _definitionVocalisationManager;
         private void LoadManagers()
         {
             _externalDictionaryManager          = new ExternalDictionaryManager(LinguineFactory);
@@ -22,6 +22,7 @@ namespace Linguine
             _variantsManager                    = new VariantsManager(LinguineFactory);
             _statementManager                   = new StatementManager(LinguineFactory);
             _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(LinguineFactory);
+            _definitionVocalisationManager      = new DefinitionVocalisationManager(LinguineFactory);
 
             HasManagers = true;
         }
@@ -29,6 +30,18 @@ namespace Linguine
         private void LoadServices()
         {
             InitialiseDefinitionLearningService();
+        }
+
+        public DefinitionVocalisationManager DefinitionVocalisationManager
+        {
+            get
+            {
+                if (_definitionVocalisationManager is null)
+                {
+                    throw new Exception("Attempting to read property before model loading complete");
+                }
+                return _definitionVocalisationManager;
+            }
         }
 
         public TextualMediaManager TextualMediaManager
