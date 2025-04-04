@@ -8,7 +8,7 @@ namespace Sound
         // fix the speed at 1.0 since the google API hasn't got variable speeds for the 
         // voices I'm interested in yet
 
-        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(10);
+        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(5);
 
         public static async Task<byte[]> TextToSpeech(String text, DataClasses.Voice voice, LanguageCode lc)
         {
