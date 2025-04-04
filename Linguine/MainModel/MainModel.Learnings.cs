@@ -8,6 +8,7 @@ using System.Linq;
 using DataClasses;
 using Config;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Linguine
 {
@@ -232,7 +233,7 @@ namespace Linguine
         {
             if (VocabModel is null)
             {
-                BuildVocabularyModel();
+                InitVocabularyModel();
             }
 
             if (VocabModel is null)
@@ -315,7 +316,7 @@ namespace Linguine
 
         public VocabularyModel? VocabModel {get; set;}
 
-        internal void BuildVocabularyModel()
+        internal VocabularyModel ComputeVocabularyModel()
         {
             if (DefinitionFrequencyEngine.DefinitionZipfScores is null)
             {
@@ -332,20 +333,36 @@ namespace Linguine
             }
 
             IReadOnlyDictionary<int, TestRecord>? testRecords = _testRecords?.LatestTestRecords();
-            
+
             if (testRecords is null)
             {
                 throw new Exception("couldn't obtain latest test records!");
             }
 
-            VocabModel = new VocabularyModel(
+            VocabularyModel ret = new VocabularyModel(
                 freqs,
                 testRecords,
                 zipfs,
                 DefinitionFrequencyEngine.ZipfHi,
                 DefinitionFrequencyEngine.ZipfLo);
 
-            VocabModel.ComputePKnownWithError();
+            ret.ComputePKnownWithError();
+
+            return ret;
+        }
+
+
+        internal void InitVocabularyModel()
+        {
+            VocabModel = ComputeVocabularyModel();
+        }
+
+        public void UpdateVocabularyModel()
+        {
+            using var context = _linguineDbContextFactory.CreateDbContext();
+            DefinitionFrequencyEngine.UpdateDefinitionFrequencies(context);
+
+            VocabModel = ComputeVocabularyModel();
         }
     }
 }

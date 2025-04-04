@@ -32,7 +32,7 @@ namespace Linguine.Tabs
             {
                 if (_model.VocabModel is null)
                 {
-                    _model.BuildVocabularyModel();
+                    _model.InitVocabularyModel();
                 }
                 toGraph = _model.VocabModel.GetPKnownByBinnedZipf();
                 CreatePlot();

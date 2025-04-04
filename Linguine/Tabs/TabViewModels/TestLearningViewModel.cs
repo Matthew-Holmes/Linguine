@@ -225,6 +225,7 @@ namespace Linguine.Tabs
             Reset();
         }
 
+        private int untilModelReset = 5;
         private void Reset()
         {
             if (_isVocabTest)
@@ -269,9 +270,19 @@ namespace Linguine.Tabs
                 ShowPlayCurrentSoundButton = false;
             }
 
-                Contexts = _definitionForTesting.Contexts.Select(wic => AsRun(wic)).ToList();
+            Contexts = _definitionForTesting.Contexts.Select(wic => AsRun(wic)).ToList();
 
             _posed = DateTime.Now;
+
+            if (untilModelReset <= 0)
+            {
+                // TODO - maybe run this on a background thread
+                // TODO - what if this gets slow??
+                _model.UpdateVocabularyModel();
+                untilModelReset = 5;
+            }
+
+            untilModelReset--;
         }
 
         private Tuple<string, string, string> AsRun(WordInContext wic)
