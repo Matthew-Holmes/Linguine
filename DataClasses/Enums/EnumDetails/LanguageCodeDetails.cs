@@ -2,6 +2,21 @@
 {
     public static class LanguageCodeDetails
     {
+        public static String GoogleName(LanguageCode lc)
+        {
+            switch (lc)
+            {
+                case LanguageCode.eng:
+                    return "en-Gb";
+                case LanguageCode.fra:
+                    return "fr-FR";
+                case LanguageCode.zho:
+                    return "cmn-CN";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
         public static String EnglishName(LanguageCode lc)
         {
             switch (lc)
@@ -13,7 +28,7 @@
                 case LanguageCode.zho:
                     return "Chinese";
                 default:
-                    return "";
+                    throw new NotImplementedException();
             }
         }
 
@@ -28,7 +43,7 @@
                 case LanguageCode.zho:
                     return "Chinois";
                 default:
-                    return "";
+                    throw new NotImplementedException();
             }
         }
 
@@ -43,7 +58,7 @@
                 case LanguageCode.zho:
                     return "汉语"; // Hànyǔ
                 default:
-                    return "";
+                    throw new NotImplementedException();
             }
         }
 
@@ -58,7 +73,7 @@
                 case LanguageCode.zho:
                     return ChineseName(named);
                 default:
-                    return "";
+                    throw new NotImplementedException();
             }
         }
 
@@ -93,7 +108,7 @@
                 case LanguageCode.zho:
                     return 0.1m;
                 default:
-                    return 1.0m;
+                    throw new NotImplementedException();
             }
         }
     }

@@ -6,6 +6,7 @@ namespace Learning
 {
     public class DefinitionLearningService
     {
+        // TODO - more pure functions
 
         // only need these to be satisfied for free study
         // text based study can work, even for very small texts (?)
