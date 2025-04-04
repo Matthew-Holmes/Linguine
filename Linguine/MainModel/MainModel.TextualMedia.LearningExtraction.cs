@@ -15,8 +15,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Linguine
 {
-
-    
     public partial class MainModel
     {
 

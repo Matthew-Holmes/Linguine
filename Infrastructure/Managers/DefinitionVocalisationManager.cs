@@ -66,6 +66,15 @@ namespace Infrastructure
                 .ToListAsync();
         }
 
+        public List<VocalisedDefinitionFile> GetAudioFilesForDefinition(int definitionId)
+        {
+            using var context = _dbf.CreateDbContext();
+
+            return context.VocalisedDefinitionFile
+                .Where(v => v.DictionaryDefinitionKey == definitionId)
+                .ToList();
+        }
+
         public bool HasAnyFiles(DictionaryDefinition def, LinguineDbContext context)
         {
             return context.VocalisedDefinitionFile

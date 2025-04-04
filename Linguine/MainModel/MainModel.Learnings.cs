@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using DataClasses;
 using Config;
+using System.Threading.Tasks;
 
 namespace Linguine
 {
@@ -15,7 +16,8 @@ namespace Linguine
         String Prompt, 
         String CorrectAnswer, 
         List<WordInContext> Contexts,
-        DictionaryDefinition Parent);
+        DictionaryDefinition Parent,
+        String? SoundFileName);
 
     public partial class MainModel
     {
@@ -27,6 +29,8 @@ namespace Linguine
         private DefinitionLearningService? _defLearningService = null;
         private TestRecords? _testRecords;
         private int MaxContextExamples = 5;
+
+        private Random _rng = new Random(Environment.TickCount);
 
         public int DistintWordsTested => _testRecords?.DistinctDefinitionsTested() ?? 0;
 
@@ -143,6 +147,17 @@ namespace Linguine
 
             String? defText = null;
 
+            List<VocalisedDefinitionFile> soundFiles = DefinitionVocalisationManager.GetAudioFilesForDefinition(def.DatabasePrimaryKey);
+
+            String? soundFile = null;
+
+            if (soundFiles.Count != 0)
+            {
+                soundFile = soundFiles[_rng.Next(soundFiles.Count)].FileName;
+
+                soundFile = Path.Combine(ConfigManager.Config.AudioStoreDirectory, soundFile);
+            }
+
             if (ConfigManager.Config.LearningForeignLanguage())
             {
                 // TODO - should these be implicit in the parsed dictionary definition manager?
@@ -168,7 +183,7 @@ namespace Linguine
                 defText = def.RomanisedPronuncation + '\n' + defText;
             }
 
-            return new DefinitionForTesting(def.Word, defText, contexts, def);
+            return new DefinitionForTesting(def.Word, defText, contexts, def, soundFile);
         }
 
         public DefinitionForTesting GetHighLearningDefinition()

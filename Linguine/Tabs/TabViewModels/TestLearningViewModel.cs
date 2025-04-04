@@ -6,6 +6,8 @@ using System.Windows.Input;
 using UserInputInterfaces;
 using System.Windows;
 using System.Text.RegularExpressions;
+using System.Media;
+using System.IO;
 
 namespace Linguine.Tabs
 {
@@ -17,7 +19,19 @@ namespace Linguine.Tabs
         public ICommand SetFocusCommand            { get; private set; }
         public ICommand NextContextCommand         { get; private set; }
         public ICommand PreviousContextCommand     { get; private set; }
+        public ICommand PlayCurrentSoundCommand    { get; private set; }
 
+        public bool ShowPlayCurrentSoundButton
+        {
+            get => _showPlayCurrentSoundButton;
+            set
+            {
+                _showPlayCurrentSoundButton = value;
+                OnPropertyChanged(nameof(ShowPlayCurrentSoundButton));
+            }
+        }
+
+        private SoundPlayer? SoundPlayer { get; set; } = null;
 
         private bool _isVocabTest       { get; set; }
         private int _vocabTestRemaining { get; set; }
@@ -55,6 +69,7 @@ namespace Linguine.Tabs
             PreviousContextCommand = new RelayCommand(() => PreviousContext());
             NextContextCommand     = new RelayCommand(() => NextContext());
 
+            PlayCurrentSoundCommand = new RelayCommand(() => SoundPlayer?.Play());
 
             Reset();
         }
@@ -93,11 +108,11 @@ namespace Linguine.Tabs
         private bool  _allowSubmission = true;
 
 
-
         private DefinitionForTesting _definitionForTesting;
         private List<Tuple<string, string, string>> _contexts;
         private Tuple<string, string, string> _currentContext;
         private int _currentContextId = 0;
+        private bool _showPlayCurrentSoundButton;
 
         public List<Tuple<string, string, string>> Contexts
         {
@@ -185,6 +200,7 @@ namespace Linguine.Tabs
         {
             if (UserAnswer == "" || UserAnswer is null)
             {
+                SoundPlayer?.Play();
                 return; // don't allow accidentaly non-input
             }
 
@@ -237,7 +253,23 @@ namespace Linguine.Tabs
             Prompt        = _definitionForTesting.Prompt;
             CorrectAnswer = _definitionForTesting.CorrectAnswer;
 
-            Contexts = _definitionForTesting.Contexts.Select(wic => AsRun(wic)).ToList();
+            if (_definitionForTesting.SoundFileName is not null)
+            {
+                ShowPlayCurrentSoundButton = true;
+                SoundPlayer player = new SoundPlayer(_definitionForTesting.SoundFileName);
+                player.Load();
+
+                SoundPlayer = player;
+
+                player.Play();      
+            } 
+            else
+            {
+                SoundPlayer = null;
+                ShowPlayCurrentSoundButton = false;
+            }
+
+                Contexts = _definitionForTesting.Contexts.Select(wic => AsRun(wic)).ToList();
 
             _posed = DateTime.Now;
         }
