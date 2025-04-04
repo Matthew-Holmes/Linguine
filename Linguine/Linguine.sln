@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataClasses", "..\DataClass
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config", "..\Config\Config.csproj", "{6BC62661-8CB5-4F7F-9BD8-E739526D51ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sound", "..\Sound\Sound.csproj", "{D1188C8F-085E-48F6-AA3B-9D09CE626C2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,10 @@ Global
 		{6BC62661-8CB5-4F7F-9BD8-E739526D51ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BC62661-8CB5-4F7F-9BD8-E739526D51ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BC62661-8CB5-4F7F-9BD8-E739526D51ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1188C8F-085E-48F6-AA3B-9D09CE626C2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1188C8F-085E-48F6-AA3B-9D09CE626C2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1188C8F-085E-48F6-AA3B-9D09CE626C2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1188C8F-085E-48F6-AA3B-9D09CE626C2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
