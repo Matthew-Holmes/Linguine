@@ -63,5 +63,28 @@ namespace Infrastructure
             return latestRecords;
         }
 
+        public IReadOnlyDictionary<int, List<TestRecord>> Last5TestRecords()
+        {
+            using var context = _dbf.CreateDbContext();
+
+            if (!context.TestRecords.Any())
+                return new Dictionary<int, List<TestRecord>>();
+
+            // warning - EF couldn't handle grouping in SQL, so had to do `.AsEnumerable()`!
+            var latestRecords = context.TestRecords
+                .AsEnumerable() 
+                .GroupBy(tr => tr.DictionaryDefinitionKey)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderByDescending(tr => tr.Finished)
+                        .Take(5)
+                        .ToList()
+                );
+
+            return latestRecords;
+        }
+
+
     }
 }

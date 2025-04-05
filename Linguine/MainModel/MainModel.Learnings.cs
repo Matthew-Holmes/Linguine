@@ -332,7 +332,7 @@ namespace Linguine
                 throw new Exception("couldn't generate Zipf scores!");
             }
 
-            IReadOnlyDictionary<int, TestRecord>? testRecords = _testRecords?.LatestTestRecords();
+            IReadOnlyDictionary<int, List<TestRecord>>? testRecords = _testRecords?.Last5TestRecords();
 
             if (testRecords is null)
             {
