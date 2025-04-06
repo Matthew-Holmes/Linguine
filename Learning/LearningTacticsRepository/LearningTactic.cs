@@ -82,7 +82,7 @@ namespace Learning
             TimeSpan totalTime = TimeSpan.FromTicks(
                 forThisDef.Select(tr => tr.Finished - tr.Posed)
                           .Select(ts => ts.Ticks)
-                          .Select(ticks => Math.Max(ticks, TimeClip.Ticks))
+                          .Select(ticks => Math.Min(ticks, TimeClip.Ticks))
                           .Sum());
 
             // use media to avoid outliers

@@ -81,9 +81,16 @@ namespace Learning
 
                     if (tacticsUsed.Count != 0)
                     {
+                        TimeSpan totalTime = TimeSpan.FromTicks(
+                            session.Where(tr => tr.DictionaryDefinitionKey == defID)
+                                   .Select(tr => tr.Finished - tr.Posed)
+                                   .Select(ts => ts.Ticks)
+                                   .Select(ticks => Math.Min(ticks, TimeSpan.FromMinutes(5).Ticks))
+                                   .Sum());
+
                         ret.Add(tacticsUsed.First());
-                        Log.Information("session {sesssion} for definition {defID} used tactic {tactic}",
-                                        i, defID, tacticsUsed.First().GetType());
+                        Log.Information("session {sesssion} for definition {defID} used tactic {tactic}, took {timespan}",
+                                        i, defID, tacticsUsed.First().GetType(), totalTime);
                         broke = true; break;
                     } 
                 }
