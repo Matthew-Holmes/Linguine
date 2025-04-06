@@ -78,6 +78,12 @@ namespace Learning
                 tactics.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
             }
 
+            Strategist strategist = new Strategist();
+
+            List<DictionaryDefinition> distinct = _testRecords.DistinctDefinitionsTested();
+
+            strategist.BuildModel(sessions, distinct);
+
         }
 
         public DictionaryDefinition GetRandomDefinition()

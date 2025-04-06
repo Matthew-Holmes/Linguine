@@ -1,0 +1,320 @@
+﻿using DataClasses;
+using Learning.LearningTacticsRepository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Security;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Learning
+{
+
+    public record DefinitionFeatures(DictionaryDefinition def,
+                                     double maxTimeBetweenCorrectDays,
+                                     double sqrtTotalExposures,
+                                     double fractionCorrect,
+                                     double minTimeBetweenIncorrectDays,
+                                     double avgTimeBetweenSessionsDays);
+
+    class Strategist
+    {
+        // Agent that aims to maximise the probability of correct response on first try
+        // using discounted rewards looking into the future
+
+        // sees a history of past learning tactics and models this probability into the future
+        // do this via a latent embedding of the word, with the latent embedding produced by the history
+
+        // then will be presented with variety of options by the Tactician
+        // and choose the one with highest increase in future reward
+
+        // most of the model should be based off of the last session
+        // since this is what we can control when planning the next session
+
+
+        private LearningTactics Tactics = new LearningTactics();
+
+
+        private DefinitionFeatures GetFeatures(
+            DictionaryDefinition   def,
+            List<List<TestRecord>> sessions,
+            DateTime at)
+        {
+            List<LearningTactic?> tactics = Tactics.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
+
+            double maxTimeBetweenCorrectDays = GetMaxTimeBetweenCorrect(
+                sessions, tactics);
+
+            double avgTimeBetweenSessionsDays;
+
+            if (maxTimeBetweenCorrectDays == 0.0)
+            {
+                avgTimeBetweenSessionsDays = GetAvgTimeBetweenSessions(sessions, tactics);
+            } 
+            else
+            {
+                avgTimeBetweenSessionsDays = GetAvgTimeBetweenSessionsDecayed(
+                    sessions, tactics, maxTimeBetweenCorrectDays, at);
+            }
+
+            double halfLife = maxTimeBetweenCorrectDays;
+
+            if (halfLife == 0)
+            {
+                halfLife = avgTimeBetweenSessionsDays;
+            }
+
+            double minTimeBetweenIncorrectDays = GetMinTimeBetweenIncorrectDecayed(
+                sessions, tactics, halfLife, at);
+
+            double totalExposuresDecayed = GetTotalExposuresDecayed(
+                def, sessions, halfLife, at);
+
+            // best practice with count variables
+            double totalExposuresSqrtDecayed = Math.Sqrt(totalExposuresDecayed);
+
+            double fractionCorrect = GetFractionCorrectDecayed(
+                def, sessions, halfLife, at);
+
+            return new DefinitionFeatures(
+                        def, 
+                        maxTimeBetweenCorrectDays, 
+                        totalExposuresSqrtDecayed, 
+                        fractionCorrect, 
+                        minTimeBetweenIncorrectDays, 
+                        avgTimeBetweenSessionsDays);
+        }
+
+        #region features
+
+        private double GetFractionCorrectDecayed(DictionaryDefinition def, List<List<TestRecord>> sessions, double halfLife, DateTime at)
+        {
+            double toDiv = 0.0;
+            double div   = 0.0;
+
+            foreach (List<TestRecord> session in sessions)
+            {
+                int total = session.Where(tr => tr.DictionaryDefinitionKey == def.DatabasePrimaryKey).Count();
+                if (total == 0)
+                {
+                    continue;
+                }
+                int correct = session.Where(tr => tr.DictionaryDefinitionKey == def.DatabasePrimaryKey).Where(tr => tr.Correct == true).Count();
+
+                DateTime time = session.First().Posed;
+                TimeSpan ago = at - time;
+
+                double decay = Math.Pow(0.5, ago.TotalDays);
+
+                toDiv += (correct / total) * decay;
+                div   += decay;
+            }
+
+            if (div == 0.0)
+            {
+                return 0.5;
+            } 
+            else
+            {
+                return toDiv / div;
+            }
+        }
+
+        private double GetTotalExposuresDecayed(DictionaryDefinition def, List<List<TestRecord>> sessions, double halfLife, DateTime at)
+        {
+            double ret = 0.0;
+
+            foreach (List<TestRecord> session in sessions)
+            {
+                DateTime time = session.First().Posed;
+                TimeSpan ago = at - time;
+
+                double decay = Math.Pow(0.5, ago.TotalDays);
+
+                ret += session.Where(tr => tr.DictionaryDefinitionKey == def.DatabasePrimaryKey).Count() * decay;
+            }
+
+            return ret;
+        }
+
+        private double GetMinTimeBetweenIncorrectDecayed(List<List<TestRecord>> sessions, List<LearningTactic?> tactics, double halfLife, DateTime at)
+        {
+            double ret = double.MaxValue;
+            bool goodRet = false;
+
+            int last_i = -1;
+
+            for (int this_i = 0; this_i != tactics.Count; this_i++)
+            {
+                if (last_i != -1 && tactics[this_i] is not null)
+                {
+                    bool thisInCorrect = !tactics[this_i].GetType().IsSubclassOf(typeof(AllCorrect));
+
+                    if (thisInCorrect)
+                    {
+                        DateTime lastTime = sessions[last_i].First().Posed;
+                        DateTime thisTime = sessions[this_i].First().Posed;
+                        TimeSpan delta = thisTime - lastTime;
+
+                        DateTime mid = lastTime + delta / 2.0;
+                        TimeSpan daysSinceMid = at - mid;
+
+                        double decay = Math.Pow(0.5, daysSinceMid.TotalDays);
+
+                        delta /= decay; // since taking min, we inflate times longer ago
+
+                        ret = Math.Min(ret, delta.TotalDays);
+                        goodRet = true;
+                    }
+                }
+
+                if (tactics[this_i] is not null)
+                {
+                    last_i = this_i;
+                }
+            }
+
+            if (goodRet)
+            {
+                return ret;
+            } else
+            {
+                return 1.0;
+            }
+        }
+
+        private double GetMaxTimeBetweenCorrect(List<List<TestRecord>> sessions, List<LearningTactic?> tactics)
+        {
+            double maxTimeBetweenCorrectDays = 0.0;
+
+            int last_i = -1;
+
+            for (int this_i = 0; this_i != tactics.Count; this_i++)
+            {
+                if (last_i != -1 && tactics[this_i] is not null)
+                {
+                    bool lastCorrect = tactics[last_i].GetType().IsSubclassOf(typeof(AllCorrect));
+                    bool thisCorrect = tactics[this_i].GetType().IsSubclassOf(typeof(AllCorrect));
+
+                    if (lastCorrect && thisCorrect)
+                    {
+                        DateTime lastTime = sessions[last_i].First().Posed;
+                        DateTime thisTime = sessions[this_i].First().Posed;
+                        TimeSpan delta = thisTime - lastTime;
+
+                        maxTimeBetweenCorrectDays = Math.Max(
+                            maxTimeBetweenCorrectDays,
+                            delta.TotalDays);
+                    }
+                }
+
+                if (tactics[this_i] is not null)
+                {
+                    last_i = this_i;
+                }
+            }
+
+            return maxTimeBetweenCorrectDays;
+        }
+        
+        private double GetAvgTimeBetweenSessions(List<List<TestRecord>> sessions, List<LearningTactic?> tactics)
+        {
+            TimeSpan total = TimeSpan.FromTicks(0);
+            int div = 0;
+
+            int last_i = -1;
+
+            for (int this_i = 0; this_i != tactics.Count; this_i++)
+            {
+                if (last_i != -1 && tactics[this_i] is not null)
+                {
+                    DateTime lastTime = sessions[last_i].First().Posed;
+                    DateTime thisTime = sessions[this_i].First().Posed;
+                    TimeSpan delta = thisTime - lastTime;
+
+                    total += delta; div++;
+                }
+
+                if (tactics[this_i] is not null)
+                {
+                    last_i = this_i;
+                }
+            }
+
+            if (div != 0)
+            {
+                return total.TotalDays / div;
+            }
+            else
+            {
+                return 1.0;
+            }
+        }
+        
+        private double GetAvgTimeBetweenSessionsDecayed(List<List<TestRecord>> sessions, List<LearningTactic?> tactics, double halfLifeDays, DateTime at)
+        {
+            TimeSpan total = TimeSpan.FromTicks(0);
+            double div = 0.0;
+
+            int last_i = -1;
+
+            for (int this_i = 0; this_i != tactics.Count; this_i++)
+            {
+                if (last_i != -1 && tactics[this_i] is not null)
+                {
+                    DateTime lastTime = sessions[last_i].First().Posed;
+                    DateTime thisTime = sessions[this_i].First().Posed;
+                    TimeSpan delta = thisTime - lastTime;
+
+                    DateTime mid = lastTime + delta / 2.0;
+                    TimeSpan daysSinceMid = at - mid;
+
+                    // time weighted average
+                    double decay = Math.Pow(0.5, daysSinceMid.TotalDays);
+
+                    delta *= decay;
+
+                    total += delta; 
+                    div += decay;
+                }
+
+                if (tactics[this_i] is not null)
+                {
+                    last_i = this_i;
+                }
+            }
+
+            if (div != 0)
+            {
+                return total.TotalDays / div;
+            }
+            else
+            {
+                return 1.0;
+            }
+        }
+
+        #endregion
+
+        public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
+        {
+            DateTime now = DateTime.Now;
+
+            List<DefinitionFeatures> features = new List<DefinitionFeatures>();
+
+            foreach (DictionaryDefinition def in defs)
+            {
+                DefinitionFeatures f = GetFeatures(def, sessions, now);
+                features.Add(f);
+            }
+        }
+        
+        // then fit linear model of probability correct in one
+            // of log time since last tactic
+            // tactic type
+            // features
+
+
+
+    }
+}

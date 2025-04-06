@@ -8,7 +8,7 @@ namespace Learning.LearningTacticsRepository
 {
     class SingleCorrectTry : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new WasTested();
+        public override LearningTactic? Prerequisite => new AllCorrect();
 
         public SingleCorrectTry()
         {
