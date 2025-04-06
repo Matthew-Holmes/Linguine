@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace Learning
 {
-
     class LearningTactics
     {
         // class for working with single session strategies relating to vocabulary acquisition
@@ -19,7 +18,7 @@ namespace Learning
 
         private static List<List<TestRecord>> GetSessions(List<TestRecord> total)
         {
-            List<List<TestRecord>> ret = new List<List<TestRecord>>();
+            List<List<TestRecord>> ret = new List<List  <TestRecord>>();
 
             if (total.Count == 0)
             {

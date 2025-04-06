@@ -5,35 +5,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.Statistics;
 
 namespace Learning
 {
     public record BasicThresholds(
-        int? MinExposures, int? MaxExposures, 
-        int? MinCorrect,   int? MaxCorrect,
-        int? MinIncorrect, int? MaxIncorrect,
-        TimeSpan? MinTotalTime,   TimeSpan? MaxTotalTime, 
-        TimeSpan? MinAverageTime, TimeSpan? MaxAverageTime);
+        int? MinExposures = null, int? MaxExposures = null, 
+        int? MinCorrect   = null, int? MaxCorrect   = null,
+        int? MinIncorrect = null, int? MaxIncorrect = null,
+        TimeSpan? MinTotalTime   = null, TimeSpan? MaxTotalTime   = null, 
+        TimeSpan? MinAverageTime = null, TimeSpan? MaxAverageTime = null);
 
 
     public delegate bool Constraint(List<TestRecord> sessionRecords, int DefID);
 
     abstract class LearningTactic
     {
-        // TODO - while these are suitable for identifying tactics
+        // TODO - while this is suitable for identifying tactics
         // need more thought when it comes to employing them
-        public abstract List<LearningTactic> Prerequisites { get; init; }
+        // TODO - this makes a tree sort of structure - is that sufficient?
+        public abstract LearningTactic? Prerequisite { get; }
 
-        public abstract List<BasicThresholds> NecThresholds { get; init; }
-        public abstract List<BasicThresholds> SufThresholds { get; init; }
+        public virtual List<BasicThresholds> NecThresholds { get; init; } = new List<BasicThresholds>();
+        public virtual List<BasicThresholds> SufThresholds { get; init; } = new List<BasicThresholds>();
 
 
-        protected abstract List<Constraint> SufConstraints { get; init; }
-        protected abstract List<Constraint> NecConstraints { get; init; }
+        protected virtual List<Constraint> SufConstraints { get; init; } = new List<Constraint>();
+        protected virtual List<Constraint> NecConstraints { get; init; } = new List<Constraint>();
 
 
         public bool UsedThisTactic(List<TestRecord> sessionRecords, int defID)
         {
+            if (Prerequisite?.UsedThisTactic(sessionRecords, defID) ?? true)
+            {
+                /* do nothing */
+            } else
+            {
+                return false;
+            }
+
             #region basic thresholds
             bool metNecThresholds = true;
 
@@ -80,6 +90,9 @@ namespace Learning
             return metBasicThresholds && metConstrains;
         }
 
+
+        private TimeSpan TimeClip => TimeSpan.FromMinutes(1); // edge cases that saw very long times
+
         private bool IsSatisfied(BasicThresholds constraint, List<TestRecord> sessionRecords, int defID)
         {
             List<TestRecord> forThisDef = sessionRecords.Where(tr => tr.DatabasePrimaryKey == defID).ToList();
@@ -95,9 +108,15 @@ namespace Learning
 
             TimeSpan totalTime = TimeSpan.FromTicks(
                 forThisDef.Select(tr => tr.Finished - tr.Posed)
-                           .Select(ts => ts.Ticks).Sum());
+                          .Select(ts => ts.Ticks)
+                          .Select(ticks => Math.Max(ticks, TimeClip.Ticks))
+                          .Sum());
 
-            TimeSpan averageTime = totalTime / totalExposures;
+            // use media to avoid outliers
+            TimeSpan averageTime = TimeSpan.FromMinutes(
+                forThisDef.Select(tr => tr.Finished - tr.Posed)
+                .Select(ts => ts.TotalMinutes)
+                .Median());
 
             bool satisfiesExposures = true;
 
