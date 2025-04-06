@@ -20,7 +20,7 @@ namespace Learning.LearningTacticsRepository
         {
             List<TestRecord> thisDef = sessionRecords.Where(sr => sr.DictionaryDefinitionKey == defID).ToList();
 
-            if (thisDef.Count < 2)
+            if (thisDef.Count < 1)
             {
                 // need at least two - otherwise its just a single incorrect response
                 return false;

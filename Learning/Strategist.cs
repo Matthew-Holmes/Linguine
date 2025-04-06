@@ -148,7 +148,7 @@ namespace Learning
             {
                 if (last_i != -1 && tactics[this_i] is not null)
                 {
-                    bool thisInCorrect = !tactics[this_i].GetType().IsSubclassOf(typeof(AllCorrect));
+                    bool thisInCorrect = !WasCorrect(tactics[this_i]);
 
                     if (thisInCorrect)
                     {
@@ -183,6 +183,20 @@ namespace Learning
             }
         }
 
+        private bool WasCorrect(LearningTactic tactic)
+        {
+            if (tactic.Prerequisite is null)
+            {
+                return false;
+            }
+            if (tactic.Prerequisite.GetType() == typeof(AllCorrect))
+            {
+                return true;
+            }
+
+            return WasCorrect(tactic.Prerequisite);
+        }
+
         private double GetMaxTimeBetweenCorrect(List<List<TestRecord>> sessions, List<LearningTactic?> tactics)
         {
             double maxTimeBetweenCorrectDays = 0.0;
@@ -193,8 +207,8 @@ namespace Learning
             {
                 if (last_i != -1 && tactics[this_i] is not null)
                 {
-                    bool lastCorrect = tactics[last_i].GetType().IsSubclassOf(typeof(AllCorrect));
-                    bool thisCorrect = tactics[this_i].GetType().IsSubclassOf(typeof(AllCorrect));
+                    bool lastCorrect = WasCorrect(tactics[last_i]);
+                    bool thisCorrect = WasCorrect(tactics[this_i]);
 
                     if (lastCorrect && thisCorrect)
                     {
@@ -313,6 +327,8 @@ namespace Learning
             // of log time since last tactic
             // tactic type
             // features
+
+        // do the same for eventually learnt
 
 
 
