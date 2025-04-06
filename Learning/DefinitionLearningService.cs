@@ -44,7 +44,7 @@ namespace Learning
 
         public bool NeedToBurnInVocabularyData()
         {
-            return _testRecords.DistinctDefinitionsTested() < _minWordsTested;
+            return _testRecords.NumberDistinctDefinitionsTested() < _minWordsTested;
         }
 
 
@@ -63,6 +63,21 @@ namespace Learning
             _testRecords      = testRecords;
             _pdefManager      = pdefManager;
             _statementManager = statementManager;
+
+            ResolveLearningTactics();
+        }
+
+        private void ResolveLearningTactics()
+        {
+            LearningTactics tactics = new LearningTactics();
+
+            List<List<TestRecord>> sessions = LearningTactics.GetSessions(_testRecords.AllRecordsTimeSorted());
+
+            foreach (DictionaryDefinition def in _testRecords.DistinctDefinitionsTested())
+            {
+                tactics.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
+            }
+
         }
 
         public DictionaryDefinition GetRandomDefinition()

@@ -8,11 +8,11 @@ namespace Learning.LearningTacticsRepository
 {
     class QuickSingleCorrectTry : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new CorrectFirstTry();
+        public override LearningTactic? Prerequisite => new SingleCorrectTry();
 
         public QuickSingleCorrectTry()
         {
-            NecThresholds = new List<BasicThresholds> { new BasicThresholds(MaxAverageTime: TimeSpan.FromMinutes(5)) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxAverageTime: TimeSpan.FromSeconds(7)) };
         }
     }
 }

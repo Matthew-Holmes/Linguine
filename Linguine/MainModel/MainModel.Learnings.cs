@@ -33,7 +33,7 @@ namespace Linguine
 
         private Random _rng = new Random(Environment.TickCount);
 
-        public int DistintWordsTested => _testRecords?.DistinctDefinitionsTested() ?? 0;
+        public int DistintWordsTested => _testRecords?.NumberDistinctDefinitionsTested() ?? 0;
 
         public DefinitionLearningService? DefLearning => _defLearningService;
 

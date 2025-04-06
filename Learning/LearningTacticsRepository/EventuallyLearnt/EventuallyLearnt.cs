@@ -9,11 +9,11 @@ namespace Learning.LearningTacticsRepository
 {
     class EventuallyLearnt : LearningTactic
     {
-        public override LearningTactic? Prerequisite => null;
+        public override LearningTactic? Prerequisite => new WasTested();
 
         public EventuallyLearnt()
         {
-            NecConstraints = new List<Constraint> { ResolvesLearningCorrect };
+            Constraints = new List<Constraint> { ResolvesLearningCorrect };
         }
 
         private bool ResolvesLearningCorrect(List<TestRecord> sortedSessionRecords, int defID)

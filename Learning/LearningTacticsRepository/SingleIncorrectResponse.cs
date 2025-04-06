@@ -8,11 +8,11 @@ namespace Learning.LearningTacticsRepository
 {
     class SingleIncorrectResponse : LearningTactic
     {
-        public override LearningTactic? Prerequisite => null;
+        public override LearningTactic? Prerequisite => new WasTested();
 
         public SingleIncorrectResponse()
         {
-            NecThresholds = new List<BasicThresholds> { new BasicThresholds(MaxExposures: 1, MinIncorrect: 1) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxExposures: 1, MinIncorrect: 1) };
         }
     }
 }

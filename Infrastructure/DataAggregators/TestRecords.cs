@@ -14,7 +14,24 @@ namespace Infrastructure
             _dbf = dbf;
         }
 
-        public int DistinctDefinitionsTested()
+        public List<TestRecord> AllRecordsTimeSorted()
+        {
+            using var context = _dbf.CreateDbContext();
+            return context.TestRecords.ToList(); // TODO - check time sorted
+        }
+
+        public List<DictionaryDefinition> DistinctDefinitionsTested()
+        {
+            using var context = _dbf.CreateDbContext();
+            return context.TestRecords.Any()
+                ? context.TestRecords
+                         .GroupBy(tr => tr.DictionaryDefinitionKey)
+                         .Select(grouping => grouping.First().Definition)
+                         .ToList() 
+                : new List<DictionaryDefinition>();
+        }
+
+        public int NumberDistinctDefinitionsTested()
         {
             using var context = _dbf.CreateDbContext();
             return context.TestRecords.Any()

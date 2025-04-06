@@ -12,7 +12,7 @@ namespace Learning.LearningTacticsRepository
 
         public SlowSingleCorrectTry()
         {
-            NecThresholds = new List<BasicThresholds> { new BasicThresholds(MinAverageTime: TimeSpan.FromSeconds(30)) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinAverageTime: TimeSpan.FromSeconds(30)) };
         }
     }
 }

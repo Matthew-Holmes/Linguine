@@ -26,12 +26,9 @@ namespace Learning
         // TODO - this makes a tree sort of structure - is that sufficient?
         public abstract LearningTactic? Prerequisite { get; }
 
-        public virtual List<BasicThresholds> NecThresholds { get; init; } = new List<BasicThresholds>();
-        public virtual List<BasicThresholds> SufThresholds { get; init; } = new List<BasicThresholds>();
+        public virtual List<BasicThresholds> Thresholds { get; init; } = new List<BasicThresholds>();
 
-
-        protected virtual List<Constraint> SufConstraints { get; init; } = new List<Constraint>();
-        protected virtual List<Constraint> NecConstraints { get; init; } = new List<Constraint>();
+        protected virtual List<Constraint> Constraints { get; init; } = new List<Constraint>();
 
 
         public bool UsedThisTactic(List<TestRecord> sessionRecords, int defID)
@@ -44,50 +41,26 @@ namespace Learning
                 return false;
             }
 
-            #region basic thresholds
-            bool metNecThresholds = true;
+            // must satisfy every constraint
 
-            foreach (BasicThresholds threshold in NecThresholds)
+            foreach (Constraint constraint in Constraints)
             {
-                metNecThresholds = metNecThresholds && IsSatisfied(threshold, sessionRecords, defID);
+                if (!constraint(sessionRecords, defID))
+                {
+                    return false;
+                }
             }
 
-            bool metSufThresholds = false;
 
-            foreach (BasicThresholds threshold in SufThresholds)
+            foreach (BasicThresholds threshold in Thresholds)
             {
-                metSufThresholds = metSufThresholds || IsSatisfied(threshold, sessionRecords, defID);
-            }
-            #endregion
-            if (metSufThresholds && !metNecThresholds)
-            {
-                Log.Error("logical inconsistency in basic thresholds");
-                throw new Exception("invalid sufficient and necessary basic thresholds!");
-            }
-            bool metBasicThresholds = metNecThresholds || metSufThresholds;
-
-            #region constraints
-            bool metNecConstraints = true;
-            foreach (Constraint constraint in NecConstraints)
-            {
-                metNecConstraints = metNecConstraints && constraint(sessionRecords, defID);
+                if (!IsSatisfied(threshold, sessionRecords, defID))
+                {
+                    return false;
+                }
             }
 
-            bool metSufConstraints = false;
-            foreach (Constraint constraint in SufConstraints)
-            {
-                metSufConstraints = metSufConstraints || constraint(sessionRecords, defID);
-            }
-            #endregion
-
-            if (metSufConstraints && !metNecConstraints)
-            {
-                Log.Error("logical inconsistency in constraints!");
-                throw new Exception("logical inconsistency in constraints!");
-            }
-            bool metConstrains = metNecConstraints || metSufConstraints;
-
-            return metBasicThresholds && metConstrains;
+            return true;
         }
 
 
@@ -95,7 +68,7 @@ namespace Learning
 
         private bool IsSatisfied(BasicThresholds constraint, List<TestRecord> sessionRecords, int defID)
         {
-            List<TestRecord> forThisDef = sessionRecords.Where(tr => tr.DatabasePrimaryKey == defID).ToList();
+            List<TestRecord> forThisDef = sessionRecords.Where(tr => tr.DictionaryDefinitionKey == defID).ToList();
 
             if (forThisDef.Count == 0)
             {
