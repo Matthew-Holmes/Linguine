@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Learning
 {
-    class LearningTactics
+    class LearningTacticsHelper
     {
         // class for working with single session strategies relating to vocabulary acquisition
 
@@ -50,11 +50,12 @@ namespace Learning
             return ret;
         }
 
+        // terminal tactic is one which is not the Prerequisite of any other
         // the first entry is all the terminal tactics
         // the second all the penultimate etc...
         private List<List<LearningTactic>> LearningTacticHeirarchy;
 
-        public LearningTactics()
+        public LearningTacticsHelper()
         {
             LearningTacticHeirarchy = ResolveLearningTactics();
         }

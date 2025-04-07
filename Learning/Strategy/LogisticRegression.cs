@@ -14,9 +14,9 @@ namespace Learning.Strategy
     {
         private readonly Vector<double> _parameters;
 
-        public LogisticRegression(List<FollowingSessionDatum> data)
+        public LogisticRegression(List<FollowingSessionDatum> data, List<Type> tacticsUsed)
         {
-            var vectoriser = new FeatureVectoriser(data);
+            var vectoriser = new FeatureVectoriser(data, tacticsUsed);
 
             var X = Matrix<double>.Build.Dense(data.Count, vectoriser.FeatureCount);
             var y = Vector<double>.Build.Dense(data.Count);

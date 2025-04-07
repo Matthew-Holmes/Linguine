@@ -14,6 +14,7 @@ using System.ComponentModel;
 using Config;
 using System.Runtime.CompilerServices;
 using HarfBuzzSharp;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Learning
 {
@@ -32,30 +33,27 @@ namespace Learning
         // since this is what we can control when planning the next session
 
 
-        private LearningTactics Tactics = new LearningTactics();
-
+        private LearningTacticsHelper Tactics = new LearningTacticsHelper();
 
         public LogisticRegression Model { get; private set; }
         public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
         public List<Type> TacticsUsed { get; private set; }
 
-        public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsed { get; private set; }
+        public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
 
         public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
-            (List<FollowingSessionDatum> data,
-                List<DefinitionFeatures> features,
-                List<List<LearningTactic?>> tactics) = GetDataForModel(sessions, defs);
+            ModelData modelData = GetDataForModel(sessions, defs);
 
-            LogisticRegression model = new LogisticRegression(data);
+            TacticsUsed = modelData.tacticsUsed;
+
+            LogisticRegression model = new LogisticRegression(modelData.trainingData, TacticsUsed);
 
             HashSet<int> defKeysPlotted = new HashSet<int>();
 
-            List<LearningTactic> tacticsUsed = data.Select(d => d.session.GetType()).Distinct().Select(t => (LearningTactic)Activator.CreateInstance(t)).ToList();
-
             // just for debug
 
-            foreach (DefinitionFeatures feature in features)
+            foreach (DefinitionFeatures feature in modelData.distinctDefinitionFeatures)
             {
                 int key = feature.def.DatabasePrimaryKey;
 
@@ -71,28 +69,29 @@ namespace Learning
                 string name = feature.def.Word + feature.def.DatabasePrimaryKey;
                 string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
 
-                ProbabilityPlotter.PlotProbabilityCurves(model, feature, tacticsUsed, $"plots/{language}/{name}.png");
+                ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
             }
 
             Dictionary<int, DefinitionFeatures> defFeaturesLookup = new Dictionary<int, DefinitionFeatures>();
             Dictionary<int, Tuple<LearningTactic, DateTime>> lastTacticUsed = new Dictionary<int, Tuple<LearningTactic, DateTime>>();
 
-            if (features.Count != tactics.Count)
+            if (modelData.distinctDefinitionFeatures.Count 
+             != modelData.distinctDefinitionTacticsIdentified.Count)
             {
                 throw new Exception("invalid data!"); // TODO data transfer class or something
             }
 
-            for (int i = 0; i != features.Count; i++)
+            for (int def_idx = 0; def_idx != modelData.distinctDefinitionFeatures.Count; def_idx++)
             {
-                DefinitionFeatures fs = features[i];
+                DefinitionFeatures fs = modelData.distinctDefinitionFeatures[def_idx];
                 defFeaturesLookup.Add(fs.def.DatabasePrimaryKey, fs);
 
-                for (int j = sessions.Count - 1; j >= 0; j--)
+                for (int sesh_idx = sessions.Count - 1; sesh_idx >= 0; sesh_idx--)
                 {
-                    LearningTactic? tactic = tactics[i][j];
+                    LearningTactic? tactic = modelData.distinctDefinitionTacticsIdentified[def_idx][sesh_idx];
                     if (tactic is not null)
                     {
-                        DateTime when = sessions[j].First().Posed;
+                        DateTime when = sessions[sesh_idx].First().Posed;
 
                         lastTacticUsed.Add(fs.def.DatabasePrimaryKey, Tuple.Create(tactic, when));
 
@@ -105,11 +104,11 @@ namespace Learning
 
             Model = model;
             DefFeatures = defFeaturesLookup.AsReadOnly();
-            TacticsUsed = tacticsUsed.Select(lt => lt.GetType()).ToList();
-            LastTacticUsed = lastTacticUsed.AsReadOnly();
+            LastTacticUsedForDefinition = lastTacticUsed.AsReadOnly();
         }
 
-        private (List<FollowingSessionDatum>, List<DefinitionFeatures>, List<List<LearningTactic?>>) GetDataForModel(
+
+        private ModelData GetDataForModel(
             List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             DateTime now = DateTime.Now;
@@ -133,7 +132,9 @@ namespace Learning
                 dataPoints.AddRange(GenerateFollowingSessionData(features[i], tactics[i], sessionTimes));
             }
 
-            return (dataPoints, features, tactics);
+            List<Type> tacticsUsed = dataPoints.Select(d => d.sessionTacticType).Distinct().ToList();
+
+            return new ModelData(dataPoints, features, tactics, sessions, tacticsUsed);
         }
 
         private List<FollowingSessionDatum> GenerateFollowingSessionData(
@@ -158,10 +159,9 @@ namespace Learning
                     double intervalDays = delta.TotalDays;
                     bool nextWasCorrect = WasCorrect(defTactics[next_id]);
 
-
                     ret.Add(new FollowingSessionDatum(
                         defFeatures,
-                        defTactics[i],
+                        defTactics[i].GetType(),
                         intervalDays,
                         nextWasCorrect));
                 }

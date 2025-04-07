@@ -12,12 +12,8 @@ namespace Learning.Strategy
     {
         private readonly Dictionary<Type, int> _tacticTypeToIndex;
 
-        public FeatureVectoriser(IEnumerable<FollowingSessionDatum> data, List<Type>? tacticTypes = null)
+        public FeatureVectoriser(IEnumerable<FollowingSessionDatum> data, List<Type> tacticTypes)
         {
-            if (tacticTypes is null)
-            {
-                tacticTypes = data.Select(d => d.session.GetType()).Distinct().ToList();
-            }
             _tacticTypeToIndex = tacticTypes.Select((type, i) => new { type, i })
                                             .ToDictionary(x => x.type, x => x.i);
         }
@@ -41,7 +37,7 @@ namespace Learning.Strategy
             features.Add(intervalLogRatio);
 
             var oneHot = new double[_tacticTypeToIndex.Count];
-            oneHot[_tacticTypeToIndex[datum.session.GetType()]] = 1;
+            oneHot[_tacticTypeToIndex[datum.sessionTacticType]] = 1;
             features.AddRange(oneHot);
 
             return Vector<double>.Build.DenseOfEnumerable(features);

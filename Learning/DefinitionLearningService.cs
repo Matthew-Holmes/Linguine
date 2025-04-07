@@ -72,9 +72,9 @@ namespace Learning
 
         private void ResolveLearningTactics()
         {
-            LearningTactics tactics = new LearningTactics();
+            LearningTacticsHelper tactics = new LearningTacticsHelper();
 
-            List<List<TestRecord>> sessions = LearningTactics.GetSessions(_testRecords.AllRecordsTimeSorted());
+            List<List<TestRecord>> sessions = LearningTacticsHelper.GetSessions(_testRecords.AllRecordsTimeSorted());
 
             foreach (DictionaryDefinition def in _testRecords.DistinctDefinitionsTested())
             {
@@ -163,23 +163,24 @@ namespace Learning
 
                 int key = features.def.DatabasePrimaryKey;
 
-                if (Strategist.LastTacticUsed.ContainsKey(key))
+                if (Strategist.LastTacticUsedForDefinition.ContainsKey(key))
                 {
-                    if (Strategist.LastTacticUsed[key] is not null)
+                    if (Strategist.LastTacticUsedForDefinition[key] is not null)
                     {
-                        LearningTactic lastTactic = Strategist.LastTacticUsed[key].Item1;
-                        DateTime when = Strategist.LastTacticUsed[key].Item2;
+                        LearningTactic lastTactic = Strategist.LastTacticUsedForDefinition[key].Item1;
+                        DateTime when = Strategist.LastTacticUsedForDefinition[key].Item2;
 
-                        if (!Strategist.TacticsUsed.Contains(lastTactic.GetType()))
+                        Type lastTacticType = lastTactic.GetType();
+
+                        if (!Strategist.TacticsUsed.Contains(lastTacticType))
                         {
                             continue;
                         }
 
-
                         TimeSpan interval = DateTime.Now - when;
                         double intervalDays = interval.TotalDays + lookAheadDays;
 
-                        FollowingSessionDatum input = ProbabilityPlotter.CreateDatum(features, lastTactic, intervalDays);
+                        FollowingSessionDatum input = ProbabilityPlotter.CreateDatum(features, lastTacticType, intervalDays);
 
                         double defpKnown = Strategist.Model.PredictProbability(input, Strategist.TacticsUsed);
 

@@ -18,7 +18,7 @@ namespace Learning.Strategy
         public static void PlotProbabilityCurves(
             LogisticRegression model,
             DefinitionFeatures defFeatures,
-            IEnumerable<LearningTactic> tactics,
+            List<Type> tacticsTypes,
             string outputPath)
         {
             var plotModel = new PlotModel { Title = $"Prediction Curves for '{defFeatures.def.Word}'" };
@@ -52,9 +52,7 @@ namespace Learning.Strategy
 
             var intervalRange = GenerateRange(0.1, lookAheadDays, 400); // 
 
-            List<Type> types = tactics.Select(t => t.GetType()).ToList();
-
-            foreach (var tactic in tactics)
+            foreach (var tactic in tacticsTypes)
             {
                 var tacticType = tactic.GetType();
                 string keyLabel = tacticType.ToString().Split('.').Last(); // Extract just the final part of the type name
@@ -70,7 +68,7 @@ namespace Learning.Strategy
                 foreach (var intervalDays in intervalRange)
                 {
                     var datum = CreateDatum(defFeatures, tactic, intervalDays);
-                    double prob = model.PredictProbability(datum, types);
+                    double prob = model.PredictProbability(datum, tacticsTypes);
                     series.Points.Add(new DataPoint(intervalDays, prob));
                 }
 
@@ -98,11 +96,11 @@ namespace Learning.Strategy
             return range;
         }
 
-        public static FollowingSessionDatum CreateDatum(DefinitionFeatures features, LearningTactic tactic, double interval)
+        public static FollowingSessionDatum CreateDatum(DefinitionFeatures features, Type tacticType, double interval)
         {
             return new FollowingSessionDatum(
                 defFeatures: features,
-                session: tactic,
+                sessionTacticType: tacticType,
                 intervalDays: interval,
                 followingWasCorrect: false // prediction ignores this
             );

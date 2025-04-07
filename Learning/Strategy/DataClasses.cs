@@ -7,17 +7,25 @@ using System.Threading.Tasks;
 
 namespace Learning.Strategy
 {
-    public record DefinitionFeatures(DictionaryDefinition def,
-                                     double maxTimeBetweenCorrectDays,
-                                     double sqrtTotalExposures,
-                                     double fractionCorrect,
-                                     double minTimeBetweenIncorrectDays,
-                                     double avgTimeBetweenSessionsDays,
-                                     double halfLifeDays);
+    public record DefinitionFeatures(
+        DictionaryDefinition def,
+        double maxTimeBetweenCorrectDays,
+        double sqrtTotalExposures,
+        double fractionCorrect,
+        double minTimeBetweenIncorrectDays,
+        double avgTimeBetweenSessionsDays,
+        double halfLifeDays);
 
     public record FollowingSessionDatum(
         DefinitionFeatures defFeatures,
-        LearningTactic session,
+        Type sessionTacticType,
         double intervalDays,
         bool followingWasCorrect);
+
+    public record ModelData(
+        List<FollowingSessionDatum> trainingData,
+        List<DefinitionFeatures> distinctDefinitionFeatures,
+        List<List<LearningTactic?>> distinctDefinitionTacticsIdentified,
+        List<List<TestRecord>> sessions,
+        List<Type> tacticsUsed);
 }
