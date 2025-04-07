@@ -29,6 +29,9 @@ namespace Learning
 
             MarkovGraph graph = BuildMarkovGraph(transitions);
 
+            // just for debug
+            MarkovGraphPlotter.SaveMarkovPlot(graph);
+
         }
 
         private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions)
@@ -139,6 +142,8 @@ namespace Learning
                 }
                 TacticTransition toAdd = new TacticTransition(from, to, cost);
                 ret.Add(toAdd);
+
+                lastTactic[defKey] = tactic;
             }
 
             return ret;

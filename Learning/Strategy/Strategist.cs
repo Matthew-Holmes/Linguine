@@ -72,6 +72,11 @@ namespace Learning
 
                 ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
             }
+
+            Tactician tactics = new Tactician(this);
+
+            tactics.BuildMarkovModel(sessions);
+
         }
     }
 }
