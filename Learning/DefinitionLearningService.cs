@@ -180,7 +180,7 @@ namespace Learning
                         TimeSpan interval = DateTime.Now - when;
                         double intervalDays = interval.TotalDays + lookAheadDays;
 
-                        FollowingSessionDatum input = ProbabilityPlotter.CreateDatum(features, lastTacticType, intervalDays);
+                        FollowingSessionDatum input = Strategist.CreateDatum(features, lastTacticType, intervalDays);
 
                         double defpKnown = Strategist.Model.PredictProbability(input, Strategist.TacticsUsed);
 
