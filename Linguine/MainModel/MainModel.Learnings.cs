@@ -236,9 +236,9 @@ namespace Linguine
 
         private List<int>? DefsToLearn;
 
-        private HashSet<int> Learnt = new HashSet<int>();
-        private Queue<int> OneCorrect = new Queue<int>();
-        private Queue<int> TwoCorrect = new Queue<int>();
+        private HashSet<int> Learnt     = new HashSet<int>();
+        private Queue<int>   OneCorrect = new Queue<int>();
+        private Queue<int>   TwoCorrect = new Queue<int>();
 
         private Queue<int> Learning = new Queue<int>();
 
