@@ -40,6 +40,8 @@ namespace Linguine.Tabs
         private DateTime _answered;
         private DateTime _finished;
 
+        private List<int> DefIdsToLearn { get; set; }
+
         private void SetFocus(object param)
         {
             if (param is Button button)

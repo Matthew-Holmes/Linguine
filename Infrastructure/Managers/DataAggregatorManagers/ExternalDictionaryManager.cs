@@ -15,6 +15,18 @@ namespace Infrastructure
                                                .ToList();
         }
 
+        public ExternalDictionary? GetFirstDictionary()
+        {
+            String name = AvailableDictionaries().FirstOrDefault();
+
+            if (name is not null || name != "")
+            {
+                return GetDictionary(name);
+            } else
+            {
+                return null;
+            }
+        }
         public ExternalDictionary? GetDictionary(String source)
         {
             if (!AvailableDictionaries().Contains(source))

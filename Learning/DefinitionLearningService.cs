@@ -1,6 +1,7 @@
 ﻿using Infrastructure;
 using Serilog;
 using DataClasses;
+using Learning.Strategy;
 
 namespace Learning
 {
@@ -53,6 +54,8 @@ namespace Learning
         private ParsedDictionaryDefinitionManager _pdefManager;
         private StatementManager                  _statementManager;
 
+        private Strategist Strategist { get; set; }
+
         public DefinitionLearningService(
             ExternalDictionary                dictionary,
             TestRecords                       testRecords,
@@ -83,6 +86,8 @@ namespace Learning
             List<DictionaryDefinition> distinct = _testRecords.DistinctDefinitionsTested();
 
             strategist.BuildModel(sessions, distinct);
+
+            Strategist = strategist;
 
         }
 
@@ -137,7 +142,8 @@ namespace Learning
             return true;
         }
 
-        public DictionaryDefinition GetHighLearningDefinition(VocabularyModel model, int topK = 5)
+
+        public List<int> GetHighLearningDefinitionIds(VocabularyModel model)
         {
             // pass vocab model since we know that this must have all the required data
 
@@ -146,8 +152,44 @@ namespace Learning
                 model.ComputePKnownWithError();
             }
 
-            IReadOnlyDictionary<int, double>? pKnown = model.PKnownWithError?
+            Dictionary<int, double>? pKnown = model.PKnownWithError?
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Item1);
+
+            double lookAheadDays = 0.0; // TODO - use discounted future returns 
+
+            foreach (var kvp in Strategist.DefFeatures)
+            {
+                DefinitionFeatures features = kvp.Value;
+
+                int key = features.def.DatabasePrimaryKey;
+
+                if (Strategist.LastTacticUsed.ContainsKey(key))
+                {
+                    if (Strategist.LastTacticUsed[key] is not null)
+                    {
+                        LearningTactic lastTactic = Strategist.LastTacticUsed[key].Item1;
+                        DateTime when = Strategist.LastTacticUsed[key].Item2;
+
+                        if (!Strategist.TacticsUsed.Contains(lastTactic.GetType()))
+                        {
+                            continue;
+                        }
+
+
+                        TimeSpan interval = DateTime.Now - when;
+                        double intervalDays = interval.TotalDays + lookAheadDays;
+
+                        FollowingSessionDatum input = ProbabilityPlotter.CreateDatum(features, lastTactic, intervalDays);
+
+                        double defpKnown = Strategist.Model.PredictProbability(input, Strategist.TacticsUsed);
+
+                        pKnown[key] = defpKnown;
+
+                    }
+                }
+
+
+            }
 
             if (pKnown is null)
             {
@@ -166,14 +208,10 @@ namespace Learning
             var topKKeys = expectedUnknown
                 .OrderByDescending(kvp => kvp.Value)                     // primary sort by value
                 .ThenBy(kvp => rng.Next())                               // randomize within ties
-                .Take(topK)
                 .Select(kvp => kvp.Key)
                 .ToList();
 
-            int selectedKey = topKKeys[rng.Next(topKKeys.Count)];
-
-            return _dictionary.TryGetDefinitionByKey(selectedKey) ?? throw new Exception();
-
+            return topKKeys;
         }
 
         public DictionaryDefinition GetInitialVocabEstimationDefinition()

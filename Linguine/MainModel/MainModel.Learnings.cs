@@ -9,6 +9,9 @@ using DataClasses;
 using Config;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections;
+using Microsoft.Extensions.Azure;
+using Windows.ApplicationModel.Contacts.DataProvider;
 
 namespace Linguine
 {
@@ -229,6 +232,68 @@ namespace Linguine
             return new DefinitionForTesting(def.Word, defText, contexts, def, soundFile);
         }
 
+        // TODO - this is very basic, add a Tactician class later
+
+        private List<int>? DefsToLearn;
+
+        private HashSet<int> Learnt = new HashSet<int>();
+        private Queue<int> OneCorrect = new Queue<int>();
+        private Queue<int> TwoCorrect = new Queue<int>();
+
+        private Queue<int> Learning = new Queue<int>();
+
+        public void Inform(int defID, bool correct)
+        {
+            if (Learning.Contains(defID))
+            {
+                Learning = new Queue<int>(Learning.Where(i => i != defID).ToList());
+
+                if (correct == true)
+                {
+                    OneCorrect.Enqueue(defID);
+                } else
+                {
+                    Learning.Enqueue(defID); // to the back
+                }
+            }
+
+            if (OneCorrect.Contains(defID))
+            {
+                OneCorrect = new Queue<int>(OneCorrect.Where(i => i != defID).ToList());
+
+                if (correct == true)
+                {
+                    TwoCorrect.Enqueue(defID);
+                } else
+                {
+                    Learning.Enqueue(defID);
+                }
+                return;
+            }
+
+            if (TwoCorrect.Contains(defID))
+            {
+                TwoCorrect = new Queue<int>(TwoCorrect.Where(i => i != defID).ToList());
+
+                if (correct == true)
+                {
+                    Learnt.Add(defID);
+                } else
+                {
+                    Learning.Enqueue(defID);
+                }
+                return;
+            }
+
+            if (correct == true)
+            {
+                Learnt.Add(defID);
+            } else
+            {
+                Learning.Enqueue(defID);
+            }
+        }
+
         public DefinitionForTesting GetHighLearningDefinition()
         {
             if (VocabModel is null)
@@ -241,7 +306,62 @@ namespace Linguine
                 throw new Exception("failed to build vocabulary model");
             }
 
-            DictionaryDefinition toTest = DefLearningService.GetHighLearningDefinition(VocabModel);
+            if (DefsToLearn is null)
+            {
+                DefsToLearn = DefLearningService.GetHighLearningDefinitionIds(VocabModel);
+            }
+
+            ExternalDictionary? dictionary = ExternalDictionaryManager.GetFirstDictionary();
+
+            int defId = -1;
+
+            if (TwoCorrect.Count > 3)
+            {
+                defId = TwoCorrect.Dequeue();
+            } else if ( OneCorrect.Count > 3)
+            {
+                defId = OneCorrect.Dequeue();
+            } else if (Learning.Count > 3)
+            {
+                defId = Learning.Dequeue();
+            } else
+            {
+                foreach (int i in DefsToLearn)
+                {
+                    // introduce a new item
+                    if (Learnt.Contains(i))
+                    {
+                        continue;
+                    } 
+                    if (OneCorrect.Contains(i))
+                    {
+                        continue;
+                    }
+                    if (TwoCorrect.Contains(i))
+                    {
+                        continue;
+                    }
+                    if (Learning.Contains(i))
+                    {
+                        continue;
+                    }
+
+                    defId = i;
+                    break;
+                }
+            }
+
+            if (defId == -1)
+            {
+                throw new Exception();
+            }
+
+            DictionaryDefinition toTest = dictionary.TryGetDefinitionByKey(defId) ?? throw new Exception();
+
+            if (toTest is null)
+            {
+                throw new Exception();
+            }
 
             DefinitionForTesting forTesting = AsDefinitionForTesting(toTest);
 
@@ -286,6 +406,9 @@ namespace Linguine
                 throw new Exception();
             }
 
+            // this updates our in memory rules for introducing defs
+            Inform(definitionForTesting.Parent.DatabasePrimaryKey, correct); // bit hacky
+            
             _testRecords.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct);
         }
 

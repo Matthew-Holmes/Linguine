@@ -12,6 +12,8 @@ using Learning.Strategy;
 using System.Reflection.Metadata;
 using System.ComponentModel;
 using Config;
+using System.Runtime.CompilerServices;
+using HarfBuzzSharp;
 
 namespace Learning
 {
@@ -79,7 +81,7 @@ namespace Learning
         #region features
 
         private (DefinitionFeatures, List<LearningTactic?>) GetFeaturesAndTactics(
-            DictionaryDefinition   def,
+            DictionaryDefinition def,
             List<List<TestRecord>> sessions,
             DateTime at)
         {
@@ -93,7 +95,7 @@ namespace Learning
             if (maxTimeBetweenCorrectDays == 0.0)
             {
                 avgTimeBetweenSessionsDays = GetAvgTimeBetweenSessions(sessions, tactics);
-            } 
+            }
             else
             {
                 avgTimeBetweenSessionsDays = GetAvgTimeBetweenSessionsDecayed(
@@ -121,11 +123,11 @@ namespace Learning
 
             return (
                     new DefinitionFeatures(
-                        def, 
-                        maxTimeBetweenCorrectDays, 
-                        totalExposuresSqrtDecayed, 
-                        fractionCorrect, 
-                        minTimeBetweenIncorrectDays, 
+                        def,
+                        maxTimeBetweenCorrectDays,
+                        totalExposuresSqrtDecayed,
+                        fractionCorrect,
+                        minTimeBetweenIncorrectDays,
                         avgTimeBetweenSessionsDays,
                         halfLife),
                     tactics
@@ -135,7 +137,7 @@ namespace Learning
         private double GetFractionCorrectDecayed(DictionaryDefinition def, List<List<TestRecord>> sessions, double halfLife, DateTime at)
         {
             double toDiv = 0.0;
-            double div   = 0.0;
+            double div = 0.0;
 
             foreach (List<TestRecord> session in sessions)
             {
@@ -152,13 +154,13 @@ namespace Learning
                 double decay = Math.Pow(0.5, ago.TotalDays);
 
                 toDiv += (correct / total) * decay;
-                div   += decay;
+                div += decay;
             }
 
             if (div == 0.0)
             {
                 return 0.5;
-            } 
+            }
             else
             {
                 return toDiv / div;
@@ -275,7 +277,7 @@ namespace Learning
 
             return maxTimeBetweenCorrectDays;
         }
-        
+
         private double GetAvgTimeBetweenSessions(List<List<TestRecord>> sessions, List<LearningTactic?> tactics)
         {
             TimeSpan total = TimeSpan.FromTicks(0);
@@ -309,7 +311,7 @@ namespace Learning
                 return 1.0;
             }
         }
-        
+
         private double GetAvgTimeBetweenSessionsDecayed(List<List<TestRecord>> sessions, List<LearningTactic?> tactics, double halfLifeDays, DateTime at)
         {
             TimeSpan total = TimeSpan.FromTicks(0);
@@ -333,7 +335,7 @@ namespace Learning
 
                     delta *= decay;
 
-                    total += delta; 
+                    total += delta;
                     div += decay;
                 }
 
@@ -355,15 +357,23 @@ namespace Learning
 
         #endregion
 
+        public LogisticRegression Model { get; private set; }
+        public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
+        public List<Type> TacticsUsed { get; private set; }
+
+        public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsed { get; private set; }
+
         public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
-            (List<FollowingSessionDatum> data, List<DefinitionFeatures> features) = GetDataForModel(sessions, defs);
+            (List<FollowingSessionDatum> data,
+                List<DefinitionFeatures> features,
+                List<List<LearningTactic?>> tactics) = GetDataForModel(sessions, defs);
 
             LogisticRegression model = new LogisticRegression(data);
 
             HashSet<int> defKeysPlotted = new HashSet<int>();
 
-            List<LearningTactic> tactics = data.Select(d => d.session.GetType()).Distinct().Select(t => (LearningTactic)Activator.CreateInstance(t)).ToList();
+            List<LearningTactic> tacticsUsed = data.Select(d => d.session.GetType()).Distinct().Select(t => (LearningTactic)Activator.CreateInstance(t)).ToList();
 
             // just for debug
 
@@ -374,7 +384,7 @@ namespace Learning
                 if (defKeysPlotted.Contains(key))
                 {
                     continue;
-                } 
+                }
                 else
                 {
                     defKeysPlotted.Add(key);
@@ -383,13 +393,45 @@ namespace Learning
                 string name = feature.def.Word + feature.def.DatabasePrimaryKey;
                 string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
 
-                ProbabilityPlotter.PlotProbabilityCurves(model, feature, tactics, $"plots/{language}/{name}.png");
+                ProbabilityPlotter.PlotProbabilityCurves(model, feature, tacticsUsed, $"plots/{language}/{name}.png");
+            }
+
+            Dictionary<int, DefinitionFeatures> defFeaturesLookup = new Dictionary<int, DefinitionFeatures>();
+            Dictionary<int, Tuple<LearningTactic, DateTime>> lastTacticUsed = new Dictionary<int, Tuple<LearningTactic, DateTime>>();
+
+            if (features.Count != tactics.Count)
+            {
+                throw new Exception("invalid data!"); // TODO data transfer class or something
+            }
+
+            for (int i = 0; i != features.Count; i++)
+            {
+                DefinitionFeatures fs = features[i];
+                defFeaturesLookup.Add(fs.def.DatabasePrimaryKey, fs);
+
+                for (int j = sessions.Count - 1; j >= 0; j--)
+                {
+                    LearningTactic? tactic = tactics[i][j];
+                    if (tactic is not null)
+                    {
+                        DateTime when = sessions[j].First().Posed;
+
+                        lastTacticUsed.Add(fs.def.DatabasePrimaryKey, Tuple.Create(tactic, when));
+
+                        break;
+                    }
+                }
+
             }
 
 
+            Model = model;
+            DefFeatures = defFeaturesLookup.AsReadOnly();
+            TacticsUsed = tacticsUsed.Select(lt => lt.GetType()).ToList();
+            LastTacticUsed = lastTacticUsed.AsReadOnly();
         }
 
-        private (List<FollowingSessionDatum>, List<DefinitionFeatures>) GetDataForModel(
+        private (List<FollowingSessionDatum>, List<DefinitionFeatures>, List<List<LearningTactic?>>) GetDataForModel(
             List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             DateTime now = DateTime.Now;
@@ -413,7 +455,7 @@ namespace Learning
                 dataPoints.AddRange(GenerateFollowingSessionData(features[i], tactics[i], sessionTimes));
             }
 
-            return (dataPoints, features);
+            return (dataPoints, features, tactics);
         }
 
         private List<FollowingSessionDatum> GenerateFollowingSessionData(

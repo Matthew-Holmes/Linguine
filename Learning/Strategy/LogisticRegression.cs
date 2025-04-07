@@ -73,6 +73,8 @@ namespace Learning.Strategy
             var vectorizer = new FeatureVectoriser(new List<FollowingSessionDatum> { datum }, types);
             var features = vectorizer.Vectorize(datum);
             var z = _parameters * features;
+            
+            
             return 1.0 / (1.0 + Math.Exp(-z));
         }
 

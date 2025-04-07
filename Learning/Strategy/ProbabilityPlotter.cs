@@ -98,7 +98,7 @@ namespace Learning.Strategy
             return range;
         }
 
-        private static FollowingSessionDatum CreateDatum(DefinitionFeatures features, LearningTactic tactic, double interval)
+        public static FollowingSessionDatum CreateDatum(DefinitionFeatures features, LearningTactic tactic, double interval)
         {
             return new FollowingSessionDatum(
                 defFeatures: features,
