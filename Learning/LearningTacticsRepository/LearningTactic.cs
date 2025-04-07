@@ -19,7 +19,7 @@ namespace Learning
 
     public delegate bool Constraint(List<TestRecord> sessionRecords, int DefID);
 
-    abstract class LearningTactic
+    public abstract class LearningTactic
     {
         // TODO - while this is suitable for identifying tactics
         // need more thought when it comes to employing them

@@ -15,7 +15,15 @@ namespace Learning
                                      double sqrtTotalExposures,
                                      double fractionCorrect,
                                      double minTimeBetweenIncorrectDays,
-                                     double avgTimeBetweenSessionsDays);
+                                     double avgTimeBetweenSessionsDays,
+                                     double halfLifeDays);
+
+
+    public record FollowingSessionDatum(
+        DefinitionFeatures defFeatures,
+        LearningTactic session,
+        double intervalDays,
+        bool followingWasCorrect);
 
     class Strategist
     {
@@ -35,7 +43,7 @@ namespace Learning
         private LearningTactics Tactics = new LearningTactics();
 
 
-        private DefinitionFeatures GetFeatures(
+        private (DefinitionFeatures, List<LearningTactic?>) GetFeaturesAndTactics(
             DictionaryDefinition   def,
             List<List<TestRecord>> sessions,
             DateTime at)
@@ -76,13 +84,17 @@ namespace Learning
             double fractionCorrect = GetFractionCorrectDecayed(
                 def, sessions, halfLife, at);
 
-            return new DefinitionFeatures(
+            return (
+                    new DefinitionFeatures(
                         def, 
                         maxTimeBetweenCorrectDays, 
                         totalExposuresSqrtDecayed, 
                         fractionCorrect, 
                         minTimeBetweenIncorrectDays, 
-                        avgTimeBetweenSessionsDays);
+                        avgTimeBetweenSessionsDays,
+                        halfLife),
+                    tactics
+                    );
         }
 
         #region features
@@ -312,21 +324,77 @@ namespace Learning
 
         public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
+            List<FollowingSessionDatum> data = GetDataForModel(sessions, defs);
+        }
+
+        private List<FollowingSessionDatum> GetDataForModel(
+            List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
+        {
             DateTime now = DateTime.Now;
 
             List<DefinitionFeatures> features = new List<DefinitionFeatures>();
+            List<List<LearningTactic?>> tactics = new List<List<LearningTactic?>>();
 
             foreach (DictionaryDefinition def in defs)
             {
-                DefinitionFeatures f = GetFeatures(def, sessions, now);
-                features.Add(f);
+                (DefinitionFeatures fs, List<LearningTactic?> ts) = GetFeaturesAndTactics(def, sessions, now);
+                features.Add(fs);
+                tactics.Add(ts);
             }
+
+            List<FollowingSessionDatum> dataPoints = new List<FollowingSessionDatum>();
+
+            List<DateTime> sessionTimes = sessions.Select(session => session.First().Posed).ToList();
+
+            for (int i = 0; i != features.Count; i++)
+            {
+                dataPoints.AddRange(GenerateFollowingSessionData(features[i], tactics[i], sessionTimes));
+            }
+
+            return dataPoints;
         }
-        
+
+        private List<FollowingSessionDatum> GenerateFollowingSessionData(
+            DefinitionFeatures defFeatures, 
+            List<LearningTactic?> defTactics, 
+            List<DateTime> sessionTimes)
+        {
+            if (defTactics.Count != sessionTimes.Count)
+            {
+                throw new Exception("invalid data provided!");
+            }
+
+            List<FollowingSessionDatum> ret = new List<FollowingSessionDatum>();
+
+            int next_id = -1;
+
+            for (int i = defTactics.Count - 1; i >=0; i--)
+            {
+                if (next_id != -1 && defTactics[i] is not null)
+                {
+                    TimeSpan delta = sessionTimes[next_id] - sessionTimes[i];
+                    double intervalDays = delta.TotalDays;
+                    bool nextWasCorrect = WasCorrect(defTactics[next_id]);
+
+                    ret.Add(new FollowingSessionDatum(
+                        defFeatures,
+                        defTactics[i],
+                        intervalDays,
+                        nextWasCorrect));
+                }
+
+                if (defTactics[i] is not null)
+                {
+                    next_id = i;
+                }
+            }
+            return ret;
+        }
+
         // then fit linear model of probability correct in one
-            // of log time since last tactic
-            // tactic type
-            // features
+        // of log time since last tactic
+        // tactic type
+        // features
 
         // do the same for eventually learnt
 
