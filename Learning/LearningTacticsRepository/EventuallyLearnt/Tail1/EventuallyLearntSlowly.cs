@@ -9,7 +9,7 @@ namespace Learning.LearningTacticsRepository
 {
     class EventuallyLearntSlowly : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new EventuallyLearnt();
+        public override LearningTactic? Prerequisite => new EventuallyLearntBase();
 
         public EventuallyLearntSlowly()
         {

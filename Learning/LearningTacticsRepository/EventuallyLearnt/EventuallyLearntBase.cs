@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace Learning.LearningTacticsRepository
 {
     // just for holding the method, should never appear as a tactic
-    class EventuallyLearnt : LearningTactic
+    class EventuallyLearntBase : LearningTactic
     {
         public override LearningTactic? Prerequisite => new WasTested();
 
-        public EventuallyLearnt()
+        public EventuallyLearntBase()
         {
             Constraints = new List<Constraint> { ResolvesLearningCorrect };
         }
