@@ -52,11 +52,9 @@ namespace Learning.Strategy
 
             var intervalRange = GenerateRange(0.1, lookAheadDays, 400); // 
 
-            foreach (var tactic in tacticsTypes)
+            foreach (var tacticType in tacticsTypes)
             {
-                var tacticType = tactic.GetType();
                 string keyLabel = tacticType.ToString().Split('.').Last(); // Extract just the final part of the type name
-
 
                 var series = new LineSeries
                 {
@@ -67,7 +65,7 @@ namespace Learning.Strategy
 
                 foreach (var intervalDays in intervalRange)
                 {
-                    var datum = CreateDatum(defFeatures, tactic, intervalDays);
+                    var datum = CreateDatum(defFeatures, tacticType, intervalDays);
                     double prob = model.PredictProbability(datum, tacticsTypes);
                     series.Points.Add(new DataPoint(intervalDays, prob));
                 }

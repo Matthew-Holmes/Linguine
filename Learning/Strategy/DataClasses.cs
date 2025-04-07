@@ -27,5 +27,7 @@ namespace Learning.Strategy
         List<DefinitionFeatures> distinctDefinitionFeatures,
         List<List<LearningTactic?>> distinctDefinitionTacticsIdentified,
         List<List<TestRecord>> sessions,
-        List<Type> tacticsUsed);
+        List<Type> tacticsUsed,
+        Dictionary<int, Tuple<LearningTactic, DateTime>> distinctDefinitionsLastTacticUsed,
+        Dictionary<int, DefinitionFeatures> defFeaturesLookup);
 }

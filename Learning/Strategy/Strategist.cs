@@ -44,15 +44,17 @@ namespace Learning
         public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             ModelData modelData = GetDataForModel(sessions, defs);
+            LogisticRegression model = new LogisticRegression(
+                modelData.trainingData, modelData.tacticsUsed);
 
             TacticsUsed = modelData.tacticsUsed;
-
-            LogisticRegression model = new LogisticRegression(modelData.trainingData, TacticsUsed);
-
-            HashSet<int> defKeysPlotted = new HashSet<int>();
+            DefFeatures = modelData.defFeaturesLookup.AsReadOnly();
+            LastTacticUsedForDefinition = modelData.distinctDefinitionsLastTacticUsed.AsReadOnly();
+            Model = model;
 
             // just for debug
-
+            #region debug plots
+            HashSet<int> defKeysPlotted = new HashSet<int>();
             foreach (DefinitionFeatures feature in modelData.distinctDefinitionFeatures)
             {
                 int key = feature.def.DatabasePrimaryKey;
@@ -71,40 +73,7 @@ namespace Learning
 
                 ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
             }
-
-            Dictionary<int, DefinitionFeatures> defFeaturesLookup = new Dictionary<int, DefinitionFeatures>();
-            Dictionary<int, Tuple<LearningTactic, DateTime>> lastTacticUsed = new Dictionary<int, Tuple<LearningTactic, DateTime>>();
-
-            if (modelData.distinctDefinitionFeatures.Count 
-             != modelData.distinctDefinitionTacticsIdentified.Count)
-            {
-                throw new Exception("invalid data!"); // TODO data transfer class or something
-            }
-
-            for (int def_idx = 0; def_idx != modelData.distinctDefinitionFeatures.Count; def_idx++)
-            {
-                DefinitionFeatures fs = modelData.distinctDefinitionFeatures[def_idx];
-                defFeaturesLookup.Add(fs.def.DatabasePrimaryKey, fs);
-
-                for (int sesh_idx = sessions.Count - 1; sesh_idx >= 0; sesh_idx--)
-                {
-                    LearningTactic? tactic = modelData.distinctDefinitionTacticsIdentified[def_idx][sesh_idx];
-                    if (tactic is not null)
-                    {
-                        DateTime when = sessions[sesh_idx].First().Posed;
-
-                        lastTacticUsed.Add(fs.def.DatabasePrimaryKey, Tuple.Create(tactic, when));
-
-                        break;
-                    }
-                }
-
-            }
-
-
-            Model = model;
-            DefFeatures = defFeaturesLookup.AsReadOnly();
-            LastTacticUsedForDefinition = lastTacticUsed.AsReadOnly();
+            #endregion
         }
 
 
@@ -134,7 +103,42 @@ namespace Learning
 
             List<Type> tacticsUsed = dataPoints.Select(d => d.sessionTacticType).Distinct().ToList();
 
-            return new ModelData(dataPoints, features, tactics, sessions, tacticsUsed);
+            Dictionary<int, DefinitionFeatures> defFeaturesLookup = new Dictionary<int, DefinitionFeatures>();
+            Dictionary<int, Tuple<LearningTactic, DateTime>> lastTacticUsed = new Dictionary<int, Tuple<LearningTactic, DateTime>>();
+
+            if (features.Count != tactics.Count)
+            {
+                throw new Exception("invalid data!"); 
+            }
+
+            for (int def_idx = 0; def_idx != features.Count; def_idx++)
+            {
+                DefinitionFeatures fs = features[def_idx];
+                defFeaturesLookup.Add(fs.def.DatabasePrimaryKey, fs);
+
+                for (int sesh_idx = sessions.Count - 1; sesh_idx >= 0; sesh_idx--)
+                {
+                    LearningTactic? tactic = tactics[def_idx][sesh_idx];
+                    if (tactic is not null)
+                    {
+                        DateTime when = sessions[sesh_idx].First().Posed;
+
+                        lastTacticUsed.Add(fs.def.DatabasePrimaryKey, Tuple.Create(tactic, when));
+
+                        break;
+                    }
+                }
+
+            }
+
+            return new ModelData(
+                dataPoints, 
+                features, 
+                tactics, 
+                sessions, 
+                tacticsUsed, 
+                lastTacticUsed, 
+                defFeaturesLookup);
         }
 
         private List<FollowingSessionDatum> GenerateFollowingSessionData(
