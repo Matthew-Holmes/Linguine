@@ -60,6 +60,33 @@ namespace Learning
             LearningTacticHeirarchy = ResolveLearningTactics();
         }
 
+        public LearningTactic? IdentityTacticForSession(List<TestRecord> session, int defID)
+        {
+            foreach (List<LearningTactic> level in LearningTacticHeirarchy)
+            {
+                List<LearningTactic> tacticsUsed = level.Where(lt => lt.UsedThisTactic(session, defID)).ToList();
+
+                if (tacticsUsed.Count > 1)
+                {
+                    Log.Error("invalid tactic logic");
+                    throw new Exception();
+                }
+
+                if (tacticsUsed.Count != 0)
+                {
+                    TimeSpan totalTime = TimeSpan.FromTicks(
+                        session.Where(tr => tr.DictionaryDefinitionKey == defID)
+                               .Select(tr => tr.Finished - tr.Posed)
+                               .Select(ts => ts.Ticks)
+                               .Select(ticks => Math.Min(ticks, TimeSpan.FromMinutes(5).Ticks))
+                               .Sum());
+
+                    return tacticsUsed.First();
+                }
+            }
+            return null;
+        }
+
         public List<LearningTactic?> IdentifyTacticsForSessions(List<List<TestRecord>> sessions, int defID)
         {
             List<LearningTactic?> ret = new List<LearningTactic?>();

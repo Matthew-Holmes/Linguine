@@ -16,7 +16,7 @@ namespace Learning
             List<List<TestRecord>> sessions,
             DateTime at)
         {
-            List<LearningTactic?> tactics = Tactics.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
+            List<LearningTactic?> tactics = TacticsHelper.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
 
             double maxTimeBetweenCorrectDays = GetMaxTimeBetweenCorrect(
                 sessions, tactics);

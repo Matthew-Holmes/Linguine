@@ -33,7 +33,7 @@ namespace Learning
         // since this is what we can control when planning the next session
 
 
-        private LearningTacticsHelper Tactics = new LearningTacticsHelper();
+        public LearningTacticsHelper TacticsHelper = new LearningTacticsHelper();
 
         public LogisticRegression Model { get; private set; }
         public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
