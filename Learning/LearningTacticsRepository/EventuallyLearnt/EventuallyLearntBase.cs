@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Learning.LearningTacticsRepository
 {
+    // TODO - add some tactics that check if there was some cooling between the tail correct response
+    // TODO - and tactics for if an incorrect was always immediately/shortly retested
+
     // just for holding the method, should never appear as a tactic
     class EventuallyLearntBase : LearningTactic
     {
