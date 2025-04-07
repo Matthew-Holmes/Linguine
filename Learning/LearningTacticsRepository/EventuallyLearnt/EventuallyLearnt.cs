@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Learning.LearningTacticsRepository
 {
+    // just for holding the method, should never appear as a tactic
     class EventuallyLearnt : LearningTactic
     {
         public override LearningTactic? Prerequisite => new WasTested();
@@ -20,24 +21,18 @@ namespace Learning.LearningTacticsRepository
         {
             List<TestRecord> thisDef = sortedSessionRecords.Where(sr => sr.DictionaryDefinitionKey == defID).ToList();
 
+            // we need to have had some incorrect, otherwise is all correct
+            if (thisDef.All(tr => tr.Correct == true))
+            {
+                return false;
+            }
+
             if (thisDef.Count < 2)
             {
                 return false;
             }
 
-            List<TestRecord> tail;
-
-            if (thisDef.Count <= 3)
-            {
-                tail = thisDef;
-            }
-            else
-            {
-                tail = thisDef.TakeLast(3).ToList();
-            }
-
-            return tail.All(tr => tr.Correct);
+            return thisDef.Last().Correct;
         }
-
     }
 }

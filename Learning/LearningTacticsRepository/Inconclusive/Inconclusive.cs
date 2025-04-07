@@ -29,18 +29,13 @@ namespace Learning.LearningTacticsRepository
                 return false;
             }
 
-            List<TestRecord> tail;
-
-            if (thisDef.Count <= 3)
+            // if never correct then wasn't inconclusive
+            if (thisDef.All(tr => tr.Correct == false))
             {
-                tail = thisDef;
-            }
-            else
-            {
-                tail = thisDef.TakeLast(3).ToList();
+                return false;
             }
 
-            return !tail.All(tr => tr.Correct == true);
+            return !thisDef.Last().Correct;
         }
     }
 }
