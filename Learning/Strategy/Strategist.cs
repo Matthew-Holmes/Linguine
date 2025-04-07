@@ -6,24 +6,58 @@ using System.Linq;
 using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.Optimization;
+using Learning.Strategy;
+using System.Reflection.Metadata;
+using System.ComponentModel;
+using Config;
 
 namespace Learning
 {
 
-    public record DefinitionFeatures(DictionaryDefinition def,
-                                     double maxTimeBetweenCorrectDays,
-                                     double sqrtTotalExposures,
-                                     double fractionCorrect,
-                                     double minTimeBetweenIncorrectDays,
-                                     double avgTimeBetweenSessionsDays,
-                                     double halfLifeDays);
 
+    public class FeatureVectoriser
+    {
+        private readonly Dictionary<Type, int> _tacticTypeToIndex;
 
-    public record FollowingSessionDatum(
-        DefinitionFeatures defFeatures,
-        LearningTactic session,
-        double intervalDays,
-        bool followingWasCorrect);
+        public FeatureVectoriser(IEnumerable<FollowingSessionDatum> data)
+        {
+            var tacticTypes = data.Select(d => d.session.GetType()).Distinct().ToList();
+            _tacticTypeToIndex = tacticTypes.Select((type, i) => new { type, i })
+                                            .ToDictionary(x => x.type, x => x.i);
+        }
+        public int FeatureCount => 7 + 1 + _tacticTypeToIndex.Count;
+
+        public Vector<double> Vectorize(FollowingSessionDatum datum)
+        {
+            var features = new List<double>();
+
+            var def = datum.defFeatures;
+            features.Add(def.maxTimeBetweenCorrectDays);
+            features.Add(def.sqrtTotalExposures);
+            features.Add(def.fractionCorrect);
+            features.Add(def.minTimeBetweenIncorrectDays);
+            features.Add(def.avgTimeBetweenSessionsDays);
+            features.Add(def.halfLifeDays);
+            features.Add(1.0); // bias
+
+            double intervalLogRatio = Math.Log(datum.intervalDays / (def.halfLifeDays + 1e-6));
+            features.Add(intervalLogRatio);
+
+            var oneHot = new double[_tacticTypeToIndex.Count];
+            oneHot[_tacticTypeToIndex[datum.session.GetType()]] = 1;
+            features.AddRange(oneHot);
+
+            return Vector<double>.Build.DenseOfEnumerable(features);
+        }
+
+        public Vector<double> GetTarget(FollowingSessionDatum datum)
+        {
+            return Vector<double>.Build.Dense(new[] { datum.followingWasCorrect ? 1.0 : 0.0 });
+        }
+    }
+
 
     class Strategist
     {
@@ -42,6 +76,7 @@ namespace Learning
 
         private LearningTactics Tactics = new LearningTactics();
 
+        #region features
 
         private (DefinitionFeatures, List<LearningTactic?>) GetFeaturesAndTactics(
             DictionaryDefinition   def,
@@ -96,8 +131,6 @@ namespace Learning
                     tactics
                     );
         }
-
-        #region features
 
         private double GetFractionCorrectDecayed(DictionaryDefinition def, List<List<TestRecord>> sessions, double halfLife, DateTime at)
         {
@@ -324,10 +357,39 @@ namespace Learning
 
         public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
-            List<FollowingSessionDatum> data = GetDataForModel(sessions, defs);
+            (List<FollowingSessionDatum> data, List<DefinitionFeatures> features) = GetDataForModel(sessions, defs);
+
+            LogisticRegression model = new LogisticRegression(data);
+
+            HashSet<int> defKeysPlotted = new HashSet<int>();
+
+            List<LearningTactic> tactics = data.Select(d => d.session.GetType()).Distinct().Select(t => (LearningTactic)Activator.CreateInstance(t)).ToList();
+
+            // just for debug
+
+            foreach (DefinitionFeatures feature in features)
+            {
+                int key = feature.def.DatabasePrimaryKey;
+
+                if (defKeysPlotted.Contains(key))
+                {
+                    continue;
+                } 
+                else
+                {
+                    defKeysPlotted.Add(key);
+                }
+
+                string name = feature.def.Word + feature.def.DatabasePrimaryKey;
+                string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
+
+                ProbabilityPlotter.PlotProbabilityCurves(model, feature, tactics, $"plots/{language}/{name}.png");
+            }
+
+
         }
 
-        private List<FollowingSessionDatum> GetDataForModel(
+        private (List<FollowingSessionDatum>, List<DefinitionFeatures>) GetDataForModel(
             List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             DateTime now = DateTime.Now;
@@ -351,7 +413,7 @@ namespace Learning
                 dataPoints.AddRange(GenerateFollowingSessionData(features[i], tactics[i], sessionTimes));
             }
 
-            return dataPoints;
+            return (dataPoints, features);
         }
 
         private List<FollowingSessionDatum> GenerateFollowingSessionData(
@@ -375,6 +437,7 @@ namespace Learning
                     TimeSpan delta = sessionTimes[next_id] - sessionTimes[i];
                     double intervalDays = delta.TotalDays;
                     bool nextWasCorrect = WasCorrect(defTactics[next_id]);
+
 
                     ret.Add(new FollowingSessionDatum(
                         defFeatures,
