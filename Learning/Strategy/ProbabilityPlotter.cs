@@ -65,7 +65,7 @@ namespace Learning.Strategy
 
                 foreach (var intervalDays in intervalRange)
                 {
-                    var datum = CreateDatum(defFeatures, tacticType, intervalDays);
+                    var datum = Strategist.CreateDatum(defFeatures, tacticType, intervalDays);
                     double prob = model.PredictProbability(datum, tacticsTypes);
                     series.Points.Add(new DataPoint(intervalDays, prob));
                 }
@@ -94,15 +94,7 @@ namespace Learning.Strategy
             return range;
         }
 
-        public static FollowingSessionDatum CreateDatum(DefinitionFeatures features, Type tacticType, double interval)
-        {
-            return new FollowingSessionDatum(
-                defFeatures: features,
-                sessionTacticType: tacticType,
-                intervalDays: interval,
-                followingWasCorrect: false // prediction ignores this
-            );
-        }
+
     }
 
 }

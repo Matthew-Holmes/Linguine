@@ -178,6 +178,16 @@ namespace Learning
             return ret;
         }
 
+        public static FollowingSessionDatum CreateDatum(DefinitionFeatures features, Type tacticType, double interval)
+        {
+            return new FollowingSessionDatum(
+                defFeatures: features,
+                sessionTacticType: tacticType,
+                intervalDays: interval,
+                followingWasCorrect: false // prediction ignores this
+            );
+        }
+
         // then fit linear model of probability correct in one
         // of log time since last tactic
         // tactic type
