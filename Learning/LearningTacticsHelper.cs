@@ -117,7 +117,7 @@ namespace Learning
                                    .Sum());
 
                         ret.Add(tacticsUsed.First());
-                        Log.Information("session {sesssion} for definition {defID} used tactic {tactic}, took {timespan}",
+                        Log.Verbose("session {sesssion} for definition {defID} used tactic {tactic}, took {timespan}",
                                         i, defID, tacticsUsed.First().GetType(), totalTime);
                         broke = true; break;
                     } 
