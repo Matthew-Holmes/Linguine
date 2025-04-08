@@ -15,6 +15,9 @@ using Config;
 using System.Runtime.CompilerServices;
 using HarfBuzzSharp;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Serilog;
 
 namespace Learning
 {
@@ -76,6 +79,38 @@ namespace Learning
             Tactician tactics = new Tactician(this);
 
             tactics.BuildMarkovModel(sessions);
+
+        }
+
+        public FollowingSessionDatum? GetFeaturesForReward(int key, double lookAheadDays = 1.0)
+        {
+            if (!LastTacticUsedForDefinition.ContainsKey(key))
+            {
+                return null;
+            }
+
+            if (LastTacticUsedForDefinition[key] is null)
+            {
+                return null;
+            }
+
+            LearningTactic lastTactic = LastTacticUsedForDefinition[key].Item1;
+            DateTime when = LastTacticUsedForDefinition[key].Item2;
+
+            Type lastTacticType = lastTactic.GetType();
+
+            if (!TacticsUsed.Contains(lastTacticType))
+            {
+                Log.Warning("encoured last tactic type that was not logged as used");
+                return null;
+            }
+
+            TimeSpan interval = DateTime.Now - when;
+            double intervalDays = interval.TotalDays + lookAheadDays;
+
+            DefinitionFeatures features = DefFeatures[key];
+
+            return CreateDatum(features, lastTacticType, intervalDays);
 
         }
     }

@@ -159,37 +159,18 @@ namespace Learning
 
             foreach (var kvp in Strategist.DefFeatures)
             {
-                DefinitionFeatures features = kvp.Value;
+                int key = kvp.Key;
+                FollowingSessionDatum? input = Strategist.GetFeaturesForReward(key);
 
-                int key = features.def.DatabasePrimaryKey;
-
-                if (Strategist.LastTacticUsedForDefinition.ContainsKey(key))
+                if (input is null)
                 {
-                    if (Strategist.LastTacticUsedForDefinition[key] is not null)
-                    {
-                        LearningTactic lastTactic = Strategist.LastTacticUsedForDefinition[key].Item1;
-                        DateTime when = Strategist.LastTacticUsedForDefinition[key].Item2;
-
-                        Type lastTacticType = lastTactic.GetType();
-
-                        if (!Strategist.TacticsUsed.Contains(lastTacticType))
-                        {
-                            continue;
-                        }
-
-                        TimeSpan interval = DateTime.Now - when;
-                        double intervalDays = interval.TotalDays + lookAheadDays;
-
-                        FollowingSessionDatum input = Strategist.CreateDatum(features, lastTacticType, intervalDays);
-
-                        double defpKnown = Strategist.Model.PredictProbability(input, Strategist.TacticsUsed);
-
-                        pKnown[key] = defpKnown;
-
-                    }
+                    Log.Warning("null input for pKnown model, skipping");
+                    continue;
                 }
 
+                double defpKnown = Strategist.Model.PredictProbability(input, Strategist.TacticsUsed);
 
+                pKnown[key] = defpKnown;
             }
 
             if (pKnown is null)
