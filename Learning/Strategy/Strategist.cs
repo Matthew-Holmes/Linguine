@@ -45,7 +45,7 @@ namespace Learning
         public double BaseLineInitialPKnown { get; internal set; }
 
         private LogisticRegression Model { get; set; }
-        private VocabularyModel VocabModel { get; init; }
+        public VocabularyModel VocabModel { get; init; }
 
 
         public Strategist(VocabularyModel vocab)
@@ -53,7 +53,7 @@ namespace Learning
             VocabModel = vocab;
         }
 
-        public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
+        public Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             ModelData modelData = GetDataForModel(sessions, defs);
             LogisticRegression model = new LogisticRegression(
@@ -92,9 +92,10 @@ namespace Learning
                 ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
 
                 // this is slow
-                tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png"); // dot can't cope with chinese chars
+                //tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png"); // dot can't cope with chinese chars
             }
 
+            return tactics;
         }
 
         public double PredictProbability(FollowingSessionDatum input)

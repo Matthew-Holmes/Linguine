@@ -26,7 +26,10 @@ namespace Learning
             // just for debug
             MarkovGraphPlotter.SaveMarkovPlot(MarkovGraph);
 
+            InitialiseTwistScores();
+
         }
+
 
         private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions, RewardData? rewardData = null)
         {

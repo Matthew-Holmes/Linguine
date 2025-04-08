@@ -55,6 +55,7 @@ namespace Learning
         private StatementManager                  _statementManager;
 
         private Strategist Strategist { get; set; }
+        private Tactician Tactician { get; set; }
 
         public DefinitionLearningService(
             ExternalDictionary                dictionary,
@@ -86,10 +87,16 @@ namespace Learning
 
             List<DictionaryDefinition> distinct = _testRecords.DistinctDefinitionsTested();
 
-            strategist.BuildModel(sessions, distinct);
+            Tactician = strategist.BuildModel(sessions, distinct);
 
             Strategist = strategist;
 
+        }
+
+
+        public int GetHighLearningDefinitionID()
+        {
+            return Tactician.GetBestDefID();
         }
 
         public DictionaryDefinition GetRandomDefinition()
@@ -144,58 +151,6 @@ namespace Learning
         }
 
 
-        public List<int> GetHighLearningDefinitionIds(VocabularyModel model)
-        {
-            // pass vocab model since we know that this must have all the required data
-
-            if (model.PKnownWithError is null)
-            {
-                model.ComputePKnownWithError();
-            }
-
-            Dictionary<int, double>? pKnown = model.PKnownWithError?
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Item1);
-
-            double lookAheadDays = 0.0; // TODO - use discounted future returns 
-
-            foreach (var kvp in Strategist.DefFeatures)
-            {
-                int key = kvp.Key;
-                FollowingSessionDatum? input = Strategist.GetCurrentRewardFeatures(key, 1.0);
-
-                if (input is null)
-                {
-                    Log.Warning("null input for pKnown model, skipping");
-                    continue;
-                }
-
-                double defpKnown = Strategist.PredictProbability(input);
-
-                pKnown[key] = defpKnown;
-            }
-
-            if (pKnown is null)
-            {
-                throw new Exception("failed to compute word known probabilities");
-            }
-
-            Dictionary<int, double> expectedUnknown = model.WordFrequencies
-                .Where(kvp => pKnown.ContainsKey(kvp.Key))
-                .ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value * (1.0 - pKnown[kvp.Key])
-                 );
-
-            //var debug = expectedUnknown.OrderByDescending(kvp => kvp.Value);
-
-            var topKKeys = expectedUnknown
-                .OrderByDescending(kvp => kvp.Value)                     // primary sort by value
-                .ThenBy(kvp => rng.Next())                               // randomize within ties
-                .Select(kvp => kvp.Key)
-                .ToList();
-
-            return topKKeys;
-        }
 
         public DictionaryDefinition GetInitialVocabEstimationDefinition()
         {
@@ -294,5 +249,11 @@ namespace Learning
 
             return _dictionary.TryGetDefinitionByKey(chosenId) ?? throw new Exception();
         }
+
+        public void Inform(TestRecord added)
+        {
+            Tactician.Inform(added);
+        }
+
     }
 }

@@ -16,7 +16,7 @@ namespace Learning
 
 
         // if no flashcards answered in 5 minutes, assume the session has ended
-        private static TimeSpan MinTimeBetweenSessions { get; } = TimeSpan.FromMinutes(5.0);
+        public static TimeSpan MinTimeBetweenSessions { get; } = TimeSpan.FromMinutes(5.0);
         public static List<List<TestRecord>> GetSessions(List<TestRecord> total)
         {
             List<List<TestRecord>> ret = new List<List  <TestRecord>>();

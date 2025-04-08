@@ -41,7 +41,8 @@ namespace Infrastructure
                 : 0; 
         }
 
-        public void AddRecord(DictionaryDefinition definition,
+
+        public TestRecord AddRecord(DictionaryDefinition definition,
             DateTime posed, DateTime answered, DateTime finished,
             bool correct)
         {
@@ -61,6 +62,8 @@ namespace Infrastructure
             
             context.TestRecords.Add(toAdd);
             context.SaveChanges();
+
+            return toAdd;
         }
 
         public IReadOnlyDictionary<int, TestRecord> LatestTestRecords()
