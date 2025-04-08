@@ -29,5 +29,6 @@ namespace Learning.Strategy
         List<List<TestRecord>> sessions,
         List<Type> tacticsUsed,
         Dictionary<int, Tuple<LearningTactic, DateTime>> distinctDefinitionsLastTacticUsed,
-        Dictionary<int, DefinitionFeatures> defFeaturesLookup);
+        Dictionary<int, DefinitionFeatures> defFeaturesLookup,
+        Dictionary<Type, double> followingSessionAverages);
 }
