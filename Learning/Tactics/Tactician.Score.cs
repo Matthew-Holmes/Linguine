@@ -7,6 +7,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -141,22 +142,38 @@ namespace Learning
 
             foreach (MarkovArrow arrow in MarkovGraph.edgesFromNull)
             {
-                FollowingSessionDatum twistInput = input with
-                {
-                    sessionTacticType = arrow.to,
-                    intervalDays = 1.0
-                };
-
-                if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
-                {
-                    twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
-                }
-                else
-                {
-                    twistReward += arrow.prob * MarkovGraph.avgReward;
-                }
-
                 cost += arrow.prob * arrow.costSeconds;
+
+
+                if (input is not null)
+                {
+                    FollowingSessionDatum twistInput = input with
+                    {
+                        sessionTacticType = arrow.to,
+                        intervalDays = 1.0
+                    };
+
+                    if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
+                    {
+                        twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
+                    }
+                    else
+                    {
+                        twistReward += arrow.prob * MarkovGraph.avgReward;
+                    }
+
+                } else
+                {
+                    if (!Strategist.DefaultRewards.ContainsKey(currentState))
+                    {
+
+                        twistReward += Strategist.BaseLineReward * arrow.prob;
+                    }
+                    else
+                    {
+                        twistReward += Strategist.DefaultRewards[arrow.to] * arrow.prob;
+                    }
+                }
             }
 
             double rewardDeltaPerCost = (twistReward - stickReward) / cost;
