@@ -14,7 +14,8 @@ namespace Learning.Strategy
         double fractionCorrect,
         double minTimeBetweenIncorrectDays,
         double avgTimeBetweenSessionsDays,
-        double halfLifeDays);
+        double halfLifeDays,
+        double zipfScore);
 
     public record FollowingSessionDatum(
         DefinitionFeatures defFeatures,

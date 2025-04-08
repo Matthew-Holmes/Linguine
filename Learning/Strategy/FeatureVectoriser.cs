@@ -18,7 +18,7 @@ namespace Learning.Strategy
                                             .ToDictionary(x => x.type, x => x.i);
         }
 
-        public int FeatureCount => 7 + 1 + _tacticTypeToIndex.Count;
+        public int FeatureCount => 8 + 1 + _tacticTypeToIndex.Count;
 
         public Vector<double> Vectorize(FollowingSessionDatum datum)
         {
@@ -31,6 +31,7 @@ namespace Learning.Strategy
             features.Add(def.minTimeBetweenIncorrectDays);
             features.Add(def.avgTimeBetweenSessionsDays);
             features.Add(def.halfLifeDays);
+            features.Add(def.zipfScore);
             features.Add(1.0); // bias
 
             double intervalLogRatio = Math.Log(datum.intervalDays / (def.halfLifeDays + 1e-6));
@@ -61,7 +62,8 @@ namespace Learning.Strategy
             "avgTimeBetweenSessionsDays",
             "halfLifeDays",
             "bias (intercept)",
-            "log(interval / halfLife)"
+            "log(interval / halfLife)",
+            "zipfScore"
         };
 
             // Add one-hot encoded tactic names in order of their index

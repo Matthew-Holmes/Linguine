@@ -53,6 +53,8 @@ namespace Learning
             double fractionCorrect = GetFractionCorrectDecayed(
                 def, sessions, halfLife, at);
 
+            double zipf = VocabModel.ZipfScores[def.DatabasePrimaryKey];
+
             return (
                     new DefinitionFeatures(
                         def,
@@ -61,7 +63,8 @@ namespace Learning
                         fractionCorrect,
                         minTimeBetweenIncorrectDays,
                         avgTimeBetweenSessionsDays,
-                        halfLife),
+                        halfLife,
+                        zipf),
                     tactics
                     );
         }

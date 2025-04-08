@@ -8,7 +8,7 @@ namespace Learning
         public IReadOnlyDictionary<int, int>       WordFrequencies { get; set; }
         IReadOnlyDictionary<int, List<TestRecord>> Last5Records    { get; set; }
         IReadOnlyDictionary<int, double>           RunningAveragePCorrect { get; set; }
-        IReadOnlyDictionary<int, double>           ZipfScores      { get; set; }
+        public IReadOnlyDictionary<int, double>           ZipfScores      { get; set; }
 
         double ZipfHi; double ZipfLo;
 
