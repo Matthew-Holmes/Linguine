@@ -37,14 +37,15 @@ namespace Learning
 
 
         public LearningTacticsHelper TacticsHelper = new LearningTacticsHelper();
+        public List<Type> TacticsUsed { get; private set; }
+        public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
+        public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
+        public IReadOnlyDictionary<Type, double> DefaultRewards { get; internal set; }
+
 
         private LogisticRegression Model { get; set; }
-        public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
-        public List<Type> TacticsUsed { get; private set; }
-
         private VocabularyModel VocabModel { get; init; }
 
-        public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
 
         public Strategist(VocabularyModel vocab)
         {
@@ -60,6 +61,7 @@ namespace Learning
             TacticsUsed = modelData.tacticsUsed;
             DefFeatures = modelData.defFeaturesLookup.AsReadOnly();
             LastTacticUsedForDefinition = modelData.distinctDefinitionsLastTacticUsed.AsReadOnly();
+            DefaultRewards = modelData.followingSessionAverages.AsReadOnly(); ;
             Model = model;
 
             // just for debug
