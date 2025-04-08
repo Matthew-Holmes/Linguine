@@ -160,7 +160,7 @@ namespace Learning
             foreach (var kvp in Strategist.DefFeatures)
             {
                 int key = kvp.Key;
-                FollowingSessionDatum? input = Strategist.GetFeaturesForReward(key);
+                FollowingSessionDatum? input = Strategist.GetCurrentRewardFeatures(key, 1.0);
 
                 if (input is null)
                 {
@@ -168,7 +168,7 @@ namespace Learning
                     continue;
                 }
 
-                double defpKnown = Strategist.Model.PredictProbability(input, Strategist.TacticsUsed);
+                double defpKnown = Strategist.PredictProbability(input);
 
                 pKnown[key] = defpKnown;
             }

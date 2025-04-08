@@ -38,11 +38,18 @@ namespace Learning
 
         public LearningTacticsHelper TacticsHelper = new LearningTacticsHelper();
 
-        public LogisticRegression Model { get; private set; }
+        private LogisticRegression Model { get; set; }
         public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
         public List<Type> TacticsUsed { get; private set; }
 
+        private VocabularyModel VocabModel { get; init; }
+
         public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
+
+        public Strategist(VocabularyModel vocab)
+        {
+            VocabModel = vocab;
+        }
 
         public void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
@@ -73,6 +80,7 @@ namespace Learning
                 string name = feature.def.Word + feature.def.DatabasePrimaryKey;
                 string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
 
+                // TODO - add a red dot on the point along the curve according to the actual last tactic observed
                 ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
             }
 
@@ -82,7 +90,28 @@ namespace Learning
 
         }
 
-        public FollowingSessionDatum? GetFeaturesForReward(int key, double lookAheadDays = 1.0)
+        public double PredictProbability(FollowingSessionDatum input)
+        {
+            return Model.PredictProbability(input, TacticsUsed);
+        }
+
+        internal double GetExistingPKnown(int defKey, double lookAheadDays)
+        {
+            // predicts the probability we will know the definition in one day
+            // todo - use discounted return?
+
+            FollowingSessionDatum? input = GetCurrentRewardFeatures(defKey, lookAheadDays);
+
+            if (input is null)
+            {
+                return VocabModel.PKnownWithError[defKey].Item1;
+            } else
+            {
+                return PredictProbability(input);
+            }
+        }
+
+        public FollowingSessionDatum? GetCurrentRewardFeatures(int key, double lookAheadDays)
         {
             if (!LastTacticUsedForDefinition.ContainsKey(key))
             {
@@ -101,7 +130,7 @@ namespace Learning
 
             if (!TacticsUsed.Contains(lastTacticType))
             {
-                Log.Warning("encoured last tactic type that was not logged as used");
+                Log.Warning("encountered last tactic type that was not logged as used");
                 return null;
             }
 
