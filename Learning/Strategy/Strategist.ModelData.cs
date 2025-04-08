@@ -61,44 +61,48 @@ namespace Learning
                         break;
                     }
                 }
-
-                Dictionary<Type, int> tacticTally = new Dictionary<Type, int>();
-                Dictionary<Type, int> wasCorrectTally = new Dictionary<Type, int>();
-
-                foreach (FollowingSessionDatum datum in dataPoints)
-                {
-                    Type t = datum.sessionTacticType;
-                    int wasCorrectDelta = datum.followingWasCorrect ? 1 : 0;
-
-                    if (!tacticTally.ContainsKey(t))
-                    {
-                        tacticTally[t] = 1;
-                        wasCorrectTally[t] = wasCorrectDelta;
-                    }
-                    else
-                    {
-                        tacticTally[t]++;
-                        wasCorrectTally[t] += wasCorrectDelta;
-                    }
-                }
-
-                Dictionary<Type, double> followingSessionAverages = new Dictionary<Type, double>();
-
-                foreach (var kvp in tacticTally)
-                {
-                    followingSessionAverages[kvp.Key] = (double)wasCorrectTally[kvp.Key] / (double)kvp.Value;
-                }
-
-                return new ModelData(
-                    dataPoints,
-                    features,
-                    tactics,
-                    sessions,
-                    tacticsUsed,
-                    lastTacticUsed,
-                    defFeaturesLookup,
-                    followingSessionAverages);
             }
+
+
+            Dictionary<Type, int> tacticTally = new Dictionary<Type, int>();
+            Dictionary<Type, int> wasCorrectTally = new Dictionary<Type, int>();
+
+            foreach (FollowingSessionDatum datum in dataPoints)
+            {
+                Type t = datum.sessionTacticType;
+                int wasCorrectDelta = datum.followingWasCorrect ? 1 : 0;
+
+                if (!tacticTally.ContainsKey(t))
+                {
+                    tacticTally[t] = 1;
+                    wasCorrectTally[t] = wasCorrectDelta;
+                }
+                else
+                {
+                    tacticTally[t]++;
+                    wasCorrectTally[t] += wasCorrectDelta;
+                }
+            }
+
+            Dictionary<Type, double> followingSessionAverages = new Dictionary<Type, double>();
+
+            foreach (var kvp in tacticTally)
+            {
+                followingSessionAverages[kvp.Key] = (double)wasCorrectTally[kvp.Key] / (double)kvp.Value;
+            }
+
+            double avgReward = (double)wasCorrectTally.Values.Sum() / (double)tacticTally.Values.Sum();
+
+            return new ModelData(
+                dataPoints,
+                features,
+                tactics,
+                sessions,
+                tacticsUsed,
+                lastTacticUsed,
+                defFeaturesLookup,
+                followingSessionAverages,
+                avgReward);
         }
 
         private static List<FollowingSessionDatum> GenerateFollowingSessionData(

@@ -122,8 +122,19 @@ namespace Linguine
             using var context = _linguineDbContextFactory.CreateDbContext();
             DefinitionFrequencyEngine.UpdateDefinitionFrequencies(context);
 
+            // TODO - carefully look into what order all the models are created
+            // TODO - lazy loading
+            // TODO - handle when there are no test records!
+
+            InitVocabularyModel(); // def learning service needs the vocab model
+
+            if (VocabModel is null)
+            {
+                throw new Exception("failed to init vocab model");
+            }
+
             _defLearningService = new DefinitionLearningService(
-                dictionary, testRecords, ParsedDictionaryDefinitionManager, StatementManager);
+                dictionary, testRecords, ParsedDictionaryDefinitionManager, StatementManager, VocabModel);
 
         }
 

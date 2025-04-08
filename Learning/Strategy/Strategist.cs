@@ -21,7 +21,7 @@ using Serilog;
 
 namespace Learning
 {
-    partial class Strategist
+    public partial class Strategist
     {
         // Agent that aims to maximise the probability of correct response on first try
         // using discounted rewards looking into the future
@@ -41,7 +41,7 @@ namespace Learning
         public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
         public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
         public IReadOnlyDictionary<Type, double> DefaultRewards { get; internal set; }
-
+        public double BaseLineReward { get; internal set; }
 
         private LogisticRegression Model { get; set; }
         private VocabularyModel VocabModel { get; init; }
@@ -62,6 +62,7 @@ namespace Learning
             DefFeatures = modelData.defFeaturesLookup.AsReadOnly();
             LastTacticUsedForDefinition = modelData.distinctDefinitionsLastTacticUsed.AsReadOnly();
             DefaultRewards = modelData.followingSessionAverages.AsReadOnly(); ;
+            BaseLineReward = modelData.tacticAverageReward;
             Model = model;
 
             // just for debug

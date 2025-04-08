@@ -30,5 +30,6 @@ namespace Learning.Strategy
         List<Type> tacticsUsed,
         Dictionary<int, Tuple<LearningTactic, DateTime>> distinctDefinitionsLastTacticUsed,
         Dictionary<int, DefinitionFeatures> defFeaturesLookup,
-        Dictionary<Type, double> followingSessionAverages);
+        Dictionary<Type, double> followingSessionAverages,
+        double tacticAverageReward);
 }

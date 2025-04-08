@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Learning
 {
-    class LearningTacticsHelper
+    public class LearningTacticsHelper
     {
         // class for working with single session strategies relating to vocabulary acquisition
 

@@ -41,6 +41,22 @@ namespace Learning.Tactics
             process.WaitForExit();
         }
 
+        private static string GetNodeName(Type t, IReadOnlyDictionary<Type, double> rewards, double avgReward)
+        {
+            string baseName = t.Name.Split('.').Last();
+
+            double reward = avgReward;
+
+            if (rewards.ContainsKey(t))
+            {
+                reward = rewards[t];
+            }
+
+            string rewardPart = $"\\n{reward:F2}";
+
+            return baseName + rewardPart;
+        }
+
         private static string GenerateDot(MarkovGraph graph)
         {
             var sb = new StringBuilder();
@@ -48,14 +64,14 @@ namespace Learning.Tactics
 
             foreach (var arrow in graph.edgesFromNull)
             {
-                sb.AppendLine($"\"START\" -> \"{arrow.to.Name.Split('.').Last()}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
+                sb.AppendLine($"\"START\" -> \"{GetNodeName(arrow.to, graph.rewards, graph.avgReward)}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
             }
 
             foreach (var from in graph.directedEdges)
             {
                 foreach (var arrow in from.Value)
                 {
-                    sb.AppendLine($"\"{from.Key.Name.Split('.').Last()}\"  -> \"{arrow.to.Name.Split('.').Last()}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
+                    sb.AppendLine($"\"{GetNodeName(from.Key, graph.rewards, graph.avgReward)}\"  -> \"{GetNodeName(arrow.to, graph.rewards, graph.avgReward)}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
                 }
             }
 

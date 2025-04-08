@@ -12,7 +12,7 @@ using System.Transactions;
 
 namespace Learning
 {
-    partial class Tactician
+    public partial class Tactician
     {
         private Strategist Strategist { get; init; }
         private MarkovGraph MarkovGraph { get; set; }

@@ -60,17 +60,18 @@ namespace Learning
             ExternalDictionary                dictionary,
             TestRecords                       testRecords,
             ParsedDictionaryDefinitionManager pdefManager,
-            StatementManager                  statementManager)
+            StatementManager                  statementManager,
+            VocabularyModel                  vocabModel)
         {
             _dictionary       = dictionary;
             _testRecords      = testRecords;
             _pdefManager      = pdefManager;
             _statementManager = statementManager;
 
-            ResolveLearningTactics();
+            ResolveLearningTactics(vocabModel);
         }
 
-        private void ResolveLearningTactics()
+        private void ResolveLearningTactics(VocabularyModel vocabModel)
         {
             LearningTacticsHelper tactics = new LearningTacticsHelper();
 
@@ -81,7 +82,7 @@ namespace Learning
                 tactics.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
             }
 
-            Strategist strategist = new Strategist();
+            Strategist strategist = new Strategist(vocabModel);
 
             List<DictionaryDefinition> distinct = _testRecords.DistinctDefinitionsTested();
 

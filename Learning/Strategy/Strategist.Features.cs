@@ -11,6 +11,7 @@ namespace Learning
 {
     partial class Strategist
     {
+
         private (DefinitionFeatures, List<LearningTactic?>) GetFeaturesAndTactics(
             DictionaryDefinition def,
             List<List<TestRecord>> sessions,
@@ -286,5 +287,7 @@ namespace Learning
                 return 1.0;
             }
         }
+
+
     }
 }

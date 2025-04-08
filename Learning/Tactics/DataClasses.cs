@@ -10,5 +10,5 @@ namespace Learning.Tactics
 
     public record MarkovArrow(Type to, double prob, double costSeconds);
 
-    public record MarkovGraph(Dictionary<Type, List<MarkovArrow>> directedEdges, List<MarkovArrow> edgesFromNull);
+    public record MarkovGraph(Dictionary<Type, List<MarkovArrow>> directedEdges, List<MarkovArrow> edgesFromNull, IReadOnlyDictionary<Type, double> rewards, double avgReward);
 }

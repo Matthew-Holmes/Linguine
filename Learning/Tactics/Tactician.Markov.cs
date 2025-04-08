@@ -27,7 +27,7 @@ namespace Learning
 
         }
 
-        private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions)
+        private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions, IReadOnlyDictionary<Type, double>? rewards = null)
         {
             Dictionary<Type, int> tallyFrom = new Dictionary<Type, int>();
 
@@ -103,7 +103,12 @@ namespace Learning
                 arrowsFromNull.Add(new MarkovArrow(toType, prob, avgTime));
             }
 
-            return new MarkovGraph(arrows, arrowsFromNull);
+            if (rewards is null)
+            {
+                rewards = Strategist.DefaultRewards;
+            }
+
+            return new MarkovGraph(arrows, arrowsFromNull, rewards, Strategist.BaseLineReward);
 
         }
 
