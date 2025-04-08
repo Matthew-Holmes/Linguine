@@ -1,4 +1,5 @@
-﻿using DataClasses;
+﻿using Config;
+using DataClasses;
 using Learning.Strategy;
 using Learning.Tactics;
 using MathNet.Numerics;
@@ -17,18 +18,21 @@ namespace Learning
         private Strategist Strategist { get; init; }
         private MarkovGraph MarkovGraph { get; set; }
 
-        private double LookAheadDays { get; set; }
+        private double LookAheadDays { get; set; } = 1.0;
 
         public Tactician(Strategist strat)
         {
             Strategist = strat;
         }
 
-        public IReadOnlyDictionary<Type, double> GetRewardAtTerminationFor(int defKey)
+        public (IReadOnlyDictionary<Type, double>, double) GetRewardForFinalState(int defKey)
         {
+            // pKnown is the vacuous final state - i.e. do nothing
+            double pKnown = Strategist.GetExistingPKnown(defKey, LookAheadDays);
+
             if (!Strategist.LastTacticUsedForDefinition.ContainsKey(defKey))
             {
-                return Strategist.DefaultRewards; // uses population averages
+                return (Strategist.DefaultRewards, pKnown); // uses population averages
             }
 
             double currentReward = Strategist.GetExistingPKnown(defKey, LookAheadDays);
@@ -51,13 +55,26 @@ namespace Learning
                     {
                         sessionTacticType = tacticType,
                         intervalDays = LookAheadDays
+                        /* note - here no (now - then) so the probabilities will increase from the pKnow as time passes */
                     };
 
                 double newReward = Strategist.PredictProbability(newInput);
 
                 ret[tacticType] = newReward;
             }
-            return ret.AsReadOnly();
+
+            return (ret.AsReadOnly(), pKnown);
+        }
+
+        internal void PlotMDP(int key, string filename)
+        {
+            (var rewards, double pKnown) = GetRewardForFinalState(key);
+
+            RewardData rData = new RewardData(rewards, pKnown);
+
+            MarkovGraph adjusted = MarkovGraph with { rewardData = rData };
+
+            MarkovGraphPlotter.SaveMarkovPlot(adjusted, filename);
         }
     }
 }

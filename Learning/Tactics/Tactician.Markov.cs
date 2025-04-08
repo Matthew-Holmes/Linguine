@@ -1,4 +1,5 @@
 ﻿using DataClasses;
+using Learning.LearningTacticsRepository;
 using Learning.Tactics;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace Learning
 
         }
 
-        private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions, IReadOnlyDictionary<Type, double>? rewards = null)
+        private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions, RewardData? rewardData = null)
         {
             Dictionary<Type, int> tallyFrom = new Dictionary<Type, int>();
 
@@ -103,12 +104,27 @@ namespace Learning
                 arrowsFromNull.Add(new MarkovArrow(toType, prob, avgTime));
             }
 
-            if (rewards is null)
+            if (rewardData is null)
             {
-                rewards = Strategist.DefaultRewards;
+                // use population stats
+                
+                // uses the transition probs for initiasl
+                // if no initial reward then infer the probability that we will get to a correct
+                // which is the same as knowing the answer in our head
+                double initialReward = 0.0;
+                foreach (MarkovArrow arrow in arrowsFromNull)
+                {
+                    LearningTactic toTactic = (LearningTactic)Activator.CreateInstance(arrow.to);
+                    if (Strategist.WasCorrect(toTactic))
+                    {
+                        initialReward += arrow.prob;
+                    }
+                }
+
+                rewardData = new RewardData(Strategist.DefaultRewards, initialReward);
             }
 
-            return new MarkovGraph(arrows, arrowsFromNull, rewards, Strategist.BaseLineReward);
+            return new MarkovGraph(arrows, arrowsFromNull, Strategist.BaseLineReward, rewardData);
 
         }
 

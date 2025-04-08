@@ -42,6 +42,7 @@ namespace Learning
         public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
         public IReadOnlyDictionary<Type, double> DefaultRewards { get; internal set; }
         public double BaseLineReward { get; internal set; }
+        public double BaseLineInitialPKnown { get; internal set; }
 
         private LogisticRegression Model { get; set; }
         private VocabularyModel VocabModel { get; init; }
@@ -65,6 +66,10 @@ namespace Learning
             BaseLineReward = modelData.tacticAverageReward;
             Model = model;
 
+            Tactician tactics = new Tactician(this);
+
+            tactics.BuildMarkovModel(sessions);
+
             // just for debug
             HashSet<int> defKeysPlotted = new HashSet<int>();
             foreach (DefinitionFeatures feature in modelData.distinctDefinitionFeatures)
@@ -80,16 +85,15 @@ namespace Learning
                     defKeysPlotted.Add(key);
                 }
 
-                string name = feature.def.Word + feature.def.DatabasePrimaryKey;
+                string name = feature.def.DatabasePrimaryKey + feature.def.Word;
                 string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
 
                 // TODO - add a red dot on the point along the curve according to the actual last tactic observed
                 ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
+
+                // this is slow
+                tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png"); // dot can't cope with chinese chars
             }
-
-            Tactician tactics = new Tactician(this);
-
-            tactics.BuildMarkovModel(sessions);
 
         }
 
@@ -98,7 +102,7 @@ namespace Learning
             return Model.PredictProbability(input, TacticsUsed);
         }
 
-        internal double GetExistingPKnown(int defKey, double lookAheadDays)
+        public double GetExistingPKnown(int defKey, double lookAheadDays)
         {
             // predicts the probability we will know the definition in one day
             // todo - use discounted return?

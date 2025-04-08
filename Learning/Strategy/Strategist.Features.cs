@@ -163,7 +163,7 @@ namespace Learning
             }
         }
 
-        private static bool WasCorrect(LearningTactic tactic)
+        public static bool WasCorrect(LearningTactic tactic)
         {
             if (tactic.Prerequisite is null)
             {

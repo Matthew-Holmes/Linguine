@@ -16,15 +16,18 @@ namespace Learning.Tactics
 
     public static class MarkovGraphPlotter
     {
-        public static void SaveMarkovPlot(MarkovGraph graph)
+        public static void SaveMarkovPlot(MarkovGraph graph, String? outFileName = null)
         {
             var dot = GenerateDot(graph);
             File.WriteAllText("graph.dot", dot);
 
-            string outFileName = $"plots/{ConfigManager.Config.Languages.TargetLanguage}/0000mdp.png"; // so first in folder
-
+            if (outFileName is null)
+            {
+                outFileName = $"plots/{ConfigManager.Config.Languages.TargetLanguage}/0000_global_mdp.png"; // so first in folder
+            }
             // this requires going and installing graphviz
             // but is just for debug so thats not too big a deal
+            // WARNING - this can't cope with weird characters
 
             var process = new Process
             {
@@ -64,14 +67,14 @@ namespace Learning.Tactics
 
             foreach (var arrow in graph.edgesFromNull)
             {
-                sb.AppendLine($"\"START\" -> \"{GetNodeName(arrow.to, graph.rewards, graph.avgReward)}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
+                sb.AppendLine($"\"START\\n{graph.rewardData.startReward:F2}\" -> \"{GetNodeName(arrow.to, graph.rewardData.rewards, graph.avgReward)}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
             }
 
             foreach (var from in graph.directedEdges)
             {
                 foreach (var arrow in from.Value)
                 {
-                    sb.AppendLine($"\"{GetNodeName(from.Key, graph.rewards, graph.avgReward)}\"  -> \"{GetNodeName(arrow.to, graph.rewards, graph.avgReward)}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
+                    sb.AppendLine($"\"{GetNodeName(from.Key, graph.rewardData.rewards, graph.avgReward)}\"  -> \"{GetNodeName(arrow.to, graph.rewardData.rewards, graph.avgReward)}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
                 }
             }
 
