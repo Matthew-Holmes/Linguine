@@ -5,10 +5,10 @@ namespace Learning
 {
     public class VocabularyModel
     {
-        public IReadOnlyDictionary<int, int>       WordFrequencies { get; set; }
-        IReadOnlyDictionary<int, List<TestRecord>> Last5Records    { get; set; }
-        IReadOnlyDictionary<int, double>           RunningAveragePCorrect { get; set; }
-        public IReadOnlyDictionary<int, double>           ZipfScores      { get; set; }
+        public IReadOnlyDictionary<int, int>       WordFrequencies      { get; set; }
+        IReadOnlyDictionary<int, bool>             FirstExposureCorrect { get; set; }
+        IReadOnlyDictionary<int, double>           DataForPSmoothing    { get; set; }
+        public IReadOnlyDictionary<int, double>    ZipfScores           { get; set; }
 
         double ZipfHi; double ZipfLo;
 
@@ -16,13 +16,13 @@ namespace Learning
 
         public VocabularyModel(
             IReadOnlyDictionary<int, int> wordFrequencies, 
-            IReadOnlyDictionary<int, List<TestRecord>> last5Records,
+            IReadOnlyDictionary<int, bool> firstExposureCorrect,
             IReadOnlyDictionary<int, double> zipfScores,
             double zipfHi,
             double zipfLo)
         {
             WordFrequencies = wordFrequencies;
-            Last5Records = last5Records;
+            FirstExposureCorrect = firstExposureCorrect;
             ZipfScores = zipfScores;
             ZipfHi = zipfHi;
             ZipfLo = zipfLo;
@@ -34,20 +34,11 @@ namespace Learning
         {
             var result = new Dictionary<int, double>();
 
-            foreach (var kvp in Last5Records)
+            foreach (var kvp in FirstExposureCorrect)
             {
-                var records = kvp.Value;
-                if (records == null || records.Count == 0)
-                {
-                    result[kvp.Key] = 0.0;
-                }
-                else
-                {
-                    double correctCount = records.Count(r => r.Correct);
-                    result[kvp.Key] = correctCount / records.Count;
-                }
+                result[kvp.Key] = kvp.Value ? 1.0 : 0.0;
             }
-            RunningAveragePCorrect = result;
+            DataForPSmoothing = result;
         }
 
         public Tuple<double[], double[]>? GetPKnownByBinnedZipf()
@@ -62,7 +53,7 @@ namespace Learning
 
             // cube root so that we aim for n bins with n^2 items in each
             int initialBinCount = (int)Math.Pow(
-                (double)(Last5Records.Count), 1.0 / 3.0);
+                (double)(FirstExposureCorrect.Count), 1.0 / 3.0);
 
             // using Zipf scores so these will be fine
             List<double> binSnapValue = new List<double> { 0.05, 0.1, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0 };
@@ -250,9 +241,9 @@ namespace Learning
                         break;
                     }
 
-                    if (RunningAveragePCorrect.ContainsKey(wordID))
+                    if (DataForPSmoothing.ContainsKey(wordID))
                     {
-                        double py = RunningAveragePCorrect[wordID];
+                        double py = DataForPSmoothing[wordID];
 
                         totalWeight += w;
                         sumWeightsSquared += w * w;
@@ -281,13 +272,12 @@ namespace Learning
             }
 
             // overwrite the values we know correctly
-            foreach (var kvp in RunningAveragePCorrect) {
+            //foreach (var kvp in PKnownNow) {
 
-                // no error because we know it
-                // maybe later we can use historic records to estimate error?
-                ret[kvp.Key] = Tuple.Create(RunningAveragePCorrect[kvp.Key], 0.0); // TODO - error is clearly non-zero here!
-                continue;
-            }
+            //    // no error, maybe change that in the future if strategy gets error too
+            //    ret[kvp.Key] = Tuple.Create(PKnownNow[kvp.Key], 0.0); // TODO - error is clearly non-zero here!
+            //    continue;
+            //}
 
             PKnownWithError = ret.AsReadOnly();
         }

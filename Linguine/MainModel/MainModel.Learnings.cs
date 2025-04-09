@@ -174,7 +174,7 @@ namespace Linguine
                 soundFile = Path.Combine(ConfigManager.Config.AudioStoreDirectory, soundFile);
             }
 
-            if (soundFiles.Count != Enum.GetNames(typeof(Voice)).Length)
+            if (soundFiles.Count < Enum.GetNames(typeof(Voice)).Length)
             {
                 var voices = Enum.GetValues(typeof(Voice));
 
@@ -195,25 +195,32 @@ namespace Linguine
                     }
                 }
 
-                Voice newVoice = unheard[_rng.Next(unheard.Count)];
-
-                // go off in the background and get another sound file
-                // since we probably care about this definition
-                _ = Task.Run(async () =>
+                if (unheard.Count != 0)
                 {
-                    try
-                    {
-                        await VocaliseDefinition(def, newVoice);
-                        
-                        // uncomment to tidy - TODO - add a button somewhere??
-                        //await DefinitionVocalisationManager.CleanupMissingFilesAsync();
+                    Voice newVoice = unheard[_rng.Next(unheard.Count)];
 
-                    }
-                    catch (Exception ex)
+                    _ = Task.Run(async () =>
                     {
-                        Log.Error($"Exception in background vocalisation task for definition {def.Word}: {ex.Message}");
-                    }
-                });
+                        try
+                        {
+                            await VocaliseDefinition(def, newVoice);
+
+                            // uncomment to tidy - TODO - add a button somewhere??
+                            //await DefinitionVocalisationManager.CleanupMissingFilesAsync();
+
+                            // go off in the background and get another sound file
+                            // since we probably care about this definition
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error($"Exception in background vocalisation task for definition {def.Word}: {ex.Message}");
+                        }
+                    });
+                }
+                else
+                {
+                    Log.Information("something weird happened");
+                }
             }
 
             if (ConfigManager.Config.LearningForeignLanguage())
@@ -359,9 +366,24 @@ namespace Linguine
                 throw new Exception("couldn't obtain latest test records!");
             }
 
+            // Todo - use strategist for this down the line
+
+            IReadOnlyDictionary<int, double> pKnownNow = testRecords.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.Average(record => record.Correct ? 1.0 : 0.0)
+            );
+
+
+            IReadOnlyDictionary<int, bool> firstWasCorrect = _testRecords?.FirstWasCorrect();
+
+            if (firstWasCorrect is null)
+            {
+                throw new Exception("couldn't obtain first was correct data");
+            }
+
             VocabularyModel ret = new VocabularyModel(
                 freqs,
-                testRecords,
+                firstWasCorrect,
                 zipfs,
                 DefinitionFrequencyEngine.ZipfHi,
                 DefinitionFrequencyEngine.ZipfLo);

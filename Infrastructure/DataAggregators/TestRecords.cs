@@ -105,6 +105,25 @@ namespace Infrastructure
             return latestRecords;
         }
 
+        public IReadOnlyDictionary<int, bool> FirstWasCorrect()
+        {
+            using var context = _dbf.CreateDbContext();
 
+            if (!context.TestRecords.Any())
+                return new Dictionary<int, bool>();
+
+            var firstWasCorrect = context.TestRecords
+                .AsEnumerable()
+                .GroupBy(tr => tr.DictionaryDefinitionKey)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderBy(tr => tr.Posed)
+                        .First()
+                        .Correct
+                );
+
+            return firstWasCorrect;
+        }
     }
 }
