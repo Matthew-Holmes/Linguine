@@ -52,9 +52,9 @@ namespace LearningExtraction
 
             List<String> statementTexts = await DecomposeIntoStatements(text); 
 
-            if (statementTexts.Count() < 2)
+            if (statementTexts.Count() < 1)
             {
-                throw new Exception("Failed to generate enough statements");
+                throw new Exception("Failed to generate any statements");
             }
 
             if (isTail)
