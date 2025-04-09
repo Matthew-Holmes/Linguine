@@ -73,12 +73,28 @@ namespace Learning.Strategy
     public class LogisticRegression
     {
         private readonly Vector<double> _parameters;
-        private double Normaliser = 1e-3;
+        private double NormaliserLoData = 3e-1;
+        private double NormaliserMdData = 5e-2;
+        private double NormaliserHiData = 3e-3;
+
+        private double Normaliser { get; set; }
 
         private FeatureScaler _scaler;
 
         public LogisticRegression(List<FollowingSessionDatum> data, List<Type> tacticsUsed)
         {
+            // TODO - tweak these as I gather more data
+            if (data.Count < 500)
+            {
+                Normaliser = NormaliserLoData;
+            }  else if (data.Count > 10_000)
+            {
+                Normaliser = NormaliserHiData;
+            } else
+            {
+                Normaliser = NormaliserMdData;
+            }
+
             var vectoriser = new FeatureVectoriser(data, tacticsUsed);
 
             var X = Matrix<double>.Build.Dense(data.Count, vectoriser.FeatureCount);
