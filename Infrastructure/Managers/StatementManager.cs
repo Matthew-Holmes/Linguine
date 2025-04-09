@@ -103,8 +103,11 @@ namespace Infrastructure
                 parent, endOfChain - 1, endOfChain - 1).LastOrDefault() ?? throw new Exception();
 
             var context = _dbf.CreateDbContext();
-            StatementDatabaseEntry previousEntry = context.Statements.Where(
-                s => s.LastCharIndex == endOfChain - 1).FirstOrDefault() ?? throw new Exception();
+            StatementDatabaseEntry previousEntry = context.Statements
+                .Where(s => s.Parent == parent)
+                .Where(s => s.LastCharIndex == endOfChain - 1)
+                .FirstOrDefault() ?? throw new Exception();
+
             context.Dispose();
 
             _databaseManager.AddContinuationOfChain(
