@@ -20,8 +20,15 @@ namespace Learning
         private Dictionary<int, Type>? CurrentTacticalState { get; set; } = null;
         private Dictionary<int, double>? CurrentTwistScores { get; set; } = null; // "stick or twist"
 
+        private int FreqCap { get; set; }
+
+        // TODO - base the index on the estimated vocab size when we have that, maybe sqrt()?
+        private int FreqCapIndex { get; set; } = 20; // cap the freq scoring by that of the 20th most frequent 
+
+
         Dictionary<int, int> CoolOff { get; set; } = new Dictionary<int, int>();
         Dictionary<int, int> CoolOffMax { get; set; } = new Dictionary<int, int>();
+
         internal int GetBestDefID()
         {
             int ret = CurrentTwistScores
@@ -60,7 +67,7 @@ namespace Learning
 
             if (tr.Correct)
             {
-                if (!CoolOff.ContainsKey(k))
+                if (!CoolOffMax.ContainsKey(k))
                 {
                     CoolOff[k] = 0;
                     CoolOffMax[k] = 1;
@@ -178,12 +185,17 @@ namespace Learning
 
             double rewardDeltaPerCost = (twistReward - stickReward) / cost;
 
-            CurrentTwistScores[lastDefTestedKey] = rewardDeltaPerCost * Strategist.VocabModel.WordFrequencies[lastDefTestedKey];
+            CurrentTwistScores[lastDefTestedKey] = rewardDeltaPerCost * Math.Min(FreqCap, Strategist.VocabModel.WordFrequencies[lastDefTestedKey]);
         }
 
         private void InitialiseTwistScores()
         {
             CurrentTwistScores = new Dictionary<int, double>();
+
+            FreqCap = Strategist.VocabModel.WordFrequencies
+                .OrderByDescending(kv => kv.Value)
+                .Take(FreqCapIndex)
+                .Last().Value;
 
             foreach (var kvp in Strategist.VocabModel.WordFrequencies)
             {
@@ -247,7 +259,7 @@ namespace Learning
 
                 double rewardDeltaPerCost = (twistReward - stickReward) / cost;
 
-                CurrentTwistScores[kvp.Key] = rewardDeltaPerCost * kvp.Value;
+                CurrentTwistScores[kvp.Key] = rewardDeltaPerCost * Math.Min(kvp.Value, FreqCap);
 
             }
         }
