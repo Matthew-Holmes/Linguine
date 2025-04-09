@@ -50,7 +50,7 @@ namespace Learning.Strategy
                 Maximum = 1
             });
 
-            var intervalRange = GenerateRange(0.1, lookAheadDays, 400); // 
+            var intervalRange = GenerateRange(1.0, lookAheadDays, 400); // 
 
             foreach (var tacticType in tacticsTypes)
             {
