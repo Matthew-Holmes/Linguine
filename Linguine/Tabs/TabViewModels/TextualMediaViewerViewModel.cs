@@ -215,7 +215,11 @@ namespace Linguine.Tabs
 
 
             if (SelectedUnitDefinition is null)
+            {
                 ShowSaveWordButton = false;
+                SelectedUnitParsedDefinitionText = "";
+                SelectedUnitRootedPronunciation = "";
+            }
             else
             {
                 ShowSaveWordButton = true;
