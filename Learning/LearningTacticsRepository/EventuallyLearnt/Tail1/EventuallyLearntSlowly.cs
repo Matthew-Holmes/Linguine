@@ -13,7 +13,7 @@ namespace Learning.LearningTacticsRepository
 
         public EventuallyLearntSlowly()
         {
-            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromSeconds(60)) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromSeconds(25)) };
         }
     }
 }

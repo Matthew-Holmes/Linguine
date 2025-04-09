@@ -13,7 +13,7 @@ namespace Learning.LearningTacticsRepository
 
         public EventuallyLearntMediumTime()
         {
-            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromSeconds(20), MaxTotalTime: TimeSpan.FromSeconds(60)) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromSeconds(10), MaxTotalTime: TimeSpan.FromSeconds(25)) };
         }
 
 
