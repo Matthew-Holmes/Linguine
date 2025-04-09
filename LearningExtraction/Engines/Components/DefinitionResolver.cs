@@ -146,18 +146,33 @@ namespace LearningExtraction
                 builder.AppendLine();
                 builder.AppendLine();
 
-                builder.AppendLine("Text source summary and context:");
-                foreach (String parentContextItem in parentContext)
+
+                if (parentContext.Count > 0)
                 {
-                    builder.AppendLine(parentContextItem);
+                    builder.AppendLine("Text source summary and context:");
+                    foreach (String parentContextItem in parentContext)
+                    {
+                        builder.AppendLine(parentContextItem);
+                    }
+                    builder.AppendLine();
                 }
-                builder.AppendLine();
 
-                builder.AppendLine("Surrounding Context: ");
-                builder.Append(contexts[i]);
-                builder.AppendLine();
+                if (contexts.Count > 0)
+                {
+                    builder.AppendLine("Surrounding Context: ");
+                    builder.Append(contexts[i]);
+                    builder.AppendLine();
+                }
 
-                builder.Append("Definitions: ");
+                if (defs[i].Count == 1)
+                {
+                    builder.Append("Definition: ");
+                }
+                else
+                {
+                    builder.Append("Definitions: ");
+                }
+
                 for (int j = 1 /* one indexing !*/; j != defs[i].Count + 1; j++)
                 {
                     builder.AppendLine();
