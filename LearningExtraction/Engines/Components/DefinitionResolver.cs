@@ -3,6 +3,8 @@ using Infrastructure;
 using System.Diagnostics;
 using System.Text;
 using DataClasses;
+using System.Security.Cryptography;
+using Serilog;
 
 namespace LearningExtraction
 {
@@ -71,8 +73,10 @@ namespace LearningExtraction
 
             List<int> correctDefnIndices = new List<int>();
 
-            foreach (String response in responses)
+            for (int ri = 0; ri != responses.Length; ri++)
             {
+                String response = responses[ri];
+
                 int defIndex;
 
                 try
@@ -94,6 +98,18 @@ namespace LearningExtraction
                 }
 
                 if (defIndex == -1) { defIndex++; /* keep this -1 even after reverting to zero indexing */ }
+
+                // edge case snapping to what will become -1, i.e. no definition
+                if (defIndex - 1 > defs[ri].Count)
+                {
+                    Log.Warning("agent gave an index above the total length");
+                    defIndex = 0;
+                }
+                if (defIndex < -1)
+                {
+                    Log.Warning("agent gave an index below -1");
+                    defIndex = 0;
+                }
 
                 correctDefnIndices.Add(defIndex - 1 /* used one indexing with the agent */);
             }
