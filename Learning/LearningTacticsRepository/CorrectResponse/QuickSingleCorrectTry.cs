@@ -12,7 +12,7 @@ namespace Learning.LearningTacticsRepository
 
         public QuickSingleCorrectTry()
         {
-            Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxAverageTime: TimeSpan.FromSeconds(7)) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxAverageTime: TimeSpan.FromSeconds(4)) };
         }
     }
 }
