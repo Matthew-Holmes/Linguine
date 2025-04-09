@@ -98,6 +98,7 @@ namespace Infrastructure
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
 
+
             modelBuilder.Entity<TextualMediaSession>()
                 .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<TextualMediaSession>()
@@ -106,14 +107,16 @@ namespace Infrastructure
             modelBuilder.Entity<TextualMediaSession>()
                 .HasOne(e => e.TextualMedia)
                 .WithMany()
-                .HasForeignKey(e => e.TextualMediaKey);
+                .HasForeignKey(e => e.TextualMediaKey)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<StatementDatabaseEntry>()
                 .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<StatementDatabaseEntry>()
                 .HasOne(e => e.Parent)
                 .WithMany()
-                .HasForeignKey(e => e.ParentKey);
+                .HasForeignKey(e => e.ParentKey)
+                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<StatementDatabaseEntry>()
                 .HasOne(e => e.Previous)
                 .WithOne()
@@ -133,7 +136,8 @@ namespace Infrastructure
             modelBuilder.Entity<StatementDefinitionNode>()
                 .HasOne(e => e.StatementDatabaseEntry)
                 .WithMany()
-                .HasForeignKey(e => e.StatementKey);
+                .HasForeignKey(e => e.StatementKey)
+                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<StatementDefinitionNode>()
                 .HasOne(e => e.DictionaryDefinition)
                 .WithMany()

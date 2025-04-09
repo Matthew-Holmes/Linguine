@@ -26,6 +26,8 @@ namespace Linguine.Tabs
 
         public ICommand ImportNewCommand { get; private set; }
         public ICommand NewSessionCommand { get; private set; }
+        
+        public ICommand DeleteSelectedTextualMediaCommand { get; private set; }
 
         public List<String> AvailableTexts => _model.AvailableTextualMediaNames;
 
@@ -35,15 +37,32 @@ namespace Linguine.Tabs
             set
             {
                 _selectedTextName = value;
-                LoadSessionsFor(value);
+
+                if (value == "")
+                {
+                    SessionInfo = new List<Tuple<bool, decimal>>();
+                    AvailableSessions = new List<string>();
+                    ShowSessions = false;
+                } else
+                {
+                    LoadSessionsFor(value);
+                    ShowSessions = true;
+                }
+
                 OnPropertyChanged(nameof(SelectedTextName));
-                ShowSessions = true;
                 BulkProcessingViewLogicFor(value);
             }
         }
 
         private void BulkProcessingViewLogicFor(String textName)
         {
+            if (textName == "")
+            {
+                _processingJobs = new ObservableCollection<ProcessingJobViewModel>();
+                OnPropertyChanged(nameof(ProcessingJobs));
+                return;
+            } 
+
             if (ProcessingJobs.Any(vm => vm.TextName == textName))
             {
                 return;
@@ -63,6 +82,7 @@ namespace Linguine.Tabs
                 _processingJobs.Insert(0, newVm);
                 OnPropertyChanged(nameof(ProcessingJobs));
             }
+            
         }
 
 
@@ -178,10 +198,29 @@ namespace Linguine.Tabs
 
             NewSessionCommand = new RelayCommand(() => NewSession());
 
+            DeleteSelectedTextualMediaCommand = new RelayCommand(() => DeleteSelectedTextualMedia());
+     
             _processingJobs = new ObservableCollection<ProcessingJobViewModel>(
                 _model.GetProcessingJobs()
                       .Select(info => new ProcessingJobViewModel(model, info))
                       .ToList());
+        }
+
+        private void DeleteSelectedTextualMedia()
+        {
+            if(_uiComponents.CanVerify.AskYesNo($"are you sure you want to delete {SelectedTextName}?"))
+            {
+                if (_uiComponents.CanVerify.AskYesNo($"are you really sure, this is IRREVERSIBLE"))
+                {
+                    if (_uiComponents.CanVerify.AskYesNo($"ok, select yes to delete {SelectedTextName}, no to abort"))
+                    {
+                        _model.DeleteTextualMedia(SelectedTextName);
+                        _uiComponents.CanMessage.Show($"{SelectedTextName} was deleted");
+                        OnPropertyChanged(nameof(AvailableTexts));
+                        SelectedTextName = "";
+                    }
+                }
+            }
         }
 
         private void NewSession()

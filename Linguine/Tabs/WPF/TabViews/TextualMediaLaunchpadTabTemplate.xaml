@@ -36,6 +36,11 @@
                     <Button Content="New Session"
                             Command="{Binding NewSessionCommand}"
                             Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <Button Content="Delete Text"
+                            Command="{Binding DeleteSelectedTextualMediaCommand}"
+                            Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Margin="30"
+                            Width="80"/>
                 </StackPanel>
 
 

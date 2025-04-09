@@ -53,5 +53,19 @@ namespace Infrastructure
 
             return possibilities.First(); // Warning - Lazy loading will break if this is used later, since dbContext gets disposed
         }
+
+        public void DeleteByName(string selectedTextName, LinguineDbContext context)
+        {
+
+            TextualMedia? tm = GetByName(selectedTextName, context);
+
+            if (tm is null)
+            {
+                return;
+            }
+
+            context.Remove(tm);
+            context.SaveChanges();
+        }
     }
 }

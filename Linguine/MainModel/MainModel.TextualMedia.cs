@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DataClasses;
 using Config;
+using System;
 
 namespace Linguine
 {
@@ -55,6 +56,10 @@ namespace Linguine
             return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core, level, native);
         }
 
-
+        internal void DeleteTextualMedia(string selectedTextName)
+        {
+            using var context = _linguineDbContextFactory.CreateDbContext();
+            TextualMediaManager.DeleteByName(selectedTextName, context);
+        }
     }
 }
