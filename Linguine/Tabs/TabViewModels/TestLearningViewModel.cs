@@ -8,6 +8,7 @@ using System.Windows;
 using System.Text.RegularExpressions;
 using System.Media;
 using System.IO;
+using QuickGraph;
 
 namespace Linguine.Tabs
 {
@@ -258,13 +259,24 @@ namespace Linguine.Tabs
 
             if (_definitionForTesting.SoundFileName is not null)
             {
-                ShowPlayCurrentSoundButton = true;
-                SoundPlayer player = new SoundPlayer(_definitionForTesting.SoundFileName);
-                player.Load();
+                try
+                {
+                    ShowPlayCurrentSoundButton = true;
+                    SoundPlayer player = new SoundPlayer(_definitionForTesting.SoundFileName);
+                    player.Load();
 
-                SoundPlayer = player;
+                    SoundPlayer = player;
 
-                player.Play();      
+                    player.Play();
+                } catch (Exception e )
+                {
+                    _uiComponents.CanMessage.Show($"threw: {e.Message}\n was trying to load {_definitionForTesting.SoundFileName}");
+
+                    // TODO - add a wizard to delete the entry if this happens
+
+                    SoundPlayer = null;
+                    ShowPlayCurrentSoundButton = false;
+                }
             } 
             else
             {
@@ -296,12 +308,12 @@ namespace Linguine.Tabs
                 prepend = "";
             } else
             {
-                prepend = wic.StatementText.Substring(0, wic.WordStart - 1);
+                prepend = wic.StatementText.Substring(0, wic.WordStart);
             }
             
-            string word    = wic.StatementText.Substring(wic.WordStart, wic.Len);
+            string word = wic.StatementText.Substring(wic.WordStart, wic.Len);
 
-            int appendIndex = wic.WordStart + wic.Len + 1;
+            int appendIndex = wic.WordStart + wic.Len;
             string append;
             if (appendIndex >= wic.StatementText.Length)
             {

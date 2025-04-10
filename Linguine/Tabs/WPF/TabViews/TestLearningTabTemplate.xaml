@@ -39,14 +39,12 @@
                                 Padding="0"
                                 Margin="0"
                                 MaxHeight="90">
-                        
+
                     <TextBlock FontSize="16"
                                 TextWrapping="Wrap"
                                 TextAlignment="Center">
                         <TextBlock.Inlines>
-                                <Run Text="{Binding CurrentContext.Item1, Mode=OneWay}" />
-                                <Run Text="{Binding CurrentContext.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/>
-                                <Run Text="{Binding CurrentContext.Item3, Mode=OneWay}" />
+                            <Run Text="{Binding CurrentContext.Item1, Mode=OneWay}" /><Run Text="{Binding CurrentContext.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/><Run Text="{Binding CurrentContext.Item3, Mode=OneWay}" />
                         </TextBlock.Inlines>
                     </TextBlock>
                         
