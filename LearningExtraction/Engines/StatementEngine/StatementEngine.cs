@@ -16,7 +16,7 @@ namespace LearningExtraction
         internal TextDecomposer     ToStatementsDecomposer              { get; set; }
         internal TextDecomposer     FromStatementsDecomposer            { get; set; }
         internal UnitRooter         UnitRooter                          { get; set; }
-        internal DefinitionResolver DefinitionResolver                  { get; set; }
+        internal BatchDefinitionResolver DefinitionResolver                  { get; set; }
         internal AgentBase          ContextChangeIdentificationAgent    { get; set; }
         internal AgentBase          ContextUpdateAgent                  { get; set; }
 

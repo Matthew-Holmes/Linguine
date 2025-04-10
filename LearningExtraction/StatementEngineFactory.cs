@@ -28,7 +28,7 @@ namespace LearningExtraction
                 AgentTask.UnitRooting, targetLanguage, true);
 
             // keep this on the cheaper API for now (?) since is the most expensive part
-            ret.DefinitionResolver = new DefinitionResolver();
+            ret.DefinitionResolver = new BatchDefinitionResolver();
             ret.DefinitionResolver.Agent = AgentFactory.GenerateProcessingAgent(
                 AgentTask.DefinitionResolution, targetLanguage);
 

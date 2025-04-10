@@ -8,7 +8,7 @@ using Serilog;
 
 namespace LearningExtraction
 {
-    public class DefinitionResolver
+    public class BatchDefinitionResolver
     {
         public int LHSContextUnits { get; set; } = 5;
         public int RHSContextUnits { get; set; } = 5;
@@ -19,7 +19,7 @@ namespace LearningExtraction
         public ExternalDictionary Dictionary { get; set; }
 
 
-        public DefinitionResolver()
+        public BatchDefinitionResolver()
         {
         }
         
