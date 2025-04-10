@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -137,27 +138,39 @@ namespace Learning
                     input = input with
                     {
                         sessionTacticType = currentState,
-                        intervalDays = LookAheadDays
+                        intervalDays      = LookAheadDays
                     };
                     stickReward = Strategist.PredictProbability(input);
                 }
             }
 
+            // now predict the expected reward if we twist
+            // explore each markov arrow from our current state
 
             double twistReward = 0.0;
             double cost = 0.0;
 
-            foreach (MarkovArrow arrow in MarkovGraph.edgesFromNull)
+            // this is the update method, so we know we aren't in the null state
+
+            List<MarkovArrow> options = new List<MarkovArrow>();
+
+            if (MarkovGraph.directedEdges.ContainsKey(currentState))
+            {
+                options = MarkovGraph.directedEdges[currentState];
+            }
+
+            if (options.Count == 0) { CurrentTwistScores[lastDefTestedKey] = 0.0; return; }
+
+            foreach (MarkovArrow arrow in options)
             {
                 cost += arrow.prob * arrow.costSeconds;
-
 
                 if (input is not null)
                 {
                     FollowingSessionDatum twistInput = input with
                     {
                         sessionTacticType = arrow.to,
-                        intervalDays = 1.0
+                        intervalDays      = LookAheadDays
                     };
 
                     if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
@@ -182,6 +195,8 @@ namespace Learning
                     }
                 }
             }
+            // warning - now favour negative with high cost over negative with low cost!
+            // TODO - solve the MDP using Dinkelbach method of average gain to mitigate this
 
             double rewardDeltaPerCost = (twistReward - stickReward) / cost;
 

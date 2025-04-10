@@ -11,7 +11,6 @@ namespace Learning
 {
     partial class Tactician
     {
-
         public void BuildMarkovModel(List<List<TestRecord>> sessions)
         {
             List<TacticTransition> transitions = new List<TacticTransition>();
