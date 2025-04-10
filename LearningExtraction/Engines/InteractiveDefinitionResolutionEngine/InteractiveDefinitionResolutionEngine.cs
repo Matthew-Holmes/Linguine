@@ -9,11 +9,10 @@ namespace LearningExtraction
 {
     public interface ICanResolveDefinitions 
     {
-        public bool ResolveFromExisting(Statement stat, int defIndex, DictionaryDefinition def);
-        public bool ResolveFromNew(     Statement stat, int defIndex, DictionaryDefinition newDef);
+        public bool Resolve(Statement stat, int defIndex, DictionaryDefinition def);
 
-
-        public Task<StatementTranslation>        GetTranslation(Statement stat);
+        
+        public Task<StatementTranslation>        GetTranslation(Statement stat, LanguageCode lc);
         public Task<InitialDefinitionAnalyis>    GetInitialAnalysis(   Statement stat, int defIndex);
         public Task<DictionaryDefinition>        GenerateNewDefinition(Statement stat, int defIndex);
     }
@@ -31,17 +30,12 @@ namespace LearningExtraction
             throw new NotImplementedException();
         }
 
-        public Task<StatementTranslation> GetTranslation(Statement stat)
+        public Task<StatementTranslation> GetTranslation(Statement stat, LanguageCode lc)
         {
             throw new NotImplementedException();
         }
 
-        public bool ResolveFromExisting(Statement stat, int defIndex, DictionaryDefinition def)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool ResolveFromNew(Statement stat, int defIndex, DictionaryDefinition newDef)
+        public bool Resolve(Statement stat, int defIndex, DictionaryDefinition def)
         {
             throw new NotImplementedException();
         }
