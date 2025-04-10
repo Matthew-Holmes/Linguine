@@ -36,6 +36,15 @@
                                 Visibility="{Binding ShowSaveWordButton, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Margin="5" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="80"/>
                     </StackPanel>
+                    <Button Content="Resolve Definition" 
+                            Command="{Binding ResolveSelectedDefinitionCommand}"
+                            Visibility="{Binding ShowResolveDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Width="120"/>
+                    <Button Content="Repair Definition"
+                            Command="{Binding RepairSelectedDefinitionCommand}"
+                            Visibility="{Binding ShowRepairDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Width="100"
+                            Margin="5,50,5,5"/>
                 </StackPanel>
                 <!-- <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/> /-->
             </ScrollViewer>

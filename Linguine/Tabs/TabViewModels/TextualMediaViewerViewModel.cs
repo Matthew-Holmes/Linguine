@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using UserInputInterfaces;
 using DataClasses;
+using System.Windows.Forms;
 
 namespace Linguine.Tabs
 {
@@ -56,6 +57,12 @@ namespace Linguine.Tabs
         private ObservableCollection<string> _selectedUnitContextInfo;
         private bool _showSaveWordButton;
         private string _selectedUnitParsedDefinition;
+
+        private bool _showResolveDefinitionButton = false;
+        private bool _showRepairDefinitionButton  = false;
+
+        public ICommand ResolveSelectedDefinitionCommand { get; init; }
+        public ICommand RepairSelectedDefinitionCommand  { get; init; }
 
         // right hand pane unit properties
         public String SelectedUnitText
@@ -118,6 +125,26 @@ namespace Linguine.Tabs
             }
         }
 
+
+        public bool ShowResolveDefinitionButton
+        {
+            get => _showResolveDefinitionButton;
+            private set
+            {
+                _showResolveDefinitionButton = value;
+                OnPropertyChanged(nameof(ShowResolveDefinitionButton));
+            }
+        }
+        public bool ShowRepairDefinitionButton
+        {
+            get => _showRepairDefinitionButton;
+            private set
+            {
+                _showRepairDefinitionButton = value;
+                OnPropertyChanged(nameof(ShowRepairDefinitionButton));
+            }
+        }
+
         public bool ShowSaveWordButton
         {
             get => _showSaveWordButton;
@@ -150,9 +177,22 @@ namespace Linguine.Tabs
             SetupTraversalCommands();
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
 
-            SaveWordCommand = new RelayCommand(() => SaveSelectedUnit());
-            ExportLearnerListCommand = new RelayCommand(() => ExportLearnerListToCsv());
             ShowSaveWordButton = false;
+            SaveWordCommand          = new RelayCommand(() => SaveSelectedUnit());
+            ExportLearnerListCommand = new RelayCommand(() => ExportLearnerListToCsv());
+            
+            RepairSelectedDefinitionCommand  = new RelayCommand(() => RepairSelectedDefinition());
+            ResolveSelectedDefinitionCommand = new RelayCommand(() => ResolveSelectedDefinition());
+        }
+
+        private void ResolveSelectedDefinition()
+        {
+            _uiComponents.CanMessage.Show("need to implement this");
+        }
+
+        private void RepairSelectedDefinition()
+        {
+            _uiComponents.CanMessage.Show("need to implement this");
         }
 
         private DictionaryDefinition? SelectedUnitDefinition { get; set; }
@@ -216,12 +256,18 @@ namespace Linguine.Tabs
 
             if (SelectedUnitDefinition is null)
             {
+                ShowResolveDefinitionButton = true;
+                ShowRepairDefinitionButton  = false;
+
                 ShowSaveWordButton = false;
                 SelectedUnitParsedDefinitionText = "";
                 SelectedUnitRootedPronunciation = "";
             }
             else
             {
+                ShowResolveDefinitionButton = false;
+                ShowRepairDefinitionButton  = true;
+
                 ShowSaveWordButton = true;
                 SelectedUnitParsedDefinitionText = _model.GetParsedDictionaryDefinition(SelectedUnitDefinition)?.ParsedDefinition
                         ?? "";
