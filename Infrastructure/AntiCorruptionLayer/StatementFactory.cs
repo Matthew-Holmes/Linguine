@@ -90,7 +90,8 @@ namespace Infrastructure
             List<List<int>> indicesByLevel = new List<List<int>>();
             List<Queue<StatementDefinitionNode>> nodesByLevel = new List<Queue<StatementDefinitionNode>>();
 
-            for (int i = 0; i != statementDefinitionNodes.Count; i++)
+            // the level for standard unit is 1, so do Count+1, include zero in case the root has a defn
+            for (int i = 0; i != statementDefinitionNodes.Count+1; i++)
             {
                 indicesByLevel.Add(new List<int>());
                 nodesByLevel.Add(new Queue<StatementDefinitionNode>());
