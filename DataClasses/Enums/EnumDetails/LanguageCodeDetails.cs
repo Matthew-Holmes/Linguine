@@ -11,7 +11,7 @@
                 case LanguageCode.fra:
                     return "fr-FR";
                 case LanguageCode.zho:
-                    return "cmn-CN";
+                    return "cmn-CN"; /* simplified characters */
                 default:
                     throw new NotImplementedException();
             }
