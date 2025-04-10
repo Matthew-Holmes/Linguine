@@ -9,16 +9,22 @@
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         </DataTemplate.Resources>
         <Grid>
-            <TextBlock Text="Resolve definitions here"/>
+            <StackPanel Orientation="Vertical">
+			    <TextBlock FontSize="16"
+			    TextWrapping="Wrap"
+			    TextAlignment="Center"
+                           Margin="5,20,5,5">
+				    <TextBlock.Inlines>
+					    <Run Text="{Binding Context.Item1, Mode=OneWay}" /><Run Text="{Binding Context.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/><Run Text="{Binding Context.Item3, Mode=OneWay}" />
+				    </TextBlock.Inlines>
+			    </TextBlock>
 
-			<TextBlock FontSize="16"
-			TextWrapping="Wrap"
-			TextAlignment="Center">
-				<TextBlock.Inlines>
-					<Run Text="{Binding Context.Item1, Mode=OneWay}" /><Run Text="{Binding Context.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/><Run Text="{Binding Context.Item3, Mode=OneWay}" />
-				</TextBlock.Inlines>
-			</TextBlock>
+                <TextBlock Text="{Binding StatementTranslation, Mode=OneWay}"
+                           TextAlignment="Center"
+                           FontSize="16"
+                           Margin="5"/>
+            </StackPanel>
 
-		</Grid>
+        </Grid>
     </DataTemplate>
 </ResourceDictionary>

@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using DataClasses;
 using Config;
 using System;
+using System.Threading.Tasks;
+using System.Linq;
+using LearningExtraction;
+using Windows.ApplicationModel.Chat;
+using Serilog;
 
 namespace Linguine
 {
@@ -60,6 +65,44 @@ namespace Linguine
         {
             using var context = _linguineDbContextFactory.CreateDbContext();
             TextualMediaManager.DeleteByName(selectedTextName, context);
+        }
+
+        internal async Task<string> GetStatementTranslationText(Statement statement)
+        {
+            // check for existing translations in the database
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+            List<StatementTranslation> existing = StatementManager.GetTranslations(statement, native);
+
+            if (existing.Count > 0)
+            {
+                return existing.First().Translation;
+            }
+
+            if (DefinitionResolver is null)
+            {
+                StartDefinitionResolutionEngine();
+            }
+
+            StatementTranslation? generated = await DefinitionResolver.GetTranslation(statement);
+
+            if (generated is not null) 
+            {
+                StatementManager.AddTranslation(generated);
+            }
+
+            if (generated is null)
+            {
+                Log.Warning("null translation found");
+                return "";
+            }
+
+            if (generated.Translation == "")
+            {
+                Log.Warning("empty translation returned");
+            }
+
+            return generated.Translation;
+
         }
     }
 }

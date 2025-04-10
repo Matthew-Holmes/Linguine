@@ -45,9 +45,8 @@ namespace Infrastructure
 
         }
 
-        public List<StatementTranslation> GetTranslations(Statement statement, LearnerLevel lvl, LanguageCode lc)
+        public List<StatementTranslation> GetTranslations(Statement statement, LanguageCode lc)
         {
-
             if (statement.ID is null)
             {
                 throw new Exception("only call this method for statements retrieved from the database");

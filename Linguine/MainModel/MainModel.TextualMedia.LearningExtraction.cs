@@ -18,11 +18,13 @@ namespace Linguine
     public partial class MainModel
     {
 
-        private ICanAnalyseText?      TextAnalyser     { get; set; }
+        private ICanAnalyseText?        TextAnalyser     { get; set; }
 
-        private ICanParseDefinitions? DefinitionParser { get; set; }
+        private ICanParseDefinitions?   DefinitionParser { get; set; }
 
-        private ICanPronounce?        Pronouncer       { get; set; }
+        private ICanPronounce?          Pronouncer       { get; set; }
+
+        private ICanResolveDefinitions? DefinitionResolver { get; set; }
 
         private int CharsToProcess { get; set; } = 1_000;
 
@@ -381,6 +383,11 @@ namespace Linguine
         private void StartPronunciationEngine()
         {
             Pronouncer = DefinitionPronouncerFactory.BuildPronunciationEngine();
+        }
+
+        private void StartDefinitionResolutionEngine()
+        {
+            DefinitionResolver = new InteractiveDefinitionResolutionEngine();
         }
 
         private List<String> GetPreviousContext(TextualMedia tm)
