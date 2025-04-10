@@ -110,6 +110,8 @@ namespace Learning
 
             CurrentTacticalState[lastDefTestedKey] = tacticType;
 
+            Log.Information("entered new state {tactic}", tacticType);
+
             UpdateTwistScores(lastDefTestedKey);
         }
 
