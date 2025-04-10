@@ -21,7 +21,7 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            var allVocalised = await context.VocalisedDefinitionFile.ToListAsync();
+            var allVocalised = await context.VocalisedDefinitionFiles.ToListAsync();
 
             foreach (var record in allVocalised)
             {
@@ -29,7 +29,7 @@ namespace Infrastructure
 
                 if (!File.Exists(fullPath))
                 {
-                    context.VocalisedDefinitionFile.Remove(record);
+                    context.VocalisedDefinitionFiles.Remove(record);
                 }
             }
 
@@ -61,7 +61,7 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            return await context.VocalisedDefinitionFile
+            return await context.VocalisedDefinitionFiles
                 .Where(v => v.DictionaryDefinitionKey == definitionId)
                 .ToListAsync();
         }
@@ -70,21 +70,21 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            return context.VocalisedDefinitionFile
+            return context.VocalisedDefinitionFiles
                 .Where(v => v.DictionaryDefinitionKey == definitionId)
                 .ToList();
         }
 
         public bool HasAnyFiles(DictionaryDefinition def, LinguineDbContext context)
         {
-            return context.VocalisedDefinitionFile
+            return context.VocalisedDefinitionFiles
                           .Where(v => v.DictionaryDefinitionKey == def.ID)
                           .Any();
         }
 
         public bool HasAnyFilesSpecificVoice(DictionaryDefinition def, Voice voice, LinguineDbContext context)
         {
-            return context.VocalisedDefinitionFile
+            return context.VocalisedDefinitionFiles
                 .Where(v => v.DictionaryDefinitionKey == def.ID)
                 .Where(v => v.Voice == voice)
                 .Any();
@@ -94,7 +94,7 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            var record = await context.VocalisedDefinitionFile.FindAsync(primaryKey);
+            var record = await context.VocalisedDefinitionFiles.FindAsync(primaryKey);
             if (record == null)
                 return false;
 
@@ -112,7 +112,7 @@ namespace Infrastructure
                 }
             }
 
-            context.VocalisedDefinitionFile.Remove(record);
+            context.VocalisedDefinitionFiles.Remove(record);
             await context.SaveChangesAsync();
 
             return true;

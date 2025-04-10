@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Diagnostics;
 using DataClasses;
+using Infrastructure.AntiCorruptionLayer;
 
 namespace Infrastructure
 {
@@ -60,7 +61,9 @@ namespace Infrastructure
         public DbSet<TestRecord> TestRecords { get; set; }
 
         // TODO - pluralise this next migration
-        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFile { get; set; }
+        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFiles { get; set; }
+
+        public DbSet<TranslatedStatementDatabaseEntry> TranslatedStatements { get; set; }
 
         public LinguineDbContext()
         {
@@ -142,6 +145,12 @@ namespace Infrastructure
                 .HasOne(e => e.DictionaryDefinition)
                 .WithMany()
                 .HasForeignKey(e => e.DefinitionKey);
+
+            modelBuilder.Entity<TranslatedStatementDatabaseEntry>()
+                .HasOne(e => e.StatementDatabaseEntry)
+                .WithMany()
+                .HasForeignKey(e => e.StatementKey)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ParsedDictionaryDefinition>()
                 .HasKey(e => e.DatabasePrimaryKey);
