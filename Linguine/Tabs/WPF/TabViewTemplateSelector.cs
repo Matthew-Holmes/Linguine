@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ABI.Windows.AI.MachineLearning;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -27,6 +28,9 @@ namespace Linguine.Tabs.WPF
 
             if (item is Tabs.TestLearningLaunchpadViewModel)
                 return element.FindResource("TestLearningLaunchpadTabTemplate") as DataTemplate;
+
+            if (item is Tabs.DefinitionResolverViewModel)
+                return element.FindResource("DefinitionResolverTabTemplate") as DataTemplate;
 
             if (item is null)
                 return null;

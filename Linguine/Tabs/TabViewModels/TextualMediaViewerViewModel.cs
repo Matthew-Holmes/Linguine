@@ -187,7 +187,18 @@ namespace Linguine.Tabs
 
         private void ResolveSelectedDefinition()
         {
-            _uiComponents.CanMessage.Show("need to implement this");
+            if (SelectedStatement is null)
+            {
+                _uiComponents.CanMessage.Show("failed to find surrounding statement for definition");
+                return;
+            }
+
+            if (SelectedUnitIndex == -1)
+            {
+                _uiComponents.CanMessage.Show("failed to located definition in statement");
+            }
+
+            _parent.BeginDefinitionResolution(SelectedStatement, SelectedUnitIndex);
         }
 
         private void RepairSelectedDefinition()
@@ -235,6 +246,8 @@ namespace Linguine.Tabs
 
         }
 
+        private Statement? SelectedStatement { get; set; }
+        private int        SelectedUnitIndex { get; set; } = -1;
 
         private void OnUnitSelected(Tuple<int, int> tuple)
         {
@@ -242,6 +255,9 @@ namespace Linguine.Tabs
             int unitIndex = tuple.Item2;
 
             Statement statement = StatementsCoveringPage[statementIndex];
+
+            SelectedStatement = statement;
+            SelectedUnitIndex = unitIndex;
 
             // Warning - this won't work if the decomposition is multilevel
             SelectedUnitText        = statement.InjectiveDecomposition?.Units?[unitIndex] ?? "";

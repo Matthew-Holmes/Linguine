@@ -284,7 +284,7 @@ namespace Linguine.Tabs
                 ShowPlayCurrentSoundButton = false;
             }
 
-            Contexts = _definitionForTesting.Contexts.Select(wic => AsRun(wic)).ToList();
+            Contexts = _definitionForTesting.Contexts.Select(wic => StatementHelper.AsRun(wic)).ToList();
 
             _posed = DateTime.Now;
 
@@ -299,39 +299,6 @@ namespace Linguine.Tabs
             untilModelReset--;
         }
 
-        private Tuple<string, string, string> AsRun(WordInContext wic)
-        {
-            string prepend;
-
-            if (wic.WordStart == 0)
-            {
-                prepend = "";
-            } else
-            {
-                prepend = wic.StatementText.Substring(0, wic.WordStart);
-            }
-            
-            string word = wic.StatementText.Substring(wic.WordStart, wic.Len);
-
-            int appendIndex = wic.WordStart + wic.Len;
-            string append;
-            if (appendIndex >= wic.StatementText.Length)
-            {
-                append = "";
-            } else
-            {
-                append = wic.StatementText.Substring(appendIndex);
-            }
-            // remove newlines since they make it look weird
-            // TODO - what about song lyrics/subtitles etc
-            // should we have a "meaningul newlines" flag??
-            prepend = Regex.Replace(prepend, @"\t|\n|\r", " ");
-            word    = Regex.Replace(word,    @"\t|\n|\r", " ");
-            append  = Regex.Replace(append,  @"\t|\n|\r", " ");
-
-            return Tuple.Create(prepend, word, append);
-             
-        }
-
+        
     }
 }

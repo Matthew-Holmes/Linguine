@@ -139,25 +139,13 @@ namespace Linguine
 
         }
 
-        private WordInContext? AsWordInContext(DictionaryDefinition def, Statement context)
-        {
-            Tuple<int, int> startLen = StatementHelper.GetStartLenOfDefinition(context, def);
 
-            if (startLen is null) { return null; }
-
-            WordInContext ret = new WordInContext(
-                context.StatementText,
-                startLen.Item1,
-                startLen.Item2
-            );
-            return ret;
-        }
 
         public DefinitionForTesting AsDefinitionForTesting(DictionaryDefinition def)
         {
             List<Statement> uses = _statementManager.GetNStatementsFor(def, MaxContextExamples);
 
-            List<WordInContext> contexts = uses.Where(use => use is not null).Select(use => AsWordInContext(def, use)).ToList();
+            List<WordInContext> contexts = uses.Where(use => use is not null).Select(use => StatementHelper.AsWordInContext(def, use)).ToList();
 
             contexts = contexts.Where(c => c is not null).ToList();
 

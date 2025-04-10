@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using System.Threading;
 using Agents;
 using Config;
+using DataClasses;
 
 namespace Linguine
 {
@@ -281,6 +282,13 @@ namespace Linguine
             Tabs.Remove(toRemove);
             Tabs.Add(new TestLearningLaunchpadViewModel(_UIcomponents, _model, this));
             SelectTab(Tabs.Last());
+        }
+
+        internal void BeginDefinitionResolution(Statement selectedStatement, int selectedUnitIndex)
+        {
+            Tabs.Add(new DefinitionResolverViewModel(selectedStatement, selectedUnitIndex, _UIcomponents, _model, this));
+            SelectTab(Tabs.Last());
+            // TODO - add new definition resolution tab
         }
         #endregion
     }
