@@ -1,4 +1,6 @@
 ﻿using DataClasses;
+using Infrastructure.AntiCorruptionLayer;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace Infrastructure
 {
@@ -16,6 +18,61 @@ namespace Infrastructure
             List<StatementDatabaseEntry> entries = _databaseManager.GetAllStatementsEntriesFor(tm);
 
             return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
+        }
+
+        public void AddTranslation(StatementTranslation st)
+        {
+            int? statementKey = st.Underlying.ID;
+
+            if (statementKey is null)
+            {
+                throw new Exception("only call this when the linked statment has a database reference");
+            }
+
+            int skey = (int)statementKey;
+
+            using var context = _dbf.CreateDbContext();
+
+            TranslatedStatementDatabaseEntry toAdd = new TranslatedStatementDatabaseEntry
+            {
+                StatementKey = skey,
+                TranslatedLanguage = st.TranslatedLanguage,
+                Translation = st.Translation
+            };
+
+            context.Add(toAdd);
+            context.SaveChanges();
+
+        }
+
+        public List<StatementTranslation> GetTranslations(Statement statement, LearnerLevel lvl, LanguageCode lc)
+        {
+
+            if (statement.ID is null)
+            {
+                throw new Exception("only call this method for statements retrieved from the database");
+            }
+
+            int id = (int)statement.ID;
+
+            using var context = _dbf.CreateDbContext();
+            
+            // go through the anti-corruption layer
+
+            List<TranslatedStatementDatabaseEntry> entries = context.TranslatedStatements
+                .Where(e => e.StatementKey == id)
+                .Where(e => e.TranslatedLanguage == lc)
+                .ToList();
+
+            // return steps back out
+
+            return entries.Select(e => new StatementTranslation
+            {
+                DatabasePrimaryKey = e.DatabasePrimaryKey,
+                Underlying = statement,
+                TranslatedLanguage = lc,
+                Translation = e.Translation
+            }).ToList();
         }
 
         public List<Statement> GetNStatementsFor(DictionaryDefinition def, int n)
