@@ -44,7 +44,7 @@ namespace Infrastructure
 
             AddDefinitions(rootedDecomp, nodes);
 
-            Statement ret = new Statement(entry.Parent, entry.FirstCharIndex, entry.LastCharIndex, statement, context, injectiveDecomp, rootedDecomp);
+            Statement ret = new Statement(entry.Parent, entry.FirstCharIndex, entry.LastCharIndex, statement, context, injectiveDecomp, rootedDecomp, entry.DatabasePrimaryKey);
 
             return ret;
 

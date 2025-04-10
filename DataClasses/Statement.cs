@@ -10,6 +10,10 @@
         private int _firstCharIndex;
         private int _lastCharIndex;
 
+        private bool _isRetrieved = false;
+        private int _databaseKey;
+        public int? ID => _isRetrieved ? _databaseKey : null;
+
         public int FirstCharIndex { get => _firstCharIndex; }
         public int LastCharIndex { get => _lastCharIndex; }
 
@@ -25,7 +29,8 @@
                          String statementText,
                          List<String> context,
                          TextDecomposition injectiveDecomposition,
-                         TextDecomposition rootedDecomposition)
+                         TextDecomposition rootedDecomposition,
+                         int? databaseKey = null)
         {
             _parent = parent;
             _statementText = statementText;
@@ -34,6 +39,12 @@
             _rootedDecomposition = rootedDecomposition;
             _firstCharIndex = firstCharIndex;
             _lastCharIndex = lastCharIndex;
+
+            if (databaseKey is not null)
+            {
+                _isRetrieved = true;
+                _databaseKey = (int)databaseKey;
+            }
         }
     }
 
