@@ -14,6 +14,9 @@ namespace Linguine
         private StatementManager?                   _statementManager;
         private ParsedDictionaryDefinitionManager?  _parsedDictionaryDefinitionManager;
         private DefinitionVocalisationManager?      _definitionVocalisationManager;
+        private ExternalDictionary?                 _dictionary;
+
+        private bool _needToImportADictionary;
         private void LoadManagers()
         {
             _externalDictionaryManager          = new ExternalDictionaryManager(LinguineFactory);
@@ -24,6 +27,12 @@ namespace Linguine
             _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(LinguineFactory);
             _definitionVocalisationManager      = new DefinitionVocalisationManager(LinguineFactory);
 
+            _needToImportADictionary = _externalDictionaryManager.AvailableDictionaries().Count == 0;
+            if (!_needToImportADictionary)
+            {
+                _dictionary = _externalDictionaryManager.GetFirstDictionary();
+            }
+
             HasManagers = true;
         }
 
@@ -31,6 +40,20 @@ namespace Linguine
         {
             InitialiseDefinitionLearningService();
         }
+
+        public ExternalDictionary? Dictionary
+        {
+            get
+            {
+                if (_needToImportADictionary) { return null; }
+                if (_dictionary is null)
+                {
+                    throw new Exception("Attempting to read property before model loading complete");
+                }
+                return _dictionary;
+            }
+        }
+
 
         public DefinitionVocalisationManager DefinitionVocalisationManager
         {

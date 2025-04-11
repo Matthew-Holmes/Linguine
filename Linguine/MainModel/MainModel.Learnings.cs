@@ -94,14 +94,7 @@ namespace Linguine
                 LoadManagers();
             }
 
-            List<String> dictionaries = ExternalDictionaryManager.AvailableDictionaries();
-
-            if (dictionaries.Count > 1)
-            {
-                throw new NotImplementedException("need to implement multiple dictionaries");
-            }
-
-            if (dictionaries.Count == 0)
+            if (Dictionary is null)
             {
                 NeedToImportADictionary = true;
                 return;
@@ -109,15 +102,7 @@ namespace Linguine
 
             NeedToImportADictionary = false; // TODO - random flags not great
 
-            ExternalDictionary? dictionary = ExternalDictionaryManager.GetDictionary(dictionaries.First());
-
-            if (dictionary is null)
-            {
-                Log.Error("failed to load the dictionary");
-                return;
-            }
-
-            TestRecords testRecords = new TestRecords(dictionary, _linguineDbContextFactory);
+            TestRecords testRecords = new TestRecords(Dictionary, _linguineDbContextFactory);
             _testRecords = testRecords;
 
             using var context = _linguineDbContextFactory.CreateDbContext();
@@ -135,7 +120,7 @@ namespace Linguine
             }
 
             _defLearningService = new DefinitionLearningService(
-                dictionary, testRecords, ParsedDictionaryDefinitionManager, StatementManager, VocabModel);
+                Dictionary, testRecords, ParsedDictionaryDefinitionManager, StatementManager, VocabModel);
 
         }
 

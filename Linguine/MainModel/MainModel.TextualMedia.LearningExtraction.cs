@@ -355,23 +355,15 @@ namespace Linguine
 
         private void StartStatementEngine()
         {
-            List<String> dictionaries = ExternalDictionaryManager.AvailableDictionaries();
-            if (dictionaries.Count == 0)
+            if (Dictionary is null)
             {
                 throw new Exception("no dictionary!");
             }
-            else if (dictionaries.Count > 1)
-            {
-                throw new NotImplementedException();
-            }
             else
             {
-                ExternalDictionary dictionary = ExternalDictionaryManager.GetDictionary(dictionaries[0])
-                    ?? throw new Exception();
-
                 APIKeysConfig keys = ConfigManager.Config.APIKeys;
 
-                TextAnalyser = StatementEngineFactory.BuildStatementEngine(dictionary);
+                TextAnalyser = StatementEngineFactory.BuildStatementEngine(Dictionary);
             }
         }
 
