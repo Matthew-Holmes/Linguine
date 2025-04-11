@@ -39,7 +39,7 @@ namespace Linguine
                 context.Dispose();
 
                 LoadManagers();
-                LoadServices();
+                Task.Run(() => LoadServices()); // so in the background
 
                 Loaded?.Invoke(this, EventArgs.Empty);
             }
