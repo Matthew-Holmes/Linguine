@@ -22,6 +22,8 @@ namespace Linguine
             }
         }
 
+        public LanguageCode Native => ConfigManager.Config.Languages.NativeLanguage;
+
         internal string? GetFullTextFromSessionID(int sessionId)
         {
             var session = GetSessionFromID(sessionId);
@@ -67,6 +69,28 @@ namespace Linguine
             TextualMediaManager.DeleteByName(selectedTextName, context);
         }
 
+        internal async Task<string> GetBestWordTranslation(
+            Statement statement, int defIndex)
+        {
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+            List<StatementTranslation> existing = StatementManager.GetTranslations(statement, native);
+
+            if (existing.Count == 0)
+            {
+                throw new Exception("requires an existing referece translation"); // TODO - fix the architecture so don't need this
+            }
+
+            if (DefinitionResolver is null)
+            {
+                StartDefinitionResolutionEngine();
+                
+            }
+
+            InitialDefinitionAnalyis ida = await DefinitionResolver.GetInitialAnalysis(existing.First(), defIndex, native);
+
+            return ida.wordBestTranslation; // TODO - flesh this out with more
+        }
+
         internal async Task<string> GetStatementTranslationText(Statement statement)
         {
             // check for existing translations in the database
@@ -104,5 +128,7 @@ namespace Linguine
             return generated.Translation;
 
         }
+
+
     }
 }

@@ -258,6 +258,7 @@ namespace Linguine
             if (forTesting.Contexts.Count == 0)
             {
                 // edge case where user knows every word every seen
+                Log.Warning("had to revert to frequent definition, since no contexts");
                 return AsDefinitionForTesting(DefLearningService.GetFrequentDefinition(1));
             }
             else

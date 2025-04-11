@@ -1,6 +1,7 @@
 ﻿using DataClasses;
 using Google.Api;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using Newtonsoft.Json.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,10 @@ namespace Linguine.Tabs
     class DefinitionResolverViewModel : TabViewModelBase
     {
         private Tuple<string, string, string>? _contexts;
+        private Tuple<string, string, string, string>? _bestTranslatedAsText;
 
+        private int                  _defIndex;
+        private String               _wordText;
         private Statement            _statement;
         private String               _statementTranslationText;
 
@@ -25,8 +29,10 @@ namespace Linguine.Tabs
             Context = StatementHelper.RunFromStatementDefIndex(selectedStatement, defIndex);
 
             _statement = selectedStatement;
+            _defIndex  = defIndex;
+            _wordText = selectedStatement.InjectiveDecomposition.Units[defIndex].Trim();
 
-            Task.Run(() => GoAndGetStatementTranslation());
+            Task.Run(() => GoAndGetDetailsForUser());
         }
 
         #region UI properties
@@ -51,11 +57,28 @@ namespace Linguine.Tabs
             }
         }
 
+        public Tuple<string, string, string, string> BestTranslatedAsTexts
+        {
+            get => _bestTranslatedAsText;
+            set
+            {
+                _bestTranslatedAsText = value;
+                OnPropertyChanged(nameof(BestTranslatedAsTexts));
+            }
+        }
+
         #endregion
    
-        private async Task GoAndGetStatementTranslation()
+        private async Task GoAndGetDetailsForUser()
         {
             StatementTranslation = await _model.GetStatementTranslationText(_statement);
+            
+            string bestWordTranslation  = await _model.GetBestWordTranslation(_statement, _defIndex);
+            bestWordTranslation = bestWordTranslation.Trim();
+
+            ForBestTranslation fixedParts = TextFactory.BestTranslatedAsString(_model.Native);
+
+            BestTranslatedAsTexts = Tuple.Create(fixedParts.inThisStatementIThink, _wordText, fixedParts.isBestTranslatedAs, bestWordTranslation);
         }
     
     }

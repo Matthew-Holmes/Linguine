@@ -39,6 +39,8 @@ namespace Agents
             {AgentTask.DefinitionIPAPronouncing, "given the following word (definition also provided) provide the word's pronunciation using the International Phonetic Alphabet IPA in British English, only reply with the pronunciation, nothing else" },
 
             {AgentTask.DefinitionRomanisedPronouncing, "given the following word (definition also provided) provide a simple pronunciation, using only alphabet letters, no IPA or diacritics, only reply with the word's pronunciation, nothing else" },
+
+            {AgentTask.GeneralPurpose, "you are a helpful assistant for language learners" },
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
@@ -61,6 +63,8 @@ namespace Agents
 
             {AgentTask.DefinitionRomanisedPronouncing, "étant donné le mot suivant (définition également fournie), fournissez une prononciation simple du mot, n'utilisez pas l'API, répondez uniquement avec la prononciation simple du mot, rien d'autre" },
 
+            {AgentTask.GeneralPurpose, "vous êtes un assistant utile pour les apprenants de langues" },
+
         };
 
         private static Dictionary<AgentTask, String> ChineseSystemMessages = new Dictionary<AgentTask, String>
@@ -81,7 +85,9 @@ namespace Agents
 
             {AgentTask.DefinitionIPAPronouncing, "给出以下单词（也为您提供了一个定义），使用国际音标 (IPA) 提供该单词的发音。仅回复发音，无需其他" },
 
-            {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（也为你提供了一个定义）提供该单词的拼音，只用该单词的拼音回复，不用其他内容" }
+            {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（也为你提供了一个定义）提供该单词的拼音，只用该单词的拼音回复，不用其他内容" },
+
+            {AgentTask.GeneralPurpose, "你是语言学习者的得力助手" },
         };
     }
 

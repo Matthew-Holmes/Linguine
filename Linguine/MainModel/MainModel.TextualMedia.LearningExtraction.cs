@@ -387,7 +387,7 @@ namespace Linguine
 
         private void StartDefinitionResolutionEngine()
         {
-            DefinitionResolver = new InteractiveDefinitionResolutionEngine();
+            DefinitionResolver = InteractiveDefinitionResolutionEngineFactory.BuildDefinitionResolutionEngine();
         }
 
         private List<String> GetPreviousContext(TextualMedia tm)

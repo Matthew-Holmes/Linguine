@@ -11,7 +11,8 @@
         UnitRooting,
         DefinitionParsing,
         DefinitionIPAPronouncing,
-        DefinitionRomanisedPronouncing
+        DefinitionRomanisedPronouncing,
+        GeneralPurpose,
     }
 
 }

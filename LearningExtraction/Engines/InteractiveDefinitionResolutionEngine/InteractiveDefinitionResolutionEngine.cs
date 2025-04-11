@@ -1,4 +1,5 @@
-﻿using Config;
+﻿using Agents;
+using Config;
 using DataClasses;
 using Infrastructure;
 using Serilog;
@@ -16,21 +17,49 @@ namespace LearningExtraction
 
         
         public Task<StatementTranslation?>        GetTranslation(Statement stat);
-        public Task<InitialDefinitionAnalyis>     GetInitialAnalysis(   Statement stat, int defIndex);
+        public Task<InitialDefinitionAnalyis>     GetInitialAnalysis(StatementTranslation stat, int defIndex, LanguageCode native);
         public Task<DictionaryDefinition>         GenerateNewDefinition(Statement stat, int defIndex);
     }
 
 
     public class InteractiveDefinitionResolutionEngine : ICanResolveDefinitions
     {
+        private AgentBase GeneralPurposeAgent { get; init; }
+
+
+        public InteractiveDefinitionResolutionEngine(AgentBase generalPurpose)
+        {
+            GeneralPurposeAgent = generalPurpose;
+        }
+
         public Task<DictionaryDefinition> GenerateNewDefinition(Statement stat, int defIndex)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InitialDefinitionAnalyis> GetInitialAnalysis(Statement stat, int defIndex)
+        public async Task<InitialDefinitionAnalyis> GetInitialAnalysis(StatementTranslation stat, 
+                                                                       int                  defIndex, 
+                                                                       LanguageCode         native)
         {
-            throw new NotImplementedException();
+            String targetLanguageStatement = stat.Underlying.StatementText;
+            String nativeLanguageStatement = stat.Translation;
+
+            String targetWord = stat.Underlying.InjectiveDecomposition.Units[defIndex];
+
+            if (targetWord is null || targetWord == "")
+            {
+                throw new Exception("target word is null or empty");
+            }
+
+            String bestWordTranslationPrompt = PromptFactory.PromptForForeignLanguageDefinitionResolution(
+                native,
+                targetWord,
+                targetLanguageStatement,
+                nativeLanguageStatement);
+
+            String wordTranslation = await GeneralPurposeAgent.GetResponse(bestWordTranslationPrompt);
+
+            return new InitialDefinitionAnalyis(wordTranslation, "");
         }
 
         public async Task<StatementTranslation?> GetTranslation(Statement stat)
