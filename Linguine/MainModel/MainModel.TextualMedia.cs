@@ -6,7 +6,6 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 using LearningExtraction;
-using Windows.ApplicationModel.Chat;
 using Serilog;
 
 namespace Linguine
@@ -129,6 +128,135 @@ namespace Linguine
 
         }
 
+        internal async Task<List<Tuple<int, string>>> GetExistingDefinitionKeysAndTexts(string rootedWordText)
+        {
+            // TODO - maybe play around with the casing here??
+            List<DictionaryDefinition> defs = Dictionary.TryGetDefinition(rootedWordText);
 
+            if (!ConfigManager.Config.LearningForeignLanguage())
+            {
+                return defs.Select(def => Tuple.Create(def.DatabasePrimaryKey, def.Definition)).ToList();
+            }
+
+            List<ParsedDictionaryDefinition> pdefs = new List<ParsedDictionaryDefinition>();
+
+
+            HashSet<DictionaryDefinition> toParseNow = new HashSet<DictionaryDefinition>();
+
+            LearnerLevel lvl    = ConfigManager.Config.GetLearnerLevel();
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+
+            foreach(DictionaryDefinition def in defs)
+            {
+                ParsedDictionaryDefinition? pdef = ParsedDictionaryDefinitionManager
+                    .GetParsedDictionaryDefinition(def, lvl, native);
+
+                if (pdef is not null) /* already got it */
+                {
+                    pdefs.Add(pdef);
+                } 
+                else /* going to have to parse it now */
+                {
+                    toParseNow.Add(def);
+                }
+            }
+
+            // get the parsed definition for those that were not parsed
+
+            if (toParseNow.Count > 0)
+            {
+                if (DefinitionParser is null)
+                {
+                    StartParsingEngine();
+                }
+                HashSet<ParsedDictionaryDefinition> newParsed = await DefinitionParser
+                    .ParseStatementsDefinitions(toParseNow, lvl, native);
+
+                ParsedDictionaryDefinitionManager.AddSet(newParsed);
+
+                pdefs.AddRange(newParsed);
+            }
+
+            // get the pronunciation information for those without
+
+            List<DictionaryDefinition> withoutPronunciations = defs.Where(def => def.RomanisedPronuncation is null).ToList();
+
+            if (Pronouncer is null)
+            {
+                StartPronunciationEngine();
+            }
+
+            List<Tuple<String, String>> pronunciations = await Pronouncer.GetDefinitionPronunciations(withoutPronunciations);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+            context.ChangeTracker.Clear();
+
+            for (int i = 0; i != pronunciations.Count; i++)
+            {
+                DictionaryDefinition def = withoutPronunciations[i];
+
+                def.IPAPronunciation = pronunciations[i].Item1;
+                def.RomanisedPronuncation = pronunciations[i].Item2;
+
+                context.Update(def);
+                await context.SaveChangesAsync();
+
+                context.ChangeTracker.Clear();
+            }
+
+            return pdefs.Select(pdef => Tuple.Create(pdef.DictionaryDefinitionKey, pdef.ParsedDefinition)).ToList();
+        }
+
+        internal bool ResolveDefinition(Statement statement, int defIndex, int selectedDefKey)
+        {
+            DictionaryDefinition? def = Dictionary.TryGetDefinitionByKey(selectedDefKey);
+
+            if (def is null)
+            {
+                Log.Warning("failed to find definition when provided with key {defKey}", selectedDefKey);
+                return false;
+            }
+
+            int rootedTotalUnits = statement.RootedDecomposition.Flattened().Decomposition.Count();
+            int level1units      = statement.RootedDecomposition.Decomposition.Count();
+
+            if (rootedTotalUnits != level1units)
+            {
+                throw new NotImplementedException("need to implement this for multi level decompositions");
+            }
+
+            if (statement.RootedDecomposition.Decomposition[defIndex].Definition is not null)
+            {
+                Log.Error("trying to resolve a definition we already know");
+                throw new Exception("already have a definition");
+            }
+
+            int? statementID = statement.ID;
+
+            if (statementID is null)
+            {
+                throw new Exception("need to call this on a statement with a record in the database!");
+            }
+
+            int statementKey = (int)statementID;
+
+            StatementDefinitionNode toAdd = new StatementDefinitionNode
+            {
+                CurrentLevel         = 1,
+                IndexAtCurrentLevel  = defIndex,
+                DefinitionKey        = def.DatabasePrimaryKey,
+                StatementKey         = statementKey,
+                WasManuallyEntered   = true,
+            };
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            context.Add(toAdd);
+            context.SaveChanges();
+
+            statement.RootedDecomposition.Decomposition[defIndex].Definition = def; // so shows up in the UI if we have the statement loaded
+
+            return true;
+        }
     }
 }

@@ -16,5 +16,7 @@ namespace Infrastructure
 
         public int StatementKey { get; set; }
         public StatementDatabaseEntry StatementDatabaseEntry { get; set; }
+
+        public bool WasManuallyEntered { get; set; } = false;
     }
 }

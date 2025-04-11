@@ -32,11 +32,17 @@ namespace Learning
 
         internal int GetBestDefID()
         {
-            int ret = CurrentTwistScores
-                .Where(kv => !CoolOff.ContainsKey(kv.Key))
-                .OrderByDescending(kv => kv.Value)
-                .First().Key;
+            var candidates = CurrentTwistScores
+                .Where(kv => !CoolOff.ContainsKey(kv.Key));
 
+            var maxScore = candidates.Max(kv => kv.Value);
+
+            var topCandidates = candidates
+                .Where(kv => kv.Value == maxScore)
+                .ToList();
+
+            var random = new Random();
+            int ret = topCandidates[random.Next(topCandidates.Count)].Key;
             Log.Information("found id with twist score of {value}", CurrentTwistScores[ret]);
 
             if (CurrentTacticalState?.ContainsKey(ret) ?? false)

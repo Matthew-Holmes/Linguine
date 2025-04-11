@@ -7,6 +7,8 @@
         <DataTemplate.Resources>
             <local:HighlightConverter x:Key="HighlightConverter"/>
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <local:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter"/>
+            <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter"/>
         </DataTemplate.Resources>
         <Grid>
             <StackPanel Orientation="Vertical">
@@ -22,13 +24,15 @@
                 <TextBlock Text="{Binding StatementTranslation, Mode=OneWay}"
                            TextAlignment="Center"
                            FontSize="16"
-                           Margin="5"/>
+                           Margin="5,5,5,15"/>
 
+                <TextBlock Text="~" FontSize="16" HorizontalAlignment="Center" FontWeight="DemiBold"/>
+                
                 <RichTextBox IsReadOnly="True"
                              BorderThickness="0"
                              Background="Transparent"
                              FontSize="16"
-                             Margin="5,50,5,5"
+                             Margin="5,15,5,5"
                              IsDocumentEnabled="False"
                              HorizontalAlignment="Center"
                              HorizontalContentAlignment="Center">
@@ -43,6 +47,88 @@
                     </FlowDocument>
                 </RichTextBox>
 
+                
+
+                <TextBlock Text="💡: Searching for existing definitions..." 
+                           FontSize="16"
+                           HorizontalAlignment="Center"
+                           Margin="5,20,5,5"
+                           Visibility="{Binding ShowWaitingForDefinitions, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
+                <TextBlock Text="💡: I couldn't find any existing definitions" 
+                           FontSize="16"
+                           HorizontalAlignment="Center"
+                           Margin="5,20,5,5"
+                           Visibility="{Binding ShowNoExistingDefinitionsFound, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
+
+                <TextBlock Text="💡: here are the existing definitions I found: "
+                           FontSize="16"
+                           HorizontalAlignment="Center"
+                           Visibility="{Binding ShowExistingDefinitions, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" 
+                           Margin="5,20,5,5"/>
+
+                <ScrollViewer Background="Transparent"
+                              Visibility="{Binding ShowExistingDefinitions, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" 
+                              HorizontalScrollBarVisibility="Auto" 
+                              VerticalScrollBarVisibility="Disabled"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,0">
+                    <ItemsControl ItemsSource="{Binding ExistingDefinitions, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="5,5,5,10"
+                                        BorderBrush="Gray"
+                                        BorderThickness="1">
+                                    <Border.Background>
+                                        <MultiBinding Converter="{StaticResource SelectionToBackgroundConverter}">
+                                            <Binding />
+                                            <!-- current definition -->
+                                            <Binding Path="DataContext.SelectedDefinition"
+                                                     RelativeSource="{RelativeSource AncestorType=ItemsControl}" Mode="OneWay"/>
+                                        </MultiBinding>
+                                    </Border.Background>
+
+                                    <TextBlock Text="{Binding Mode=OneWay}" Width="150"
+                                               Cursor="Hand"
+                                               FontSize="16"
+                                               Background="Transparent"
+                                               Foreground="Black"
+                                               Padding="5"
+                                               TextWrapping="Wrap">
+                                            <TextBlock.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.SelectDefinitionCommand}"
+                                                          CommandParameter="{Binding}" />
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+
+                <TextBlock Text="~" FontSize="16" HorizontalAlignment="Center" FontWeight="DemiBold"/>
+
+
+                <Button Content="Resolve" 
+                        FontSize="16"
+                        Command="{Binding ResolveCommand}" 
+                        Width="75"
+                        Height="30"
+                        Margin="5,10,5,5"
+                        Visibility="{Binding ShowResolveButton, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
+
+                <TextBlock Text="Resolution complete, you may close this tab"
+                           FontSize="16"
+                           Margin="5,10,5,5"
+                           HorizontalAlignment="Center"
+                           Visibility="{Binding ResolutionComplete, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
+                
             </StackPanel>
 
         </Grid>
