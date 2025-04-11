@@ -71,29 +71,28 @@ namespace Learning
             tactics.BuildMarkovModel(sessions);
 
             // just for debug
-            HashSet<int> defKeysPlotted = new HashSet<int>();
-            foreach (DefinitionFeatures feature in modelData.distinctDefinitionFeatures)
+            new Thread(() =>
             {
-                int key = feature.def.DatabasePrimaryKey;
+                HashSet<int> defKeysPlotted = new HashSet<int>();
 
-                if (defKeysPlotted.Contains(key))
+                foreach (DefinitionFeatures feature in modelData.distinctDefinitionFeatures)
                 {
-                    continue;
+                    int key = feature.def.DatabasePrimaryKey;
+
+                    if (!defKeysPlotted.Add(key))
+                        continue;
+
+                    string name = key + feature.def.Word;
+                    string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
+
+                    ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
+
+                    tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png");
                 }
-                else
-                {
-                    defKeysPlotted.Add(key);
-                }
-
-                string name = feature.def.DatabasePrimaryKey + feature.def.Word;
-                string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
-
-                // TODO - add a red dot on the point along the curve according to the actual last tactic observed
-                ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
-
-                // this is slow
-                //tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png"); // dot can't cope with chinese chars
-            }
+            })
+            {
+                IsBackground = true
+            }.Start();
 
             return tactics;
         }
