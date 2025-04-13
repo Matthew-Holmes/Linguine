@@ -2,6 +2,7 @@
 using Infrastructure;
 using DataClasses;
 using Config;
+using Helpers;
 
 namespace LearningExtraction
 {
@@ -31,6 +32,7 @@ namespace LearningExtraction
             ret.DefinitionResolver = new BatchDefinitionResolver();
             ret.DefinitionResolver.Agent = AgentFactory.GenerateProcessingAgent(
                 AgentTask.DefinitionResolution, targetLanguage);
+            ret.DefinitionResolver.PromptParts = TextFactory.DefinitionResolutionString(targetLanguage);
 
             ret.DefinitionResolver.Dictionary = dictionary; // maybe make an interface for what the dictionary is used for here
 

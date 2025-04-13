@@ -5,6 +5,7 @@ using System.Text;
 using DataClasses;
 using System.Security.Cryptography;
 using Serilog;
+using Helpers;
 
 namespace LearningExtraction
 {
@@ -17,6 +18,8 @@ namespace LearningExtraction
 
         public AgentBase Agent { get; set; }
         public ExternalDictionary Dictionary { get; set; }
+
+        public ForDefinitionResolution PromptParts { get; set; }
 
 
         public BatchDefinitionResolver()
@@ -140,37 +143,39 @@ namespace LearningExtraction
 
                 StringBuilder builder = new StringBuilder();
 
-                builder.Append("Word: ");
+                builder.Append(PromptParts.word);
                 builder.Append(td.Units[i]);
 
                 builder.AppendLine();
                 builder.AppendLine();
 
+                // TODO - need to translate these if the texts is in target language
 
-                if (parentContext.Count > 0)
-                {
-                    builder.AppendLine("Text source summary and context:");
-                    foreach (String parentContextItem in parentContext)
-                    {
-                        builder.AppendLine(parentContextItem);
-                    }
-                    builder.AppendLine();
-                }
+                //if (parentContext.Count > 0)
+                //{
+                //    builder.AppendLine("Text source summary and context:");
+                //    foreach (String parentContextItem in parentContext)
+                //    {
+                //        builder.AppendLine(parentContextItem);
+                //    }
+                //    builder.AppendLine();
+                //}
 
                 if (contexts.Count > 0)
                 {
-                    builder.AppendLine("Surrounding Context: ");
+                    builder.AppendLine(PromptParts.surroundingContext);
                     builder.Append(contexts[i]);
                     builder.AppendLine();
                 }
 
                 if (defs[i].Count == 1)
                 {
-                    builder.Append("Definition: ");
+                    throw new NotImplementedException();
+                    // TODO - custom yes/no prompt for this
                 }
                 else
                 {
-                    builder.Append("Definitions: ");
+                    builder.Append(PromptParts.definitionOptions);
                 }
 
                 for (int j = 1 /* one indexing !*/; j != defs[i].Count + 1; j++)
