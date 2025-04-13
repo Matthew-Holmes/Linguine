@@ -16,10 +16,14 @@ namespace LearningExtraction
 
         public int MaxContextChars { get; set; } = 200;
 
-        public AgentBase Agent { get; set; }
+        public AgentBase MultiDefinitionAgent { get; set; }
+        public AgentBase SingleDefinitionAgent { get; set; }
         public ExternalDictionary Dictionary { get; set; }
 
         public ForDefinitionResolution PromptParts { get; set; }
+
+        public List<String> Affirmatives { get; set; }
+        public List<String> Negatives { get; set; }
 
 
         public BatchDefinitionResolver()
@@ -62,15 +66,18 @@ namespace LearningExtraction
             List<String> contexts = DecompositionHelper.GetContextWindows(
                 injective, LHSContextUnits, RHSContextUnits, MaxContextChars);
 
-            List<String> prompts = FormPromptsOneIndexed(td, defs, contexts, parentContext);
+            List<Prompt?> prompts = FormPromptsOneIndexed(td, defs, contexts, parentContext);
 
             // the prompt is empty if there is no work to be done
             Task<String> defaultTask = Task<String>.Factory.StartNew(() => "0");
 
             var getResponseTasks = prompts.Select(prompt 
-                => prompt != "" 
-                    ? Agent.GetResponse(prompt) 
-                    : defaultTask);
+                => prompt is not null 
+                    ? 
+                    (
+                        prompt.isMultiDef ? MultiDefinitionAgent.GetResponse(prompt.text)
+                                          : SingleDefinitionAgent.GetResponse(prompt.text)
+                    ) : defaultTask);
 
             String[] responses = await Task.WhenAll(getResponseTasks);
 
@@ -80,48 +87,93 @@ namespace LearningExtraction
             {
                 String response = responses[ri];
 
-                int defIndex;
-
-                try
+                if (prompts[ri] is null)
                 {
+                    correctDefnIndices.Add(-1);
+                    continue;
+                }
+
+                if (prompts[ri].isMultiDef)
+                {
+
+                    int defIndex;
 
                     try
                     {
-                        defIndex = int.Parse(response);
+                        try
+                        {
+                            defIndex = int.Parse(response);
+                        }
+                        catch (Exception _)
+                        {
+                            // have another go if the agent returned the whole line, not just an integer
+                            defIndex = int.Parse(response.Split('.')[0]);
+                        }
                     }
                     catch (Exception _)
                     {
-                        // have another go if the agent returned the whole line, not just an integer
-                        defIndex = int.Parse(response.Split('.')[0]);
+                        Debug.WriteLine($"failed to parse response {response}");
+                        defIndex = -1;
                     }
-                } catch (Exception _)
-                {
-                    Debug.WriteLine($"failed to parse response {response}");
-                    defIndex = -1;
-                }
 
-                if (defIndex == -1) { defIndex++; /* keep this -1 even after reverting to zero indexing */ }
+                    if (defIndex == -1) { defIndex++; /* keep this -1 even after reverting to zero indexing */ }
 
-                // edge case snapping to what will become -1, i.e. no definition
-                if (defIndex - 1 > defs[ri].Count)
-                {
-                    Log.Warning("agent gave an index above the total length");
-                    defIndex = 0;
-                }
-                if (defIndex < -1)
-                {
-                    Log.Warning("agent gave an index below -1");
-                    defIndex = 0;
-                }
+                    // edge case snapping to what will become -1, i.e. no definition
+                    if (defIndex - 1 > defs[ri].Count)
+                    {
+                        Log.Warning("agent gave an index above the total length");
+                        defIndex = 0;
+                    }
+                    if (defIndex < -1)
+                    {
+                        Log.Warning("agent gave an index below -1");
+                        defIndex = 0;
+                    }
 
-                correctDefnIndices.Add(defIndex - 1 /* used one indexing with the agent */);
+                    correctDefnIndices.Add(defIndex - 1 /* used one indexing with the agent */);
+                } 
+                else
+                {
+                    bool wasCorrect = false;
+                    bool wasIncorrect = false;
+
+                    foreach (String affirmative in Affirmatives)
+                    {
+                        if (response.Trim() == affirmative)
+                        {
+                            wasCorrect = true;
+                        }
+                    }
+
+                    foreach (String negative in Negatives)
+                    {
+                        if (response.Trim() == negative)
+                        {
+                            wasCorrect = true;
+                        }
+                    }
+
+                    if (wasCorrect && wasIncorrect)
+                    {
+                        Log.Warning("result was both negative and positive, response: {response}", response);
+                    }
+
+                    if (!wasCorrect && !wasCorrect)
+                    {
+                        Log.Warning("couldn't parse anything from response: {response}", response);
+                    }
+
+                    correctDefnIndices.Add(wasCorrect ? 0 : -1);
+                }
             }
 
             return correctDefnIndices;
             
         }
 
-        private List<String> FormPromptsOneIndexed(TextDecomposition td, List<List<DictionaryDefinition>> defs, List<String> contexts, List<String> parentContext)
+        private record Prompt(String text, bool isMultiDef);
+
+        private List<Prompt?> FormPromptsOneIndexed(TextDecomposition td, List<List<DictionaryDefinition>> defs, List<String> contexts, List<String> parentContext)
         {
             // gets the prompts to pass to the agent
             // if there is no decision to be made then the prompt is empty
@@ -134,12 +186,12 @@ namespace LearningExtraction
                 throw new ArgumentException("all provided enumerables must be the same length");
             }
 
-            List<String> ret = new List<String>();
+            List<Prompt?> ret = new List<Prompt?>();
 
             for (int i = 0; i != defs.Count; i++)
             {
                 // don't need to resolve anything
-                if (defs[i].Count <= 1) { ret.Add(""); continue; }
+                if (defs[i].Count == 0) { ret.Add(null); continue; }
 
                 StringBuilder builder = new StringBuilder();
 
@@ -170,23 +222,27 @@ namespace LearningExtraction
 
                 if (defs[i].Count == 1)
                 {
-                    throw new NotImplementedException();
-                    // TODO - custom yes/no prompt for this
+                    builder.Append(PromptParts.singleDefinition);
+                    builder.AppendLine();
+                    builder.Append(defs[i][0].Definition);
+
+                    ret.Add(new Prompt(builder.ToString(), false));
                 }
                 else
                 {
                     builder.Append(PromptParts.definitionOptions);
+
+                    for (int j = 1 /* one indexing !*/; j != defs[i].Count + 1; j++)
+                    {
+                        builder.AppendLine();
+                        builder.Append(j.ToString());
+                        builder.Append(". ");
+                        builder.Append(defs[i][j - 1].Definition);
+                    }
+
+                    ret.Add(new Prompt(builder.ToString(), true));
                 }
 
-                for (int j = 1 /* one indexing !*/; j != defs[i].Count + 1; j++)
-                {
-                    builder.AppendLine();
-                    builder.Append(j.ToString());
-                    builder.Append(". ");
-                    builder.Append(defs[i][j-1].Definition);
-                }
-
-                ret.Add(builder.ToString());
             }
             return ret;
         }

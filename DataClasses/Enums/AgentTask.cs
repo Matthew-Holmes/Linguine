@@ -5,7 +5,8 @@
     {
         ContextChangeIdentification,
         ContextUpdating,
-        DefinitionResolution,
+        MultiDefinitionResolution,
+        SingleDefinitionResolution,
         DecompositionToStatements,
         DecompositionToUnits,
         UnitRooting,

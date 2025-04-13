@@ -26,7 +26,9 @@ namespace Agents
 
             {AgentTask.ContextUpdating, "Consider the following statements, and context, please update the context if it has changed. Such as a change of location, time or focus. If you do think the context has changed, preserve context elements that are still applicable. Remove lines that no longer apply. Respond with just the new context, with each item on a new line as before. DO NOT SUMMARISE - provide concise contextual information only. ONLY RESPOND WITH THE NEW CONTEXT, no other information"},
 
-            {AgentTask.DefinitionResolution, "Given the following word, context and definition options, determine the most appropriate definition, respond with only a single integer value and nothing else using the indexing of the definitions given, if no definitions match, respond -1" },
+            {AgentTask.MultiDefinitionResolution, "Given the following word, context and definition options, determine the most appropriate definition, respond with only a single integer value and nothing else using the indexing of the definitions given, if no definitions match, respond -1" },
+
+            {AgentTask.SingleDefinitionResolution, "Given the following word, context and definitions, do you think the definition is correct, ignoring inflection, reply either yes or no, and nothing else" },
 
             {AgentTask.DecompositionToStatements, "break the following text into the statements composing it, usually sentences for conventional text, they should be long enough that with context provided a user can understand the meaning of the statement; the statements must be verbatim from the text DO NOT SUMMARISE, DO NOT NUMBER THE STATEMENTS, the statements should map injectively into the text. Return each statement on a new line" },
 
@@ -49,7 +51,9 @@ namespace Agents
 
             {AgentTask.ContextUpdating, "Tenez compte des déclarations suivantes et du contexte, veuillez mettre à jour le contexte pour refléter les changements qui se produisent entre les lignes demandées, conservez les éléments de contexte qui sont toujours applicables, mais supprimez et ajoutez des lignes de contexte afin que les déclarations suivantes soient compréhensibles en utilisant ce contexte. Répondez avec uniquement le nouveau contexte, avec chaque élément sur une nouvelle ligne comme auparavant. NE PAS RÉSUMER – fournissez uniquement des informations contextuelles concises. RÉPONDEZ UNIQUEMENT AVEC LE NOUVEAU CONTEXTE, aucune autre information"},
 
-            {AgentTask.DefinitionResolution, "Étant donné les options de mot, de contexte et de définition suivantes, déterminez la définition la plus appropriée, répondez avec une seule valeur entière et rien d'autre en utilisant l'indexation des définitions données, si aucune définition ne correspond, répondez -1" },
+            {AgentTask.MultiDefinitionResolution, "Étant donné les options de mot, de contexte et de définition suivantes, déterminez la définition la plus appropriée, répondez avec une seule valeur entière et rien d'autre en utilisant l'indexation des définitions données, si aucune définition ne correspond, répondez -1" },
+
+            {AgentTask.SingleDefinitionResolution, "Étant donné le mot suivant, le contexte et les définitions, pensez-vous que la définition est correcte, en ignorant l'inflexion, répondez oui ou non, et rien d'autre" },
 
             {AgentTask.DecompositionToStatements, "diviser le texte suivant en déclarations qui le composent, généralement des phrases pour un texte conventionnel, elles doivent être suffisamment longues pour qu'avec le contexte fourni, un utilisateur puisse comprendre le sens de la déclaration ; les déclarations doivent être textuellement tirées du texte. NE PAS RÉSUMER, NE NUMÉROTER PAS LES DÉCLARATIONS, les déclarations doivent être mappées de manière injective dans le texte. Renvoie chaque instruction sur une nouvelle ligne" },
 
@@ -73,7 +77,9 @@ namespace Agents
 
             {AgentTask.ContextUpdating, "考虑以下陈述和上下文，请更新上下文以反映所要求行之间发生的变化，保留仍然适用的上下文元素，但删除和添加上下文行，以便后续陈述可以使用该上下文来理解。仅使用新的上下文进行回复，每一项都像以前一样在新行上。不要总结 - 仅提供简明的上下文信息。仅使用新的上下文进行回复，不要提供其他信息"},
 
-            {AgentTask.DefinitionResolution, "给定以下单词、上下文和定义选项，确定最合适的定义，使用给定定义的索引仅用一个整数值来响应，而不使用其他任何值，如果没有匹配的定义，则响应 -1" },
+            {AgentTask.MultiDefinitionResolution, "给定以下单词、上下文和定义选项，确定最合适的定义，使用给定定义的索引仅用一个整数值来响应，而不使用其他任何值，如果没有匹配的定义，则响应 -1" },
+
+            {AgentTask.SingleDefinitionResolution, "给出以下单词、上下文和定义，你认为定义是否正确，忽略词形变化，回答“是”或“否”，仅此而已" },
 
             {AgentTask.DecompositionToStatements, "将以下文本分解为组成它的语句，通常是句子，对于常规文本，它们应该足够长，以便用户在提供上下文的情况下能够理解语句的含义；语句必须逐字逐句地来自文本不要总结，不要对语句进行编号，语句应该注入到文本中。在新行上返回每个语句" },
 

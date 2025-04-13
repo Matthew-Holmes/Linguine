@@ -30,9 +30,15 @@ namespace LearningExtraction
 
             // keep this on the cheaper API for now (?) since is the most expensive part
             ret.DefinitionResolver = new BatchDefinitionResolver();
-            ret.DefinitionResolver.Agent = AgentFactory.GenerateProcessingAgent(
-                AgentTask.DefinitionResolution, targetLanguage);
-            ret.DefinitionResolver.PromptParts = TextFactory.DefinitionResolutionString(targetLanguage);
+
+            ret.DefinitionResolver.MultiDefinitionAgent = AgentFactory.GenerateProcessingAgent(
+                AgentTask.MultiDefinitionResolution, targetLanguage);
+            ret.DefinitionResolver.SingleDefinitionAgent = AgentFactory.GenerateProcessingAgent(
+                AgentTask.SingleDefinitionResolution, targetLanguage);
+
+            ret.DefinitionResolver.PromptParts  = TextFactory.DefinitionResolutionString(targetLanguage);
+            ret.DefinitionResolver.Affirmatives = TextFactory.Affirmatives(targetLanguage);
+            ret.DefinitionResolver.Negatives    = TextFactory.Negatives(targetLanguage);
 
             ret.DefinitionResolver.Dictionary = dictionary; // maybe make an interface for what the dictionary is used for here
 

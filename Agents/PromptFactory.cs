@@ -10,6 +10,7 @@ namespace Agents
     public static class PromptFactory
     {
         // TODO - a similar method but for when in the user's native language
+        // TODO - reconcile this with text factory in helpers
         public static String PromptForForeignLanguageDefinitionResolution(
             LanguageCode native, String targetLanguageWord, String targetLanguageStatement, String nativeLanguageStatement)
         {
