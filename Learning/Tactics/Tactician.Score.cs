@@ -44,6 +44,7 @@ namespace Learning
             var random = new Random();
             int ret = topCandidates[random.Next(topCandidates.Count)].Key;
             Log.Information("found id with twist score of {value}", CurrentTwistScores[ret]);
+            Log.Information("total occurences: {occurences}", Strategist.VocabModel.WordFrequencies[ret]);
 
             if (CurrentTacticalState?.ContainsKey(ret) ?? false)
             {

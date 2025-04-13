@@ -149,6 +149,7 @@ namespace LearningExtraction
                     {
                         if (response.Trim() == negative)
                         {
+                            Log.Information("single definition incorrect");
                             wasCorrect = true;
                         }
                     }
