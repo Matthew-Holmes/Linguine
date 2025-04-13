@@ -21,7 +21,7 @@ using Serilog;
 
 namespace Learning
 {
-    public partial class Strategist
+    internal partial class Strategist
     {
         // Agent that aims to maximise the probability of correct response on first try
         // using discounted rewards looking into the future
@@ -36,24 +36,24 @@ namespace Learning
         // since this is what we can control when planning the next session
 
 
-        public LearningTacticsHelper TacticsHelper = new LearningTacticsHelper();
-        public List<Type> TacticsUsed { get; private set; }
-        public IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
-        public IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
-        public IReadOnlyDictionary<Type, double> DefaultRewards { get; internal set; }
-        public double BaseLineReward { get; internal set; }
-        public double BaseLineInitialPKnown { get; internal set; }
+        internal LearningTacticsHelper TacticsHelper = new LearningTacticsHelper();
+        internal List<Type> TacticsUsed { get; private set; }
+        internal IReadOnlyDictionary<int, DefinitionFeatures> DefFeatures { get; private set; }
+        internal IReadOnlyDictionary<int, Tuple<LearningTactic, DateTime>> LastTacticUsedForDefinition { get; private set; }
+        internal IReadOnlyDictionary<Type, double> DefaultRewards { get; set; }
+        internal double BaseLineReward { get; set; }
+        internal double BaseLineInitialPKnown { get; set; }
 
         private LogisticRegression Model { get; set; }
-        public VocabularyModel VocabModel { get; init; }
+        internal VocabularyModel VocabModel { get; init; }
 
 
-        public Strategist(VocabularyModel vocab)
+        internal Strategist(VocabularyModel vocab)
         {
             VocabModel = vocab;
         }
 
-        public Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
+        internal Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             ModelData modelData = GetDataForModel(sessions, defs);
             LogisticRegression model = new LogisticRegression(
@@ -97,12 +97,12 @@ namespace Learning
             return tactics;
         }
 
-        public double PredictProbability(FollowingSessionDatum input)
+        internal double PredictProbability(FollowingSessionDatum input)
         {
             return Model.PredictProbability(input, TacticsUsed);
         }
 
-        public double GetExistingPKnown(int defKey, double lookAheadDays)
+        internal double GetExistingPKnown(int defKey, double lookAheadDays)
         {
             // predicts the probability we will know the definition in one day
             // todo - use discounted return?
@@ -118,7 +118,7 @@ namespace Learning
             }
         }
 
-        public FollowingSessionDatum? GetCurrentRewardFeatures(int key, double lookAheadDays)
+        internal FollowingSessionDatum? GetCurrentRewardFeatures(int key, double lookAheadDays)
         {
             if (!LastTacticUsedForDefinition.ContainsKey(key))
             {

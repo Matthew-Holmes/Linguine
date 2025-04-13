@@ -10,6 +10,16 @@ namespace Learning
 {
     partial class Strategist
     {
+        internal static FollowingSessionDatum CreateDatum(DefinitionFeatures features, Type tacticType, double interval)
+        {
+            return new FollowingSessionDatum(
+                defFeatures: features,
+                sessionTacticType: tacticType,
+                intervalDays: interval,
+                followingWasCorrect: false // prediction ignores this
+            );
+        }
+
         private ModelData GetDataForModel(
             List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
@@ -142,14 +152,6 @@ namespace Learning
             return ret;
         }
 
-        public static FollowingSessionDatum CreateDatum(DefinitionFeatures features, Type tacticType, double interval)
-        {
-            return new FollowingSessionDatum(
-                defFeatures: features,
-                sessionTacticType: tacticType,
-                intervalDays: interval,
-                followingWasCorrect: false // prediction ignores this
-            );
-        }
+
     }
 }

@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class SlowSingleCorrectTry : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new SingleCorrectTry();
+        internal override LearningTactic? Prerequisite => new SingleCorrectTry();
 
-        public SlowSingleCorrectTry()
+        internal SlowSingleCorrectTry()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MinAverageTime: TimeSpan.FromSeconds(10)) };
         }

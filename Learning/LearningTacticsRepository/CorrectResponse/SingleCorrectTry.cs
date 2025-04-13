@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class SingleCorrectTry : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new AllCorrect();
+        internal override LearningTactic? Prerequisite => new AllCorrect();
 
-        public SingleCorrectTry()
+        internal SingleCorrectTry()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxExposures: 1, MinCorrect: 1) };
         }

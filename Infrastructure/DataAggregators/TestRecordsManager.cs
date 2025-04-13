@@ -1,14 +1,15 @@
 ﻿using DataClasses;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
-    public class TestRecords
+    public class TestRecordsManager
     {
         private ExternalDictionary _dictionary;
 
         private LinguineDbContextFactory _dbf;
 
-        public TestRecords(ExternalDictionary dictionary, LinguineDbContextFactory dbf)
+        public TestRecordsManager(ExternalDictionary dictionary, LinguineDbContextFactory dbf)
         {
             _dictionary = dictionary;
             _dbf = dbf;
@@ -17,19 +18,9 @@ namespace Infrastructure
         public List<TestRecord> AllRecordsTimeSorted()
         {
             using var context = _dbf.CreateDbContext();
-            return context.TestRecords.ToList(); // TODO - check time sorted
+            return context.TestRecords.Include(tr => tr.Definition).ToList();
         }
 
-        public List<DictionaryDefinition> DistinctDefinitionsTested()
-        {
-            using var context = _dbf.CreateDbContext();
-            return context.TestRecords.Any()
-                ? context.TestRecords
-                         .GroupBy(tr => tr.DictionaryDefinitionKey)
-                         .Select(grouping => grouping.First().Definition)
-                         .ToList() 
-                : new List<DictionaryDefinition>();
-        }
 
         public int NumberDistinctDefinitionsTested()
         {
@@ -66,22 +57,6 @@ namespace Infrastructure
             return toAdd;
         }
 
-        public IReadOnlyDictionary<int, TestRecord> LatestTestRecords()
-        {
-            using var context = _dbf.CreateDbContext();
-
-            if (!context.TestRecords.Any())
-                return new Dictionary<int, TestRecord>();
-
-            var latestRecords = context.TestRecords
-                .GroupBy(tr => tr.DictionaryDefinitionKey)
-                .Select(group => group
-                    .OrderByDescending(tr => tr.Finished)
-                    .First())
-                .ToDictionary(tr => tr.DictionaryDefinitionKey);
-
-            return latestRecords;
-        }
 
         public IReadOnlyDictionary<int, List<TestRecord>> Last5TestRecords()
         {

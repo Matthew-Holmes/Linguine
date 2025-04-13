@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Serilog;
+using System.Net.NetworkInformation;
 
 namespace Infrastructure
 {
@@ -10,6 +11,8 @@ namespace Infrastructure
     using FrequencyBucketMap = IReadOnlyDictionary<int, HashSet<int>>;
     using ZipfMap            = IReadOnlyDictionary<int, double>;
 
+    public record FrequencyData(FrequencyMap freqs, ZipfMap zipfs, double zipfLo, double zipfHi);
+
     public static class DefinitionFrequencyEngine
     {
         public static FrequencyMap?       DefinitionFrequencies       { get; private set; }
@@ -17,6 +20,20 @@ namespace Infrastructure
         public static ZipfMap?            DefinitionZipfScores        { get; private set; }
         public static double              ZipfLo                      { get; private set; }
         public static double              ZipfHi                      { get; private set; }
+
+        public static FrequencyData? FrequencyData
+        {
+            get 
+            {
+                if (DefinitionFrequencies is null)
+                    return null;
+                if (DefinitionZipfScores is null)
+                    return null;
+
+                return new FrequencyData(DefinitionFrequencies, DefinitionZipfScores, ZipfLo, ZipfHi);
+            }
+        }
+
 
         public static void UpdateDefinitionFrequencies(LinguineDbContext context)
         {

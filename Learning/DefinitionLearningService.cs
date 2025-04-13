@@ -2,6 +2,7 @@
 using Serilog;
 using DataClasses;
 using Learning.Strategy;
+using Infrastructure.Migrations;
 
 namespace Learning
 {
@@ -45,52 +46,59 @@ namespace Learning
 
         public bool NeedToBurnInVocabularyData()
         {
-            return _testRecords.NumberDistinctDefinitionsTested() < _minWordsTested;
+            return _allRecords.Count < _minWordsTested;
         }
 
+        public List<DictionaryDefinition> DistinctDefinitionTested(List<TestRecord> allRecords)
+        {
+            return allRecords.GroupBy(tr => tr.DictionaryDefinitionKey)
+                             .Select(grouping => grouping.First().Definition)
+                             .ToList();
+        }
 
-        private ExternalDictionary                _dictionary;
-        private TestRecords                       _testRecords;
-        private ParsedDictionaryDefinitionManager _pdefManager;
-        private StatementManager                  _statementManager;
+        private FrequencyData    _freqData;
+        private List<TestRecord> _allRecords;
 
         private Strategist Strategist { get; set; }
         private Tactician Tactician { get; set; }
+        private VocabularyModel VocabModel { get; init; }
 
-        public DefinitionLearningService(
-            ExternalDictionary                dictionary,
-            TestRecords                       testRecords,
-            ParsedDictionaryDefinitionManager pdefManager,
-            StatementManager                  statementManager,
-            VocabularyModel                  vocabModel)
+
+        public DefinitionLearningService(FrequencyData freqData, List<TestRecord> allRecords)
         {
-            _dictionary       = dictionary;
-            _testRecords      = testRecords;
-            _pdefManager      = pdefManager;
-            _statementManager = statementManager;
+            _freqData = freqData;
+            _allRecords = allRecords;
 
-            ResolveLearningTactics(vocabModel);
+            VocabModel = new VocabularyModel(freqData, _allRecords);
+
+            ResolveLearningTactics(VocabModel);
+
         }
+
+        public Tuple<double[], double[]> GetPKnownByBinnedZipf()
+        {
+            return VocabModel.GetPKnownByBinnedZipf();
+        }
+
 
         private void ResolveLearningTactics(VocabularyModel vocabModel)
         {
             LearningTacticsHelper tactics = new LearningTacticsHelper();
 
-            List<List<TestRecord>> sessions = LearningTacticsHelper.GetSessions(_testRecords.AllRecordsTimeSorted());
+            List<List<TestRecord>>     sessions = LearningTacticsHelper.GetSessions(_allRecords);
+            List<DictionaryDefinition> distinct = DistinctDefinitionTested(_allRecords);
 
-            foreach (DictionaryDefinition def in _testRecords.DistinctDefinitionsTested())
+            foreach (DictionaryDefinition def in distinct)
             {
                 tactics.IdentifyTacticsForSessions(sessions, def.DatabasePrimaryKey);
             }
 
             Strategist strategist = new Strategist(vocabModel);
 
-            List<DictionaryDefinition> distinct = _testRecords.DistinctDefinitionsTested();
 
             Tactician = strategist.BuildModel(sessions, distinct);
 
             Strategist = strategist;
-
         }
 
 
@@ -99,12 +107,8 @@ namespace Learning
             return Tactician.GetBestDefID();
         }
 
-        public DictionaryDefinition GetRandomDefinition()
-        {
-            return _dictionary.GetRandomDefinition();
-        }
 
-        public DictionaryDefinition GetFrequentDefinition(int freq = 5)
+        public int GetFrequentDefinition(int freq = 5)
         {
             if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
             {
@@ -118,20 +122,12 @@ namespace Learning
                 .ToList();
 
             if (eligibleKeys.Count == 0)
-                return null; // No eligible keys found
+                return -1; // No eligible keys found
 
             Random rnd = new Random();
             int def_key = eligibleKeys[rnd.Next(eligibleKeys.Count)];
 
-            DictionaryDefinition? def = _dictionary.TryGetDefinitionByKey(def_key);
-
-            if (def is null)
-            {
-                Log.Error("couldn't find a definition that was supposed to exist");
-                throw new Exception(); // maybe update the frequencies then try again?
-            }
-
-            return def;
+            return def_key;
         }
 
         public bool AnyDataForWordFrequencies()
@@ -151,8 +147,22 @@ namespace Learning
         }
 
 
+        public IReadOnlyDictionary<int, TestRecord> LatestTestRecords(List<TestRecord> records)
+        {
+            if (!records.Any())
+                return new Dictionary<int, TestRecord>();
 
-        public DictionaryDefinition GetInitialVocabEstimationDefinition()
+            var latestRecords = records
+                .GroupBy(tr => tr.DictionaryDefinitionKey)
+                .Select(group => group
+                    .OrderByDescending(tr => tr.Finished)
+                    .First())
+                .ToDictionary(tr => tr.DictionaryDefinitionKey);
+
+            return latestRecords;
+        }
+
+        public int GetInitialVocabEstimationDefinition()
         {
             // adaptive binning approach to get good coverage
             int chosenId;
@@ -163,7 +173,7 @@ namespace Learning
                 throw new Exception();
             }
 
-            IReadOnlyDictionary<int, TestRecord> latest = _testRecords.LatestTestRecords();
+            IReadOnlyDictionary<int, TestRecord> latest = LatestTestRecords(_allRecords);
 
             IReadOnlyDictionary<int, double> zipfScores = DefinitionFrequencyEngine.DefinitionZipfScores;
 
@@ -220,34 +230,29 @@ namespace Learning
             if (candidates.Count == 0)
             {
                 // have filled our bins a decent amount, lets just randomly sample
-                DictionaryDefinition? ret = GetFrequentDefinition(1);
+                int ret = GetFrequentDefinition(1);
 
                 int cnt = 0;
-                while (ret is not null && latest.ContainsKey(ret.DatabasePrimaryKey))
+                while (latest.ContainsKey(ret))
                 {
                     ret = GetFrequentDefinition(1);
                     cnt++;
                     if (cnt > _minWordsTested)
                     {
                         Log.Warning("couldn't find a definition to test, even though we should have enough data");
-                        ret = null;
+                        ret = -1;
                         break;
                     }
                 }
 
                 Log.Information("took {count} cycles to find a unseen word", cnt);
 
-                if (ret is null)
-                {
-                    return GetRandomDefinition();
-                }
-
                 return ret;
             }
 
             chosenId = candidates[rng.Next(candidates.Count())].Key;
 
-            return _dictionary.TryGetDefinitionByKey(chosenId) ?? throw new Exception();
+            return chosenId;
         }
 
         public void Inform(TestRecord added)

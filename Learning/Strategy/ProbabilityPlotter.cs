@@ -13,9 +13,9 @@ using OxyPlot.Legends;
 namespace Learning.Strategy
 {
 
-    public static class ProbabilityPlotter
+    internal static class ProbabilityPlotter
     {
-        public static void PlotProbabilityCurves(
+        internal static void PlotProbabilityCurves(
             LogisticRegression model,
             DefinitionFeatures defFeatures,
             List<Type> tacticsTypes,
@@ -93,8 +93,5 @@ namespace Learning.Strategy
                 range.Add(start + i * step);
             return range;
         }
-
-
     }
-
 }

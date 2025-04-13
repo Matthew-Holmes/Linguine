@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Learning
 {
-    public class LearningTacticsHelper
+    internal class LearningTacticsHelper
     {
         // class for working with single session strategies relating to vocabulary acquisition
 
 
         // if no flashcards answered in 5 minutes, assume the session has ended
-        public static TimeSpan MinTimeBetweenSessions { get; } = TimeSpan.FromMinutes(5.0);
-        public static List<List<TestRecord>> GetSessions(List<TestRecord> total)
+        internal static TimeSpan MinTimeBetweenSessions { get; } = TimeSpan.FromMinutes(5.0);
+        internal static List<List<TestRecord>> GetSessions(List<TestRecord> total)
         {
             List<List<TestRecord>> ret = new List<List  <TestRecord>>();
 
@@ -55,12 +55,12 @@ namespace Learning
         // the second all the penultimate etc...
         private List<List<LearningTactic>> LearningTacticHeirarchy;
 
-        public LearningTacticsHelper()
+        internal LearningTacticsHelper()
         {
             LearningTacticHeirarchy = ResolveLearningTactics();
         }
 
-        public LearningTactic? IdentityTacticForSession(List<TestRecord> session, int defID)
+        internal LearningTactic? IdentityTacticForSession(List<TestRecord> session, int defID)
         {
             foreach (List<LearningTactic> level in LearningTacticHeirarchy)
             {
@@ -87,7 +87,7 @@ namespace Learning
             return null;
         }
 
-        public List<LearningTactic?> IdentifyTacticsForSessions(List<List<TestRecord>> sessions, int defID)
+        internal List<LearningTactic?> IdentifyTacticsForSessions(List<List<TestRecord>> sessions, int defID)
         {
             List<LearningTactic?> ret = new List<LearningTactic?>();
 
@@ -143,7 +143,11 @@ namespace Learning
             List<LearningTactic> allTactics = new List<LearningTactic>();
             foreach (var type in derivedTypes)
             {
-                if (Activator.CreateInstance(type) is LearningTactic tactic)
+                if (Activator.CreateInstance(type,
+                                             BindingFlags.Instance | BindingFlags.NonPublic,
+                                             null,
+                                             null,
+                                             null) is LearningTactic tactic)
                 {
                     allTactics.Add(tactic);
                 }

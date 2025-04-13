@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class WasTested : LearningTactic
     {
-        public override LearningTactic? Prerequisite => null;
+        internal override LearningTactic? Prerequisite => null;
 
-        public WasTested()
+        internal WasTested()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MinExposures: 1) };
         }

@@ -97,7 +97,7 @@ namespace Linguine.Tabs
         private void SetupVocabTest()
         {
             _isVocabTest = true;
-            _vocabTestRemaining = _model.DefLearning?.VocabTestWordCount ?? throw new Exception("couldn't access definition learning service");
+            _vocabTestRemaining = _model.VocabTestWordCount ?? throw new Exception("couldn't access definition learning service");
 
             _vocabTestRemaining -= _model.DistintWordsTested;
 
@@ -228,7 +228,6 @@ namespace Linguine.Tabs
             Reset();
         }
 
-        private int untilModelReset = 5;
         private void Reset()
         {
             if (_isVocabTest)
@@ -288,17 +287,6 @@ namespace Linguine.Tabs
 
             _posed = DateTime.Now;
 
-            if (untilModelReset <= 0)
-            {
-                // TODO - maybe run this on a background thread
-                // TODO - what if this gets slow??
-                _model.UpdateVocabularyModel();
-                untilModelReset = 5;
-            }
-
-            untilModelReset--;
         }
-
-        
     }
 }

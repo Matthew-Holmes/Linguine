@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class EventuallyLearntTail2Slowly : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new EventuallyLearntSlowly();
+        internal override LearningTactic? Prerequisite => new EventuallyLearntSlowly();
 
-        public EventuallyLearntTail2Slowly()
+        internal EventuallyLearntTail2Slowly()
         {
             Constraints = new List<Constraint> { EventuallyLearntTail2MediumTime.ResolvesTail2 };
         }

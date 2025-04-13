@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class QuicklyInconclusive : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new Inconclusive();
+        internal override LearningTactic? Prerequisite => new Inconclusive();
 
-        public QuicklyInconclusive()
+        internal QuicklyInconclusive()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxTotalTime: TimeSpan.FromSeconds(20)) };
         }

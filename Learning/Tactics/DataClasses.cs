@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Learning.Tactics
 {
-    public record TacticTransition(Type? from, Type to, TimeSpan cost); // TODO - later we might make the model definition dependant?
+    internal record TacticTransition(Type? from, Type to, TimeSpan cost); // TODO - later we might make the model definition dependant?
 
-    public record MarkovArrow(Type to, double prob, double costSeconds);
+    internal record MarkovArrow(Type to, double prob, double costSeconds);
 
-    public record MarkovGraph(Dictionary<Type, List<MarkovArrow>> directedEdges, List<MarkovArrow> edgesFromNull, double avgReward, RewardData rewardData);
+    internal record MarkovGraph(Dictionary<Type, List<MarkovArrow>> directedEdges, List<MarkovArrow> edgesFromNull, double avgReward, RewardData rewardData);
 
-    public record RewardData(IReadOnlyDictionary<Type, double> rewards, double startReward);
+    internal record RewardData(IReadOnlyDictionary<Type, double> rewards, double startReward);
 }

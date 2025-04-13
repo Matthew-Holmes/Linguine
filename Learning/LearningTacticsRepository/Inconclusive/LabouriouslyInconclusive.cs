@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class LabouriouslyInconclusive : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new Inconclusive();
+        internal override LearningTactic? Prerequisite => new Inconclusive();
 
-        public LabouriouslyInconclusive()
+        internal LabouriouslyInconclusive()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromMinutes(1)) };
         }

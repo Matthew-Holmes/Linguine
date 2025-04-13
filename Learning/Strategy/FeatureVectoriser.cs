@@ -9,20 +9,20 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Learning.Strategy
 {
-    public class FeatureVectoriser
+    internal class FeatureVectoriser
     {
         private readonly Dictionary<Type, int> _tacticTypeToIndex;
 
-        public FeatureVectoriser(IEnumerable<FollowingSessionDatum> data, List<Type> tacticTypes)
+        internal FeatureVectoriser(IEnumerable<FollowingSessionDatum> data, List<Type> tacticTypes)
         {
             _tacticTypeToIndex = tacticTypes.Select((type, i) => new { type, i })
                                             .ToDictionary(x => x.type, x => x.i);
         }
         //                           DiagQuad        bias
         //                         Linear  TopTriangle       
-        public int FeatureCount => 8 + 8+((8*8-8)/2) + 1 + _tacticTypeToIndex.Count;
+        internal int FeatureCount => 8 + 8+((8*8-8)/2) + 1 + _tacticTypeToIndex.Count;
 
-        public Vector<double> Vectorize(FollowingSessionDatum datum)
+        internal Vector<double> Vectorize(FollowingSessionDatum datum)
         {
             var features = new List<double>();
 
@@ -61,14 +61,14 @@ namespace Learning.Strategy
             return Vector<double>.Build.DenseOfEnumerable(features);
         }
 
-        public Vector<double> GetTarget(FollowingSessionDatum datum)
+        internal Vector<double> GetTarget(FollowingSessionDatum datum)
         {
             return Vector<double>.Build.Dense(new[] { datum.followingWasCorrect ? 1.0 : 0.0 });
         }
 
-        public Dictionary<Type, int> GetTacticIndexMap() => _tacticTypeToIndex;
+        internal Dictionary<Type, int> GetTacticIndexMap() => _tacticTypeToIndex;
 
-        public List<string> GetFeatureNames()
+        internal List<string> GetFeatureNames()
         {
             var names = new List<string>
             {

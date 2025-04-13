@@ -14,9 +14,9 @@ using Config;
 namespace Learning.Tactics
 {
 
-    public static class MarkovGraphPlotter
+    internal static class MarkovGraphPlotter
     {
-        public static void SaveMarkovPlot(MarkovGraph graph, String? outFileName = null)
+        internal static void SaveMarkovPlot(MarkovGraph graph, String? outFileName = null)
         {
             var dot = GenerateDot(graph);
             File.WriteAllText("graph.dot", dot);

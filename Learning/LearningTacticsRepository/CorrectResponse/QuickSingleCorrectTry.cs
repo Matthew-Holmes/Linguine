@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class QuickSingleCorrectTry : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new SingleCorrectTry();
+        internal override LearningTactic? Prerequisite => new SingleCorrectTry();
 
-        public QuickSingleCorrectTry()
+        internal QuickSingleCorrectTry()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxAverageTime: TimeSpan.FromSeconds(4)) };
         }

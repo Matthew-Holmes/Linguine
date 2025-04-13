@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Learning.LearningTacticsRepository
 {
-    class AllCorrect : LearningTactic
+    internal class AllCorrect : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new WasTested();
+        internal override LearningTactic? Prerequisite => new WasTested();
 
-        public AllCorrect()
+        internal AllCorrect()
         {
             Constraints = new List<Constraint> { _AllCorrect };
         }

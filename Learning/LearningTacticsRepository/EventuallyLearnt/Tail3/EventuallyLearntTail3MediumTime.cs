@@ -9,15 +9,15 @@ namespace Learning.LearningTacticsRepository
 {
     class EventuallyLearntTail3MediumTime : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new EventuallyLearntTail2MediumTime();
+        internal override LearningTactic? Prerequisite => new EventuallyLearntTail2MediumTime();
 
 
-        public EventuallyLearntTail3MediumTime()
+        internal EventuallyLearntTail3MediumTime()
         {
             Constraints = new List<Constraint> { ResolvesTail3 };
         }
 
-        public static bool ResolvesTail3(List<TestRecord> sortedSessionRecords, int defID)
+        internal static bool ResolvesTail3(List<TestRecord> sortedSessionRecords, int defID)
         {
             List<TestRecord> thisDef = sortedSessionRecords.Where(sr => sr.DictionaryDefinitionKey == defID).ToList();
 

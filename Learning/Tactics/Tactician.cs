@@ -13,19 +13,19 @@ using System.Transactions;
 
 namespace Learning
 {
-    public partial class Tactician
+    internal partial class Tactician
     {
         private Strategist Strategist { get; init; }
         private MarkovGraph MarkovGraph { get; set; }
 
         private double LookAheadDays { get; set; } = 1.0;
 
-        public Tactician(Strategist strat)
+        internal Tactician(Strategist strat)
         {
             Strategist = strat;
         }
 
-        public (IReadOnlyDictionary<Type, double>, double) GetRewardForFinalState(int defKey)
+        internal (IReadOnlyDictionary<Type, double>, double) GetRewardForFinalState(int defKey)
         {
             // pKnown is the vacuous final state - i.e. do nothing
             double pKnown = Strategist.GetExistingPKnown(defKey, LookAheadDays);

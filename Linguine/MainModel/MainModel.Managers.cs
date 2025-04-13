@@ -38,7 +38,7 @@ namespace Linguine
 
         private void LoadServices()
         {
-            InitialiseDefinitionLearningService();
+            StartDefinitionLearningService();
         }
 
         public ExternalDictionary? Dictionary

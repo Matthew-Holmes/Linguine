@@ -11,6 +11,19 @@ namespace Learning
 {
     partial class Strategist
     {
+        internal static bool WasCorrect(LearningTactic tactic)
+        {
+            if (tactic.Prerequisite is null)
+            {
+                return false;
+            }
+            if (tactic.Prerequisite.GetType() == typeof(AllCorrect))
+            {
+                return true;
+            }
+
+            return WasCorrect(tactic.Prerequisite);
+        }
 
         private (DefinitionFeatures, List<LearningTactic?>) GetFeaturesAndTactics(
             DictionaryDefinition def,
@@ -166,19 +179,7 @@ namespace Learning
             }
         }
 
-        public static bool WasCorrect(LearningTactic tactic)
-        {
-            if (tactic.Prerequisite is null)
-            {
-                return false;
-            }
-            if (tactic.Prerequisite.GetType() == typeof(AllCorrect))
-            {
-                return true;
-            }
 
-            return WasCorrect(tactic.Prerequisite);
-        }
 
         private double GetMaxTimeBetweenCorrect(List<List<TestRecord>> sessions, List<LearningTactic?> tactics)
         {

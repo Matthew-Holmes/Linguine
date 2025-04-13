@@ -9,7 +9,7 @@ using MathNet.Numerics.Statistics;
 
 namespace Learning
 {
-    public record BasicThresholds(
+    internal record BasicThresholds(
         int? MinExposures = null, int? MaxExposures = null, 
         int? MinCorrect   = null, int? MaxCorrect   = null,
         int? MinIncorrect = null, int? MaxIncorrect = null,
@@ -17,21 +17,21 @@ namespace Learning
         TimeSpan? MinAverageTime = null, TimeSpan? MaxAverageTime = null);
 
 
-    public delegate bool Constraint(List<TestRecord> sessionRecords, int DefID);
+    internal delegate bool Constraint(List<TestRecord> sessionRecords, int DefID);
 
-    public abstract class LearningTactic
+    internal abstract class LearningTactic
     {
         // TODO - while this is suitable for identifying tactics
         // need more thought when it comes to employing them
         // TODO - this makes a tree sort of structure - is that sufficient?
-        public abstract LearningTactic? Prerequisite { get; }
+        internal abstract LearningTactic? Prerequisite { get; }
 
-        public virtual List<BasicThresholds> Thresholds { get; init; } = new List<BasicThresholds>();
+        internal virtual List<BasicThresholds> Thresholds { get; init; } = new List<BasicThresholds>();
 
         protected virtual List<Constraint> Constraints { get; init; } = new List<Constraint>();
 
 
-        public bool UsedThisTactic(List<TestRecord> sessionRecords, int defID)
+        internal bool UsedThisTactic(List<TestRecord> sessionRecords, int defID)
         {
             if (Prerequisite?.UsedThisTactic(sessionRecords, defID) ?? true)
             {

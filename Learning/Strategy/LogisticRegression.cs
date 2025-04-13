@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace Learning.Strategy
 {
-    public class FeatureScaler
+    internal class FeatureScaler
     {
         private Vector<double> _mins;
         private Vector<double> _maxs;
 
-        public Vector<double> Mins => _mins;
-        public Vector<double> Maxs => _maxs;
-            
+        internal Vector<double> Mins => _mins;
+        internal Vector<double> Maxs => _maxs;
 
-        public void Fit(Matrix<double> X)
+
+        internal void Fit(Matrix<double> X)
         {
             int cols = X.ColumnCount;
             _mins = Vector<double>.Build.Dense(cols, double.PositiveInfinity);
@@ -35,7 +35,7 @@ namespace Learning.Strategy
             }
         }
 
-        public void Transform(Matrix<double> X)
+        internal void Transform(Matrix<double> X)
         {
             for (int i = 0; i < X.RowCount; i++)
             {
@@ -53,7 +53,7 @@ namespace Learning.Strategy
             }
         }
 
-        public Vector<double> Transform(Vector<double> x)
+        internal Vector<double> Transform(Vector<double> x)
         {
             var scaled = Vector<double>.Build.Dense(x.Count);
             for (int j = 0; j < x.Count; j++)
@@ -70,7 +70,7 @@ namespace Learning.Strategy
 
 
 
-    public class LogisticRegression
+    internal class LogisticRegression
     {
         private readonly Vector<double> _parameters;
         private double NormaliserLoData = 3e-1;
@@ -81,7 +81,7 @@ namespace Learning.Strategy
 
         private FeatureScaler _scaler;
 
-        public LogisticRegression(List<FollowingSessionDatum> data, List<Type> tacticsUsed)
+        internal LogisticRegression(List<FollowingSessionDatum> data, List<Type> tacticsUsed)
         {
             // TODO - tweak these as I gather more data
             if (data.Count < 500)
@@ -152,7 +152,7 @@ namespace Learning.Strategy
 
         }
 
-        public double PredictProbability(FollowingSessionDatum datum, List<Type> types)
+        internal double PredictProbability(FollowingSessionDatum datum, List<Type> types)
         {
             var vectorizer = new FeatureVectoriser(new List<FollowingSessionDatum> { datum }, types);
             var features = vectorizer.Vectorize(datum);
@@ -163,7 +163,7 @@ namespace Learning.Strategy
         }
 
 
-        public static void LogModelParameters(Vector<double> parameters, FeatureVectoriser vectoriser, FeatureScaler scaler)
+        internal static void LogModelParameters(Vector<double> parameters, FeatureVectoriser vectoriser, FeatureScaler scaler)
         {
             var featureNames = vectoriser.GetFeatureNames();
 

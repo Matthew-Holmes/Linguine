@@ -13,9 +13,9 @@ namespace Learning.LearningTacticsRepository
     // just for holding the method, should never appear as a tactic
     class EventuallyLearntBase : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new WasTested();
+        internal override LearningTactic? Prerequisite => new WasTested();
 
-        public EventuallyLearntBase()
+        internal EventuallyLearntBase()
         {
             Constraints = new List<Constraint> { ResolvesLearningCorrect };
         }

@@ -8,9 +8,9 @@ namespace Learning.LearningTacticsRepository
 {
     class SingleIncorrectResponse : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new WasTested();
+        internal override LearningTactic? Prerequisite => new WasTested();
 
-        public SingleIncorrectResponse()
+        internal SingleIncorrectResponse()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MaxExposures: 1, MinIncorrect: 1) };
         }

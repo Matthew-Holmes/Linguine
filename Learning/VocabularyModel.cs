@@ -1,36 +1,56 @@
 ﻿using Serilog;
 using DataClasses;
+using Infrastructure;
 
 namespace Learning
 {
-    public class VocabularyModel
+    internal class VocabularyModel
     {
-        public IReadOnlyDictionary<int, int>       WordFrequencies      { get; set; }
-        IReadOnlyDictionary<int, bool>             FirstExposureCorrect { get; set; }
-        IReadOnlyDictionary<int, double>           DataForPSmoothing    { get; set; }
-        public IReadOnlyDictionary<int, double>    ZipfScores           { get; set; }
+        internal IReadOnlyDictionary<int, int>       WordFrequencies      { get; set; }
+        IReadOnlyDictionary<int, bool>               FirstExposureCorrect { get; set; }
+        IReadOnlyDictionary<int, double>             DataForPSmoothing    { get; set; }
+        internal IReadOnlyDictionary<int, double>    ZipfScores           { get; set; }
 
         double ZipfHi; double ZipfLo;
 
-        public IReadOnlyDictionary<int, Tuple<double, double>>? PKnownWithError { get; set; }
+        internal IReadOnlyDictionary<int, Tuple<double, double>> PKnownWithError { get; set; }
 
-        public VocabularyModel(
-            IReadOnlyDictionary<int, int> wordFrequencies, 
-            IReadOnlyDictionary<int, bool> firstExposureCorrect,
-            IReadOnlyDictionary<int, double> zipfScores,
-            double zipfHi,
-            double zipfLo)
+
+        public IReadOnlyDictionary<int, bool> FirstWasCorrect(List<TestRecord> records)
         {
-            WordFrequencies = wordFrequencies;
-            FirstExposureCorrect = firstExposureCorrect;
-            ZipfScores = zipfScores;
-            ZipfHi = zipfHi;
-            ZipfLo = zipfLo;
+            if (records.Count == 0)
+                return new Dictionary<int, bool>();
 
-            ComputeRunningAverage();
+            var firstWasCorrect = records
+                .AsEnumerable()
+                .GroupBy(tr => tr.DictionaryDefinitionKey)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderBy(tr => tr.Posed)
+                        .First()
+                        .Correct
+                );
+
+            return firstWasCorrect;
         }
 
-        public void ComputeRunningAverage()
+        public VocabularyModel(FrequencyData freqData, List<TestRecord> allrecords)
+        {
+            WordFrequencies = freqData.freqs;
+            ZipfScores      = freqData.zipfs;
+            ZipfLo          = freqData.zipfLo;
+            ZipfHi          = freqData.zipfHi;
+
+            FirstExposureCorrect = FirstWasCorrect(allrecords);
+
+            ComputeRunningAverage();
+
+            ComputePKnownWithError();
+
+        }
+
+        internal void ComputeRunningAverage()
         {
             var result = new Dictionary<int, double>();
 
@@ -41,16 +61,8 @@ namespace Learning
             DataForPSmoothing = result;
         }
 
-        public Tuple<double[], double[]>? GetPKnownByBinnedZipf()
+        internal Tuple<double[], double[]>? GetPKnownByBinnedZipf()
         {
-
-            if (PKnownWithError is null) { ComputePKnownWithError(); }
-
-            if (PKnownWithError is null)
-            {
-                throw new Exception("failed to compute p knowns and errors");
-            }
-
             // cube root so that we aim for n bins with n^2 items in each
             int initialBinCount = (int)Math.Pow(
                 (double)(FirstExposureCorrect.Count), 1.0 / 3.0);
@@ -150,7 +162,7 @@ namespace Learning
 
         }
 
-        public void ComputePKnownWithError()
+        internal void ComputePKnownWithError()
         {
             // use a kernel
                 // TODO 
@@ -283,7 +295,7 @@ namespace Learning
         }
 
 
-        public static List<Tuple<int, double>> ComputeRanksSorted(IReadOnlyDictionary<int, int> wordFrequencies)
+        internal static List<Tuple<int, double>> ComputeRanksSorted(IReadOnlyDictionary<int, int> wordFrequencies)
         {
             var sorted = wordFrequencies
                 .OrderByDescending(kvp => kvp.Value)

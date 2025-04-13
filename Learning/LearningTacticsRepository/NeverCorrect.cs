@@ -9,9 +9,9 @@ namespace Learning.LearningTacticsRepository
 {
     class NeverCorrect : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new WasTested();
+        internal override LearningTactic? Prerequisite => new WasTested();
 
-        public NeverCorrect()
+        internal NeverCorrect()
         {
             Constraints = new List<Constraint> { NoneCorrect };
         }

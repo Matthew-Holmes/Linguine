@@ -4,6 +4,7 @@ using Learning.Tactics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace Learning
 {
     partial class Tactician
     {
-        public void BuildMarkovModel(List<List<TestRecord>> sessions)
+        internal void BuildMarkovModel(List<List<TestRecord>> sessions)
         {
             List<TacticTransition> transitions = new List<TacticTransition>();
 
@@ -116,7 +117,12 @@ namespace Learning
                 double initialReward = 0.0;
                 foreach (MarkovArrow arrow in arrowsFromNull)
                 {
-                    LearningTactic toTactic = (LearningTactic)Activator.CreateInstance(arrow.to);
+                    LearningTactic toTactic = (LearningTactic)Activator
+                        .CreateInstance(arrow.to, 
+                                        BindingFlags.Instance | BindingFlags.NonPublic, 
+                                        null,
+                                        null, 
+                                        null);
                     if (Strategist.WasCorrect(toTactic))
                     {
                         initialReward += arrow.prob;

@@ -9,9 +9,9 @@ namespace Learning.LearningTacticsRepository
 {
     class EventuallyLearntMediumTime : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new EventuallyLearntBase();
+        internal override LearningTactic? Prerequisite => new EventuallyLearntBase();
 
-        public EventuallyLearntMediumTime()
+        internal EventuallyLearntMediumTime()
         {
             Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromSeconds(10), MaxTotalTime: TimeSpan.FromSeconds(25)) };
         }

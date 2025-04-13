@@ -10,9 +10,9 @@ namespace Learning.LearningTacticsRepository
 {
     class Inconclusive : LearningTactic
     {
-        public override LearningTactic? Prerequisite => new WasTested();
+        internal override LearningTactic? Prerequisite => new WasTested();
 
-        public Inconclusive()
+        internal Inconclusive()
         {
             // the user has been correct once, but was not cosistent towards the end of the session
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Learning.Strategy
 {
-    public record DefinitionFeatures(
+    internal record DefinitionFeatures(
         DictionaryDefinition def,
         double maxTimeBetweenCorrectDays,
         double sqrtTotalExposures,
@@ -17,13 +17,13 @@ namespace Learning.Strategy
         double halfLifeDays,
         double zipfScore);
 
-    public record FollowingSessionDatum(
+    internal record FollowingSessionDatum(
         DefinitionFeatures defFeatures,
         Type sessionTacticType,
         double intervalDays,
         bool followingWasCorrect);
 
-    public record ModelData(
+    internal record ModelData(
         List<FollowingSessionDatum> trainingData,
         List<DefinitionFeatures> distinctDefinitionFeatures,
         List<List<LearningTactic?>> distinctDefinitionTacticsIdentified,

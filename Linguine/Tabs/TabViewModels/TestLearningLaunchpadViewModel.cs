@@ -5,6 +5,7 @@ using System.Linq;
 using System;
 using System.Windows.Input;
 using UserInputInterfaces;
+using Learning;
 
 namespace Linguine.Tabs 
 { 
@@ -30,11 +31,7 @@ namespace Linguine.Tabs
 
             if (AnyDataForWordFrequencies)
             {
-                if (_model.VocabModel is null)
-                {
-                    _model.InitVocabularyModel();
-                }
-                toGraph = _model.VocabModel.GetPKnownByBinnedZipf();
+                toGraph = _model.GetPKnownByBinnedZipf();
                 CreatePlot();
             }
         }

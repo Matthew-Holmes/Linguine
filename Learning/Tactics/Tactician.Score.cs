@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Learning
 {
-    public partial class Tactician
+    internal partial class Tactician
     {
         private List<TestRecord>? CurrentSession { get; set; }
         private Dictionary<int, Type>? CurrentTacticalState { get; set; } = null;
@@ -53,7 +53,7 @@ namespace Learning
             return ret;
         }
 
-        public void Inform(TestRecord tr)
+        internal void Inform(TestRecord tr)
         {
             if (CurrentSession is null || tr.Posed - CurrentSession.Last().Finished > LearningTacticsHelper.MinTimeBetweenSessions)
             {
