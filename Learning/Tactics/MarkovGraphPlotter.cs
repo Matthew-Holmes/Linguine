@@ -82,7 +82,19 @@ namespace Learning.Tactics
 
             foreach (ExplodedMarkovGraphArrow arrow in exploded.arrows)
             {
-                sb.AppendLine($"\"{arrow.from}\"  -> \"{arrow.to}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
+                String from = arrow.from;
+                if (exploded.rewards.ContainsKey(from))
+                {
+                    from += $"\\n{exploded.rewards[from]:F2}";
+                }
+
+                String to = arrow.to;
+                if (exploded.rewards.ContainsKey(to))
+                {
+                    to += $"\\n{exploded.rewards[to]:F2}";
+                }
+
+                sb.AppendLine($"\"{from}\"  -> \"{to}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
             }
 
             sb.AppendLine("}");

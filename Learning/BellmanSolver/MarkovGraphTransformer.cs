@@ -12,6 +12,7 @@ namespace Learning.BellmanSolver
         internal static ExplodedMarkovGraph Explode(MarkovGraph markov)
         {
             List<ExplodedMarkovGraphArrow> arrows = new List<ExplodedMarkovGraphArrow>();
+            Dictionary<String, double> rewards = new Dictionary<String, double>();
 
             // add arrows from null
             foreach (MarkovArrow oldArrow in markov.edgesFromNull)
@@ -22,6 +23,14 @@ namespace Learning.BellmanSolver
 
                 arrows.Add(new ExplodedMarkovGraphArrow(from, middle, oldArrow.prob, oldArrow.costSeconds));
                 arrows.Add(new ExplodedMarkovGraphArrow(middle, to, 1.0, 0.0));
+
+                double startOldReward = markov.rewardData.startReward;
+                double endOldReward = markov.rewardData.rewards[oldArrow.to];
+
+                double rewardDelta = endOldReward - startOldReward;
+
+                rewards[middle] = rewardDelta;
+
             }
 
             // add the rest of the arrows
@@ -36,10 +45,18 @@ namespace Learning.BellmanSolver
 
                     arrows.Add(new ExplodedMarkovGraphArrow(from, middle, oldArrow.prob, oldArrow.costSeconds));
                     arrows.Add(new ExplodedMarkovGraphArrow(middle, to, 1.0, 0.0));
+
+                    double startOldReward = markov.rewardData.rewards[kvp.Key];
+                    double endOldReward   = markov.rewardData.rewards[oldArrow.to];
+
+                    double rewardDelta = endOldReward - startOldReward;
+
+                    rewards[middle] = rewardDelta;
                 }
             }
 
-            return new ExplodedMarkovGraph(arrows);
+
+            return new ExplodedMarkovGraph(arrows, rewards.AsReadOnly());
         }
     }
 }

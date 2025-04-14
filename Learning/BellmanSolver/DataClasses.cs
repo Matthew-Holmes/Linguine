@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace Learning.BellmanSolver
 {
     internal record ExplodedMarkovGraphArrow(String from, String to, double prob, double costSeconds);
-    internal record ExplodedMarkovGraph(List<ExplodedMarkovGraphArrow> arrows);
+    internal record ExplodedMarkovGraph(List<ExplodedMarkovGraphArrow> arrows, IReadOnlyDictionary<String, double> rewards);
 
 }
