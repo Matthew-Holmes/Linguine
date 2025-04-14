@@ -11,6 +11,8 @@ namespace Learning
 {
     partial class DefinitionLearningService
     {
+        private int _zipfBinCount    = 1;
+        private bool _frozenBinCount = false;
         private VocabularyModel VocabModel { get; init; }
 
         public Tuple<double[], double[]> GetPKnownByBinnedZipf()
@@ -111,6 +113,20 @@ namespace Learning
             return chosenId;
         }
 
+        private IReadOnlyDictionary<int, TestRecord> LatestTestRecords(List<TestRecord> records)
+        {
+            if (!records.Any())
+                return new Dictionary<int, TestRecord>();
+
+            var latestRecords = records
+                .GroupBy(tr => tr.DictionaryDefinitionKey)
+                .Select(group => group
+                    .OrderByDescending(tr => tr.Finished)
+                    .First())
+                .ToDictionary(tr => tr.DictionaryDefinitionKey);
+
+            return latestRecords;
+        }
 
 
     }
