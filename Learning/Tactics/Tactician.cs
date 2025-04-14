@@ -1,5 +1,6 @@
 ﻿using Config;
 using DataClasses;
+using Learning.BellmanSolver;
 using Learning.Strategy;
 using Learning.Tactics;
 using MathNet.Numerics;
@@ -29,6 +30,8 @@ namespace Learning
             GlobalMarkovGraph = BuildGlobalMarkovGraph(allTransitions);
 
             MarkovGraphPlotter.SaveMarkovPlot(GlobalMarkovGraph); // just for debug
+
+            
 
             InitialiseTwistScores();
         }
@@ -84,8 +87,8 @@ namespace Learning
 
             adjusted = UpdateInitialProbs(adjusted, pKnown);
 
-            MarkovGraphPlotter.SaveMarkovPlot(adjusted, filename);
             MarkovGraphPlotter.SaveExplodedMarkovPlot(adjusted, filenameExploded);
+            MarkovGraphPlotter.SaveMarkovPlot(MarkovGraphTransformer.Prune(adjusted), filename);
         }
 
     }
