@@ -123,7 +123,6 @@ namespace Learning
                 .Last().Value;
 
             (double baseTwistReward, double baseCost) = GetBaseGraphRewardCostFromNull();
-            double basePCorrect = BaseGraphPCorrectFirstTry();
 
             foreach (var kvp in Strategist.VocabModel.WordFrequencies)
             {
@@ -141,20 +140,13 @@ namespace Learning
 
                 if (knowItTodayInput is null /* no previous examples of testing this */)
                 {
-                    // if no session data use the base graph
-                    // but initialise the null reward with our vocab model's probability
                     stickReward = Strategist.VocabModel.PKnownWithError[kvp.Key].Item1;
-                    twistReward = baseTwistReward;
-                    cost        = baseCost;
                 }
                 else
                 {
                     stickReward = Strategist.PredictProbability(knowItTodayInput);
 
-                    // TODO - adjust the probabilities of the edges from initial node 
-                    // so that the correct ones sum to the stick reward
-
-                    MarkovGraph localMarkov = UpdateInitialProbs(GlobalMarkovGraph, basePCorrect, stickReward);
+                    MarkovGraph localMarkov = UpdateInitialProbs(GlobalMarkovGraph, stickReward);
 
                     foreach (MarkovArrow arrow in localMarkov.edgesFromNull) 
                     { 
@@ -187,11 +179,10 @@ namespace Learning
         }
 
         private MarkovGraph UpdateInitialProbs(
-            MarkovGraph baseMarkovGraph,
-            double basePCorrect,
-            double newPCorrect)
+            MarkovGraph baseMarkovGraph, double newPCorrect)
         {
             List<MarkovArrow> scaledEdgesFromNull = new List<MarkovArrow>();
+            double basePCorrect = baseMarkovGraph.PCorrectFirstTry;
 
             for (int i = 0; i != baseMarkovGraph.edgesFromNull.Count; i++)
             {
@@ -212,14 +203,15 @@ namespace Learning
             return baseMarkovGraph with { edgesFromNull = scaledEdgesFromNull };
         }
 
-        private double BaseGraphPCorrectFirstTry()
+
+        private double PCorrectFirstTry(List<MarkovArrow> edgesFromNull, List<bool> edgeFromNullIsCorrect)
         {
             double ret = 0.0;
 
-            for (int i = 0; i != GlobalMarkovGraph.edgesFromNull.Count; i++)
+            for (int i = 0; i != edgesFromNull.Count; i++)
             {
-                MarkovArrow arrow   = GlobalMarkovGraph.edgesFromNull[i];
-                bool arrowIsCorrect = GlobalMarkovGraph.edgeFromNullIsCorrect[i];
+                MarkovArrow arrow   = edgesFromNull[i];
+                bool arrowIsCorrect = edgeFromNullIsCorrect[i];
 
                 if (arrowIsCorrect)
                 {

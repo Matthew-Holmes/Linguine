@@ -10,7 +10,7 @@ namespace Learning.Tactics
 
     internal record MarkovArrow(Type to, double prob, double costSeconds);
 
-    internal record MarkovGraph(Dictionary<Type, List<MarkovArrow>> directedEdges, List<MarkovArrow> edgesFromNull, List<bool> edgeFromNullIsCorrect, double avgReward, RewardData rewardData);
+    internal record MarkovGraph(Dictionary<Type, List<MarkovArrow>> directedEdges, List<MarkovArrow> edgesFromNull, List<bool> edgeFromNullIsCorrect, double avgReward, RewardData rewardData, double PCorrectFirstTry);
 
     internal record RewardData(IReadOnlyDictionary<Type, double> rewards, double startReward);
 }

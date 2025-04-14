@@ -129,7 +129,9 @@ namespace Learning
                 rewardData = new RewardData(Strategist.DefaultRewards, initialReward);
             }
 
-            return new MarkovGraph(arrows, arrowsFromNull, edgesFromNullAreCorrect, Strategist.BaseLineReward, rewardData);
+            double PFirstTryCorrect = PCorrectFirstTry(arrowsFromNull, edgesFromNullAreCorrect);
+
+            return new MarkovGraph(arrows, arrowsFromNull, edgesFromNullAreCorrect, Strategist.BaseLineReward, rewardData, PFirstTryCorrect);
 
         }
 
