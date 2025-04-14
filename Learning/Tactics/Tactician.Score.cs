@@ -17,110 +17,10 @@ namespace Learning
 {
     internal partial class Tactician
     {
-        private List<TestRecord>? CurrentSession { get; set; }
-        private Dictionary<int, Type>? CurrentTacticalState { get; set; } = null;
-        private Dictionary<int, double>? CurrentTwistScores { get; set; } = null; // "stick or twist"
-
-        private int FreqCap { get; set; }
-
-        // TODO - base the index on the estimated vocab size when we have that, maybe sqrt()?
+        private int FreqCap      { get; set; }
         private int FreqCapIndex { get; set; } = 20; // cap the freq scoring by that of the 20th most frequent 
 
 
-        Dictionary<int, int> CoolOff { get; set; } = new Dictionary<int, int>();
-        Dictionary<int, int> CoolOffMax { get; set; } = new Dictionary<int, int>();
-
-        internal int GetBestDefID()
-        {
-            var candidates = CurrentTwistScores
-                .Where(kv => !CoolOff.ContainsKey(kv.Key));
-
-            var maxScore = candidates.Max(kv => kv.Value);
-
-            var topCandidates = candidates
-                .Where(kv => kv.Value == maxScore)
-                .ToList();
-
-            var random = new Random();
-            int ret = topCandidates[random.Next(topCandidates.Count)].Key;
-            Log.Information("found id with twist score of {value}", CurrentTwistScores[ret]);
-            Log.Information("total occurences: {occurences}", Strategist.VocabModel.WordFrequencies[ret]);
-
-            if (CurrentTacticalState?.ContainsKey(ret) ?? false)
-            {
-                Log.Information("was in state {state}", CurrentTacticalState[ret].Name.Split('.').Last());
-            }
-
-            return ret;
-        }
-
-        internal void Inform(TestRecord tr)
-        {
-            if (CurrentSession is null || tr.Posed - CurrentSession.Last().Finished > LearningTacticsHelper.MinTimeBetweenSessions)
-            {
-                CurrentSession = new List<TestRecord> { tr };
-                CurrentTacticalState = new Dictionary<int, Type>();
-
-                CoolOffMax = new Dictionary<int, int>();
-                CoolOff = new Dictionary<int, int>();
-                // TODO - how to update twist scores without deleting init??
-            }
-            else
-            {
-                CurrentSession.Add(tr);
-            }
-
-            int k = tr.DictionaryDefinitionKey;
-
-
-            if (tr.Correct)
-            {
-                if (!CoolOffMax.ContainsKey(k))
-                {
-                    CoolOff[k] = 0;
-                    CoolOffMax[k] = 1;
-                }
-
-                CoolOffMax[k]++; CoolOffMax[k]++;
-                CoolOff[k] = CoolOffMax[k];
-            } else
-            {
-                CoolOff.Remove(k);
-                CoolOffMax[k] = 0;
-            }
-
-            foreach (var l in CoolOff.Keys)
-            {
-                CoolOff[l]--;
-                if (CoolOff[l] <= 0)
-                {
-                    CoolOff.Remove(l);
-                }
-            }
-
-            UpdateTacticalState();
-        }
-
-        private void UpdateTacticalState()
-        {
-            // now just use the last def id
-            // in the future if we have cooloff tactics, then this will need to be more advanced
-
-            int lastDefTestedKey = CurrentSession.Last().DictionaryDefinitionKey;
-
-            Type? tacticType = Strategist.TacticsHelper.IdentityTacticForSession(CurrentSession, lastDefTestedKey)?.GetType() ?? null;
-
-            if (tacticType is null)
-            {
-                throw new Exception("couldn't identify a tactic for a tested definition");
-            }
-
-            CurrentTacticalState[lastDefTestedKey] = tacticType;
-
-            Log.Information("entered new state {tactic}", tacticType);
-
-            UpdateTwistScores(lastDefTestedKey);
-        }
 
         private void UpdateTwistScores(int lastDefTestedKey)
         {
@@ -163,9 +63,9 @@ namespace Learning
 
             List<MarkovArrow> options = new List<MarkovArrow>();
 
-            if (MarkovGraph.directedEdges.ContainsKey(currentState))
+            if (GlobalMarkovGraph.directedEdges.ContainsKey(currentState))
             {
-                options = MarkovGraph.directedEdges[currentState];
+                options = GlobalMarkovGraph.directedEdges[currentState];
             }
 
             if (options.Count == 0) { CurrentTwistScores[lastDefTestedKey] = 0.0; return; }
@@ -182,13 +82,13 @@ namespace Learning
                         intervalDays      = LookAheadDays
                     };
 
-                    if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
+                    if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
                     {
                         twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
                     }
                     else
                     {
-                        twistReward += arrow.prob * MarkovGraph.avgReward;
+                        twistReward += arrow.prob * GlobalMarkovGraph.avgReward;
                     }
 
                 } else
@@ -221,71 +121,86 @@ namespace Learning
                 .Take(FreqCapIndex)
                 .Last().Value;
 
+            (double baseTwistReward, double baseCost) = GetBaseGraphRewardCostFromNull();
+
             foreach (var kvp in Strategist.VocabModel.WordFrequencies)
             {
                 double stickReward;
                 double twistReward = 0.0;
-                double cost = 0.0;
+                double cost        = 0.0;
 
                 if (kvp.Value == 0)
                 {
-                    CurrentTwistScores[kvp.Key] = kvp.Value;
+                    CurrentTwistScores[kvp.Key] = 0.0; // TODO - handle this case
                     continue;
                 }
 
-                FollowingSessionDatum? input = Strategist.GetCurrentRewardFeatures(kvp.Key, LookAheadDays);
+                FollowingSessionDatum? knowItTodayInput = Strategist.GetCurrentRewardFeatures(kvp.Key, LookAheadDays);
 
-                if (input is null)
+                if (knowItTodayInput is null /* no previous examples of testing this */)
                 {
                     // if no session data use the base graph
                     // but initialise the null reward with our vocab model's probability
                     stickReward = Strategist.VocabModel.PKnownWithError[kvp.Key].Item1;
-
-                    foreach (MarkovArrow arrow in MarkovGraph.edgesFromNull)
-                    {
-                        if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
-                        {
-                            twistReward += arrow.prob * MarkovGraph.rewardData.rewards[arrow.to];
-                        }
-                        else
-                        {
-                            twistReward += arrow.prob * MarkovGraph.avgReward;
-                        }
-
-                        cost += arrow.prob * arrow.costSeconds;
-                    }
+                    twistReward = baseTwistReward;
+                    cost        = baseCost;
                 }
                 else
                 {
-                    stickReward = Strategist.PredictProbability(input);
+                    stickReward = Strategist.PredictProbability(knowItTodayInput);
 
-                    foreach (MarkovArrow arrow in MarkovGraph.edgesFromNull)
+                    // TODO - adjust the probabilities of the edges from initial node 
+                    // so that the correct ones sum to the stick reward
+
+                    foreach (MarkovArrow arrow in GlobalMarkovGraph.edgesFromNull)
                     {
-                        FollowingSessionDatum twistInput = input with
+                        FollowingSessionDatum twistInput = knowItTodayInput with
                         {
                             sessionTacticType = arrow.to,
-                            intervalDays = LookAheadDays /* no past if twist now */
+                            intervalDays      = LookAheadDays /* no past if twist now */
                         };
 
-                        if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
+                        if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
                         {
                             twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
                         }
                         else
                         {
-                            twistReward += arrow.prob * MarkovGraph.avgReward;
+                            twistReward += arrow.prob * GlobalMarkovGraph.avgReward;
                         }
 
                         cost += arrow.prob * arrow.costSeconds;
                     }
                 }
 
-
                 double rewardDeltaPerCost = (twistReward - stickReward) / cost;
 
                 CurrentTwistScores[kvp.Key] = rewardDeltaPerCost * Math.Min(kvp.Value, FreqCap);
-
             }
+        }
+
+        private (double reward, double cost) GetBaseGraphRewardCostFromNull()
+        {
+            // TODO - cache this in the markov graph?
+
+            double reward = 0.0;
+            double cost = 0.0;
+
+            foreach (MarkovArrow arrow in GlobalMarkovGraph.edgesFromNull)
+            {
+                if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
+                {
+                    reward += arrow.prob * GlobalMarkovGraph.rewardData.rewards[arrow.to];
+                }
+                else
+                {
+                    reward += arrow.prob * GlobalMarkovGraph.avgReward;
+                }
+
+                cost += arrow.prob * arrow.costSeconds;
+            }
+
+            return (reward, cost);
         }
     }
 }

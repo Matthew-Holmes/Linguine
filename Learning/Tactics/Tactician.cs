@@ -15,14 +15,22 @@ namespace Learning
 {
     internal partial class Tactician
     {
-        private Strategist Strategist { get; init; }
-        private MarkovGraph MarkovGraph { get; set; }
+        private Strategist  Strategist { get; init; }
+        private MarkovGraph GlobalMarkovGraph { get; set; }
 
         private double LookAheadDays { get; set; } = 1.0;
 
-        internal Tactician(Strategist strat)
+        internal Tactician(Strategist strat, List<List<TestRecord>> sessions)
         {
             Strategist = strat;
+
+            List<TacticTransition> allTransitions = GetAllTransitions(sessions);
+
+            GlobalMarkovGraph = BuildMarkovGraph(allTransitions);
+
+            MarkovGraphPlotter.SaveMarkovPlot(GlobalMarkovGraph); // just for debug
+
+            InitialiseTwistScores();
         }
 
         internal (IReadOnlyDictionary<Type, double>, double) GetRewardForFinalState(int defKey)
@@ -72,7 +80,7 @@ namespace Learning
 
             RewardData rData = new RewardData(rewards, pKnown);
 
-            MarkovGraph adjusted = MarkovGraph with { rewardData = rData };
+            MarkovGraph adjusted = GlobalMarkovGraph with { rewardData = rData };
 
             MarkovGraphPlotter.SaveMarkovPlot(adjusted, filename);
         }

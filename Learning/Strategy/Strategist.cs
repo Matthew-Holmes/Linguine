@@ -56,19 +56,17 @@ namespace Learning
         internal Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
         {
             ModelData modelData = GetDataForModel(sessions, defs);
-            LogisticRegression model = new LogisticRegression(
-                modelData.trainingData, modelData.tacticsUsed);
 
-            TacticsUsed = modelData.tacticsUsed;
-            DefFeatures = modelData.defFeaturesLookup.AsReadOnly();
+            TacticsUsed                 = modelData.tacticsUsed;
+            DefFeatures                 = modelData.defFeaturesLookup.AsReadOnly();
             LastTacticUsedForDefinition = modelData.distinctDefinitionsLastTacticUsed.AsReadOnly();
-            DefaultRewards = modelData.followingSessionAverages.AsReadOnly(); ;
-            BaseLineReward = modelData.tacticAverageReward;
-            Model = model;
+            DefaultRewards              = modelData.followingSessionAverages.AsReadOnly(); ;
+            BaseLineReward              = modelData.tacticAverageReward;
 
-            Tactician tactics = new Tactician(this);
+            Model = new LogisticRegression(
+                            modelData.trainingData, modelData.tacticsUsed);
 
-            tactics.BuildMarkovModel(sessions);
+            Tactician tactics = new Tactician(this, sessions);
 
             // just for debug
             new Thread(() =>
@@ -85,7 +83,7 @@ namespace Learning
                     string name = key + feature.def.Word;
                     string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
 
-                    ProbabilityPlotter.PlotProbabilityCurves(model, feature, TacticsUsed, $"plots/{language}/{name}.png");
+                    ProbabilityPlotter.PlotProbabilityCurves(Model, feature, TacticsUsed, $"plots/{language}/{name}.png");
 
                     tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png");
                 }

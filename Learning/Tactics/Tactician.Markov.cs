@@ -12,25 +12,6 @@ namespace Learning
 {
     partial class Tactician
     {
-        internal void BuildMarkovModel(List<List<TestRecord>> sessions)
-        {
-            List<TacticTransition> transitions = new List<TacticTransition>();
-
-            foreach (List<TestRecord> session in sessions)
-            {
-                transitions.AddRange(GetTransitions(session));
-            }
-
-            MarkovGraph = BuildMarkovGraph(transitions);
-
-            // just for debug
-            MarkovGraphPlotter.SaveMarkovPlot(MarkovGraph);
-
-            InitialiseTwistScores();
-
-        }
-
-
         private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions, RewardData? rewardData = null)
         {
             Dictionary<Type, int> tallyFrom = new Dictionary<Type, int>();
@@ -134,6 +115,18 @@ namespace Learning
 
             return new MarkovGraph(arrows, arrowsFromNull, Strategist.BaseLineReward, rewardData);
 
+        }
+
+        private List<TacticTransition> GetAllTransitions(List<List<TestRecord>> sessions)
+        {
+            List<TacticTransition> transitions = new List<TacticTransition>();
+
+            foreach (List<TestRecord> session in sessions)
+            {
+                transitions.AddRange(GetTransitions(session));
+            }
+
+            return transitions;
         }
 
         private List<TacticTransition> GetTransitions(List<TestRecord> session)
