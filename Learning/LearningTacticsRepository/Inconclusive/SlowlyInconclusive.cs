@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Learning.LearningTacticsRepository
 {
-    class LabouriouslyInconclusive : LearningTactic
+    class SlowlyInconclusive : LearningTactic
     {
         internal override LearningTactic? Prerequisite => new Inconclusive();
 
-        internal LabouriouslyInconclusive()
+        internal SlowlyInconclusive()
         {
-            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromMinutes(1)) };
+            Thresholds = new List<BasicThresholds> { new BasicThresholds(MinTotalTime: TimeSpan.FromSeconds(25)) };
         }
     }
 }
