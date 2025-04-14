@@ -264,7 +264,7 @@ namespace Learning
                         FollowingSessionDatum twistInput = input with
                         {
                             sessionTacticType = arrow.to,
-                            intervalDays = LookAheadDays
+                            intervalDays = LookAheadDays /* no past if twist now */
                         };
 
                         if (MarkovGraph.rewardData.rewards.ContainsKey(arrow.to))

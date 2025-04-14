@@ -57,7 +57,7 @@ namespace Learning
 
         internal LearningTacticsHelper()
         {
-            LearningTacticHeirarchy = ResolveLearningTactics();
+            LearningTacticHeirarchy = ResolveLearningTacticsHeirarchy();
         }
 
         internal LearningTactic? IdentityTacticForSession(List<TestRecord> session, int defID)
@@ -132,7 +132,7 @@ namespace Learning
             return ret;
         }
 
-        private List<List<LearningTactic>> ResolveLearningTactics()
+        private List<List<LearningTactic>> ResolveLearningTacticsHeirarchy()
         {
             var baseType = typeof(LearningTactic);
 

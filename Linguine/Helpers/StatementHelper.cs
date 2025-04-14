@@ -83,6 +83,12 @@ namespace Linguine
             int start = 0;
             int index = 0;
 
+            if (flatInjective.Decomposition is null)
+            {
+                // if the statement a leaf
+                return Tuple.Create(0, statement.StatementText.Length);
+            }
+
             while (index < flatInjective.Decomposition.Count)
             {
                 String toFind = flatInjective.Decomposition[index].Total;
