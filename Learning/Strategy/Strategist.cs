@@ -85,7 +85,9 @@ namespace Learning
 
                     ProbabilityPlotter.PlotProbabilityCurves(Model, feature, TacticsUsed, $"plots/{language}/{name}.png");
 
-                    tactics.PlotMDP(key, $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png");
+                    tactics.PlotMDP(key, 
+                                    $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png", 
+                                    $"plots/{language}/{feature.def.DatabasePrimaryKey}_exploded_mdp.png");
                 }
             })
             {

@@ -74,7 +74,7 @@ namespace Learning
             return (ret.AsReadOnly(), pKnown);
         }
 
-        internal void PlotMDP(int key, string filename)
+        internal void PlotMDP(int key, string filename, string filenameExploded)
         {
             (var rewards, double pKnown) = GetRewardForFinalState(key);
 
@@ -85,6 +85,7 @@ namespace Learning
             adjusted = UpdateInitialProbs(adjusted, pKnown);
 
             MarkovGraphPlotter.SaveMarkovPlot(adjusted, filename);
+            MarkovGraphPlotter.SaveExplodedMarkovPlot(adjusted, filenameExploded);
         }
 
     }

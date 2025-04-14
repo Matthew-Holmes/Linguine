@@ -10,15 +10,28 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Diagnostics;
 using Config;
+using Learning.BellmanSolver;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Learning.Tactics
 {
 
     internal static class MarkovGraphPlotter
     {
+        internal static void SaveExplodedMarkovPlot(MarkovGraph graph, String? outFileName = null)
+        {
+            var dot = GenerateExplodedDot(graph);
+            SavePlotFromDot(dot, outFileName);
+        }
+
         internal static void SaveMarkovPlot(MarkovGraph graph, String? outFileName = null)
         {
             var dot = GenerateDot(graph);
+            SavePlotFromDot(dot, outFileName);
+        }
+
+        private static void SavePlotFromDot(String dot, String? outFileName = null)
+        {
             File.WriteAllText("graph.dot", dot);
 
             if (outFileName is null)
@@ -58,6 +71,23 @@ namespace Learning.Tactics
             string rewardPart = $"\\n{reward:F2}";
 
             return baseName + rewardPart;
+        }
+
+        private static string GenerateExplodedDot(MarkovGraph graph)
+        {
+            ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(graph);
+
+            var sb = new StringBuilder();
+            sb.AppendLine("digraph MarkovGraph {");
+
+            foreach (ExplodedMarkovGraphArrow arrow in exploded.arrows)
+            {
+                sb.AppendLine($"\"{arrow.from}\"  -> \"{arrow.to}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
+            }
+
+            sb.AppendLine("}");
+
+            return sb.ToString();
         }
 
         private static string GenerateDot(MarkovGraph graph)

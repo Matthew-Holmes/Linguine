@@ -161,7 +161,7 @@ namespace Learning
 
                         if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
                         {
-                            twistReward +=arrow.prob * Strategist.PredictProbability(twistInput);
+                            twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
                         }
                         else
                         {
