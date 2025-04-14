@@ -154,21 +154,12 @@ namespace Learning
                     // TODO - adjust the probabilities of the edges from initial node 
                     // so that the correct ones sum to the stick reward
 
-                    //MarkovGraph localMarkov = UpdateInitialProbs(GlobalMarkovGraph, stickReward);
+                    MarkovGraph localMarkov = UpdateInitialProbs(GlobalMarkovGraph, basePCorrect, stickReward);
 
-                    for (int i = 0; i != GlobalMarkovGraph.edgesFromNull.Count; i++)
-                    {
-                        MarkovArrow arrow   = GlobalMarkovGraph.edgesFromNull[i];
-                        bool arrowIsCorrect = GlobalMarkovGraph.edgeFromNullIsCorrect[i];
-
-
+                    foreach (MarkovArrow arrow in localMarkov.edgesFromNull) 
+                    { 
                         // the correct global arrows from null sum to basePCorrect
                         // we want these correct local arrows to sum to the stick reward in probability
-
-                        double correctSF = stickReward / basePCorrect; // add a bit of an eps
-                        double incorrectSF = (1.0 - stickReward) / (1.0000001 - basePCorrect);
-
-                        double scaledProb = arrowIsCorrect ? arrow.prob * correctSF : arrow.prob * incorrectSF;
 
                         FollowingSessionDatum twistInput = knowItTodayInput with
                         {
@@ -178,14 +169,14 @@ namespace Learning
 
                         if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
                         {
-                            twistReward += scaledProb * Strategist.PredictProbability(twistInput);
+                            twistReward +=arrow.prob * Strategist.PredictProbability(twistInput);
                         }
                         else
                         {
-                            twistReward += scaledProb * GlobalMarkovGraph.avgReward;
+                            twistReward += arrow.prob * GlobalMarkovGraph.avgReward;
                         }
 
-                        cost += scaledProb * arrow.costSeconds;
+                        cost += arrow.prob * arrow.costSeconds;
                     }
                 }
 
@@ -195,9 +186,30 @@ namespace Learning
             }
         }
 
-        private MarkovGraph UpdateInitialProbs(MarkovGraph globalMarkovGraph, double stickReward)
+        private MarkovGraph UpdateInitialProbs(
+            MarkovGraph baseMarkovGraph,
+            double basePCorrect,
+            double newPCorrect)
         {
-            throw new NotImplementedException();
+            List<MarkovArrow> scaledEdgesFromNull = new List<MarkovArrow>();
+
+            for (int i = 0; i != baseMarkovGraph.edgesFromNull.Count; i++)
+            {
+                MarkovArrow arrow = baseMarkovGraph.edgesFromNull[i];
+                bool arrowIsCorrect = baseMarkovGraph.edgeFromNullIsCorrect[i];
+
+                // the correct global arrows from null sum to basePCorrect
+                // we want these correct local arrows to sum to the stick reward in probability
+
+                double correctSF   =         newPCorrect / (basePCorrect + 0.000001);
+                double incorrectSF = (1.0 - newPCorrect) / (1.0000001 - basePCorrect); // add a bit of an eps
+
+                double scaledProb = arrowIsCorrect ? arrow.prob * correctSF : arrow.prob * incorrectSF;
+
+                scaledEdgesFromNull.Add(arrow with { prob = scaledProb });
+            }
+
+            return baseMarkovGraph with { edgesFromNull = scaledEdgesFromNull };
         }
 
         private double BaseGraphPCorrectFirstTry()
