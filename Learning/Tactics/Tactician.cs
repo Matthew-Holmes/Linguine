@@ -26,7 +26,7 @@ namespace Learning
 
             List<TacticTransition> allTransitions = GetAllTransitions(sessions);
 
-            GlobalMarkovGraph = BuildMarkovGraph(allTransitions);
+            GlobalMarkovGraph = BuildGlobalMarkovGraph(allTransitions);
 
             MarkovGraphPlotter.SaveMarkovPlot(GlobalMarkovGraph); // just for debug
 

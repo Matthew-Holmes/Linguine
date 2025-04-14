@@ -12,7 +12,7 @@ namespace Learning
 {
     partial class Tactician
     {
-        private MarkovGraph BuildMarkovGraph(List<TacticTransition> transitions, RewardData? rewardData = null)
+        private MarkovGraph BuildGlobalMarkovGraph(List<TacticTransition> transitions, RewardData? rewardData = null)
         {
             Dictionary<Type, int> tallyFrom = new Dictionary<Type, int>();
 
@@ -75,6 +75,7 @@ namespace Learning
                     double prob = (double)tallyTo[fromType][toType] / (double)tallyFrom[fromType];
                     double avgTime = (double)tallyCostTo[fromType][toType] / (double)tallyTo[fromType][toType];
 
+
                     arrows[fromType].Add(new MarkovArrow(toType, prob, avgTime));
                 }
             }
@@ -86,7 +87,17 @@ namespace Learning
                 double prob = (double)tallyToFromNull[toType] / (double)tallyFromNull;
                 double avgTime = (double)tallyCostToFromNull[toType] / (double)tallyToFromNull[toType];
                 arrowsFromNull.Add(new MarkovArrow(toType, prob, avgTime));
+
+                LearningTactic tactic = (LearningTactic)Activator
+                    .CreateInstance(toType,
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    null,
+                    null)!;
+
             }
+
+            List<bool> edgesFromNullAreCorrect = new List<bool>();
 
             if (rewardData is null)
             {
@@ -103,17 +114,22 @@ namespace Learning
                                         BindingFlags.Instance | BindingFlags.NonPublic, 
                                         null,
                                         null, 
-                                        null);
-                    if (Strategist.WasCorrect(toTactic))
+                                        null)!;
+
+                    bool wasCorrect = Strategist.WasCorrect(toTactic);
+
+                    if (wasCorrect)
                     {
                         initialReward += arrow.prob;
                     }
+
+                    edgesFromNullAreCorrect.Add(wasCorrect);
                 }
 
                 rewardData = new RewardData(Strategist.DefaultRewards, initialReward);
             }
 
-            return new MarkovGraph(arrows, arrowsFromNull, Strategist.BaseLineReward, rewardData);
+            return new MarkovGraph(arrows, arrowsFromNull, edgesFromNullAreCorrect, Strategist.BaseLineReward, rewardData);
 
         }
 

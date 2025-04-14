@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime;
 using System.Security.Cryptography;
 using System.Text;
@@ -122,6 +123,7 @@ namespace Learning
                 .Last().Value;
 
             (double baseTwistReward, double baseCost) = GetBaseGraphRewardCostFromNull();
+            double basePCorrect = BaseGraphPCorrectFirstTry();
 
             foreach (var kvp in Strategist.VocabModel.WordFrequencies)
             {
@@ -152,24 +154,38 @@ namespace Learning
                     // TODO - adjust the probabilities of the edges from initial node 
                     // so that the correct ones sum to the stick reward
 
-                    foreach (MarkovArrow arrow in GlobalMarkovGraph.edgesFromNull)
+                    //MarkovGraph localMarkov = UpdateInitialProbs(GlobalMarkovGraph, stickReward);
+
+                    for (int i = 0; i != GlobalMarkovGraph.edgesFromNull.Count; i++)
                     {
+                        MarkovArrow arrow   = GlobalMarkovGraph.edgesFromNull[i];
+                        bool arrowIsCorrect = GlobalMarkovGraph.edgeFromNullIsCorrect[i];
+
+
+                        // the correct global arrows from null sum to basePCorrect
+                        // we want these correct local arrows to sum to the stick reward in probability
+
+                        double correctSF = stickReward / basePCorrect; // add a bit of an eps
+                        double incorrectSF = (1.0 - stickReward) / (1.0000001 - basePCorrect);
+
+                        double scaledProb = arrowIsCorrect ? arrow.prob * correctSF : arrow.prob * incorrectSF;
+
                         FollowingSessionDatum twistInput = knowItTodayInput with
                         {
                             sessionTacticType = arrow.to,
-                            intervalDays      = LookAheadDays /* no past if twist now */
+                            intervalDays = LookAheadDays /* no past if twist now */
                         };
 
                         if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
                         {
-                            twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
+                            twistReward += scaledProb * Strategist.PredictProbability(twistInput);
                         }
                         else
                         {
-                            twistReward += arrow.prob * GlobalMarkovGraph.avgReward;
+                            twistReward += scaledProb * GlobalMarkovGraph.avgReward;
                         }
 
-                        cost += arrow.prob * arrow.costSeconds;
+                        cost += scaledProb * arrow.costSeconds;
                     }
                 }
 
@@ -177,6 +193,29 @@ namespace Learning
 
                 CurrentTwistScores[kvp.Key] = rewardDeltaPerCost * Math.Min(kvp.Value, FreqCap);
             }
+        }
+
+        private MarkovGraph UpdateInitialProbs(MarkovGraph globalMarkovGraph, double stickReward)
+        {
+            throw new NotImplementedException();
+        }
+
+        private double BaseGraphPCorrectFirstTry()
+        {
+            double ret = 0.0;
+
+            for (int i = 0; i != GlobalMarkovGraph.edgesFromNull.Count; i++)
+            {
+                MarkovArrow arrow   = GlobalMarkovGraph.edgesFromNull[i];
+                bool arrowIsCorrect = GlobalMarkovGraph.edgeFromNullIsCorrect[i];
+
+                if (arrowIsCorrect)
+                {
+                    ret += arrow.prob;
+                }
+            }
+
+            return ret;
         }
 
         private (double reward, double cost) GetBaseGraphRewardCostFromNull()
