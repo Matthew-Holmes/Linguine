@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Learning.BellmanSolver
+namespace Learning.Solver
 {
     internal static class MarkovGraphTransformer
     {

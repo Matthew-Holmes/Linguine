@@ -1,4 +1,4 @@
-﻿using Learning.BellmanSolver;
+﻿using Learning.Solver;
 using Learning.Strategy;
 using Learning.Tactics;
 using System.Collections.Concurrent;
@@ -114,7 +114,7 @@ namespace Learning
                 indices = rawData.indices;
             }
 
-            (double[] Er, double[] Ec, bool[] _, int startIndex) = BellmanDinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
+            (double[] Er, double[] Ec, bool[] _, int startIndex) = Dinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
 
             double startGain = Ec[startIndex] == 0 ? 0.0 : Er[startIndex] / Ec[startIndex];
 

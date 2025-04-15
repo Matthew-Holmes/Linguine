@@ -1,6 +1,6 @@
 ﻿using Config;
 using DataClasses;
-using Learning.BellmanSolver;
+using Learning.Solver;
 using Learning.Strategy;
 using Learning.Tactics;
 using MathNet.Numerics;

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Diagnostics;
 using Config;
-using Learning.BellmanSolver;
+using Learning.Solver;
 using System.Security.Cryptography.X509Certificates;
 using MathNet.Numerics.Integration;
 
@@ -84,7 +84,7 @@ namespace Learning.Tactics
                 ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(graph);
                 ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
 
-            (double[] rewards, double[] costs, bool[] isTerminated, int _) = BellmanDinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
+            (double[] rewards, double[] costs, bool[] isTerminated, int _) = Dinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
 
             var sb = new StringBuilder();
             sb.AppendLine("digraph MarkovGraph {");

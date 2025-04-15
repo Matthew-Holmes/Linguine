@@ -11,9 +11,9 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using Serilog;
 
-namespace Learning.BellmanSolver
+namespace Learning.Solver
 {
-    internal static class BellmanDinkelbach
+    internal static class Dinkelbach
     {
         // Note - our lives are a lot easier here than a general RL problem
         // since our policy is empirical probabilities
@@ -193,7 +193,7 @@ namespace Learning.BellmanSolver
             double delta = double.MaxValue;
             int steps = 0;
 
-            while ((delta > eps || steps < 10) && steps < 100) /* we aren't going to be testing one word 100 times, so don't worry about long tail asympotics! */
+            while ((delta > eps || steps < 10) && steps < 60) /* we aren't going to be testing one word 30 = 60 / 2 times, so don't worry about long tail asympotics! */
             {
                 // each column of distributionMatrix is a probability distribution
                 var stepExpectations = distributionMatrix.TransposeThisAndMultiply(values); // vector of expectations
