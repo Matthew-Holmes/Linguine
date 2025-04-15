@@ -18,7 +18,7 @@ namespace Learning.BellmanSolver
 
         internal static (double[], bool[]) GetNodeValuesAndIsTerminal(ExplodedMarkovData data)
         {
-            // solve using gain estimate and close to 1 discount factor
+            // solve using gain estimate and no discount factor
 
             // then any nodes that only can get worse --> terminate
 
@@ -202,7 +202,5 @@ namespace Learning.BellmanSolver
 
             return ret;
         }
-
-
     }
 }
