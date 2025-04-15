@@ -12,6 +12,7 @@ using System.Diagnostics;
 using Config;
 using Learning.BellmanSolver;
 using System.Security.Cryptography.X509Certificates;
+using MathNet.Numerics.Integration;
 
 namespace Learning.Tactics
 {
@@ -80,13 +81,20 @@ namespace Learning.Tactics
 
         private static string GenerateExplodedDot(MarkovGraph graph)
         {
-            ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(graph);
-            ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
+                ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(graph);
+                ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
 
-            (double[] solvedRewards, bool[] isTerminated) = BellmanDinkelbach.GetNodeValuesAndIsTerminal(rawData);
+            (double[] rewards, double[] costs, bool[] isTerminated) = BellmanDinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
 
             var sb = new StringBuilder();
             sb.AppendLine("digraph MarkovGraph {");
+
+            double[] gains = new double[rewards.Length];
+
+            for (int i = 0; i != rewards.Length; i++)
+            {
+                gains[i] = costs[i] == 0 ? 0 : rewards[i] / costs[i];
+            }
 
             foreach (ExplodedMarkovGraphArrow arrow in exploded.arrows)
             {
@@ -95,10 +103,10 @@ namespace Learning.Tactics
                 if (isTerminated[rawData.indices[from]])
                     continue; // the solver says don't proceed from this node
 
-                from += $"\\n{solvedRewards[rawData.indices[from]]:F2}";
+                from += $"\\n{gains[rawData.indices[from]]:F5}";
 
                 String to = arrow.to;
-                to += $"\\n{solvedRewards[rawData.indices[to]]:F2}";
+                to += $"\\n{gains[rawData.indices[to]]:F5}";
 
                 sb.AppendLine($"\"{from}\"  -> \"{to}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
             }

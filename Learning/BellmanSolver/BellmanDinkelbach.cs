@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -16,7 +17,7 @@ namespace Learning.BellmanSolver
         // Note - our lives are a lot easier here than a general RL problem
         // since our policy is empirical probabilities
 
-        internal static (double[], bool[]) GetNodeValuesAndIsTerminal(ExplodedMarkovData data)
+        internal static (double[], double[], bool[]) GetCostRewardExpectionasAndIsTerminated(ExplodedMarkovData data)
         {
             // solve using gain estimate and no discount factor
 
@@ -37,70 +38,57 @@ namespace Learning.BellmanSolver
 
             Vector<double> bestV      = null;
             bool[] bestTerminatedMask = new bool[n];
-            double bestGain           = double.NegativeInfinity;
+            double currentGain        = double.NegativeInfinity;
+            double oldReward;
 
-            HashSet<int> GetReachableSet(int start, Matrix<double> mat)
+            
+            (Vector<double> Er, Vector<double> Ec) GetExpectations()
             {
-                var visited = new HashSet<int>();
-                var queue = new Queue<int>();
-                queue.Enqueue(start);
-                visited.Add(start);
+                Vector<double> Er = GetExpectationsForAllBasisVectors(P, r);
+                Vector<double> Ec = GetExpectationsForAllBasisVectors(P, c);
 
-                while (queue.Count > 0)
-                {
-                    int cur = queue.Dequeue();
-                    // For each potential "row" (0..n-1):
-                    for (int row = 0; row < n; row++)
-                    {
-                        // If there's a positive probability from cur -> row
-                        if (mat[row, cur] > 0.0 && !visited.Contains(row))
-                        {
-                            visited.Add(row);
-                            queue.Enqueue(row);
-                        }
-                    }
-                }
+                return (Er, Ec);
 
-                return visited;
-            }
-
-            (double gainVal, Vector<double> vSoln, double Er) SolveCurrentMarkov()
-            {
-                double Er = GetExpectationAccordingToPolicy(P, r, ei);
-                double Ec = GetExpectationAccordingToPolicy(P, c, ei);
-
-                double newGain = Math.Abs(Er / Ec);
-
-                // Solve Bellman for rhat = r - gain * c
-                var rhat = r - newGain * c;
-                Vector<double> v = BellmanSolve(P, rhat);
-
-                // because no entries to start node, the solver can't give it a value - lets do it manually
-                v[si] = P.Column(si).DotProduct(v) - newGain * P.Column(si).DotProduct(c);
-
-                return (newGain, v, Er);
             }
 
             // solve once initially
-            var (currentGain, currentV, currentEr) = SolveCurrentMarkov();
-            bestGain = currentEr > 0.0 ? currentGain : 0.0;
+            (Vector<double> Er, Vector<double> Ec) = GetExpectations();
 
-            bestV = currentV.Clone();
+            currentGain = Er[si] > 0.0 ? (Er[si] / Ec[si]) : 0.0;
+            oldReward = Er[si];
 
             bool improved = true;
             while (improved)
             {
                 improved = false;
 
-                // identify the lowest-value node among the non-terminated
-                double minVal = double.PositiveInfinity;
+                // identify the lowest-value gain node among the non-terminated
+                double minGainVal = double.PositiveInfinity;
+                double minRewardVal = double.PositiveInfinity;
+
                 int minIndex = -1;
                 for (int i = 0; i < n; i++)
                 {
-                    if (!isTerminated[i] && currentV[i] < minVal)
+                    if (isTerminated[i]) { continue; }
+
+                    if (Er[i] < 0)
                     {
-                        minVal = currentV[i];
-                        minIndex = i;
+                        if (Er[i] < minRewardVal)
+                        {
+                            minRewardVal = Er[i];
+                            minIndex = i;
+                        }
+                        continue;
+                    }
+
+                    if (minRewardVal == double.PositiveInfinity)
+                    {
+                        // haven't found any negative rewards, so delete a low gain node
+                        if ((Er[i] / Ec[i]) < minGainVal)
+                        {
+                            minGainVal = Er[i] / Ec[i];
+                            minIndex = i;
+                        }
                     }
                 }
 
@@ -119,36 +107,29 @@ namespace Learning.BellmanSolver
 
                 isTerminated[minIndex] = true;
 
-                // resolve Markov
-                var (newGain, newV, newEr) = SolveCurrentMarkov();
+                (Er, Ec) = GetExpectations();
+
+                double newGain = Er[si] / Ec[si];
 
                 // check if gain improved, or if reward is negative, that we improved the reward
                 // since in negative reward regime, talking about gain doesn't really make sense
 
-                // condition 1: If we are in negative reward territory, see if Er improved
-                if (currentEr < 0)
-                {
-                    currentEr = newEr;
-                    currentV = newV;
-
-                    // if we reached positive regime, then use real gain, otherwise use dummy value of 0.0
-                    currentGain = (newEr > 0) ? newGain : 0.0;
-                    improved = true;
-                }
                 // condition 2: otherwise, check if the gain improved
-                if (currentEr > 0 && newGain > currentGain)
+
+                if (oldReward < 0)
+                {
+                    improved = true; // there must be some negative reward nodes, so removing them always helps
+                    oldReward = Er[si];
+                }
+                else if (newGain > currentGain)
                 {
                     currentGain = newGain;
-                    currentEr = newEr;
-                    currentV = newV;
                     improved = true;
                 }
 
                 // update “best so far” if needed
                 if (improved)
                 {
-                    bestGain = currentGain;
-                    bestV = currentV.Clone();
                     for (int i = 0; i < n; i++)
                         bestTerminatedMask[i] = isTerminated[i];
                 }
@@ -161,14 +142,13 @@ namespace Learning.BellmanSolver
                     }
                     isTerminated[minIndex] = false;
 
-
                     // not improved => break out and revert to “best so far”
                     break;
                 }
             }
 
             // return best solution
-            return (bestV.ToArray(), bestTerminatedMask);
+            return (Er.ToArray(), Ec.ToArray(), bestTerminatedMask);
         }
 
         private static Vector<double> BellmanSolve(Matrix<double> P, Vector<double> r)
@@ -189,7 +169,7 @@ namespace Learning.BellmanSolver
 
             int steps = 0;
 
-            while (delta > eps || steps < 10)
+            while (delta > eps || steps < 100)
             {
                 double stepExpectation = distribution.DotProduct(values);
                 ret += stepExpectation;
@@ -201,6 +181,31 @@ namespace Learning.BellmanSolver
             }
 
             return ret;
+        }
+
+        private static Vector<double> GetExpectationsForAllBasisVectors(Matrix<double> transitions, Vector<double> values, double eps = 1e-7)
+        {
+            int n = values.Count;
+            var distributionMatrix = Matrix<double>.Build.DenseIdentity(n);
+            var expectations = Vector<double>.Build.Dense(n); // accumulates expectation per basis vector
+
+            double delta = double.MaxValue;
+            int steps = 0;
+
+            while (delta > eps || steps < 100)
+            {
+                // each column of distributionMatrix is a probability distribution
+                var stepExpectations = distributionMatrix.TransposeThisAndMultiply(values); // vector of expectations
+                expectations += stepExpectations;
+
+                var nextDistributionMatrix = transitions * distributionMatrix;
+                delta = stepExpectations.AbsoluteMaximum(); // Largest change in this step
+
+                distributionMatrix = nextDistributionMatrix;
+                steps++;
+            }
+
+            return expectations;
         }
     }
 }
