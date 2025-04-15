@@ -35,7 +35,7 @@ namespace Linguine
             {
                 // edge case where user knows every word every seen
                 Log.Warning("had to revert to frequent definition, since no contexts");
-                return GetRandomDefinition();
+                return GetRandomDefinition(freq: 1);
             }
             else
             {
@@ -43,9 +43,9 @@ namespace Linguine
             }
         }
 
-        public DefinitionForTesting GetRandomDefinition()
+        public DefinitionForTesting GetRandomDefinition(int freq = 5)
         {
-            int toTestKey = DefLearningService.GetFrequentDefinition();
+            int toTestKey = DefLearningService.GetFrequentDefinition(freq);
 
             DictionaryDefinition toTest = ToTestFromKey(toTestKey);
 
