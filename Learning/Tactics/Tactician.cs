@@ -6,6 +6,7 @@ using Learning.Tactics;
 using MathNet.Numerics;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,9 @@ namespace Learning
     {
         private Strategist  Strategist { get; init; }
         private MarkovGraph GlobalMarkovGraph { get; set; }
+
+        private ConcurrentDictionary<int, Tuple<double[], double[]>> RewardCostArrays { get; } = new ConcurrentDictionary<int, Tuple<double[], double[]>>();
+        
 
         private double LookAheadDays { get; set; } = 1.0;
 
@@ -33,7 +37,7 @@ namespace Learning
 
             
 
-            InitialiseTwistScores();
+            BeginInitialisingTwistScores();
         }
 
         internal (IReadOnlyDictionary<Type, double>, double) GetRewardForFinalState(int defKey)

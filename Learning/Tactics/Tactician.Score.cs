@@ -1,18 +1,8 @@
-﻿using DataClasses;
+﻿using Learning.BellmanSolver;
 using Learning.Strategy;
 using Learning.Tactics;
-using MathNet.Numerics.Integration;
-using OxyPlot;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
-using System.Runtime;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Learning
 {
@@ -21,161 +11,116 @@ namespace Learning
         private int FreqCap      { get; set; }
         private int FreqCapIndex { get; set; } = 20; // cap the freq scoring by that of the 20th most frequent 
 
+        private IReadOnlyDictionary<String, int>? indices { get; set; }
 
 
         private void UpdateTwistScores(int lastDefTestedKey)
         {
-            FollowingSessionDatum? input = Strategist.GetCurrentRewardFeatures(lastDefTestedKey, LookAheadDays);
+            Type currentState = CurrentTacticalState![lastDefTestedKey];
 
-            double stickReward;
+            String lookup = currentState.ToString().Split('.').Last();
 
-            Type currentState = CurrentTacticalState[lastDefTestedKey];
-
-            if (!Strategist.DefaultRewards.ContainsKey(currentState))
+            if (!indices!.ContainsKey(lookup))
             {
-                // not modelled so just use the baseline
-                stickReward = Strategist.BaseLineReward;
-            }
-            else 
+                return;
+                // not modelled - i.e. frequency 0 word, we could use the global markov graph?
+            } 
+
+            if (!RewardCostArrays.ContainsKey(lastDefTestedKey))
             {
-                if (input is null)
-                {
-                    // no history use population averages
-                    stickReward = Strategist.DefaultRewards[currentState];
-                }
-                else
-                {
-                    input = input with
-                    {
-                        sessionTacticType = currentState,
-                        intervalDays      = LookAheadDays
-                    };
-                    stickReward = Strategist.PredictProbability(input);
-                }
+                return; // edge case due to parallelism, its not ideal, but rare enough to not bother handling
             }
 
-            // now predict the expected reward if we twist
-            // explore each markov arrow from our current state
+            int index = indices[lookup];
 
-            double twistReward = 0.0;
-            double cost = 0.0;
+            Tuple<double[], double[]> arrs = RewardCostArrays[lastDefTestedKey];
 
-            // this is the update method, so we know we aren't in the null state
+            double Er = arrs.Item1[index];
+            double Ec = arrs.Item2[index];
 
-            List<MarkovArrow> options = new List<MarkovArrow>();
-
-            if (GlobalMarkovGraph.directedEdges.ContainsKey(currentState))
-            {
-                options = GlobalMarkovGraph.directedEdges[currentState];
-            }
-
-            if (options.Count == 0) { CurrentTwistScores[lastDefTestedKey] = 0.0; return; }
-
-            foreach (MarkovArrow arrow in options)
-            {
-                cost += arrow.prob * arrow.costSeconds;
-
-                if (input is not null)
-                {
-                    FollowingSessionDatum twistInput = input with
-                    {
-                        sessionTacticType = arrow.to,
-                        intervalDays      = LookAheadDays
-                    };
-
-                    if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
-                    {
-                        twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
-                    }
-                    else
-                    {
-                        twistReward += arrow.prob * GlobalMarkovGraph.avgReward;
-                    }
-
-                } else
-                {
-                    if (!Strategist.DefaultRewards.ContainsKey(currentState))
-                    {
-
-                        twistReward += Strategist.BaseLineReward * arrow.prob;
-                    }
-                    else
-                    {
-                        twistReward += Strategist.DefaultRewards[arrow.to] * arrow.prob;
-                    }
-                }
-            }
-            // warning - now favour negative with high cost over negative with low cost!
-            // TODO - solve the MDP using Dinkelbach method of average gain to mitigate this
-
-            double rewardDeltaPerCost = (twistReward - stickReward) / cost;
-
-            CurrentTwistScores[lastDefTestedKey] = rewardDeltaPerCost * Math.Min(FreqCap, Strategist.VocabModel.WordFrequencies[lastDefTestedKey]);
+            double gain = Ec == 0 ? 0 : Er / Ec;
+            
+            CurrentTwistScores![lastDefTestedKey] = gain * Math.Min(FreqCap, Strategist.VocabModel.WordFrequencies[lastDefTestedKey]);
         }
 
-        private void InitialiseTwistScores()
+        private void BeginInitialisingTwistScores()
         {
-            CurrentTwistScores = new Dictionary<int, double>();
+            CurrentTwistScores = new ConcurrentDictionary<int, double>();
 
             FreqCap = Strategist.VocabModel.WordFrequencies
                 .OrderByDescending(kv => kv.Value)
                 .Take(FreqCapIndex)
                 .Last().Value;
 
-            (double baseTwistReward, double baseCost) = GetBaseGraphRewardCostFromNull();
+            var rng = new Random(); // randomise so as we compute them we aren't being only shown 
+                                    // words begining with a, the b, then c etc
+            var nonZeros = Strategist.VocabModel.WordFrequencies
+                .Where(kvp => kvp.Value > 0)
+                .OrderBy(_ => rng.Next())
+                .ToList();
 
-            foreach (var kvp in Strategist.VocabModel.WordFrequencies)
+
+            Task.Run(() =>
             {
-                double stickReward;
-                double twistReward = 0.0;
-                double cost        = 0.0;
+                int total = nonZeros.Count();
+                int completed = 0;
 
-                if (kvp.Value == 0)
+                Parallel.ForEach(nonZeros, new ParallelOptions
                 {
-                    CurrentTwistScores[kvp.Key] = 0.0; // TODO - handle this case
-                    continue;
-                }
-
-                FollowingSessionDatum? knowItTodayInput = Strategist.GetCurrentRewardFeatures(kvp.Key, LookAheadDays);
-
-                if (knowItTodayInput is null /* no previous examples of testing this */)
+                    MaxDegreeOfParallelism = Environment.ProcessorCount - 1 /* leave some compute for the GUI */
+                }, kvp =>
                 {
-                    stickReward = Strategist.VocabModel.PKnownWithError[kvp.Key].Item1;
-                }
-                else
-                {
-                    stickReward = Strategist.PredictProbability(knowItTodayInput);
+                    InitMarkovData(kvp.Key, kvp.Value);
 
-                    MarkovGraph localMarkov = UpdateInitialProbs(GlobalMarkovGraph, stickReward);
+                    int current = Interlocked.Increment(ref completed);
+                    double percent = (double)current / total * 100;
+                    Debug.WriteLine($"Progress: {percent:F2}%");
+                });
+            });
+        }
 
-                    foreach (MarkovArrow arrow in localMarkov.edgesFromNull) 
-                    { 
-                        // the correct global arrows from null sum to basePCorrect
-                        // we want these correct local arrows to sum to the stick reward in probability
+        private void InitMarkovData(int defKey, int freq)
+        {
+            FollowingSessionDatum? knowItTodayInput = Strategist.GetCurrentRewardFeatures(defKey, LookAheadDays);
 
-                        FollowingSessionDatum twistInput = knowItTodayInput with
-                        {
-                            sessionTacticType = arrow.to,
-                            intervalDays = LookAheadDays /* no past if twist now */
-                        };
+            MarkovGraph localGraph;
 
-                        if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
-                        {
-                            twistReward += arrow.prob * Strategist.PredictProbability(twistInput);
-                        }
-                        else
-                        {
-                            twistReward += arrow.prob * GlobalMarkovGraph.avgReward;
-                        }
+            if (knowItTodayInput is null /* no previous examples of testing this */)
+            {
+                // TODO - investigate thread safety here
+                double pKnown = Strategist.VocabModel.PKnownWithError[defKey].Item1;
 
-                        cost += arrow.prob * arrow.costSeconds;
-                    }
-                }
-
-                double rewardDeltaPerCost = (twistReward - stickReward) / cost;
-
-                CurrentTwistScores[kvp.Key] = rewardDeltaPerCost * Math.Min(kvp.Value, FreqCap);
+                // TODO - we might be able to optimise this?
+                localGraph = UpdateInitialProbs(GlobalMarkovGraph, pKnown);
             }
+            else
+            {
+                (var rewards, double pKnown) = GetRewardForFinalState(defKey);
+
+                RewardData rData = new RewardData(rewards, pKnown);
+
+                MarkovGraph adjustedReward = GlobalMarkovGraph with { rewardData = rData };
+
+                localGraph = UpdateInitialProbs(adjustedReward, pKnown);
+            }
+
+            MarkovGraph pruned = MarkovGraphTransformer.Prune(localGraph);
+
+            ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(pruned);
+            ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
+
+            if (indices is null)
+            {
+                indices = rawData.indices;
+            }
+
+            (double[] Er, double[] Ec, bool[] _, int startIndex) = BellmanDinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
+
+            double startGain = Ec[startIndex] == 0 ? 0.0 : Er[startIndex] / Ec[startIndex];
+
+            CurrentTwistScores![defKey] = Math.Min(freq, FreqCap) * startGain;
+
+            RewardCostArrays[defKey] = Tuple.Create(Er, Ec);
         }
 
         private MarkovGraph UpdateInitialProbs(
@@ -220,30 +165,6 @@ namespace Learning
             }
 
             return ret;
-        }
-
-        private (double reward, double cost) GetBaseGraphRewardCostFromNull()
-        {
-            // TODO - cache this in the markov graph?
-
-            double reward = 0.0;
-            double cost = 0.0;
-
-            foreach (MarkovArrow arrow in GlobalMarkovGraph.edgesFromNull)
-            {
-                if (GlobalMarkovGraph.rewardData.rewards.ContainsKey(arrow.to))
-                {
-                    reward += arrow.prob * GlobalMarkovGraph.rewardData.rewards[arrow.to];
-                }
-                else
-                {
-                    reward += arrow.prob * GlobalMarkovGraph.avgReward;
-                }
-
-                cost += arrow.prob * arrow.costSeconds;
-            }
-
-            return (reward, cost);
         }
     }
 }

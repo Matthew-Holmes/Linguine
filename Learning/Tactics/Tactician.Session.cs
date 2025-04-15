@@ -1,6 +1,7 @@
 ﻿using DataClasses;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Learning
     {
         private List<TestRecord>?        CurrentSession       { get; set; }
         private Dictionary<int, Type>?   CurrentTacticalState { get; set; } = null;
-        private Dictionary<int, double>? CurrentTwistScores   { get; set; } = null; // "stick or twist"
+        private ConcurrentDictionary<int, double>? CurrentTwistScores   { get; set; } = null; // "stick or twist"
 
 
         Dictionary<int, int> CoolOff    { get; set; } = new Dictionary<int, int>();
