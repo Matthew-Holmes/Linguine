@@ -9,6 +9,7 @@ using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Integration;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using Serilog;
 
 namespace Learning.BellmanSolver
 {
@@ -17,7 +18,7 @@ namespace Learning.BellmanSolver
         // Note - our lives are a lot easier here than a general RL problem
         // since our policy is empirical probabilities
 
-        internal static (double[], double[], bool[]) GetCostRewardExpectionasAndIsTerminated(ExplodedMarkovData data)
+        internal static (double[], double[], bool[], int) GetCostRewardExpectionasAndIsTerminated(ExplodedMarkovData data)
         {
             // solve using gain estimate and no discount factor
 
@@ -148,7 +149,7 @@ namespace Learning.BellmanSolver
             }
 
             // return best solution
-            return (Er.ToArray(), Ec.ToArray(), bestTerminatedMask);
+            return (Er.ToArray(), Ec.ToArray(), bestTerminatedMask, si);
         }
 
         private static Vector<double> BellmanSolve(Matrix<double> P, Vector<double> r)
@@ -192,7 +193,7 @@ namespace Learning.BellmanSolver
             double delta = double.MaxValue;
             int steps = 0;
 
-            while (delta > eps || steps < 100)
+            while ((delta > eps || steps < 10) && steps < 100) /* we aren't going to be testing one word 100 times, so don't worry about long tail asympotics! */
             {
                 // each column of distributionMatrix is a probability distribution
                 var stepExpectations = distributionMatrix.TransposeThisAndMultiply(values); // vector of expectations
@@ -204,6 +205,8 @@ namespace Learning.BellmanSolver
                 distributionMatrix = nextDistributionMatrix;
                 steps++;
             }
+
+            Log.Verbose("stopped after {steps}", steps);
 
             return expectations;
         }
