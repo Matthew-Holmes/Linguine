@@ -18,6 +18,8 @@ namespace Learning.Tactics
 
     internal static class MarkovGraphPlotter
     {
+        private static object _lock = new();
+
         internal static void SaveExplodedMarkovPlot(MarkovGraph graph, String? outFileName = null)
         {
             var dot = GenerateExplodedDot(graph);
@@ -32,29 +34,32 @@ namespace Learning.Tactics
 
         private static void SavePlotFromDot(String dot, String? outFileName = null)
         {
-            File.WriteAllText("graph.dot", dot);
+            lock (_lock) {
 
-            if (outFileName is null)
-            {
-                outFileName = $"plots/{ConfigManager.Config.Languages.TargetLanguage}/0000_global_mdp.png"; // so first in folder
-            }
-            // this requires going and installing graphviz
-            // but is just for debug so thats not too big a deal
-            // WARNING - this can't cope with weird characters
+                File.WriteAllText("graph.dot", dot);
 
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
+                if (outFileName is null)
                 {
-                    FileName = "dot", // make sure it's in your PATH
-                    Arguments = $"-Tpng graph.dot -o {outFileName}",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
+                    outFileName = $"plots/{ConfigManager.Config.Languages.TargetLanguage}/0000_global_mdp.png"; // so first in folder
                 }
-            };
-            process.Start();
-            process.WaitForExit();
+                // this requires going and installing graphviz
+                // but is just for debug so thats not too big a deal
+                // WARNING - this can't cope with weird characters
+
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "dot", // make sure it's in your PATH
+                        Arguments = $"-Tpng graph.dot -o {outFileName}",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                process.Start();
+                process.WaitForExit();
+            }
         }
 
         private static string GetNodeName(Type t, IReadOnlyDictionary<Type, double> rewards, double avgReward)
@@ -76,6 +81,9 @@ namespace Learning.Tactics
         private static string GenerateExplodedDot(MarkovGraph graph)
         {
             ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(graph);
+            ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
+
+            (double[] solvedRewards, bool[] isTerminated) = BellmanDinkelbach.GetNodeValuesAndIsTerminal(rawData);
 
             var sb = new StringBuilder();
             sb.AppendLine("digraph MarkovGraph {");
@@ -83,16 +91,14 @@ namespace Learning.Tactics
             foreach (ExplodedMarkovGraphArrow arrow in exploded.arrows)
             {
                 String from = arrow.from;
-                if (exploded.rewards.ContainsKey(from))
-                {
-                    from += $"\\n{exploded.rewards[from]:F2}";
-                }
+
+                if (isTerminated[rawData.indices[from]])
+                    continue; // the solver says don't proceed from this node
+
+                from += $"\\n{solvedRewards[rawData.indices[from]]:F2}";
 
                 String to = arrow.to;
-                if (exploded.rewards.ContainsKey(to))
-                {
-                    to += $"\\n{exploded.rewards[to]:F2}";
-                }
+                to += $"\\n{solvedRewards[rawData.indices[to]]:F2}";
 
                 sb.AppendLine($"\"{from}\"  -> \"{to}\" [label=\"p={arrow.prob:F2}\\navg={arrow.costSeconds:F1}s\"];");
             }
