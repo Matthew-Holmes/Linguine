@@ -86,9 +86,10 @@ namespace Learning
             MarkovGraph adjusted = GlobalMarkovGraph with { rewardData = rData };
 
             adjusted = UpdateInitialProbs(adjusted, pKnown);
-
-            MarkovGraphPlotter.SaveExplodedMarkovPlot(adjusted, filenameExploded);
-            MarkovGraphPlotter.SaveMarkovPlot(MarkovGraphTransformer.Prune(adjusted), filename);
+            MarkovGraph pruned = MarkovGraphTransformer.Prune(adjusted);
+            
+            MarkovGraphPlotter.SaveMarkovPlot(pruned, filename);
+            MarkovGraphPlotter.SaveExplodedMarkovPlot(pruned, filenameExploded);
         }
 
     }
