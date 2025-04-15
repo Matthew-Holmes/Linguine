@@ -59,7 +59,6 @@ namespace Learning.BellmanSolver
             return new ExplodedMarkovGraph(arrows, rewards.AsReadOnly());
         }
 
-
         internal static MarkovGraph Prune(MarkovGraph markov)
         {
             // remove outward arrows from nodes which mathematically should not be proceeded (twisted) from
@@ -116,6 +115,52 @@ namespace Learning.BellmanSolver
 
             return markov with { directedEdges = prunedEdges };
         }
+
+        internal static ExplodedMarkovData ToData(ExplodedMarkovGraph graph)
+        {
+            // collect all unique states from the graph
+            var allStates = graph.arrows
+                .SelectMany(a => new[] { a.from, a.to })
+                .Distinct()
+                .OrderBy(s => s) // deterministic indexing
+                .ToList();
+
+            var indices = allStates
+                .Select((state, index) => new { state, index })
+                .ToDictionary(x => x.state, x => x.index);
+
+            // default inits to 0.0s
+            int n               = allStates.Count;
+            var rewards         = new double[n];
+            var transitionProbs = new double[n, n];
+            var costs           = new double[n];
+
+            // rewards array
+            foreach (var (state, reward) in graph.rewards)
+            {
+                if (indices.TryGetValue(state, out int i))
+                {
+                    rewards[i] = reward;
+                }
+            }
+
+            // transition probabilities and costs
+            foreach (var arrow in graph.arrows)
+            {
+                int from = indices[arrow.from];
+                int to   = indices[arrow.to];
+
+                transitionProbs[from, to] = arrow.prob;
+
+                // exploded graphs only have costs for arrows that are the only arrow into the node
+                // because of this we can shift the costs into the node itself
+                if (arrow.costSeconds != 0)
+                    costs[to] = arrow.costSeconds;
+            }
+
+            return new ExplodedMarkovData(rewards, costs, transitionProbs, indices);
+        }
+
 
         private static bool IsReachable(MarkovGraph graph, Type from, Type to)
         {
