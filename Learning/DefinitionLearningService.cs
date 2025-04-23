@@ -16,7 +16,7 @@ namespace Learning
         private Tactician  Tactician  { get; set; }
 
 
-        public DefinitionLearningService(FrequencyData freqData, List<TestRecord> allRecords)
+        public DefinitionLearningService(FrequencyData freqData, List<TestRecord> allRecords, CancellationTokenSource cts)
         {
             _allRecords = allRecords;
 
@@ -26,9 +26,8 @@ namespace Learning
             List<List<TestRecord>> sessions = LearningTacticsHelper.GetSessions(_allRecords);
             List<DictionaryDefinition> distinct = DistinctDefinitionTested(_allRecords);
 
-            Tactician = Strategist.BuildModel(sessions, distinct);
+            Tactician = Strategist.BuildModel(sessions, distinct, cts);
         }
-
 
         public void Inform(TestRecord added)
         {

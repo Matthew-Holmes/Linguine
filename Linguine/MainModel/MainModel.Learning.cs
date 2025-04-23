@@ -81,7 +81,7 @@ namespace Linguine
 
             List<TestRecord>? allRecords = trm.AllRecordsTimeSorted();
 
-            _defLearningService = new DefinitionLearningService(freqData, allRecords);
+            _defLearningService = new DefinitionLearningService(freqData, allRecords, ConfigManager.CancelRunningTasksSource);
         }
 
 

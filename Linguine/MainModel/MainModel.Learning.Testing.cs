@@ -27,6 +27,8 @@ namespace Linguine
         {
             int defId = DefLearningService.GetHighLearningDefinitionID();
 
+            if (lastNcorrect > 10) { defId = DefLearningService.GetFrequentDefinition(1); } // edge case not giving amything hard
+
             DictionaryDefinition toTest = ToTestFromKey(defId);
 
             DefinitionForTesting forTesting = AsDefinitionForTesting(toTest);
@@ -191,6 +193,8 @@ namespace Linguine
         #endregion
 
         #region recording test data
+
+        private int lastNcorrect = 0;
         internal void RecordTest(DefinitionForTesting definitionForTesting,
                                  DateTime posed, DateTime answered, DateTime finished,
                                  bool correct)
@@ -203,6 +207,8 @@ namespace Linguine
             TestRecordsManager trm = new TestRecordsManager(Dictionary, _linguineDbContextFactory);
 
             TestRecord added = trm.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct);
+
+            if (added.Correct) { lastNcorrect++; } else { lastNcorrect = 0; }
 
             DefLearningService.Inform(added);
         }

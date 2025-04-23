@@ -11,8 +11,10 @@ namespace Learning
         private int FreqCap      { get; set; }
         private int FreqCapIndex { get; set; } = 20; // cap the freq scoring by that of the 20th most frequent 
 
-        private IReadOnlyDictionary<String, int>? indices { get; set; }
+        private IReadOnlyDictionary<String, int> Indices { get; set; }
 
+        // TODO - get rid of the transition data from the reward arrays
+        // pass an ordering to the Dinklebach
 
         private void UpdateTwistScores(int lastDefTestedKey)
         {
@@ -20,10 +22,10 @@ namespace Learning
 
             String lookup = currentState.ToString().Split('.').Last();
 
-            if (!indices!.ContainsKey(lookup))
+            if (!Indices.ContainsKey(lookup))
             {
                 return;
-                // not modelled - i.e. frequency 0 word, we could use the global markov graph?
+                // not modelled this state because it hasn't appeared in training data - oh well, it will eventually show up...
             } 
 
             if (!RewardCostArrays.ContainsKey(lastDefTestedKey))
@@ -31,19 +33,19 @@ namespace Learning
                 return; // edge case due to parallelism, its not ideal, but rare enough to not bother handling
             }
 
-            int index = indices[lookup];
+            int index = Indices[lookup];
 
-            Tuple<double[], double[]> arrs = RewardCostArrays[lastDefTestedKey];
+            RewardsCosts arrs = RewardCostArrays[lastDefTestedKey];
 
-            double Er = arrs.Item1[index];
-            double Ec = arrs.Item2[index];
+            double Er = arrs.rewards[index];
+            double Ec = arrs.costs[index];
 
             double gain = Ec == 0 ? 0 : Er / Ec;
             
             CurrentTwistScores![lastDefTestedKey] = gain * Math.Min(FreqCap, Strategist.VocabModel.WordFrequencies[lastDefTestedKey]);
         }
 
-        private void BeginInitialisingTwistScores()
+        private void BeginInitialisingTwistScores(CancellationTokenSource cts)
         {
             CurrentTwistScores = new ConcurrentDictionary<int, double>();
 
@@ -59,27 +61,40 @@ namespace Learning
                 .OrderBy(_ => rng.Next())
                 .ToList();
 
+            int totalStates = Indices.Keys.Count();
 
             Task.Run(() =>
             {
-                int total = nonZeros.Count();
-                int completed = 0;
-
-                Parallel.ForEach(nonZeros, new ParallelOptions
+                try
                 {
-                    MaxDegreeOfParallelism = Environment.ProcessorCount - 1 /* leave some compute for the GUI */
-                }, kvp =>
-                {
-                    InitMarkovData(kvp.Key, kvp.Value);
+                    int total = nonZeros.Count();
+                    int completed = 0;
 
-                    int current = Interlocked.Increment(ref completed);
-                    double percent = (double)current / total * 100;
-                    Debug.WriteLine($"Progress: {percent:F2}%");
-                });
-            });
+                    Parallel.ForEach(nonZeros, new ParallelOptions
+                    {
+                        MaxDegreeOfParallelism = Environment.ProcessorCount - 1,
+                        CancellationToken = cts.Token
+                    }, kvp =>
+                    {
+
+                        cts.Token.ThrowIfCancellationRequested();
+
+                        InitMarkovData(kvp.Key, kvp.Value, totalStates);
+
+                        int current = Interlocked.Increment(ref completed);
+                        double percent = (double)current / total * 100;
+                        Debug.WriteLine($"Progress: {percent:F2}%");
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    Debug.WriteLine("Operation was canceled.");
+                }
+            }, cts.Token);
+
         }
 
-        private void InitMarkovData(int defKey, int freq)
+        private void InitMarkovData(int defKey, int freq, int totalStates)
         {
             FollowingSessionDatum? knowItTodayInput = Strategist.GetCurrentRewardFeatures(defKey, LookAheadDays);
 
@@ -104,23 +119,32 @@ namespace Learning
                 localGraph = UpdateInitialProbs(adjustedReward, pKnown);
             }
 
-            MarkovGraph pruned = MarkovGraphTransformer.Prune(localGraph);
-
+            MarkovGraph         pruned   = MarkovGraphTransformer.Prune(localGraph);
             ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(pruned);
-            ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
-
-            if (indices is null)
-            {
-                indices = rawData.indices;
-            }
+            ExplodedMarkovData  rawData  = MarkovGraphTransformer.ToData(exploded);
 
             (double[] Er, double[] Ec, bool[] _, int startIndex) = Dinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
+
+            // TODO - filter for the indices that only correspond to true nodes, not transitions, use indices to build the arrays
 
             double startGain = Ec[startIndex] == 0 ? 0.0 : Er[startIndex] / Ec[startIndex];
 
             CurrentTwistScores![defKey] = Math.Min(freq, FreqCap) * startGain;
 
-            RewardCostArrays[defKey] = Tuple.Create(Er, Ec);
+            RewardsCosts toAdd = new RewardsCosts(Er, Ec, totalStates);
+
+            if (toAdd.rewards.Length != toAdd.costs.Length)
+            {
+                throw new Exception("lengths mismach in reward cost arrays!");
+            }
+
+            if (toAdd.costs.Length != toAdd.cnt)
+            {
+                // TODO - make the datatype so these checks are implicit!
+                throw new Exception("lengths didn't match the expected value in reward cost arrays");
+            }
+
+            RewardCostArrays[defKey] = toAdd;
         }
 
         private MarkovGraph UpdateInitialProbs(
@@ -131,7 +155,7 @@ namespace Learning
 
             for (int i = 0; i != baseMarkovGraph.edgesFromNull.Count; i++)
             {
-                MarkovArrow arrow = baseMarkovGraph.edgesFromNull[i];
+                MarkovArrow arrow   = baseMarkovGraph.edgesFromNull[i];
                 bool arrowIsCorrect = baseMarkovGraph.edgeFromNullIsCorrect[i];
 
                 // the correct global arrows from null sum to basePCorrect

@@ -25,6 +25,8 @@ namespace Config
 
             _config = _configuration.Get<Config>() ?? new Config();
 
+            CancelRunningTasksSource = new CancellationTokenSource();
+
             // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/change-tokens?view=aspnetcore-9.0
             ChangeToken.OnChange(
                 () => _configuration.GetReloadToken(),
@@ -37,6 +39,7 @@ namespace Config
 
         public static APIKeys APIKeys => _apiKeys;
 
+        public static CancellationTokenSource CancelRunningTasksSource { get; set; }
 
         public static event Action ConfigChanged;
 
@@ -47,9 +50,13 @@ namespace Config
             // (if that was the source of the change)
             lock (_lock)
             {
+                CancelRunningTasksSource.Cancel();
+
                 _config = _configuration.Get<Config>() ?? throw new Exception("couldn't parse new config");
 
                 LoadAPIKeys();
+
+                CancelRunningTasksSource = new CancellationTokenSource(); // old references to this are not updated, so will be cancelled like we want
 
                 ConfigChanged?.Invoke();
             }

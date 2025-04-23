@@ -15,6 +15,8 @@ namespace Learning.Strategy
 
     internal static class ProbabilityPlotter
     {
+        private static object _lock = new();
+
         internal static void PlotProbabilityCurves(
             LogisticRegression model,
             DefinitionFeatures defFeatures,
@@ -73,16 +75,20 @@ namespace Learning.Strategy
                 plotModel.Series.Add(series);
             }
 
-            var directory = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(directory))
+            lock (_lock)
             {
-                Directory.CreateDirectory(directory);
+
+                var directory = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+
+                using var stream = File.Create(outputPath);
+                var exporter = new PngExporter { Width = 800, Height = 600 };
+                exporter.Export(plotModel, stream);
             }
-
-
-            using var stream = File.Create(outputPath);
-            var exporter = new PngExporter { Width = 800, Height = 600 };
-            exporter.Export(plotModel, stream);
         }
 
         private static List<double> GenerateRange(double start, double end, int count)

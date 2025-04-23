@@ -5,6 +5,7 @@ using Learning.Strategy;
 using Learning.Tactics;
 using MathNet.Numerics;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,12 +21,12 @@ namespace Learning
         private Strategist  Strategist { get; init; }
         private MarkovGraph GlobalMarkovGraph { get; set; }
 
-        private ConcurrentDictionary<int, Tuple<double[], double[]>> RewardCostArrays { get; } = new ConcurrentDictionary<int, Tuple<double[], double[]>>();
+        private ConcurrentDictionary<int, RewardsCosts> RewardCostArrays { get; } = new ConcurrentDictionary<int, RewardsCosts>();
         
 
         private double LookAheadDays { get; set; } = 1.0;
 
-        internal Tactician(Strategist strat, List<List<TestRecord>> sessions)
+        internal Tactician(Strategist strat, List<List<TestRecord>> sessions, CancellationTokenSource cts)
         {
             Strategist = strat;
 
@@ -35,9 +36,11 @@ namespace Learning
 
             MarkovGraphPlotter.SaveMarkovPlot(GlobalMarkovGraph); // just for debug
 
-            
+            ExplodedMarkovGraph tmpExploded = MarkovGraphTransformer.Explode(GlobalMarkovGraph);
 
-            BeginInitialisingTwistScores();
+            Indices = MarkovGraphTransformer.ToData(tmpExploded).indices;
+            
+            BeginInitialisingTwistScores(cts);
         }
 
         internal (IReadOnlyDictionary<Type, double>, double) GetRewardForFinalState(int defKey)
@@ -47,7 +50,7 @@ namespace Learning
 
             if (!Strategist.LastTacticUsedForDefinition.ContainsKey(defKey))
             {
-                return (Strategist.DefaultRewards, pKnown); // uses population averages
+                 // uses population averages
             }
 
             double currentReward = Strategist.GetExistingPKnown(defKey, LookAheadDays);
@@ -56,7 +59,9 @@ namespace Learning
 
             if (input is null)
             {
-                throw new Exception("requested reward for definition without observed sessions");
+                Log.Warning("requested reward for definition without observed sessions ending in tactics modelled");
+
+                return (Strategist.DefaultRewards, pKnown);
             }
 
             Dictionary<Type, double> ret = new Dictionary<Type, double>();

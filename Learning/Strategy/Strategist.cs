@@ -53,7 +53,7 @@ namespace Learning
             VocabModel = vocab;
         }
 
-        internal Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs)
+        internal Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs, CancellationTokenSource cts)
         {
             ModelData modelData = GetDataForModel(sessions, defs);
 
@@ -66,7 +66,7 @@ namespace Learning
             Model = new LogisticRegression(
                             modelData.trainingData, modelData.tacticsUsed);
 
-            Tactician tactics = new Tactician(this, sessions);
+            Tactician tactics = new Tactician(this, sessions, cts);
 
             // just for debug
             new Thread(() =>

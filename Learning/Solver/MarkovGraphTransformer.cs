@@ -46,8 +46,18 @@ namespace Learning.Solver
                     arrows.Add(new ExplodedMarkovGraphArrow(from, middle, oldArrow.prob, oldArrow.costSeconds));
                     arrows.Add(new ExplodedMarkovGraphArrow(middle, to, 1.0, 0.0));
 
-                    double startOldReward = markov.rewardData.rewards[kvp.Key];
-                    double endOldReward   = markov.rewardData.rewards[oldArrow.to];
+                    double startOldReward = markov.avgReward;
+                    double endOldReward   = markov.avgReward;
+
+                    if (markov.rewardData.rewards.ContainsKey(kvp.Key))
+                    {
+                        startOldReward = markov.rewardData.rewards[kvp.Key];
+                    }
+
+                    if (markov.rewardData.rewards.ContainsKey(oldArrow.to))
+                    {
+                        endOldReward = markov.rewardData.rewards[oldArrow.to];
+                    }
 
                     double rewardDelta = endOldReward - startOldReward;
 
