@@ -119,14 +119,16 @@ namespace DataClasses
                 decomposition.Add(new TextDecomposition(unit, null)); // leaves
             }
 
+            // still keep the level even when should be a leaf, so don't have a weird edge case to deal with
+
             if (decomposition.Count == 0)
             {
                 return new TextDecomposition(total, null); // is a leaf
             }
-            else if (decomposition.Count == 1 && decomposition.First().Total == parent)
-            {
-                return new TextDecomposition(total, null); // single element newLinedDecomposition bijects, is a leaf
-            }
+            //else if (decomposition.Count == 1 && decomposition.First().Total == parent)
+            //{
+            //    return new TextDecomposition(total, null); // single element newLinedDecomposition bijects, is a leaf
+            //}
             else
             {
                 return new TextDecomposition(total, decomposition);
