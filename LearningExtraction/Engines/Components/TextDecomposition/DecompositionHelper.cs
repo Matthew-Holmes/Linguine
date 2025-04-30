@@ -184,7 +184,7 @@ namespace LearningExtraction
                             newUnitText.Remove(i, 1);
                             if (i == 0)
                             {
-                                Log.Warning("had a unit entirly composed of problem characters in {text}", parent);
+                                Log.Warning("had a unit entirely composed of problem characters in {text}", parent);
                             }
                         }
                         else
