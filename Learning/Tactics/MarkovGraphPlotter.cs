@@ -84,7 +84,7 @@ namespace Learning.Tactics
                 ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(graph);
                 ExplodedMarkovData rawData = MarkovGraphTransformer.ToData(exploded);
 
-            (double[] rewards, double[] costs, bool[] isTerminated, int _) = Dinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
+            (double[] rewards, double[] costs, bool[] isTerminated, int _) = Dinkelbach.GetCostRewardExpectationsAndIsTerminated(rawData);
 
             var sb = new StringBuilder();
             sb.AppendLine("digraph MarkovGraph {");

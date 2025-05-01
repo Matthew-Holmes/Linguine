@@ -25,7 +25,12 @@ namespace Learning.Solver
                 arrows.Add(new ExplodedMarkovGraphArrow(middle, to, 1.0, 0.0));
 
                 double startOldReward = markov.rewardData.startReward;
-                double endOldReward = markov.rewardData.rewards[oldArrow.to];
+                double endOldReward   = markov.avgReward;
+
+                if (markov.rewardData.rewards.ContainsKey(oldArrow.to))
+                {
+                    endOldReward = markov.rewardData.rewards[oldArrow.to];
+                }
 
                 double rewardDelta = endOldReward - startOldReward;
 

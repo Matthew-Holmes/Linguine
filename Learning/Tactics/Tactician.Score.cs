@@ -61,8 +61,6 @@ namespace Learning
                 .OrderBy(_ => rng.Next())
                 .ToList();
 
-            int totalStates = Indices.Keys.Count();
-
             Task.Run(() =>
             {
                 try
@@ -79,7 +77,7 @@ namespace Learning
 
                         cts.Token.ThrowIfCancellationRequested();
 
-                        InitMarkovData(kvp.Key, kvp.Value, totalStates);
+                        InitMarkovData(kvp.Key, kvp.Value);
 
                         int current = Interlocked.Increment(ref completed);
                         double percent = (double)current / total * 100;
@@ -94,7 +92,7 @@ namespace Learning
 
         }
 
-        private void InitMarkovData(int defKey, int freq, int totalStates)
+        private void InitMarkovData(int defKey, int freq)
         {
             FollowingSessionDatum? knowItTodayInput = Strategist.GetCurrentRewardFeatures(defKey, LookAheadDays);
 
@@ -123,7 +121,7 @@ namespace Learning
             ExplodedMarkovGraph exploded = MarkovGraphTransformer.Explode(pruned);
             ExplodedMarkovData  rawData  = MarkovGraphTransformer.ToData(exploded);
 
-            (double[] Er, double[] Ec, bool[] _, int startIndex) = Dinkelbach.GetCostRewardExpectionasAndIsTerminated(rawData);
+            (double[] Er, double[] Ec, bool[] _, int startIndex) = Dinkelbach.GetCostRewardExpectationsAndIsTerminated(rawData);
 
             // TODO - filter for the indices that only correspond to true nodes, not transitions, use indices to build the arrays
 
@@ -131,7 +129,23 @@ namespace Learning
 
             CurrentTwistScores![defKey] = Math.Min(freq, FreqCap) * startGain;
 
-            RewardsCosts toAdd = new RewardsCosts(Er, Ec, totalStates);
+            // TODO - create arrays that match the global markov indices, then fill in the values we got from the
+            // pruned, exploded Markov graph
+
+            int globalCnt = Indices.Count;
+            double[] ErPadded = new double[globalCnt];
+            double[] EcPadded = new double[globalCnt];
+
+            foreach (var kvp in rawData.indices)
+            {
+                int globalIndex = Indices[kvp.Key];
+
+                ErPadded[globalIndex] = Er[kvp.Value];
+                EcPadded[globalIndex] = Ec[kvp.Value];
+
+            }
+
+            RewardsCosts toAdd = new RewardsCosts(ErPadded, EcPadded, globalCnt);
 
             if (toAdd.rewards.Length != toAdd.costs.Length)
             {

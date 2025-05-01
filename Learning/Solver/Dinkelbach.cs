@@ -18,7 +18,7 @@ namespace Learning.Solver
         // Note - our lives are a lot easier here than a general RL problem
         // since our policy is empirical probabilities
 
-        internal static (double[], double[], bool[], int) GetCostRewardExpectionasAndIsTerminated(ExplodedMarkovData data)
+        internal static (double[], double[], bool[], int) GetCostRewardExpectationsAndIsTerminated(ExplodedMarkovData data)
         {
             // solve using gain estimate and no discount factor
 
