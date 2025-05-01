@@ -26,7 +26,6 @@ namespace Learning.LearningTacticsRepository
 
             if (thisDef.Count != 1)
             {
-                // need at least two - otherwise its just a single incorrect response
                 return false;
             }
 

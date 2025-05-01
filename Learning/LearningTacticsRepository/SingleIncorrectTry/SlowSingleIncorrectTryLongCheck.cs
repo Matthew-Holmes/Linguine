@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Learning.LearningTacticsRepository
 {
-    class SlowSingleCorrectTryLongCheck : LearningTactic
+    class SlowSingleIncorrectTryLongCheck : LearningTactic
     {
-        internal override LearningTactic? Prerequisite => new SlowSingleCorrectTry();
+        internal override LearningTactic? Prerequisite => new SlowSingleIncorrectTry();
 
-        internal SlowSingleCorrectTryLongCheck()
+        internal SlowSingleIncorrectTryLongCheck()
         {
             Constraints = new List<Constraint> { _LongCheck };
         }
