@@ -13,12 +13,12 @@ namespace LearningExtraction
     {
         public int MaxStatements  { get; set; } = 20;
 
-        internal TextDecomposer     ToStatementsDecomposer              { get; set; }
-        internal TextDecomposer     FromStatementsDecomposer            { get; set; }
-        internal UnitRooter         UnitRooter                          { get; set; }
+        internal TextDecomposer          ToStatementsDecomposer              { get; set; }
+        internal TextDecomposer          FromStatementsDecomposer            { get; set; }
+        internal UnitRooter              UnitRooter                          { get; set; }
         internal BatchDefinitionResolver DefinitionResolver                  { get; set; }
-        internal AgentBase          ContextChangeIdentificationAgent    { get; set; }
-        internal AgentBase          ContextUpdateAgent                  { get; set; }
+        internal AgentBase               ContextChangeIdentificationAgent    { get; set; }
+        internal AgentBase               ContextUpdateAgent                  { get; set; }
 
         public async Task<List<ProtoStatement>?> GenerateStatementsFor(
             String text, List<String> context, bool isTail, CancellationToken token)
@@ -79,7 +79,5 @@ namespace LearningExtraction
                 if (builders.Count > MaxStatements) { break; }
             }
         }
-
-
     }
 }

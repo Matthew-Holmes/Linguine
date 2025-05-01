@@ -12,9 +12,9 @@ namespace LearningExtraction
 
         public int MaxVolumeToProcess { get; set; }  // if given text larger than this, chunk it
 
-        public AgentBase StandardAgent { get; set; }
+        public AgentBase StandardAgent        { get; set; }
         public AgentBase HighPerformanceAgent { get; set; }
-        public AgentBase FallbackAgent { get; set; }
+        public AgentBase FallbackAgent        { get; set; }
 
         public async Task<TextDecomposition> DecomposeText(String text, bool mustInject = true, bool mustBiject = false)
         {
@@ -76,7 +76,6 @@ namespace LearningExtraction
 
             if (ret2 is not null && MaintainsInvariants(ret2))
             {
-
                 Log.Warning("successful decomposition using high powered agent, potentially trivial, hard text: \"{HardText}\"", text);
                 return ret2;
             }

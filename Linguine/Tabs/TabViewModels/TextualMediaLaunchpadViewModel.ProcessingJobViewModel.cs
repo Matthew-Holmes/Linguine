@@ -223,7 +223,8 @@ namespace Linguine.Tabs
                         {
                             _complete = complete;
                             _steps++;
-                        }));
+                        },
+                        complete => _cts.Cancel()));
                 }
                 else
                 {

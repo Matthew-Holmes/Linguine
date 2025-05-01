@@ -311,6 +311,11 @@ namespace Linguine
 
         private void SetIndices(List<StatementBuilder> builders, int startOfStatementsIndex)
         {
+            if (builders.Count == 0)
+            {
+                throw new Exception("no builders provided!");
+            }
+
             if (builders.Select(b => b.Parent).Distinct().Count() != 1)
             {
                 throw new Exception("something went wrong!");

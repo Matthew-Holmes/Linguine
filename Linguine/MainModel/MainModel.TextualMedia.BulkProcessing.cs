@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DataClasses;
 using Config;
+using System.Management;
 
 namespace Linguine
 {
@@ -52,7 +53,7 @@ namespace Linguine
             return ret;
         }
 
-        internal async Task StartBulkProcessing(string textName, Action<int>? progressCallback = null)
+        internal async Task StartBulkProcessing(string textName, Action<int>? progressCallback = null, Action<int>? finished = null)
         {
             using var context = LinguineFactory.CreateDbContext();
             TextualMedia? tm = TextualMediaManager?.GetByName(textName, context) ?? null;
@@ -87,12 +88,14 @@ namespace Linguine
             var cts = newCts.Token;
             var stopwatch = new Stopwatch();
 
+            int completed = -1;
+
             try
             {
                 while (!cts.IsCancellationRequested)
                 {
                     stopwatch.Restart();
-                    int completed = await ProcessNextChunk(tm, cts);
+                    completed = await ProcessNextChunk(tm, cts);
                     stopwatch.Stop();
 
                     if (completed == -1)
@@ -115,6 +118,7 @@ namespace Linguine
             }
             finally
             {
+                finished?.Invoke(completed);
                 _bulkCancellations.TryRemove(textName, out _);
                 newCts.Dispose();
             }

@@ -151,14 +151,16 @@ namespace Learning
                         DateTime thisTime = sessions[this_i].First().Posed;
                         TimeSpan delta = thisTime - lastTime;
 
+                        double deltaDays = delta.TotalDays;
+
                         DateTime mid = lastTime + delta / 2.0;
                         TimeSpan daysSinceMid = at - mid;
 
                         double decay = Math.Pow(0.5, daysSinceMid.TotalDays);
 
-                        delta /= decay; // since taking min, we inflate times longer ago
+                        deltaDays /= decay; // since taking min, we inflate times longer ago
 
-                        ret = Math.Min(ret, delta.TotalDays);
+                        ret = Math.Min(ret, deltaDays);
                         goodRet = true;
                     }
                 }

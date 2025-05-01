@@ -5,6 +5,12 @@ namespace LearningExtraction
 {
     public partial class StatementEngine
     {
+
+        //private record UnitDefinitions(List<DictionaryDefinition> options);
+        //private record DecompositionDefinitions(List<UnitDefinitions> options);
+        //private record DecompositionDefinitionsTask(Tuple<ProtoStatementBuilder, DecompositionDefinitions> data);
+
+ 
         private async Task AttachCorrectDefinitions(List<ProtoStatementBuilder> builders)
         {
             List<Tuple<ProtoStatementBuilder, List<List<DictionaryDefinition>>>> taskData = new List<Tuple<ProtoStatementBuilder, List<List<DictionaryDefinition>>>>();
