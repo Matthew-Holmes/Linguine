@@ -99,7 +99,7 @@ namespace Linguine.Tabs
             _isVocabTest = true;
             _vocabTestRemaining = _model.VocabTestWordCount ?? throw new Exception("couldn't access definition learning service");
 
-            _vocabTestRemaining -= _model.DistintWordsTested;
+            _vocabTestRemaining -= _model.DistinctWordsTested;
 
             Title = $"Remaining: {_vocabTestRemaining}";
         }

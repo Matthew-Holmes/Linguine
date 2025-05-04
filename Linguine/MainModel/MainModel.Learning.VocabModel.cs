@@ -23,7 +23,7 @@ namespace Linguine
             return DefLearningService.GetPKnownByBinnedZipf();
         }
 
-        public int DistintWordsTested
+        public int DistinctWordsTested
         {
             get
             {
