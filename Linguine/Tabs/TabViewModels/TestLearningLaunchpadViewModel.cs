@@ -39,18 +39,20 @@ namespace Linguine.Tabs
         #region data validation
 
         public bool EnoughDataForWordFrequencies { get; private set; }
-        public bool AnyDataForWordFrequencies { get; private set; }
-        public bool NeedToBurnInVocabularyData { get; private set; }
+        public bool AnyDataForWordFrequencies    { get; private set; }
+        public bool NeedToBurnInVocabularyData   { get; private set; }
 
         public bool NeedADictionary { get; private set; }
 
         public bool TellUserToProcessMoreData => !EnoughDataForWordFrequencies && !NeedADictionary;
-        public bool TellUserToDoVocabBurnin => NeedToBurnInVocabularyData && EnoughDataForWordFrequencies && !NeedADictionary;
-        public bool FreeStudyIsEnabled => EnoughDataForWordFrequencies && !NeedToBurnInVocabularyData;
-        public bool TargetedStudyEnabled => AnyDataForWordFrequencies;
+        public bool TellUserToDoVocabBurnin   => NeedToBurnInVocabularyData && EnoughDataForWordFrequencies && !NeedADictionary;
+        public bool FreeStudyIsEnabled        => EnoughDataForWordFrequencies && !NeedToBurnInVocabularyData;
+        public bool TargetedStudyEnabled      => AnyDataForWordFrequencies;
+
+        // TODO - localise these!
 
         public String NeedADictionaryText { get; } = "Please import a dictionary to begin learning";
-        public String NeedMoreDataText { get; } = "Not enough processed text for learning";
+        public String NeedMoreDataText    { get; } = "Not enough processed text for learning";
         public String NeedVocabBurnInText { get; } = "Please complete an initial vocabulary assessment";
 
         private void ValidateSufficentData()
@@ -63,7 +65,7 @@ namespace Linguine.Tabs
 
         private void BeginTargetedStudy()
         {
-            _parent.CloseThisAndBeginTargetedStudy(this);
+            throw new NotImplementedException();
         }
 
         private void BeginFreeStudy()
@@ -133,30 +135,30 @@ namespace Linguine.Tabs
 
             var xAxis = new LinearAxis
             {
-                Position = AxisPosition.Bottom,
+                Position           = AxisPosition.Bottom,
                 MajorGridlineStyle = LineStyle.None,
                 MinorGridlineStyle = LineStyle.None,
-                TickStyle = TickStyle.Inside,
-                AxislineStyle = LineStyle.Solid,
-                IsPanEnabled = false,
-                IsZoomEnabled = false,
-                MinorTickSize = 0,
-                Minimum = sortedXs.First() - xMargin,
-                Maximum = sortedXs.Last() + xMargin
+                TickStyle          = TickStyle.Inside,
+                AxislineStyle      = LineStyle.Solid,
+                IsPanEnabled       = false,
+                IsZoomEnabled      = false,
+                MinorTickSize      = 0,
+                Minimum            = sortedXs.First() - xMargin,
+                Maximum            = sortedXs.Last() + xMargin
             };
 
             var yAxis = new LinearAxis
             {
-                Position = AxisPosition.Left,
+                Position           = AxisPosition.Left,
                 MajorGridlineStyle = LineStyle.None,
                 MinorGridlineStyle = LineStyle.None,
-                AxislineStyle = LineStyle.Solid,
-                IsPanEnabled = false,
-                IsZoomEnabled = false,
-                MinorTickSize = 0,
-                TickStyle = TickStyle.Inside,
-                Minimum = 0,
-                Maximum = 1.05
+                AxislineStyle      = LineStyle.Solid,
+                IsPanEnabled       = false,
+                IsZoomEnabled      = false,
+                MinorTickSize      = 0,
+                TickStyle          = TickStyle.Inside,
+                Minimum            = 0,
+                Maximum            = 1.05
             };
 
 
@@ -164,6 +166,7 @@ namespace Linguine.Tabs
             model.Axes.Add(yAxis);
 
             PlotModel = model;
+
             ShowPlot = true;
         }
         #endregion
