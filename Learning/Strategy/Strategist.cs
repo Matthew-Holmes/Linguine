@@ -12,11 +12,6 @@ using Learning.Strategy;
 using System.Reflection.Metadata;
 using System.ComponentModel;
 using Config;
-using System.Runtime.CompilerServices;
-using HarfBuzzSharp;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Serilog;
 
 namespace Learning
@@ -73,7 +68,10 @@ namespace Learning
             {
                 HashSet<int> defKeysPlotted = new HashSet<int>();
 
-                foreach (DefinitionFeatures feature in modelData.distinctDefinitionFeatures)
+                var toIt = new List<DefinitionFeatures>(modelData.distinctDefinitionFeatures);
+                toIt.Reverse(); // more interesting examples at the end of this
+
+                foreach (DefinitionFeatures feature in toIt)
                 {
                     int key = feature.def.DatabasePrimaryKey;
 
@@ -83,7 +81,11 @@ namespace Learning
                     string name = key + feature.def.Word;
                     string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
 
-                    ProbabilityPlotter.PlotProbabilityCurves(Model, feature, TacticsUsed, $"plots/{language}/{name}.png");
+                    Tuple<LearningTactic, DateTime> lastSeen = modelData.distinctDefinitionsLastTacticUsed[key];
+
+                    ProbabilityPlotter.PlotProbabilityCurves(
+                        Model, feature, TacticsUsed, lastSeen.Item1, lastSeen.Item2,
+                        $"plots/{language}/{name}.png");
 
                     tactics.PlotMDP(key, 
                                     $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png", 

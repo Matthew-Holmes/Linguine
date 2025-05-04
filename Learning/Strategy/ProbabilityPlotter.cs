@@ -21,38 +21,41 @@ namespace Learning.Strategy
             LogisticRegression model,
             DefinitionFeatures defFeatures,
             List<Type> tacticsTypes,
+            LearningTactic lastTacticSeen,
+            DateTime lastSeenTime,
             string outputPath)
         {
             var plotModel = new PlotModel { Title = $"Prediction Curves for '{defFeatures.def.Word}'" };
             var legend = new Legend
             {
-                LegendTitle = "Learning Tactics",
-                LegendPosition = LegendPosition.RightTop,
-                LegendPlacement = LegendPlacement.Outside,
-                LegendOrientation = LegendOrientation.Vertical,
+                LegendTitle           = "Learning Tactics",
+                LegendPosition        = LegendPosition.RightTop,
+                LegendPlacement       = LegendPlacement.Outside,
+                LegendOrientation     = LegendOrientation.Vertical,
                 LegendBorderThickness = 0
             };
             plotModel.Legends.Add(legend);
 
-            double lookAheadDays = 200;
+            double lookAheadDays = 14;
 
             plotModel.Axes.Add(new LinearAxis
             {
                 Position = AxisPosition.Bottom,
-                Title = "Interval Days",
-                Minimum = 0,
-                Maximum = lookAheadDays
+                Title    = "Interval Days",
+                Minimum  = 0,
+                Maximum  = lookAheadDays
             });
 
             plotModel.Axes.Add(new LinearAxis
             {
                 Position = AxisPosition.Left,
-                Title = "Probability Correct",
-                Minimum = 0,
-                Maximum = 1
+                Title    = "Probability Correct",
+                Minimum  = 0,
+                Maximum  = 1
             });
 
-            var intervalRange = GenerateRange(1.0, lookAheadDays, 400); // 
+            
+            var intervalRange = GenerateRange(0.0, lookAheadDays, 400); // 
 
             foreach (var tacticType in tacticsTypes)
             {
@@ -74,6 +77,23 @@ namespace Learning.Strategy
 
                 plotModel.Series.Add(series);
             }
+
+            TimeSpan timeSinceLast = DateTime.Now - lastSeenTime;
+            var datumForDot = Strategist.CreateDatum(defFeatures, lastTacticSeen.GetType(), timeSinceLast.TotalDays);
+            double probForDot = model.PredictProbability(datumForDot, tacticsTypes);
+
+            var scatterSeriesForDot = new ScatterSeries
+            {
+                MarkerType            = MarkerType.Circle,
+                MarkerFill            = OxyColors.Red,
+                MarkerStroke          = OxyColors.Red,
+                MarkerStrokeThickness = 0,
+                MarkerSize            = 3,
+                //IsVisibleInLegend = false
+            };
+
+            scatterSeriesForDot.Points.Add(new ScatterPoint(timeSinceLast.TotalDays, probForDot));
+            plotModel.Series.Add(scatterSeriesForDot);
 
             lock (_lock)
             {
