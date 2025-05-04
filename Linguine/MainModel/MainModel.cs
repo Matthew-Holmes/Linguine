@@ -33,12 +33,10 @@ namespace Linguine
                     Directory.CreateDirectory(config.DatabaseDirectory);
                 }
 
-                _linguineDbContextFactory = new LinguineDbContextFactory(config.GetDatabaseString());
-                var context = LinguineFactory.CreateDbContext();
-                context.Database.EnsureCreated();
-                context.Dispose();
+                EnsureDatabase(config);
 
                 LoadManagers();
+
                 Task.Run(() => LoadServices()); // so in the background
 
                 Loaded?.Invoke(this, EventArgs.Empty);
@@ -49,10 +47,23 @@ namespace Linguine
             }
         }
 
-
+        private void EnsureDatabase(Config.Config config)
+        {
+            String connString = config.GetDatabaseString();
+            _linguineDbContextFactory = new LinguineDbContextFactory(connString);
+            var context = LinguineFactory.CreateDbContext();
+            context.Database.EnsureCreated();
+            context.Dispose();
+        }
 
         public void Dispose()
         {
+            // stop any running jobs
+            foreach (var kvp in _bulkCancellations)
+            {
+                kvp.Value.Cancel();
+            }
+
             // clean up our events
             foreach (Delegate d in LoadingFailed.GetInvocationList())
             {
