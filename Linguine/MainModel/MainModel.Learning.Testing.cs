@@ -28,7 +28,7 @@ namespace Linguine
             int defId = DefLearningService.GetHighLearningDefinitionID();
 
             if (lastNcorrect > 10) { defId = DefLearningService.GetFrequentDefinition(1); } // edge case not giving amything hard
-
+            
             DictionaryDefinition toTest = ToTestFromKey(defId);
 
             DefinitionForTesting forTesting = AsDefinitionForTesting(toTest);
@@ -179,6 +179,7 @@ namespace Linguine
 
             if (maybeToTest is null)
             {
+                Log.Warning("couldn't get the definition {defKey} requested - testing user on random one instead!", toTestKey);
                 toTest = Dictionary.GetRandomDefinition();
             }
             else
