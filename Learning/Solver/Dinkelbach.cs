@@ -64,7 +64,7 @@ namespace Learning.Solver
                 improved = false;
 
                 // identify the lowest-value gain node among the non-terminated
-                double minGainVal = double.PositiveInfinity;
+                double minGainVal   = double.PositiveInfinity;
                 double minRewardVal = double.PositiveInfinity;
 
                 int minIndex = -1;
