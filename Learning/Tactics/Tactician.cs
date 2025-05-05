@@ -1,18 +1,9 @@
-﻿using Config;
-using DataClasses;
+﻿using DataClasses;
 using Learning.Solver;
 using Learning.Strategy;
 using Learning.Tactics;
-using MathNet.Numerics;
-using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Serilog;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
 
 namespace Learning
 {
