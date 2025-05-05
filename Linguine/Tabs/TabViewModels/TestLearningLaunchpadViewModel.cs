@@ -16,9 +16,6 @@ namespace Linguine.Tabs
         public ICommand StartVocabAssessmentCommand { get; private set; }
 
 
-
-
-
         public TestLearningLaunchpadViewModel(UIComponents uiComponents, MainModel model, MainViewModel parent) : base(uiComponents, model, parent)
         {
             Title = "Learn";
@@ -50,7 +47,6 @@ namespace Linguine.Tabs
         public bool TargetedStudyEnabled      => AnyDataForWordFrequencies;
 
         // TODO - localise these!
-
         public String NeedADictionaryText { get; } = "Please import a dictionary to begin learning";
         public String NeedMoreDataText    { get; } = "Not enough processed text for learning";
         public String NeedVocabBurnInText { get; } = "Please complete an initial vocabulary assessment";
@@ -58,9 +54,19 @@ namespace Linguine.Tabs
         private void ValidateSufficentData()
         {
             NeedADictionary              = _model.NeedToImportADictionary;
-            EnoughDataForWordFrequencies = _model.EnoughDataForWordFrequencies();
-            AnyDataForWordFrequencies    = _model.AnyDataForWordFrequencies();
-            NeedToBurnInVocabularyData   = _model.NeedToBurnInVocabularyData();
+
+            EnoughDataForWordFrequencies = false;
+            AnyDataForWordFrequencies    = false;
+            NeedToBurnInVocabularyData   = false;
+
+            if (!NeedADictionary)
+            {
+                DLSRequirements req = _model.GetDLSRequirements();
+
+                EnoughDataForWordFrequencies = req.EnoughDataForWordFrequencies;
+                AnyDataForWordFrequencies    = req.AnyDataForWordFrequencies;
+                NeedToBurnInVocabularyData   = req.NeedToBurnInVocabularyData;
+            }
         }
 
         private void BeginTargetedStudy()
@@ -144,7 +150,7 @@ namespace Linguine.Tabs
                 IsZoomEnabled      = false,
                 MinorTickSize      = 0,
                 Minimum            = sortedXs.First() - xMargin,
-                Maximum            = sortedXs.Last() + xMargin
+                Maximum            = sortedXs.Last()  + xMargin
             };
 
             var yAxis = new LinearAxis

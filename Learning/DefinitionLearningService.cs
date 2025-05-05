@@ -6,28 +6,16 @@ using Infrastructure.Migrations;
 
 namespace Learning
 {
-    public partial class DefinitionLearningService
+    internal partial class DefinitionLearningService : IDefinitionLearningService
     {
         private Random rng = new Random();
 
-        private List<TestRecord> _allRecords;
+        internal required List<TestRecord> AllRecords  { get; init; }
+        internal required FrequencyData    Frequencies { get; init; }
+        internal required VocabularyModel  VocabModel  { get; init; }
+        internal required Strategist       Strategist  { get; init; }
+        internal required Tactician        Tactician   { get; init; }
 
-        private Strategist Strategist { get; set; }
-        private Tactician  Tactician  { get; set; }
-
-
-        public DefinitionLearningService(FrequencyData freqData, List<TestRecord> allRecords, CancellationTokenSource cts)
-        {
-            _allRecords = allRecords;
-
-            VocabModel = new VocabularyModel(freqData, _allRecords);
-            Strategist = new Strategist(VocabModel);
-
-            List<List<TestRecord>> sessions = LearningTacticsHelper.GetSessions(_allRecords);
-            List<DictionaryDefinition> distinct = DistinctDefinitionTested(_allRecords);
-
-            Tactician = Strategist.BuildModel(sessions, distinct, cts);
-        }
 
         public void Inform(TestRecord added)
         {
@@ -59,13 +47,6 @@ namespace Learning
             int def_key = eligibleKeys[rnd.Next(eligibleKeys.Count)];
 
             return def_key;
-        }
-
-        private List<DictionaryDefinition> DistinctDefinitionTested(List<TestRecord> allRecords)
-        {
-            return allRecords.GroupBy(tr => tr.DictionaryDefinitionKey)
-                             .Select(grouping => grouping.First().Definition)
-                             .ToList();
         }
     }
 }

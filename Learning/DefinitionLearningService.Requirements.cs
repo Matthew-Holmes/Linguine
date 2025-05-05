@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace Learning
 {
+    public record DLSRequirements(
+        bool EnoughDataForWordFrequencies,
+        bool NeedToBurnInVocabularyData, 
+        bool AnyDataForWordFrequencies);
+
     partial class DefinitionLearningService
     {
         private int _minWordsProcessed = 300;
@@ -16,7 +21,16 @@ namespace Learning
 
         public int VocabTestWordCount => _minWordsTested;
 
-        public bool EnoughDataForWordFrequencies()
+        public DLSRequirements RequirementsMet()
+        {
+            bool wordFreqEnough = EnoughDataForWordFrequencies();
+            bool burnIn         = NeedToBurnInVocabularyData();
+            bool wordFreqAny    = AnyDataForWordFrequencies();
+
+            return new DLSRequirements(wordFreqEnough, burnIn, wordFreqAny);
+        }
+
+        private bool EnoughDataForWordFrequencies()
         {
             if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
             {
@@ -29,21 +43,21 @@ namespace Learning
                 return false;
             }
 
-            int total = DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum();
+            int total  = DefinitionFrequencyEngine.DefinitionFrequencies.Values.Sum();
             int unique = DefinitionFrequencyEngine.DefinitionFrequencies.Where(kvp => kvp.Value != 0).Count();
 
-            bool enoughTotalText = total >= _minWordsProcessed;
+            bool enoughTotalText   = total  >= _minWordsProcessed;
             bool enoughUniqueWords = unique >= _minWordsTested;
 
             return enoughTotalText && enoughUniqueWords;
         }
 
-        public bool NeedToBurnInVocabularyData()
+        private bool NeedToBurnInVocabularyData()
         {
-            return _allRecords.Count < _minWordsTested;
+            return AllRecords.Count < _minWordsTested;
         }
 
-        public bool AnyDataForWordFrequencies()
+        private bool AnyDataForWordFrequencies()
         {
             if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
             {

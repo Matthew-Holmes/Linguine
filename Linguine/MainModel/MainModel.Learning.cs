@@ -12,26 +12,22 @@ using System.Threading;
 
 namespace Linguine
 {
-
-
-
     public partial class MainModel
     {
-        private DefinitionLearningService? _defLearningService = null;
+        private IDefinitionLearningService? _defLearningService = null;
 
         private int MaxContextExamples = 5;
 
         private Random _rng = new Random(Environment.TickCount);
 
 
-        private DefinitionLearningService DefLearningService
+        private IDefinitionLearningService DefLearningService
         {
             get
             {
-                if (_defLearningService is null)
-                {
-                    StartDefinitionLearningService();
-                }
+                // TODO - how to make this wait for the service to be loaded??
+                // only allow the learn button once it is ready
+                // how to handle the vocab model??
 
                 if (_defLearningService is null)
                 {
@@ -58,6 +54,7 @@ namespace Linguine
 
             NeedToImportADictionary = false; // TODO - random flags not great
 
+            // TODO - refactor the freqency engine into the learning service startup
 
             if (DefinitionFrequencyEngine.FrequencyData is null)
             {
@@ -81,7 +78,7 @@ namespace Linguine
 
             List<TestRecord>? allRecords = trm.AllRecordsTimeSorted();
 
-            _defLearningService = new DefinitionLearningService(freqData, allRecords, ConfigManager.CancelRunningTasksSource);
+            _defLearningService = DefinitionLearningServiceFactory.BuildDLS(freqData, allRecords, ConfigManager.CancelRunningTasksSource);
         }
 
 

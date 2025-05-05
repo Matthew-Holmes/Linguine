@@ -11,11 +11,10 @@ namespace Learning
 {
     partial class DefinitionLearningService
     {
-        private int _zipfBinCount    = 1;
-        private bool _frozenBinCount = false;
-        private VocabularyModel VocabModel { get; init; }
+        private int  _zipfBinCount    = 1;
+        private bool _frozenBinCount  = false;
 
-        public Tuple<double[], double[]> GetPKnownByBinnedZipf()
+        public Tuple<double[], double[]>? GetPKnownByBinnedZipf()
         {
             return VocabModel.GetPKnownByBinnedZipf();
         }
@@ -31,7 +30,7 @@ namespace Learning
                 throw new Exception();
             }
 
-            IReadOnlyDictionary<int, TestRecord> latest = LatestTestRecords(_allRecords);
+            IReadOnlyDictionary<int, TestRecord> latest = LatestTestRecords(AllRecords);
 
             IReadOnlyDictionary<int, double> zipfScores = DefinitionFrequencyEngine.DefinitionZipfScores;
 
@@ -127,7 +126,5 @@ namespace Learning
 
             return latestRecords;
         }
-
-
     }
 }

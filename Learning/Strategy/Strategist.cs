@@ -39,18 +39,23 @@ namespace Learning
         internal double BaseLineReward { get; set; }
         internal double BaseLineInitialPKnown { get; set; }
 
-        private LogisticRegression Model { get; set; }
-        internal VocabularyModel VocabModel { get; init; }
+        // telemetry/debug properties
+        internal LogisticRegression Model     { get; set; }
+        internal VocabularyModel   VocabModel { get; init; }
+        internal ModelData          ModelData { get; set; }
 
 
-        internal Strategist(VocabularyModel vocab)
+        internal Strategist(VocabularyModel vocab, List<List<TestRecord>> sessions, List<DictionaryDefinition> defs, CancellationTokenSource cts)
         {
             VocabModel = vocab;
+            BuildModel(sessions, defs, cts);
         }
 
-        internal Tactician BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs, CancellationTokenSource cts)
+        internal void BuildModel(List<List<TestRecord>> sessions, List<DictionaryDefinition> defs, CancellationTokenSource cts)
         {
             ModelData modelData = GetDataForModel(sessions, defs);
+
+            ModelData = modelData;
 
             TacticsUsed                 = modelData.tacticsUsed;
             DefFeatures                 = modelData.defFeaturesLookup.AsReadOnly();
@@ -61,42 +66,11 @@ namespace Learning
             Model = new LogisticRegression(
                             modelData.trainingData, modelData.tacticsUsed);
 
-            Tactician tactics = new Tactician(this, sessions, cts);
+            //return;
 
             // just for debug
-            new Thread(() =>
-            {
-                HashSet<int> defKeysPlotted = new HashSet<int>();
 
-                var toIt = new List<DefinitionFeatures>(modelData.distinctDefinitionFeatures);
-                toIt.Reverse(); // more interesting examples at the end of this
-
-                foreach (DefinitionFeatures feature in toIt)
-                {
-                    int key = feature.def.DatabasePrimaryKey;
-
-                    if (!defKeysPlotted.Add(key))
-                        continue;
-
-                    string name = key + feature.def.Word;
-                    string language = ConfigManager.Config.Languages.TargetLanguage.ToString();
-
-                    Tuple<LearningTactic, DateTime> lastSeen = modelData.distinctDefinitionsLastTacticUsed[key];
-
-                    ProbabilityPlotter.PlotProbabilityCurves(
-                        Model, feature, TacticsUsed, lastSeen.Item1, lastSeen.Item2,
-                        $"plots/{language}/{name}.png");
-
-                    tactics.PlotMDP(key, 
-                                    $"plots/{language}/{feature.def.DatabasePrimaryKey}_mdp.png", 
-                                    $"plots/{language}/{feature.def.DatabasePrimaryKey}_exploded_mdp.png");
-                }
-            })
-            {
-                IsBackground = true
-            }.Start();
-
-            return tactics;
+            return;
         }
 
         internal double PredictProbability(FollowingSessionDatum input)
