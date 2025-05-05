@@ -1,6 +1,7 @@
 ﻿using Learning.Solver;
 using Learning.Strategy;
 using Learning.Tactics;
+using Serilog;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
@@ -65,16 +66,18 @@ namespace Learning
             {
                 try
                 {
-                    int total = nonZeros.Count();
+                    int total     = nonZeros.Count();
                     int completed = 0;
+
+                    Log.Information("beginning Markov scoring init with {cores} cores", Environment.ProcessorCount - 1);
 
                     Parallel.ForEach(nonZeros, new ParallelOptions
                     {
                         MaxDegreeOfParallelism = Environment.ProcessorCount - 1,
                         CancellationToken = cts.Token
-                    }, kvp =>
+                    }, 
+                    kvp =>
                     {
-
                         cts.Token.ThrowIfCancellationRequested();
 
                         InitMarkovData(kvp.Key, kvp.Value);
@@ -97,6 +100,9 @@ namespace Learning
             FollowingSessionDatum? knowItTodayInput = Strategist.GetCurrentRewardFeatures(defKey, LookAheadDays);
 
             MarkovGraph localGraph;
+
+            // TODO - untested words in a bin can be processed together
+            // unless we start adding features based on the word length etc
 
             if (knowItTodayInput is null /* no previous examples of testing this */)
             {
