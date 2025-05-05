@@ -48,7 +48,7 @@ namespace Learning
             // pKnown is the vacuous final state - i.e. do nothing
             double pKnown = Strategist.GetExistingPKnown(defKey, LookAheadDays);
 
-            if (!Strategist.LastTacticUsedForDefinition.ContainsKey(defKey))
+            if (!Strategist.LastTacticUsed.ContainsKey(defKey))
             {
                  // uses population averages
             }
