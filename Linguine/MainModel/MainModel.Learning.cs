@@ -21,6 +21,8 @@ namespace Linguine
         private Random _rng = new Random(Environment.TickCount);
 
 
+        // TODO - get this from a service manager
+
         private IDefinitionLearningService DefLearningService
         {
             get

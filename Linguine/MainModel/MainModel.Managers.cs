@@ -5,6 +5,8 @@ namespace Linguine
 {
     public partial class MainModel
     {
+
+        // TODO - extract these to a service manager
         public bool HasManagers { get; private set; } = false;
 
         private TextualMediaManager?                _textualMediaManager;

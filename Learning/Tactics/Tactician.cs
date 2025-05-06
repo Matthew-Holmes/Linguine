@@ -91,6 +91,5 @@ namespace Learning
             MarkovGraphPlotter.SaveMarkovPlot(pruned, filename);
             MarkovGraphPlotter.SaveExplodedMarkovPlot(pruned, filenameExploded);
         }
-
     }
 }

@@ -20,6 +20,8 @@ namespace Linguine
         DictionaryDefinition Parent,
         String? SoundFileName);
 
+
+    // TODO - un-extract ToTestFromKey
     partial class MainModel
     {
         #region get definition methods
@@ -67,6 +69,8 @@ namespace Linguine
         #endregion
 
         #region UI data wrappers
+
+        // TODO - could this be a service?
         public DefinitionForTesting AsDefinitionForTesting(DictionaryDefinition def)
         {
             List<Statement> uses = _statementManager.GetNStatementsFor(def, MaxContextExamples);
