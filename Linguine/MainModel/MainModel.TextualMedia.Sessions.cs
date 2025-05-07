@@ -111,6 +111,5 @@ namespace Linguine
         {
             return GetSessionFromID(sessionID)?.LastActive ?? DateTime.MinValue;
         }
-
     }
 }

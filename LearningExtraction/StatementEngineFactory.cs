@@ -14,7 +14,7 @@ namespace LearningExtraction
 
             StatementEngine ret = new StatementEngine();
 
-            ret.ToStatementsDecomposer = TextDecomposerFactory.MakeStatementsDecomposer();
+            ret.ToStatementsDecomposer   = TextDecomposerFactory.MakeStatementsDecomposer();
             ret.FromStatementsDecomposer = TextDecomposerFactory.MakeUnitsDecomposer();
 
             // these aren't actually used any more!
@@ -31,7 +31,7 @@ namespace LearningExtraction
             // keep this on the cheaper API for now (?) since is the most expensive part
             ret.DefinitionResolver = new BatchDefinitionResolver();
 
-            ret.DefinitionResolver.MultiDefinitionAgent = AgentFactory.GenerateProcessingAgent(
+            ret.DefinitionResolver.MultiDefinitionAgent  = AgentFactory.GenerateProcessingAgent(
                 AgentTask.MultiDefinitionResolution, targetLanguage);
             ret.DefinitionResolver.SingleDefinitionAgent = AgentFactory.GenerateProcessingAgent(
                 AgentTask.SingleDefinitionResolution, targetLanguage);
