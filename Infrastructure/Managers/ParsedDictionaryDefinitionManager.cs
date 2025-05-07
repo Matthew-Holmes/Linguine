@@ -2,7 +2,7 @@
 
 namespace Infrastructure
 {
-    public class ParsedDictionaryDefinitionManager : ManagerBase
+    public class ParsedDictionaryDefinitionManager : DataManagerBase
     {
         public ParsedDictionaryDefinitionManager(LinguineDbContextFactory dbf) : base(dbf)
         {

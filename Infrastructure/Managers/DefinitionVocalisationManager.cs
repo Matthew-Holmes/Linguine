@@ -11,7 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure
 {
-    public class DefinitionVocalisationManager : ManagerBase
+    public class DefinitionVocalisationManager : DataManagerBase
     {
         public DefinitionVocalisationManager(LinguineDbContextFactory dbf) : base(dbf)
         {

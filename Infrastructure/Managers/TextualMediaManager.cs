@@ -2,7 +2,7 @@
 
 namespace Infrastructure
 {
-    public class TextualMediaManager : ManagerBase
+    public class TextualMediaManager : DataManagerBase
     {
         public TextualMediaManager(LinguineDbContextFactory dbf) : base(dbf)
         {

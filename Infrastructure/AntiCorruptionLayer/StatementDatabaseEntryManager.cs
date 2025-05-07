@@ -4,7 +4,7 @@ using DataClasses;
 
 namespace Infrastructure
 {
-    internal class StatementDatabaseEntryManager : ManagerBase
+    internal class StatementDatabaseEntryManager : DataManagerBase
     {
         private static readonly Random rng = new Random();
 

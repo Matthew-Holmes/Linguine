@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Infrastructure
 {
-    public class StatementManager : ManagerBase
+    public class StatementManager : DataManagerBase
     {
         private StatementDatabaseEntryManager _databaseManager;
 

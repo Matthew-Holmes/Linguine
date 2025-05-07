@@ -2,7 +2,7 @@
 
 namespace Infrastructure
 {
-    public class ExternalDictionaryManager : ManagerBase
+    public class ExternalDictionaryManager : DataManagerBase
     {
         public ExternalDictionaryManager(LinguineDbContextFactory db) : base(db)
         {

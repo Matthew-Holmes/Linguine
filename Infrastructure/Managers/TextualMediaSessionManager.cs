@@ -3,7 +3,7 @@ using DataClasses;
 
 namespace Infrastructure
 {
-    public class TextualMediaSessionManager : ManagerBase
+    public class TextualMediaSessionManager : DataManagerBase
     {
         public TextualMediaSessionManager(LinguineDbContextFactory dbf) : base(dbf)
         {
