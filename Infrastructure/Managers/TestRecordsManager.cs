@@ -3,16 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
-    public class TestRecordsManager
+    public class TestRecordsManager : DataManagerBase
     {
-        private ExternalDictionary _dictionary;
-
-        private LinguineDbContextFactory _dbf;
-
-        public TestRecordsManager(ExternalDictionary dictionary, LinguineDbContextFactory dbf)
+        public TestRecordsManager(LinguineDbContextFactory dbf) : base(dbf)
         {
-            _dictionary = dictionary;
-            _dbf = dbf;
         }
 
         public List<TestRecord> AllRecordsTimeSorted()
