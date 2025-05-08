@@ -26,7 +26,7 @@ namespace Linguine
             _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(LinguineFactory);
             _definitionVocalisationManager      = new DefinitionVocalisationManager(LinguineFactory);
 
-            _needToImportADictionary = _dictionaryDefinitionManager.AnyDefinitions();
+            _needToImportADictionary = !_dictionaryDefinitionManager.AnyDefinitions();
 
             // TODO - some sort of flag in state enum for when need to load a dictionary??
 
