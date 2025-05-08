@@ -18,7 +18,7 @@ namespace LearningExtraction
 
         public AgentBase MultiDefinitionAgent { get; set; }
         public AgentBase SingleDefinitionAgent { get; set; }
-        public ExternalDictionary Dictionary { get; set; }
+        public DictionaryDefinitionManager DictionaryDefinitionManager { get; set; }
 
         public ForDefinitionResolution PromptParts { get; set; }
 
@@ -33,7 +33,7 @@ namespace LearningExtraction
         // TODO - refactor this to work on statements
         public List<List<DictionaryDefinition>> GetPossibleDefinitions(TextDecomposition td)
         {
-            return td.Units?.Select(u => Dictionary.TryGetDefinition(u)).ToList() ?? new List<List<DictionaryDefinition>>();
+            return td.Units?.Select(u => DictionaryDefinitionManager.TryGetDefinition(u)).ToList() ?? new List<List<DictionaryDefinition>>();
         }
 
         public async Task<List<int>> IdentifyCorrectDefinitions(

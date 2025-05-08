@@ -8,7 +8,8 @@ namespace LearningExtraction
 {
     public static class StatementEngineFactory
     {
-        public static StatementEngine BuildStatementEngine(ExternalDictionary dictionary)
+        // TODO - refactor this
+        public static StatementEngine BuildStatementEngine(DictionaryDefinitionManager mngr)
         {
             LanguageCode targetLanguage = ConfigManager.Config.Languages.TargetLanguage;
 
@@ -40,7 +41,7 @@ namespace LearningExtraction
             ret.DefinitionResolver.Affirmatives = TextFactory.Affirmatives(targetLanguage);
             ret.DefinitionResolver.Negatives    = TextFactory.Negatives(targetLanguage);
 
-            ret.DefinitionResolver.Dictionary = dictionary; // maybe make an interface for what the dictionary is used for here
+            ret.DefinitionResolver.DictionaryDefinitionManager = mngr; // maybe make an interface for what the dictionary is used for here
 
             return ret;
         }
