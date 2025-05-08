@@ -2,7 +2,7 @@
 
 namespace Infrastructure
 {
-    public class VariantsManager : ManagerBase
+    public class VariantsManager : DataManagerBase
     {
         public VariantsManager(LinguineDbContextFactory dbf) : base(dbf)
         {

@@ -2,7 +2,7 @@
 
 namespace Infrastructure
 {
-    public class DictionaryDefinitionManager : ManagerBase
+    public class DictionaryDefinitionManager : DataManagerBase
     {
         public DictionaryDefinitionManager(LinguineDbContextFactory db) : base(db)
         {
