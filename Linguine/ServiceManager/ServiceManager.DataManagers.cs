@@ -9,14 +9,23 @@ using Windows.UI.Notifications;
 
 namespace Linguine
 {
+
+    // TODO - what to do about readonly handles etc??
+
+    public enum DataManagersState
+    {
+        NoDatabaseYet,
+        RequestedReadonly,
+        Requested,
+        Initialised,
+        IntialisedReadonly,
+        Disposing,
+        Disposed
+    }// TODO - do we need the dispose stuff, or handle that with IDisposable
+
     partial class ServiceManager
     {
 
-        // new interface should look something like this?
 
-        //public DataManagerBase<T> GetManager()
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

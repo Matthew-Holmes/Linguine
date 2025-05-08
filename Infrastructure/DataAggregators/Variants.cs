@@ -2,6 +2,8 @@
 
 namespace Infrastructure
 {
+    // TODO - do we really need multiple sources??
+
     public class Variants
     {
         public String Source { get; }

@@ -76,7 +76,7 @@ namespace Linguine
                 throw new Exception("trying to access the dictionary before it is available");
             }
 
-            TestRecordsManager trm = new TestRecordsManager(Dictionary, _linguineDbContextFactory);
+            TestRecordsManager trm = new TestRecordsManager(_linguineDbContextFactory);
 
             List<TestRecord>? allRecords = trm.AllRecordsTimeSorted();
 

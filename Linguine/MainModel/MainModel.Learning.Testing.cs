@@ -209,7 +209,7 @@ namespace Linguine
                 throw new Exception("couldn't find a dictionary");
             }
 
-            TestRecordsManager trm = new TestRecordsManager(Dictionary, _linguineDbContextFactory);
+            TestRecordsManager trm = new TestRecordsManager(_linguineDbContextFactory);
 
             TestRecord added = trm.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct);
 

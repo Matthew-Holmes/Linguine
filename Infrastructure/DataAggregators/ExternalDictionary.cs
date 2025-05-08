@@ -2,6 +2,8 @@
 
 namespace Infrastructure
 {
+    // TODO - do we really need multiple sources??
+
     public class ExternalDictionary
     {
         public String Source { get; }
