@@ -38,7 +38,7 @@ namespace Linguine
             StartDefinitionLearningService();
         }
 
-        public DictionaryDefinitionManager? Dictionary
+        public DictionaryDefinitionManager? DictionaryDefinitionManager
         {
             get
             {

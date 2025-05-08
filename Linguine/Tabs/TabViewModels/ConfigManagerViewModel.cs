@@ -128,22 +128,22 @@ namespace Linguine.Tabs
         #endregion
 
         #region dictionary loading
-        public List<String> TargetLanguageDictionaries { get; private set; }
+        public ICommand AddTargetDictionaryCommand { get; private set; }
 
-        public ICommand AddNewTargetDictionaryCommand { get; private set; }
-
-        private void SetupDictionarySelection()
+        private void SetupDictionaryImporting()
         {
-            if (_parent.Model.HasManagers) { RefreshAvailableDictionaries(); }
+            // TODO - some sort of state checking
 
-            _model.Loaded += (s,e) => RefreshAvailableDictionaries();
+            if (_parent.Model.HasManagers) { RefreshDictionaryAvailability(); }
 
-            AddNewTargetDictionaryCommand = new RelayCommand(() => AddNewTargetDictionary());
+            _model.Loaded += (s,e) => RefreshDictionaryAvailability();
+
+            AddTargetDictionaryCommand = new RelayCommand(() => AddTargetDictionary());
         }
 
-        private void AddNewTargetDictionary()
+        private void AddTargetDictionary()
         {
-            if (_uiComponents.CanVerify.AskYesNo($"add a new {TargetLanguage} dictionary for target language definitions?"))
+            if (_uiComponents.CanVerify.AskYesNo($"add a {TargetLanguage} dictionary for target language definitions?"))
             {
                 AddNewDictionary();
             }
@@ -151,20 +151,15 @@ namespace Linguine.Tabs
 
         private void AddNewDictionary()
         {
-            String name;
+
+            // TODO - check if a dictionary already exists
+
             String filename;
 
             while (true)
             {
                 filename = _uiComponents.CanBrowseFiles.Browse();
                 if (filename is not null && filename != "") { break; }
-                if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
-            }
-
-            while (true)
-            {
-                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictionary");
-                if (name is not null && name != "") { break; }
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }
 
@@ -175,10 +170,10 @@ namespace Linguine.Tabs
             }
             else
             {
-                DictionaryDefinitionManager manager = _model.ExternalDictionaryManager;
+                DictionaryDefinitionManager manager = _model.DictionaryDefinitionManager;
                 try
                 {
-                    manager.AddNewDictionaryFromCSV(filename, name);
+                    manager.AddDictionaryFromCSV(filename); // TODO - return message rather than throw for duplicates??
                 }
                 catch (Exception e)
                 {
@@ -186,87 +181,87 @@ namespace Linguine.Tabs
                 }
             }
             
-            RefreshAvailableDictionaries();
+            RefreshDictionaryAvailability();
         }
 
-        private void RefreshAvailableDictionaries()
+        private void RefreshDictionaryAvailability()
         {
-            TargetLanguageDictionaries = _model.ExternalDictionaryManager.AvailableDictionaries();
 
-            if (TargetLanguageDictionaries.Count != 0)
+            // TODO - this is sloppy - all this should be in the main model
+
+            bool anyDefinitions = _model.DictionaryDefinitionManager.AnyDefinitions();
+
+            if (anyDefinitions)
             {
                 _model.NeedToImportADictionary = false;
             }
-
-            OnPropertyChanged(nameof(TargetLanguageDictionaries));
+            // grey out a button or something
         }
 
         #endregion
 
-        #region variants loading
-        public List<String> TargetLanguageVariantSources { get; private set; }
-        public ICommand AddNewTargetVariantsSourceCommand { get; private set; }
+        #region variants loading - disabled for now
+        //public ICommand AddNewTargetVariantsCommand { get; private set; }
 
-        private void SetupVariantsSelection()
-        {
-            RefreshAvailableVariantsSources();
-            _model.Loaded += (s, e) => RefreshAvailableVariantsSources();
+        //private void SetupVariantsSelection()
+        //{
+        //    RefreshVariantsAvailability();
+        //    _model.Loaded += (s, e) => RefreshVariantsAvailability();
 
-            AddNewTargetVariantsSourceCommand = new RelayCommand(() => AddNewTargetVariantsSource());
-        }
+        //    AddNewTargetVariantsCommand = new RelayCommand(() => AddTargetVariants());
+        //}
 
-        private void AddNewTargetVariantsSource()
-        {
-            if (_uiComponents.CanVerify.AskYesNo($"add a new {TargetLanguage} variants source for variant/root mapping?"))
-            {
-                AddNewVariantsSource();
-            }
-        }
+        //private void AddTargetVariants()
+        //{
+        //    if (_uiComponents.CanVerify.AskYesNo($"add a new {TargetLanguage} variants source for variant/root mapping?"))
+        //    {
+        //        AddVariants();
+        //    }
+        //}
 
-        private void AddNewVariantsSource()
-        {
-            String name;
-            String filename;
+        //private void AddVariants()
+        //{
+        //    String name;
+        //    String filename;
 
-            while (true)
-            {
-                filename = _uiComponents.CanBrowseFiles.Browse();
-                if (filename is not null && filename != "") { break; }
-                if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
-            }
+        //    while (true)
+        //    {
+        //        filename = _uiComponents.CanBrowseFiles.Browse();
+        //        if (filename is not null && filename != "") { break; }
+        //        if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
+        //    }
 
-            while (true)
-            {
-                name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictionary");
-                if (name is not null && name != "") { break; }
-                if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
-            }
+        //    while (true)
+        //    {
+        //        name = _uiComponents.CanGetText.GetResponse("Choose a name for the Dictionary");
+        //        if (name is not null && name != "") { break; }
+        //        if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
+        //    }
 
 
-            if (!_model.HasManagers)
-            {
-                _uiComponents.CanMessage.Show("please wait for variants manager to load");
-            }
-            else
-            {
-                VariantsManager manager = _model.VariantsManager;
-                try
-                {
-                    manager.AddNewVariantsSourceFromCSV(filename, name);
-                }
-                catch (Exception e)
-                {
-                    _uiComponents.CanMessage.Show(e.Message);
-                }
-            }
-            RefreshAvailableVariantsSources();
-        }
+        //    if (!_model.HasManagers)
+        //    {
+        //        _uiComponents.CanMessage.Show("please wait for variants manager to load");
+        //    }
+        //    else
+        //    {
+        //        VariantsManager manager = _model.VariantsManager;
+        //        try
+        //        {
+        //            manager.AddNewVariantsSourceFromCSV(filename);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            _uiComponents.CanMessage.Show(e.Message);
+        //        }
+        //    }
+        //    RefreshVariantsAvailability();
+        //}
 
-        private void RefreshAvailableVariantsSources()
-        {
-            TargetLanguageVariantSources = _model.VariantsManager.AvailableVariantsSources();
-            OnPropertyChanged(nameof(TargetLanguageVariantSources));
-        }
+        //private void RefreshVariantsAvailability()
+        //{
+        //    throw new NotImplementedException();
+        //}
         #endregion
 
         public ConfigManagerViewModel(UIComponents uiComponents, MainModel model, MainViewModel parent) 
@@ -274,8 +269,8 @@ namespace Linguine.Tabs
         {
             Title = "Config Manager";
             SetupLanguageSelection();
-            SetupDictionarySelection();
-            SetupVariantsSelection();
+            SetupDictionaryImporting();
+            //SetupVariantsSelection();
         }
 
        

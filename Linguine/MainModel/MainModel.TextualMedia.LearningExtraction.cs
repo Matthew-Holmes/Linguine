@@ -360,7 +360,7 @@ namespace Linguine
 
         private void StartStatementEngine()
         {
-            if (Dictionary is null)
+            if (DictionaryDefinitionManager is null)
             {
                 throw new Exception("no dictionary!");
             }
@@ -368,7 +368,7 @@ namespace Linguine
             {
                 APIKeysConfig keys = ConfigManager.Config.APIKeys;
 
-                TextAnalyser = StatementEngineFactory.BuildStatementEngine(Dictionary);
+                TextAnalyser = StatementEngineFactory.BuildStatementEngine(DictionaryDefinitionManager);
             }
         }
 

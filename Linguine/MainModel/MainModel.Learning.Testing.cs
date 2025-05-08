@@ -168,19 +168,19 @@ namespace Linguine
 
         private DictionaryDefinition ToTestFromKey(int toTestKey)
         {
-            if (Dictionary is null)
+            if (DictionaryDefinitionManager is null)
             {
                 throw new Exception("trying to access dictionary before it is available");
             }
 
-            DictionaryDefinition? maybeToTest = Dictionary?.TryGetDefinitionByKey(toTestKey);
+            DictionaryDefinition? maybeToTest = DictionaryDefinitionManager?.TryGetDefinitionByKey(toTestKey);
 
             DictionaryDefinition toTest;
 
             if (maybeToTest is null)
             {
                 Log.Warning("couldn't get the definition {defKey} requested - testing user on random one instead!", toTestKey);
-                toTest = Dictionary.GetRandomDefinition();
+                toTest = DictionaryDefinitionManager.GetRandomDefinition();
             }
             else
             {
@@ -200,12 +200,12 @@ namespace Linguine
                                  DateTime posed, DateTime answered, DateTime finished,
                                  bool correct)
         {
-            if (Dictionary is null)
+            if (DictionaryDefinitionManager is null)
             {
                 throw new Exception("couldn't find a dictionary");
             }
 
-            TestRecordsManager trm = new TestRecordsManager(Dictionary, _linguineDbContextFactory);
+            TestRecordsManager trm = new TestRecordsManager(DictionaryDefinitionManager, _linguineDbContextFactory);
 
             TestRecord added = trm.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct);
 

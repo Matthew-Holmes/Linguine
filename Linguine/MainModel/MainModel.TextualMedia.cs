@@ -131,7 +131,7 @@ namespace Linguine
         internal async Task<List<Tuple<int, string>>> GetExistingDefinitionKeysAndTexts(string rootedWordText)
         {
             // TODO - maybe play around with the casing here??
-            List<DictionaryDefinition> defs = Dictionary.TryGetDefinition(rootedWordText);
+            List<DictionaryDefinition> defs = DictionaryDefinitionManager.TryGetDefinition(rootedWordText);
 
             if (!ConfigManager.Config.LearningForeignLanguage())
             {
@@ -209,7 +209,7 @@ namespace Linguine
 
         internal bool ResolveDefinition(Statement statement, int defIndex, int selectedDefKey)
         {
-            DictionaryDefinition? def = Dictionary.TryGetDefinitionByKey(selectedDefKey);
+            DictionaryDefinition? def = DictionaryDefinitionManager.TryGetDefinitionByKey(selectedDefKey);
 
             if (def is null)
             {

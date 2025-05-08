@@ -27,11 +27,11 @@ namespace Linguine
         {
             get
             {
-                if (Dictionary is null)
+                if (DictionaryDefinitionManager is null)
                 {
                     throw new Exception("trying to access dictionary before it is available");
                 }
-                TestRecordsManager? tr = new TestRecordsManager(Dictionary, _linguineDbContextFactory);
+                TestRecordsManager? tr = new TestRecordsManager(DictionaryDefinitionManager, _linguineDbContextFactory);
                 return tr?.NumberDistinctDefinitionsTested() ?? 0;
             }
         }
