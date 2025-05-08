@@ -27,7 +27,7 @@ namespace Linguine
         {
             get
             {
-                if (Dictionary is null)
+                if (DictionaryDefinitionManager is null)
                 {
                     throw new Exception("trying to access dictionary before it is available");
                 }

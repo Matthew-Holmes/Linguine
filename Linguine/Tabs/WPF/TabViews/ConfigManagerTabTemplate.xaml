@@ -41,24 +41,9 @@
                 
             </StackPanel>
 
-            <StackPanel Name="Dictionaries" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Text="Target Dictionaries"/>
-                    <ListBox ItemsSource="{Binding TargetLanguageDictionaries}"/>
-                    <Button Content="Add" Command="{Binding AddNewTargetDictionaryCommand}"/>
-                </StackPanel>
+            <StackPanel Name="Dictionary" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button Content="Add Dictionary" Command="{Binding AddTargetDictionaryCommand}" IsEnabled="{Binding AddDictionaryEnabled}"/>
             </StackPanel>
-
-            <StackPanel Name="Variantss" Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Text="Target Variant Sources"/>
-                    <ListBox ItemsSource="{Binding TargetLanguageVariantSources}"/>
-                    <Button Content="Add" Command="{Binding AddNewTargetVariantsSourceCommand}"/>
-                </StackPanel>
-            </StackPanel>
-            
-            
-
         </Grid>
 
     </DataTemplate>

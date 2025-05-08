@@ -10,18 +10,17 @@ namespace Linguine
         public bool HasManagers { get; private set; } = false;
 
         private TextualMediaManager?                _textualMediaManager;
-        private ExternalDictionaryManager?          _externalDictionaryManager;
+        private DictionaryDefinitionManager?        _dictionaryDefinitionManager;
         private VariantsManager?                    _variantsManager;
         private TextualMediaSessionManager?         _textualMediaSessionManager;
         private StatementManager?                   _statementManager;
         private ParsedDictionaryDefinitionManager?  _parsedDictionaryDefinitionManager;
         private DefinitionVocalisationManager?      _definitionVocalisationManager;
-        private ExternalDictionary?                 _dictionary;
 
         private bool _needToImportADictionary;
         private void LoadManagers()
         {
-            _externalDictionaryManager          = new ExternalDictionaryManager(LinguineFactory);
+            _dictionaryDefinitionManager        = new DictionaryDefinitionManager(LinguineFactory);
             _textualMediaManager                = new TextualMediaManager(LinguineFactory);
             _textualMediaSessionManager         = new TextualMediaSessionManager(LinguineFactory);
             _variantsManager                    = new VariantsManager(LinguineFactory);
@@ -29,11 +28,9 @@ namespace Linguine
             _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(LinguineFactory);
             _definitionVocalisationManager      = new DefinitionVocalisationManager(LinguineFactory);
 
-            _needToImportADictionary = _externalDictionaryManager.AvailableDictionaries().Count == 0;
-            if (!_needToImportADictionary)
-            {
-                _dictionary = _externalDictionaryManager.GetFirstDictionary();
-            }
+            _needToImportADictionary = !_dictionaryDefinitionManager.AnyDefinitions();
+
+            // TODO - some sort of flag in state enum for when need to load a dictionary??
 
             HasManagers = true;
         }
@@ -43,16 +40,15 @@ namespace Linguine
             StartDefinitionLearningService();
         }
 
-        public ExternalDictionary? Dictionary
+        public DictionaryDefinitionManager? DictionaryDefinitionManager
         {
             get
             {
-                if (_needToImportADictionary) { return null; }
-                if (_dictionary is null)
+                if (_dictionaryDefinitionManager is null)
                 {
                     throw new Exception("Attempting to read property before model loading complete");
                 }
-                return _dictionary;
+                return _dictionaryDefinitionManager;
             }
         }
 
@@ -81,17 +77,6 @@ namespace Linguine
             }
         }
 
-        public ExternalDictionaryManager ExternalDictionaryManager
-        {
-            get
-            {
-                if (_externalDictionaryManager is null)
-                {
-                    throw new Exception("Attempting to read property before model loading complete");
-                }
-                return _externalDictionaryManager;
-            }
-        }
         public VariantsManager VariantsManager
         {
             get

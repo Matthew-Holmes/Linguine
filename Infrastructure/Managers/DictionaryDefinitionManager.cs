@@ -2,19 +2,28 @@
 
 namespace Infrastructure
 {
-    // TODO - do we really need multiple sources??
-
-    public class ExternalDictionary
+    public class DictionaryDefinitionManager : ManagerBase
     {
-        public String Source { get; }
-
-        private LinguineDbContextFactory _dbf;
-
-        public ExternalDictionary(String source, LinguineDbContextFactory dbf)
+        public DictionaryDefinitionManager(LinguineDbContextFactory db) : base(db)
         {
-            Source = source;
-            _dbf = dbf;   
         }
+
+        #region adding from csv
+        public void AddDictionaryFromCSV(String filename)
+        {
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(this, filename);
+
+            VerifyIntegrity();
+        }
+
+        public void VerifyIntegrity()
+        {
+            if (DuplicateDefinitions() == true)
+            {
+                throw new Exception("found duplicate definitions");
+            }
+        }
+        #endregion
 
         public DictionaryDefinition GetRandomDefinition()
         {
@@ -42,7 +51,7 @@ namespace Infrastructure
         public List<DictionaryDefinition> TryGetDefinition(String word)
         {
             using var context = _dbf.CreateDbContext();
-            return context.DictionaryDefinitions.Where(def => def.Source == Source).Where(dd => dd.Word == word).ToList();
+            return context.DictionaryDefinitions.Where(dd => dd.Word == word).ToList();
         }
 
         public DictionaryDefinition? TryGetDefinitionByKey(int key)
@@ -54,16 +63,11 @@ namespace Infrastructure
         public bool Contains(String word)
         {
             using var context = _dbf.CreateDbContext();
-            return context.DictionaryDefinitions.Where(def => def.Source == Source).Any(dd => dd.Word == word);
+            return context.DictionaryDefinitions.Any(dd => dd.Word == word);
         }
 
         internal bool Add(DictionaryDefinition definition, LinguineDbContext context, bool save = true)
         {
-            if (definition.Source != Source)
-            {
-                return false;
-            }
-
             context.DictionaryDefinitions.Add(definition);
 
             if (save)
@@ -78,14 +82,9 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            if (definitions.Any(def => def.Source != Source))
-            {
-                return false;
-            }
-
             foreach (var def in definitions)
             {
-               Add(def, context, false);
+                Add(def, context, false);
             }
 
             context.SaveChanges();
@@ -97,12 +96,15 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
             return context.DictionaryDefinitions
-                          .Where(def => def.Source == Source)
                           .GroupBy(p => new { p.Word, p.Definition })
                           .Where(p => p.Count() > 1)
                           .Any();
         }
 
+        public bool AnyDefinitions()
+        {
+            using var context = _dbf.CreateDbContext();
+            return context.DictionaryDefinitions.Any();
+        }
     }
-
 }

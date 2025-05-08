@@ -48,7 +48,7 @@ namespace Linguine
                 throw new Exception("managers not loaded yet");
             }
 
-            if (Dictionary is null)
+            if (DictionaryDefinitionManager is null)
             {
                 NeedToImportADictionary = true;
                 return;
@@ -71,7 +71,7 @@ namespace Linguine
                 throw new Exception("couldn't generate frequency data");
             }
 
-            if (Dictionary is null)
+            if (DictionaryDefinitionManager is null)
             {
                 throw new Exception("trying to access the dictionary before it is available");
             }

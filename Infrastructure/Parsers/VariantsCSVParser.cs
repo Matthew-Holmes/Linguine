@@ -7,21 +7,20 @@ namespace Infrastructure
     internal class VariantsCSVParser
     {
         public static void ParseVariantsFromCSVToSQLiteAndSave(
-            Variants target,
-            String csvFileLocation,
-            String source)
+            VariantsManager mngr,
+            String csvFileLocation)
         {
-            var records = ParseCSV(csvFileLocation, source);
+            var records = ParseCSV(csvFileLocation);
 
             if (records.Count == 0)
             {
                 throw new DataException("record parsing failed, are you sure there are records present?");
             }
 
-            target.Add(records);
+            mngr.Add(records);
         }
 
-        public static List<VariantRoot> ParseCSV(String filePath, String source)
+        public static List<VariantRoot> ParseCSV(String filePath)
         {
             var variants = new List<VariantRoot>();
 
@@ -43,7 +42,6 @@ namespace Infrastructure
                             {
                                 Variant = parts[0],
                                 Root = parts[1],
-                                Source = source
                             };
                             variants.Add(variantRoot);
                         }
