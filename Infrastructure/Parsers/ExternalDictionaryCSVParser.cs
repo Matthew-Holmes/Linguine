@@ -7,26 +7,20 @@ namespace Infrastructure
     internal class ExternalDictionaryCSVParser
     {
         public static void ParseDictionaryFromCSVToSQLiteAndSave(
-            ExternalDictionary target,
-            String csvFileLocation,
-            String source)
+            DictionaryDefinitionManager mngr,
+            String csvFileLocation)
         {
-            if (target.Source != source)
-            {
-                throw new Exception("Dictionary source doesn't match provided");
-            }
-
-            var records = ParseCsv(csvFileLocation, source);
+            var records = ParseCsv(csvFileLocation);
 
             if (records.Count == 0)
             {
                 throw new DataException("record parsing failed, are you sure there are records present?");
             }
 
-            target.Add(records);
+            mngr.Add(records);
         }
 
-        private static List<DictionaryDefinition> ParseCsv(String filePath, String source)
+        private static List<DictionaryDefinition> ParseCsv(String filePath)
         {
             var definitions = new List<DictionaryDefinition>();
 
@@ -48,7 +42,6 @@ namespace Infrastructure
                                 ID = int.Parse(parts[0]),
                                 Word = parts[1],
                                 Definition = parts[2],
-                                Source = source
                             };
 
                             definitions.Add(definition);

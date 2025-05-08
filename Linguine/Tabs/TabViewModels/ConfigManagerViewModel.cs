@@ -175,7 +175,7 @@ namespace Linguine.Tabs
             }
             else
             {
-                ExternalDictionaryManager manager = _model.ExternalDictionaryManager;
+                DictionaryDefinitionManager manager = _model.ExternalDictionaryManager;
                 try
                 {
                     manager.AddNewDictionaryFromCSV(filename, name);

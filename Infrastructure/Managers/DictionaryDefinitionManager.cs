@@ -1,15 +1,30 @@
 ﻿using DataClasses;
+using Serilog;
 
 namespace Infrastructure
 {
-    public class ExternalDictionary
+    public class DictionaryDefinitionManager : ManagerBase
     {
-        private LinguineDbContextFactory _dbf;
-
-        public ExternalDictionary(LinguineDbContextFactory dbf)
+        public DictionaryDefinitionManager(LinguineDbContextFactory db) : base(db)
         {
-            _dbf = dbf;   
         }
+
+        #region adding from csv
+        public void AddDictionaryFromCSV(String filename)
+        {
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(this, filename);
+
+            VerifyIntegrity();
+        }
+
+        public void VerifyIntegrity()
+        {
+            if (DuplicateDefinitions() == true)
+            {
+                throw new Exception("found duplicate definitions");
+            }
+        }
+        #endregion
 
         public DictionaryDefinition GetRandomDefinition()
         {
@@ -70,7 +85,7 @@ namespace Infrastructure
 
             foreach (var def in definitions)
             {
-               Add(def, context, false);
+                Add(def, context, false);
             }
 
             context.SaveChanges();
@@ -86,5 +101,6 @@ namespace Infrastructure
                           .Where(p => p.Count() > 1)
                           .Any();
         }
+
     }
 }

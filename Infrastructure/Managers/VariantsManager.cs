@@ -2,13 +2,10 @@
 
 namespace Infrastructure
 {
-    public class Variants
+    public class VariantsManager : ManagerBase
     {
-        private LinguineDbContextFactory _dbf;
-
-        public Variants(String source, LinguineDbContextFactory dbf)
+        public VariantsManager(LinguineDbContextFactory dbf) : base(dbf)
         {
-            _dbf = dbf;
         }
 
         public IEnumerable<String> GetVariants(String root)
@@ -65,6 +62,23 @@ namespace Infrastructure
                       .GroupBy(p => new { p.Variant, p.Root })
                       .Where(p => p.Count() > 1)
                       .Any();
+        }
+
+
+        public void AddNewVariantsSourceFromCSV(String filename)
+        {
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(this, filename);
+
+            VerifyIntegrity();
+
+        }
+
+        public void VerifyIntegrity()
+        {
+           if (DuplicateEntries())
+           {
+                throw new Exception("Found duplicate rows");
+           }
         }
     }
 }

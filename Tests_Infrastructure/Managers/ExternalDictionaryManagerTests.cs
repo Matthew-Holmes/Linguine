@@ -79,7 +79,7 @@ namespace Tests_Infrastructure
         public void AvailableDictionaries_ReturnsCorrectDictionaryNames()
         {
             var expected = new List<string> { "English1", "English2" };
-            var manager = new ExternalDictionaryManager(_dbf);
+            var manager = new DictionaryDefinitionManager(_dbf);
             var result = manager.AvailableDictionaries();
             CollectionAssert.AreEqual(expected, result);
         }
@@ -90,7 +90,7 @@ namespace Tests_Infrastructure
         {
             string expectedName = "English1";
 
-            var manager = new ExternalDictionaryManager(_dbf);
+            var manager = new DictionaryDefinitionManager(_dbf);
 
             ExternalDictionary result = manager.GetDictionary(expectedName);
 
@@ -103,7 +103,7 @@ namespace Tests_Infrastructure
         {
             string name = "NonExistingDict";
 
-            var manager = new ExternalDictionaryManager(_dbf);
+            var manager = new DictionaryDefinitionManager(_dbf);
 
             ExternalDictionary result = manager.GetDictionary(name);
 
@@ -117,7 +117,7 @@ namespace Tests_Infrastructure
             string name = "NewDict";
             string csvFileLocation = CreateMockCSVFile();
 
-            var manager = new ExternalDictionaryManager(_dbf);
+            var manager = new DictionaryDefinitionManager(_dbf);
 
             manager.AddNewDictionaryFromCSV(csvFileLocation, name);
 
@@ -132,7 +132,7 @@ namespace Tests_Infrastructure
             string name = "English1"; // Existing name
             string csvFileLocation = CreateMockCSVFile();
 
-            var manager = new ExternalDictionaryManager(_dbf);
+            var manager = new DictionaryDefinitionManager(_dbf);
 
             manager.AddNewDictionaryFromCSV(csvFileLocation, name);
         }
@@ -141,7 +141,7 @@ namespace Tests_Infrastructure
         [TestMethod]
         public void VerifyIntegrityWith_PassesForValidConfig()
         {
-            var manager = new ExternalDictionaryManager(_dbf);
+            var manager = new DictionaryDefinitionManager(_dbf);
             manager.VerifyIntegrity(manager.GetDictionary("English1"));
         }
 

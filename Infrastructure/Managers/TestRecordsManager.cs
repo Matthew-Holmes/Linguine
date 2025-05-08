@@ -5,13 +5,11 @@ namespace Infrastructure
 {
     public class TestRecordsManager
     {
-        private ExternalDictionary _dictionary;
 
         private LinguineDbContextFactory _dbf;
 
-        public TestRecordsManager(ExternalDictionary dictionary, LinguineDbContextFactory dbf)
+        public TestRecordsManager(LinguineDbContextFactory dbf)
         {
-            _dictionary = dictionary;
             _dbf = dbf;
         }
 

@@ -8,7 +8,7 @@ namespace Linguine
         public bool HasManagers { get; private set; } = false;
 
         private TextualMediaManager?                _textualMediaManager;
-        private ExternalDictionaryManager?          _externalDictionaryManager;
+        private DictionaryDefinitionManager?          _externalDictionaryManager;
         private VariantsManager?                    _variantsManager;
         private TextualMediaSessionManager?         _textualMediaSessionManager;
         private StatementManager?                   _statementManager;
@@ -19,7 +19,7 @@ namespace Linguine
         private bool _needToImportADictionary;
         private void LoadManagers()
         {
-            _externalDictionaryManager          = new ExternalDictionaryManager(LinguineFactory);
+            _externalDictionaryManager          = new DictionaryDefinitionManager(LinguineFactory);
             _textualMediaManager                = new TextualMediaManager(LinguineFactory);
             _textualMediaSessionManager         = new TextualMediaSessionManager(LinguineFactory);
             _variantsManager                    = new VariantsManager(LinguineFactory);
@@ -79,7 +79,7 @@ namespace Linguine
             }
         }
 
-        public ExternalDictionaryManager ExternalDictionaryManager
+        public DictionaryDefinitionManager ExternalDictionaryManager
         {
             get
             {
