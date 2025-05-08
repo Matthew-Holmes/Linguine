@@ -22,6 +22,8 @@ namespace Linguine.Tabs
         public  List<String> LanguageOptions { get => _languageOptions; private set => _languageOptions = value; }
 
         private List<String> _learnerLevelOptions;
+        private bool _addDictionaryEnabled;
+
         public List<String> LearnerLevelOptions { 
             get => _learnerLevelOptions; private set => _learnerLevelOptions = value; }
 
@@ -128,6 +130,16 @@ namespace Linguine.Tabs
         #endregion
 
         #region dictionary loading
+
+        public bool AddDictionaryEnabled
+        {
+            get => _addDictionaryEnabled;
+            set
+            {
+                _addDictionaryEnabled = value;
+                OnPropertyChanged(nameof(AddDictionaryEnabled));
+            }
+        }
         public ICommand AddTargetDictionaryCommand { get; private set; }
 
         private void SetupDictionaryImporting()
@@ -189,13 +201,22 @@ namespace Linguine.Tabs
 
             // TODO - this is sloppy - all this should be in the main model
 
+            if (!_model.HasManagers)
+            {
+                return;
+            }
+
             bool anyDefinitions = _model.DictionaryDefinitionManager.AnyDefinitions();
 
             if (anyDefinitions)
             {
                 _model.NeedToImportADictionary = false;
+                AddDictionaryEnabled = false;
             }
-            // grey out a button or something
+            else
+            {
+                AddDictionaryEnabled = true;
+            }
         }
 
         #endregion

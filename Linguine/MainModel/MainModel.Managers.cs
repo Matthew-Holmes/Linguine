@@ -42,7 +42,6 @@ namespace Linguine
         {
             get
             {
-                if (_needToImportADictionary) { return null; }
                 if (_dictionaryDefinitionManager is null)
                 {
                     throw new Exception("Attempting to read property before model loading complete");
