@@ -102,5 +102,10 @@ namespace Infrastructure
                           .Any();
         }
 
+        public bool AnyDefinitions()
+        {
+            using var context = _dbf.CreateDbContext();
+            return context.DictionaryDefinitions.Any();
+        }
     }
 }
