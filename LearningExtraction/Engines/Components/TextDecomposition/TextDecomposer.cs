@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Helpers;
 using Serilog;
 using DataClasses;
+using System.Text;
 
 namespace LearningExtraction
 {
@@ -30,7 +31,7 @@ namespace LearningExtraction
             }
 
             Func<TextDecomposition, bool> MaintainsInvariants = (TextDecomposition td)
-                => (!mustBiject || td.Bijects()) && (!mustInject || td.Injects());
+                => (!mustBiject || td.Bijects()) && (!mustInject || td.Injects()) && td.Decomposition?.Count > 0 && !td.Decomposition.All(subtd => subtd.Total == "");
 
             Func<TextDecomposition, bool> IsNonTrivial = (TextDecomposition td)
                 => (td.Decomposition?.Count ?? 1) > 1;
@@ -105,7 +106,7 @@ namespace LearningExtraction
             TextDecomposition ret = TextDecomposition.FromNewLinedString(text, await agent.GetResponse(text), true);
 
             // fixup weird /r/n newlines 
-            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemChars);
+            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemRunes);
 
             return ret;
         }
@@ -116,7 +117,7 @@ namespace LearningExtraction
             TextDecomposition ret = TextDecomposition.FromNewLinedString(text, await agent.GetResponse(strippedText), true);
 
             // fixup weird /r/n newlines 
-            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemChars);
+            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemRunes);
 
             return ret;
         }
