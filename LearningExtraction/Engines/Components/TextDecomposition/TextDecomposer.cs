@@ -8,7 +8,13 @@ namespace LearningExtraction
 {
     public class TextDecomposer
     {
-        private static List<char> ProblemChars = new List<char> { '\n', '\r' };
+
+
+        private static List<Rune> ProblemRunes = new List<Rune>
+            {
+                new Rune('\n'),
+                new Rune('\r')
+            };
 
         public int MaxVolumeToProcess { get; set; }  // if given text larger than this, chunk it
 
