@@ -46,6 +46,7 @@ namespace Infrastructure
             Dispose(false);
         }
         #endregion
+
         private readonly String _connectionString;
 
         // Tables
@@ -84,11 +85,13 @@ namespace Infrastructure
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
 
+
             modelBuilder.Entity<VariantRoot>()
                 .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<VariantRoot>()
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
+
 
             modelBuilder.Entity<TextualMedia>()
                 .HasKey(e => e.DatabasePrimaryKey);
@@ -107,6 +110,7 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.TextualMediaKey)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<StatementDatabaseEntry>()
                 .HasKey(e => e.DatabasePrimaryKey);
@@ -129,6 +133,7 @@ namespace Infrastructure
                 .Property(e => e.ContextCheckpoint)
                 .HasConversion(new ContextJSONConverter());
 
+
             modelBuilder.Entity<StatementDefinitionNode>()
                 .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<StatementDefinitionNode>()
@@ -141,11 +146,13 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.DefinitionKey);
 
+
             modelBuilder.Entity<TranslatedStatementDatabaseEntry>()
                 .HasOne(e => e.StatementDatabaseEntry)
                 .WithMany()
                 .HasForeignKey(e => e.StatementKey)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<ParsedDictionaryDefinition>()
                 .HasKey(e => e.DatabasePrimaryKey);
@@ -157,10 +164,12 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
 
+
             modelBuilder.Entity<TestRecord>()
                 .HasOne(e => e.Definition)
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
+
 
             modelBuilder.Entity<VocalisedDefinitionFile>()
                 .HasKey(e => e.DatabasePrimaryKey);
