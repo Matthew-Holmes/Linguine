@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,17 @@ namespace Linguine
 
         // Dispose
         // should clean up all resources
+
+        private LinguineDbContextFactory DBF { get; init; }
+
+        public ServiceManager(LinguineDbContextFactory dbf)
+        {
+            DBF = dbf;
+        }
+
+        // TODO - readonly context factory that managers can have instance of
+        // but changing data methods require a context that only the MainModel can generate??
+        // TODO - dispose that cascade disposes all handles generated from the dbf??
 
     }
 }
