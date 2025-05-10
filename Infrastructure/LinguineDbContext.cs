@@ -49,21 +49,16 @@ namespace Infrastructure
         private readonly String _connectionString;
 
         // Tables
-        public DbSet<DictionaryDefinition> DictionaryDefinitions { get; set; }
-        public DbSet<VariantRoot> Variants { get; set; }
-        public DbSet<TextualMedia> TextualMedia { get; set; }
-        public DbSet<TextualMediaSession> TextualMediaSessions { get; set; }
-
-        public DbSet<StatementDatabaseEntry> Statements { get; set; }
-        public DbSet<StatementDefinitionNode> StatementDefinitions { get; set; }
-
-        public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
-        public DbSet<TestRecord> TestRecords { get; set; }
-
-        // TODO - pluralise this next migration
-        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFiles { get; set; }
-
-        public DbSet<TranslatedStatementDatabaseEntry> TranslatedStatements { get; set; }
+        public DbSet<DictionaryDefinition>             DictionaryDefinitions       { get; set; }
+        public DbSet<VariantRoot>                      Variants                    { get; set; }
+        public DbSet<TextualMedia>                     TextualMedia                { get; set; }
+        public DbSet<TextualMediaSession>              TextualMediaSessions        { get; set; }
+        public DbSet<StatementDatabaseEntry>           Statements                  { get; set; }
+        public DbSet<StatementDefinitionNode>          StatementDefinitions        { get; set; }
+        public DbSet<ParsedDictionaryDefinition>       ParsedDictionaryDefinitions { get; set; }
+        public DbSet<TestRecord>                       TestRecords                 { get; set; }
+        public DbSet<VocalisedDefinitionFile>          VocalisedDefinitionFiles    { get; set; }    
+        public DbSet<TranslatedStatementDatabaseEntry> TranslatedStatements        { get; set; }
 
         public LinguineDbContext()
         {
