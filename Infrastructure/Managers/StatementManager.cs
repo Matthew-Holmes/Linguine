@@ -13,6 +13,16 @@ namespace Infrastructure
             _databaseManager = new StatementDatabaseEntryManager(dbf);
         }
 
+
+        public int UniqueDefinitionsObserved()
+        {
+            using var context = _dbf.CreateDbContext();
+            return context.StatementDefinitions
+                .GroupBy(node => node.DefinitionKey)
+                .Count();
+        }
+
+
         public List<Statement> GetAllStatementsFor(TextualMedia tm)
         {
             List<StatementDatabaseEntry> entries = _databaseManager.GetAllStatementsEntriesFor(tm);

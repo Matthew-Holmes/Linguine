@@ -16,7 +16,7 @@ namespace Infrastructure
         }
 
 
-        public int NumberDistinctDefinitionsTested()
+        public int UniqueDefinitionsTested()
         {
             using var context = _dbf.CreateDbContext();
             return context.TestRecords.Any()

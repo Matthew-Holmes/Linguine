@@ -34,11 +34,13 @@ namespace Linguine
         // Dispose
         // should clean up all resources
 
-        private LinguineDbContextFactory DBF { get; init; }
+        private LinguineReadonlyDbContextFactory DBF { get; init; }
 
-        public ServiceManager(LinguineDbContextFactory dbf)
+        public ServiceManager(LinguineReadonlyDbContextFactory dbf)
         {
             DBF = dbf;
+
+            InitialiseManagers(dbf);
         }
 
         // TODO - readonly context factory that managers can have instance of

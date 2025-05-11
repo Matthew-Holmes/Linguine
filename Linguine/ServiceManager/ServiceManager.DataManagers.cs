@@ -1,4 +1,6 @@
 ﻿using Infrastructure;
+using Learning;
+using LearningExtraction;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -11,6 +13,7 @@ namespace Linguine
 {
     public enum DataQuality
     {
+        NeedManagers,
         NeedDictionary,
         NeedMoreTextProcessed,
         NeedMoreVocabTested,
@@ -23,8 +26,6 @@ namespace Linguine
         Initialising,
         Initialised,
     }
-    // TODO - do we need the dispose stuff, or handle that with IDisposable
-    // TODO - what to do about readonly handles etc??
 
     public class Managers
     {
@@ -40,15 +41,18 @@ namespace Linguine
 
     partial class ServiceManager
     {
+        private int _minWordsProcessed = 300;
+        private int _minWordsTested    = 50;
+
         // TODO - callbacks when these change??
         public DataManagersState ManagerState { get; private set; } = DataManagersState.NoDatabaseYet;
-        public DataQuality       DataQuality  { get; private set; } 
+        public DataQuality       DataQuality  { get; private set; } = DataQuality.NeedManagers;  
 
 
         public Managers? Managers { get; private set; } = null;
 
 
-        public void InitialiseManagers(LinguineReadonlyDbContextFactory dbf)
+        private void InitialiseManagers(LinguineReadonlyDbContextFactory dbf)
         {
             ManagerState = DataManagersState.Initialising;
 
@@ -63,7 +67,34 @@ namespace Linguine
                 Sessions          = new TextualMediaSessionManager(dbf),
             };
 
+            InspectDataQuality();
+
             ManagerState = DataManagersState.Initialised;
+        }
+
+        private void InspectDataQuality()
+        {
+            if (Managers is null) { return; }
+
+            if (!Managers.Definitions.AnyDefinitions())
+            {
+                DataQuality = DataQuality.NeedDictionary;
+                return;
+            }
+
+            if (Managers.Statements.UniqueDefinitionsObserved() < _minWordsProcessed)
+            {
+                DataQuality = DataQuality.NeedMoreTextProcessed;
+                return;
+            }
+
+            if (Managers.TestRecords.UniqueDefinitionsTested() < _minWordsTested)
+            {
+                DataQuality = DataQuality.NeedMoreVocabTested;
+                return;
+            }
+
+            DataQuality = DataQuality.Good;
         }
     }
 }
