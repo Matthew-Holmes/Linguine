@@ -15,8 +15,10 @@ namespace Linguine
         private LinguineReadonlyDbContextFactory _linguineReadonlyDbContextFactory;
 
 
-        public LinguineDbContextFactory         LinguineFactory        { get => _linguineDbContextFactory; }
+        public LinguineDbContextFactory         LinguineFactory         { get => _linguineDbContextFactory; }
         public LinguineReadonlyDbContextFactory ReadonlyLinguineFactory { get => _linguineReadonlyDbContextFactory; }
+
+        internal ServiceManager SM { get; set; }
         
 
         public MainModel() { }
@@ -39,13 +41,16 @@ namespace Linguine
 
                 StartContextFactories(config);
 
+                SM = new ServiceManager(ReadonlyLinguineFactory);
+
                 EnsureDatabase();
 
-                LoadManagers();
+                SM.Initialise();
 
-                Task.Run(() => LoadServices()); // so in the background
+                StartDefinitionLearningService();
 
                 Loaded?.Invoke(this, EventArgs.Empty);
+
             }
             catch (Exception e)
             {

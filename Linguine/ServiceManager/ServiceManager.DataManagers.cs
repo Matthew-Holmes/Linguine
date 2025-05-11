@@ -72,7 +72,7 @@ namespace Linguine
             ManagerState = DataManagersState.Initialised;
         }
 
-        private void InspectDataQuality()
+        internal void InspectDataQuality()
         {
             if (Managers is null) { return; }
 

@@ -39,8 +39,11 @@ namespace Linguine
         public ServiceManager(LinguineReadonlyDbContextFactory dbf)
         {
             DBF = dbf;
+        }
 
-            InitialiseManagers(dbf);
+        public void Initialise()
+        {
+            InitialiseManagers(DBF);
         }
 
         // TODO - readonly context factory that managers can have instance of

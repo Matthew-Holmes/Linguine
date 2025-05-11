@@ -242,7 +242,7 @@ namespace Linguine.Tabs
             {
                 TextualMedia tm = _loader.ImportFromFile(filename);
 
-                var manager = _model.TextualMediaManager;
+                var manager = _model.SM.Managers!.TextualMedia;
 
                 if (manager is null)
                 {

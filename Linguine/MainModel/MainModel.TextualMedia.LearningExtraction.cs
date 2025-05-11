@@ -30,7 +30,7 @@ namespace Linguine
 
         private Tuple<String?, List<String>?, bool, int> GetNextChunkInfo(TextualMedia tm)
         {
-            int end = StatementManager.IndexOffEndOfLastStatement(tm);
+            int end = SM.Managers!.Statements.IndexOffEndOfLastStatement(tm);
 
             if (end == tm.Text.Length)
             {
@@ -96,7 +96,7 @@ namespace Linguine
 
             using var context = LinguineFactory.CreateDbContext();
 
-            StatementManager.AddStatements(statements, context);
+            SM.Managers!.Statements.AddStatements(statements, context);
 
             if (token.IsCancellationRequested)
             {
@@ -127,7 +127,7 @@ namespace Linguine
         {
             using var context = LinguineFactory.CreateDbContext();
 
-            if (DefinitionVocalisationManager.HasAnyFilesSpecificVoice(definition, voice, context))
+            if (SM.Managers!.Vocalisations.HasAnyFilesSpecificVoice(definition, voice, context))
             {
                 return;
             }
@@ -144,7 +144,7 @@ namespace Linguine
 
                 byte[] audio = await Talker.TextToSpeech(definition.Word, voice, target);
 
-                var record = await DefinitionVocalisationManager.AddVocalisationAsync(
+                var record = await SM.Managers!.Vocalisations.AddVocalisationAsync(
                     audio,
                     definition,
                     voice,
@@ -169,7 +169,7 @@ namespace Linguine
             using var context = LinguineFactory.CreateDbContext();
 
             List<DictionaryDefinition> newDefinitions = definitions.Where(
-                d => DefinitionVocalisationManager.HasAnyFiles(d, context) == false).ToList();
+                d => SM.Managers!.Vocalisations.HasAnyFiles(d, context) == false).ToList();
 
             context.Dispose();
 
@@ -199,7 +199,7 @@ namespace Linguine
 
                         byte[] audio = await Talker.TextToSpeech(def.Word, voice, target);
 
-                        var record = await DefinitionVocalisationManager.AddVocalisationAsync(audio, def, voice, fileName);
+                        var record = await SM.Managers!.Vocalisations.AddVocalisationAsync(audio, def, voice, fileName);
                         recordsToSave.Add(record);
                     }
                     catch (Exception ex)
@@ -304,14 +304,14 @@ namespace Linguine
             LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
 
             HashSet<DictionaryDefinition> newDefinitionsSet = 
-                ParsedDictionaryDefinitionManager.FilterOutKnown(
+                SM.Managers!.ParsedDefinitions.FilterOutKnown(
                     definitions, level, native);
 
             HashSet<ParsedDictionaryDefinition> parsedDefinitions = 
                 await DefinitionParser.ParseStatementsDefinitions(
                     newDefinitionsSet, level, native);
 
-            ParsedDictionaryDefinitionManager.AddSet(parsedDefinitions, context);
+            SM.Managers!.ParsedDefinitions.AddSet(parsedDefinitions, context);
         }
 
 
@@ -368,7 +368,7 @@ namespace Linguine
 
         private void StartStatementEngine()
         {
-            if (DictionaryDefinitionManager is null)
+            if (SM.DataQuality == DataQuality.NeedDictionary)
             {
                 throw new Exception("no dictionary!");
             }
@@ -376,7 +376,12 @@ namespace Linguine
             {
                 APIKeysConfig keys = ConfigManager.Config.APIKeys;
 
-                TextAnalyser = StatementEngineFactory.BuildStatementEngine(DictionaryDefinitionManager);
+                if (SM.ManagerState != DataManagersState.Initialised)
+                {
+                    throw new Exception("Managers not initialised yet!");
+                }
+
+                TextAnalyser = StatementEngineFactory.BuildStatementEngine(SM.Managers!.Definitions);
             }
         }
 
@@ -397,7 +402,7 @@ namespace Linguine
 
         private List<String> GetPreviousContext(TextualMedia tm)
         {
-            Statement? previousStatement = StatementManager.GetLastStatement(tm);
+            Statement? previousStatement = SM.Managers!.Statements.GetLastStatement(tm);
 
             if (previousStatement is null)
             {

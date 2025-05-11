@@ -6,6 +6,7 @@ using System;
 using System.Windows.Input;
 using UserInputInterfaces;
 using Learning;
+using System.Windows.Documents;
 
 namespace Linguine.Tabs 
 { 
@@ -26,7 +27,7 @@ namespace Linguine.Tabs
 
             ValidateSufficentData();
 
-            if (AnyDataForWordFrequencies)
+            if (!NeedToBurnInVocabularyData)
             {
                 toGraph = _model.GetPKnownByBinnedZipf();
                 CreatePlot();
@@ -36,7 +37,6 @@ namespace Linguine.Tabs
         #region data validation
 
         public bool EnoughDataForWordFrequencies { get; private set; }
-        public bool AnyDataForWordFrequencies    { get; private set; }
         public bool NeedToBurnInVocabularyData   { get; private set; }
 
         public bool NeedADictionary { get; private set; }
@@ -44,7 +44,6 @@ namespace Linguine.Tabs
         public bool TellUserToProcessMoreData => !EnoughDataForWordFrequencies && !NeedADictionary;
         public bool TellUserToDoVocabBurnin   => NeedToBurnInVocabularyData && EnoughDataForWordFrequencies && !NeedADictionary;
         public bool FreeStudyIsEnabled        => EnoughDataForWordFrequencies && !NeedToBurnInVocabularyData;
-        public bool TargetedStudyEnabled      => AnyDataForWordFrequencies;
 
         // TODO - localise these!
         public String NeedADictionaryText { get; } = "Please import a dictionary to begin learning";
@@ -53,20 +52,37 @@ namespace Linguine.Tabs
 
         private void ValidateSufficentData()
         {
-            NeedADictionary              = _model.NeedToImportADictionary;
-
+            NeedADictionary              = true;
             EnoughDataForWordFrequencies = false;
-            AnyDataForWordFrequencies    = false;
-            NeedToBurnInVocabularyData   = false;
+            NeedToBurnInVocabularyData   = true;
 
-            if (!NeedADictionary)
+
+            if (_model.SM.DataQuality == DataQuality.NeedDictionary) 
             {
-                DLSRequirements req = _model.GetDLSRequirements();
-
-                EnoughDataForWordFrequencies = req.EnoughDataForWordFrequencies;
-                AnyDataForWordFrequencies    = req.AnyDataForWordFrequencies;
-                NeedToBurnInVocabularyData   = req.NeedToBurnInVocabularyData;
+                return;
             }
+
+            NeedADictionary = false;
+
+            if (_model.SM.DataQuality == DataQuality.NeedMoreTextProcessed)
+            {
+                return;
+            }
+
+            EnoughDataForWordFrequencies = true;
+
+            if (_model.SM.DataQuality == DataQuality.NeedMoreVocabTested)
+            {
+                return;
+            }
+
+            NeedToBurnInVocabularyData = false;
+
+            if (_model.SM.DataQuality != DataQuality.Good)
+            {
+                throw new NotImplementedException("should only be here is have good data");
+            }
+
         }
 
         private void BeginTargetedStudy()

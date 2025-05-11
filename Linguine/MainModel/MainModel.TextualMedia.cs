@@ -17,7 +17,7 @@ namespace Linguine
             get
             {
                 using var context = ReadonlyLinguineFactory.CreateDbContext();
-                return TextualMediaManager.AvailableTextualMediaNames(context);
+                return SM.Managers!.TextualMedia.AvailableTextualMediaNames(context);
             }
         }
 
@@ -38,7 +38,7 @@ namespace Linguine
 
             if (session is null) { return null; }
 
-            var ret = StatementManager.StatementStartIndices(session.TextualMedia);
+            var ret = SM.Managers!.Statements.StatementStartIndices(session.TextualMedia);
 
             ret.Sort();
 
@@ -52,27 +52,27 @@ namespace Linguine
 
             if (session is null) { return null; }
 
-            return StatementManager.GetStatementsCoveringRange(session.TextualMedia, start, end);
+            return SM.Managers!.Statements.GetStatementsCoveringRange(session.TextualMedia, start, end);
         }
 
         internal ParsedDictionaryDefinition? GetParsedDictionaryDefinition(DictionaryDefinition core)
         {
             LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
             LearnerLevel level  = ConfigManager.Config.GetLearnerLevel();
-            return ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(core, level, native);
+            return SM.Managers!.ParsedDefinitions.GetParsedDictionaryDefinition(core, level, native);
         }
 
         internal void DeleteTextualMedia(string selectedTextName)
         {
             using var context = _linguineDbContextFactory.CreateDbContext();
-            TextualMediaManager.DeleteByName(selectedTextName, context);
+            SM.Managers!.TextualMedia.DeleteByName(selectedTextName, context);
         }
 
         internal async Task<string> GetBestWordTranslation(
             Statement statement, int defIndex)
         {
             LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
-            List<StatementTranslation> existing = StatementManager.GetTranslations(statement, native);
+            List<StatementTranslation> existing = SM.Managers!.Statements.GetTranslations(statement, native);
 
             if (existing.Count == 0)
             {
@@ -96,7 +96,7 @@ namespace Linguine
 
             // check for existing translations in the database
             LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
-            List<StatementTranslation> existing = StatementManager.GetTranslations(statement, native);
+            List<StatementTranslation> existing = SM.Managers!.Statements.GetTranslations(statement, native);
 
             if (existing.Count > 0)
             {
@@ -112,7 +112,7 @@ namespace Linguine
 
             if (generated is not null) 
             {
-                StatementManager.AddTranslation(generated, context);
+                SM.Managers!.Statements.AddTranslation(generated, context);
             }
 
             if (generated is null)
@@ -136,7 +136,7 @@ namespace Linguine
             
 
             // TODO - maybe play around with the casing here??
-            List<DictionaryDefinition> defs = DictionaryDefinitionManager.TryGetDefinition(rootedWordText);
+            List<DictionaryDefinition> defs = SM.Managers!.Definitions.TryGetDefinition(rootedWordText);
 
             if (!ConfigManager.Config.LearningForeignLanguage())
             {
@@ -153,8 +153,7 @@ namespace Linguine
 
             foreach(DictionaryDefinition def in defs)
             {
-                ParsedDictionaryDefinition? pdef = ParsedDictionaryDefinitionManager
-                    .GetParsedDictionaryDefinition(def, lvl, native);
+                ParsedDictionaryDefinition? pdef = SM.Managers!.ParsedDefinitions.GetParsedDictionaryDefinition(def, lvl, native);
 
                 if (pdef is not null) /* already got it */
                 {
@@ -178,7 +177,7 @@ namespace Linguine
                 HashSet<ParsedDictionaryDefinition> newParsed = await DefinitionParser
                     .ParseStatementsDefinitions(toParseNow, lvl, native);
 
-                ParsedDictionaryDefinitionManager.AddSet(newParsed, context);
+                SM.Managers!.ParsedDefinitions.AddSet(newParsed, context);
 
                 pdefs.AddRange(newParsed);
             }
@@ -215,7 +214,7 @@ namespace Linguine
 
         internal bool ResolveDefinition(Statement statement, int defIndex, int selectedDefKey)
         {
-            DictionaryDefinition? def = DictionaryDefinitionManager.TryGetDefinitionByKey(selectedDefKey);
+            DictionaryDefinition? def = SM.Managers!.Definitions.TryGetDefinitionByKey(selectedDefKey);
 
             if (def is null)
             {

@@ -9,19 +9,23 @@ namespace Infrastructure
         }
 
         #region adding from csv
-        public void AddDictionaryFromCSV(String filename, LinguineDbContext context)
+        public String? AddDictionaryFromCSV(String filename, LinguineDbContext context, Action callback)
         {
             ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(this, filename, context);
 
-            VerifyIntegrity();
+            callback();
+
+            return IntegrityMessage();
         }
 
-        public void VerifyIntegrity()
+        public String? IntegrityMessage()
         {
             if (DuplicateDefinitions() == true)
             {
-                throw new Exception("found duplicate definitions");
+                return "found duplicate definitions";
             }
+
+            return null;
         }
         #endregion
 

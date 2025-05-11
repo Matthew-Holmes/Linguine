@@ -5,6 +5,7 @@ using DataClasses;
 using Config;
 using System.Windows.Input;
 using UserInputInterfaces;
+using Microsoft.VisualBasic.Logging;
 
 namespace Linguine.Tabs
 {
@@ -146,9 +147,15 @@ namespace Linguine.Tabs
         {
             // TODO - some sort of state checking
 
-            if (_parent.Model.HasManagers) { RefreshDictionaryAvailability(); }
+            if (_parent.Model is not null)
+            {
+                if (_parent.Model.SM.ManagerState == DataManagersState.Initialised) 
+                { 
+                    RefreshAddDictionaryEnabled(); 
+                }
+            }
 
-            _model.Loaded += (s,e) => RefreshDictionaryAvailability();
+            _model.Loaded += (s,e) => RefreshAddDictionaryEnabled();
 
             AddTargetDictionaryCommand = new RelayCommand(() => AddTargetDictionary());
         }
@@ -175,48 +182,52 @@ namespace Linguine.Tabs
                 if (_uiComponents.CanVerify.AskYesNo("Abort?")) { return; }
             }
 
-            if (!_model.HasManagers)
+            if (_model.SM.ManagerState == DataManagersState.Initialising)
             {
                 _uiComponents.CanMessage.Show("Please wait for dictionary management to load");
                 return;
-            }
-            else
+            } else if (_model.SM.ManagerState == DataManagersState.NoDatabaseYet)
             {
-                DictionaryDefinitionManager manager = _model.DictionaryDefinitionManager;
+                _uiComponents.CanMessage.Show("something went wrong! no database detected");
+                return;
+            }
+            else if (_model.SM.ManagerState == DataManagersState.Initialised)
+            {
                 try
                 {
                     using var context = _model.LinguineFactory.CreateDbContext(); // TODO - push this down to model method?
-                    manager.AddDictionaryFromCSV(filename, context); // TODO - return message rather than throw for duplicates??
+
+                    String? msg = _model.SM.Managers!.Definitions.AddDictionaryFromCSV(
+                        filename, context, 
+                        _model.SM.InspectDataQuality);
+
+                    if (msg is not null)
+                    {
+                        _uiComponents.CanMessage.Show(msg);
+                    }
                 }
                 catch (Exception e)
                 {
                     _uiComponents.CanMessage.Show(e.Message);
                 }
+
+            } else
+            {
+                throw new NotImplementedException();
             }
-            
-            RefreshDictionaryAvailability();
+
+            RefreshAddDictionaryEnabled();
         }
 
-        private void RefreshDictionaryAvailability()
+        private void RefreshAddDictionaryEnabled()
         {
-
-            // TODO - this is sloppy - all this should be in the main model
-
-            if (!_model.HasManagers)
+            if (_model.SM.DataQuality == DataQuality.NeedDictionary)
             {
-                return;
-            }
-
-            bool anyDefinitions = _model.DictionaryDefinitionManager.AnyDefinitions();
-
-            if (anyDefinitions)
-            {
-                _model.NeedToImportADictionary = false;
-                AddDictionaryEnabled = false;
+                AddDictionaryEnabled = true;
             }
             else
             {
-                AddDictionaryEnabled = true;
+                AddDictionaryEnabled = false;
             }
         }
 
@@ -294,7 +305,5 @@ namespace Linguine.Tabs
             SetupDictionaryImporting();
             //SetupVariantsSelection();
         }
-
-       
     }
 }

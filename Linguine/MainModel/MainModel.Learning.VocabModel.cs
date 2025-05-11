@@ -1,5 +1,6 @@
 ﻿using Infrastructure;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +15,25 @@ namespace Linguine
 
         public Tuple<double[], double[]> GetPKnownByBinnedZipf()
         {
-            while (!HasManagers)
+            // TODO - extract the method for waiting for init??
+
+            if (SM.ManagerState == DataManagersState.NoDatabaseYet)
+            {
+                throw new Exception("no database!");
+            }
+
+            while (SM.ManagerState == DataManagersState.Initialising)
             {
                 Thread.Sleep(100);
                 // TODO - pin down what we want to do for lazy loading!
             }
+
+            if (SM.ManagerState != DataManagersState.Initialised)
+            {
+                throw new Exception("unexpected data manager state");
+            }
+
+            // TODO - where should def learning service go, engines??
 
             return DefLearningService.GetPKnownByBinnedZipf();
         }
@@ -27,12 +42,7 @@ namespace Linguine
         {
             get
             {
-                if (DictionaryDefinitionManager is null)
-                {
-                    throw new Exception("trying to access dictionary before it is available");
-                }
-                TestRecordsManager? tr = new TestRecordsManager(_linguineReadonlyDbContextFactory);
-                return tr?.UniqueDefinitionsTested() ?? 0;
+                return SM.Managers!.TestRecords.UniqueDefinitionsTested();
             }
         }
     }

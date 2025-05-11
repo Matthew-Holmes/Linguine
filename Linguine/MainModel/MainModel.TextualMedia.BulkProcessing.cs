@@ -20,14 +20,14 @@ namespace Linguine
 
         internal ProcessingJobInfo GetProcessingInfo(String name, bool isProcessing, decimal secondsPerStep, int charPerStep, LinguineReadonlyDbContext context)
         {
-            TextualMedia? tm = TextualMediaManager.GetByName(name, context);
+            TextualMedia? tm = SM.Managers.TextualMedia.GetByName(name, context);
 
             if (tm is null)
             {
                 throw new Exception($"unexpected textual media name: {name}");
             }
 
-            int sofar = StatementManager.IndexOffEndOfLastStatement(tm, context);
+            int sofar = SM.Managers.Statements.IndexOffEndOfLastStatement(tm, context);
 
 
             return new ProcessingJobInfo(name, tm.Text.Length, sofar, secondsPerStep, charPerStep, isProcessing);
@@ -56,7 +56,9 @@ namespace Linguine
         internal async Task StartBulkProcessing(string textName, Action<int>? progressCallback = null, Action<int>? finished = null)
         {
             using LinguineReadonlyDbContext context = ReadonlyLinguineFactory.CreateDbContext();
-            TextualMedia? tm = TextualMediaManager?.GetByName(textName, context) ?? null;
+
+            // TODO - some waiting here?
+            TextualMedia? tm = SM.Managers!.TextualMedia.GetByName(textName, context) ?? null;
 
             if (tm is null)
             {

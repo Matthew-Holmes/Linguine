@@ -73,7 +73,7 @@ namespace Linguine
         // TODO - could this be a service?
         public DefinitionForTesting AsDefinitionForTesting(DictionaryDefinition def)
         {
-            List<Statement> uses = _statementManager.GetNStatementsFor(def, MaxContextExamples);
+            List<Statement> uses = SM.Managers!.Statements.GetNStatementsFor(def, MaxContextExamples);
 
             List<WordInContext> contexts = uses.Where(use => use is not null).Select(use => StatementHelper.AsWordInContext(def, use)).ToList();
 
@@ -81,7 +81,7 @@ namespace Linguine
 
             String? defText = null;
 
-            List<VocalisedDefinitionFile> soundFiles = DefinitionVocalisationManager.GetAudioFilesForDefinition(def.DatabasePrimaryKey);
+            List<VocalisedDefinitionFile> soundFiles = SM.Managers!.Vocalisations.GetAudioFilesForDefinition(def.DatabasePrimaryKey);
 
             String? soundFile = null;
 
@@ -144,7 +144,7 @@ namespace Linguine
             if (ConfigManager.Config.LearningForeignLanguage())
             {
                 // TODO - should these be implicit in the parsed dictionary definition manager?
-                ParsedDictionaryDefinition? pdef = ParsedDictionaryDefinitionManager.GetParsedDictionaryDefinition(
+                ParsedDictionaryDefinition? pdef = SM.Managers.ParsedDefinitions.GetParsedDictionaryDefinition(
                     def, ConfigManager.Config.GetLearnerLevel(), ConfigManager.Config.Languages.NativeLanguage);
 
                 // TODO - once have multiple parsing levels - use a fallback to neares parsed level if the correct one is not available
@@ -172,19 +172,14 @@ namespace Linguine
 
         private DictionaryDefinition ToTestFromKey(int toTestKey)
         {
-            if (DictionaryDefinitionManager is null)
-            {
-                throw new Exception("trying to access dictionary before it is available");
-            }
-
-            DictionaryDefinition? maybeToTest = DictionaryDefinitionManager?.TryGetDefinitionByKey(toTestKey);
+            DictionaryDefinition? maybeToTest = SM.Managers!.Definitions.TryGetDefinitionByKey(toTestKey);
 
             DictionaryDefinition toTest;
 
             if (maybeToTest is null)
             {
                 Log.Warning("couldn't get the definition {defKey} requested - testing user on random one instead!", toTestKey);
-                toTest = DictionaryDefinitionManager.GetRandomDefinition();
+                toTest = SM.Managers.Definitions.GetRandomDefinition();
             }
             else
             {
@@ -204,16 +199,9 @@ namespace Linguine
                                  DateTime posed, DateTime answered, DateTime finished,
                                  bool correct)
         {
-            if (DictionaryDefinitionManager is null)
-            {
-                throw new Exception("couldn't find a dictionary");
-            }
-
-            TestRecordsManager trm = new TestRecordsManager(ReadonlyLinguineFactory);
-
             using var context = LinguineFactory.CreateDbContext();
 
-            TestRecord added = trm.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct, context);
+            TestRecord added = SM.Managers!.TestRecords.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct, context);
 
             if (added.Correct) { lastNcorrect++; } else { lastNcorrect = 0; }
 

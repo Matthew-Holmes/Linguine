@@ -43,18 +43,11 @@ namespace Linguine
 
         internal void StartDefinitionLearningService()
         {
-            if (HasManagers == false)
+            if (SM.ManagerState != DataManagersState.Initialised)
             {
                 throw new Exception("managers not loaded yet");
             }
 
-            if (DictionaryDefinitionManager is null)
-            {
-                NeedToImportADictionary = true;
-                return;
-            }
-
-            NeedToImportADictionary = false; // TODO - random flags not great
 
             // TODO - refactor the freqency engine into the learning service startup
 
@@ -71,14 +64,8 @@ namespace Linguine
                 throw new Exception("couldn't generate frequency data");
             }
 
-            if (DictionaryDefinitionManager is null)
-            {
-                throw new Exception("trying to access the dictionary before it is available");
-            }
 
-            TestRecordsManager trm = new TestRecordsManager(_linguineReadonlyDbContextFactory); // TODO - homogonise this!!
-
-            List<TestRecord>? allRecords = trm.AllRecordsTimeSorted();
+            List<TestRecord>? allRecords = SM.Managers!.TestRecords.AllRecordsTimeSorted();
 
             _defLearningService = DefinitionLearningServiceFactory.BuildDLS(freqData, allRecords, ConfigManager.CancelRunningTasksSource);
         }

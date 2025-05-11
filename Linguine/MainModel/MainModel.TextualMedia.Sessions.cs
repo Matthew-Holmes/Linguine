@@ -13,7 +13,7 @@ namespace Linguine
 
         public List<int> ActiveSessionsIDs
         {
-            get => TextualMediaSessionManager
+            get => SM.Managers!.Sessions
                 ?.ActiveSessions()
                 ?.Select(s => s.DatabasePrimaryKey)
                 ?.ToList() 
@@ -24,7 +24,7 @@ namespace Linguine
         {
             using var roContext = ReadonlyLinguineFactory.CreateDbContext();
 
-            var tm = TextualMediaManager?.GetByName(selectedTextName, roContext) ?? null;
+            var tm = SM.Managers!.TextualMedia.GetByName(selectedTextName, roContext) ?? null;
 
             if (tm is null)
             {
@@ -33,7 +33,7 @@ namespace Linguine
 
             using var context = LinguineFactory.CreateDbContext();
 
-            if (TextualMediaSessionManager.NewSession(tm, context))
+            if (SM.Managers!.Sessions.NewSession(tm, context))
             {
                 SessionsChanged?.Invoke(this, EventArgs.Empty);
                 return true;
@@ -61,32 +61,32 @@ namespace Linguine
 
             if (session is null) { return; }
 
-            TextualMediaSessionManager.CloseSession(session, context); // not the end of the world if we don't have it, 
+            SM.Managers!.Sessions.CloseSession(session, context); // not the end of the world if we don't have it, 
         }
 
         internal List<Tuple<bool, decimal>>? GetSessionInfoByName(string name)
         {
             using var context = ReadonlyLinguineFactory.CreateDbContext();
-            TextualMedia? tm = TextualMediaManager?.GetByName(name, context) ?? null;
+            TextualMedia? tm = SM.Managers!.TextualMedia.GetByName(name, context) ?? null;
 
             if (tm is null) { return null; }
 
             using var roContext = LinguineFactory.CreateDbContext();
 
-            return TextualMediaSessionManager?.SessionInfo(tm, roContext) ?? null;
+            return SM.Managers!.Sessions.SessionInfo(tm, roContext) ?? null;
         }
 
         internal bool ActivateExistingSessionFor(string selectedTextName, decimal progress)
         {
             using var roContext = ReadonlyLinguineFactory.CreateDbContext();
 
-            TextualMedia? tm = TextualMediaManager?.GetByName(selectedTextName, roContext) ?? null;
+            TextualMedia? tm = SM.Managers!.TextualMedia.GetByName(selectedTextName, roContext) ?? null;
 
             if (tm is null) { return false; }
 
             using var context = LinguineFactory.CreateDbContext();
 
-            bool b = TextualMediaSessionManager?.ActivateExistingSession(tm, context, progress) ?? false;
+            bool b = SM.Managers!.Sessions.ActivateExistingSession(tm, context, progress);
 
             if (b)
             {
