@@ -3,9 +3,9 @@ namespace Infrastructure
 { 
     public class ManagerBase
     {
-        protected LinguineDbContextFactory _dbf;
+        protected LinguineReadonlyDbContextFactory _dbf;
 
-        public ManagerBase(LinguineDbContextFactory dbf)
+        public ManagerBase(LinguineReadonlyDbContextFactory dbf)
         {
             _dbf = dbf;
         }

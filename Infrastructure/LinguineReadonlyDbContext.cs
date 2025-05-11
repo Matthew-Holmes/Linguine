@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class LingineReadonlyDbContext
+    public class LinguineReadonlyDbContext : IDisposable
     {
         private LinguineDbContext _dbContext;
 
-        internal LingineReadonlyDbContext(LinguineDbContext dbContext)
+        internal LinguineReadonlyDbContext(LinguineDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -29,5 +29,9 @@ namespace Infrastructure
         public IQueryable<VocalisedDefinitionFile> VocalisedDefinitionFiles => _dbContext.VocalisedDefinitionFiles.AsNoTracking();
         public IQueryable<TranslatedStatementDatabaseEntry> TranslatedStatements => _dbContext.TranslatedStatements.AsNoTracking();
 
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
     }
 }

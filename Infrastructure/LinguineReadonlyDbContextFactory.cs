@@ -15,11 +15,11 @@ namespace Infrastructure
             _dbf = dbf;
         }
 
-        public LingineReadonlyDbContext CreateDbContext()
+        public LinguineReadonlyDbContext CreateDbContext()
         {
             LinguineDbContext core = _dbf.CreateDbContext();
 
-            return new LingineReadonlyDbContext(core);
+            return new LinguineReadonlyDbContext(core);
         }
     }
 }

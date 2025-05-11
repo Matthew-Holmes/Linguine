@@ -3,14 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
-    public class TestRecordsManager
+    public class TestRecordsManager : ManagerBase
     {
-
-        private LinguineDbContextFactory _dbf;
-
-        public TestRecordsManager(LinguineDbContextFactory dbf)
+        public TestRecordsManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
-            _dbf = dbf;
         }
 
         public List<TestRecord> AllRecordsTimeSorted()
@@ -33,9 +29,8 @@ namespace Infrastructure
 
         public TestRecord AddRecord(DictionaryDefinition definition,
             DateTime posed, DateTime answered, DateTime finished,
-            bool correct)
+            bool correct, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
 
             context.Attach(definition);
 

@@ -8,7 +8,7 @@ namespace Infrastructure
     {
         private StatementDatabaseEntryManager _databaseManager;
 
-        public StatementManager(LinguineDbContextFactory dbf) : base(dbf)
+        public StatementManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
             _databaseManager = new StatementDatabaseEntryManager(dbf);
         }
@@ -20,7 +20,7 @@ namespace Infrastructure
             return StatementFactory.FromDatabaseEntries(_databaseManager.AttachDefinitions(entries));
         }
 
-        public void AddTranslation(StatementTranslation st)
+        public void AddTranslation(StatementTranslation st, LinguineDbContext context)
         {
             int? statementKey = st.Underlying.ID;
 
@@ -30,8 +30,6 @@ namespace Infrastructure
             }
 
             int skey = (int)statementKey;
-
-            using var context = _dbf.CreateDbContext();
 
             TranslatedStatementDatabaseEntry toAdd = new TranslatedStatementDatabaseEntry
             {
@@ -95,8 +93,7 @@ namespace Infrastructure
         public List<int> StatementStartIndices(TextualMedia tm)
         {
             using var context = _dbf.CreateDbContext();
-            context.Attach(tm);
-            return context.Statements.Where(s => s.Parent == tm).Select(s => s.FirstCharIndex).ToList();
+            return context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Select(s => s.FirstCharIndex).ToList();
         }
 
         public List<Statement> GetStatementsCoveringRange(TextualMedia tm, int start, int stop)
@@ -114,10 +111,9 @@ namespace Infrastructure
             return StatementFactory.FromDatabaseEntries(raw).Skip(bookMark).ToList();
         }
 
-        public int IndexOffEndOfLastStatement(TextualMedia tm, LinguineDbContext context)
+        public int IndexOffEndOfLastStatement(TextualMedia tm, LinguineReadonlyDbContext context)
         {
-            context.Attach(tm);
-            var statements = context.Statements.Where(s => s.Parent == tm);
+            var statements = context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey);
             if (!statements.Any())
             {
                 return -1;
@@ -131,7 +127,7 @@ namespace Infrastructure
             return IndexOffEndOfLastStatement(tm, context);
         }
 
-        public void AddInitialStatements(List<Statement> statements)
+        public void AddInitialStatements(List<Statement> statements, LinguineDbContext context)
         {
             TextualMedia parent = VerifyChainAndGetParent(statements);
 
@@ -140,16 +136,16 @@ namespace Infrastructure
                 throw new Exception("Already have statements for this text!");
             }
 
-            _databaseManager.AddStartOfChain(StatementDatabaseEntryFactory.FromStatements(statements, null, null));
+            _databaseManager.AddStartOfChain(StatementDatabaseEntryFactory.FromStatements(statements, null, null), context);
         }
 
-        public void AddStatements(List<Statement> statements)
+        public void AddStatements(List<Statement> statements, LinguineDbContext context)
         {
             TextualMedia parent = VerifyChainAndGetParent(statements);
 
             if (GetAllStatementsFor(parent).Count() == 0)
             {
-                AddInitialStatements(statements);
+                AddInitialStatements(statements, context);
                 return;
             }
 
@@ -158,16 +154,16 @@ namespace Infrastructure
             Statement previous = GetStatementsCoveringRange(
                 parent, endOfChain - 1, endOfChain - 1).LastOrDefault() ?? throw new Exception();
 
-            var context = _dbf.CreateDbContext();
+            var rocontext = _dbf.CreateDbContext();
             StatementDatabaseEntry previousEntry = context.Statements
                 .Where(s => s.Parent == parent)
                 .Where(s => s.LastCharIndex == endOfChain - 1)
                 .FirstOrDefault() ?? throw new Exception();
 
-            context.Dispose();
+            rocontext.Dispose();
 
             _databaseManager.AddContinuationOfChain(
-                StatementDatabaseEntryFactory.FromStatements(statements, previous, previousEntry));
+                StatementDatabaseEntryFactory.FromStatements(statements, previous, previousEntry), context);
         }
 
         public Statement? GetLastStatement(TextualMedia tm)
