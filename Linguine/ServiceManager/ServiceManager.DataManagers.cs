@@ -22,8 +22,6 @@ namespace Linguine
         NoDatabaseYet,
         Initialising,
         Initialised,
-        Disposing,
-        Disposed,
     }
     // TODO - do we need the dispose stuff, or handle that with IDisposable
     // TODO - what to do about readonly handles etc??
@@ -36,26 +34,36 @@ namespace Linguine
         public required StatementManager                  Statements        { get; set; }
         public required TestRecordsManager                TestRecords       { get; set; }
         public required TextualMediaManager               TextualMedia      { get; set; }
-        public required TextualMediaSessionManager        SessionManager    { get; set; }
+        public required TextualMediaSessionManager        Sessions          { get; set; }
     }
 
 
     partial class ServiceManager
     {
         // TODO - callbacks when these change??
-        public DataManagersState ManagerState { get; private set; }
-        public DataQuality       DataQuality  { get; private set; }
+        public DataManagersState ManagerState { get; private set; } = DataManagersState.NoDatabaseYet;
+        public DataQuality       DataQuality  { get; private set; } 
 
 
-        // would a union type make sense here??
-        public Managers? Managers           { get; private set; }
-        public Managers? ReadOnlyManangers  { get; private set; }
+        public Managers? Managers { get; private set; } = null;
 
-        public void InitialiseManager()
+
+        public void InitialiseManagers(LinguineReadonlyDbContextFactory dbf)
         {
-            throw new NotImplementedException();
+            ManagerState = DataManagersState.Initialising;
+
+            Managers = new Managers
+            {
+                Vocalisations     = new DefinitionVocalisationManager(dbf),
+                Definitions       = new DictionaryDefinitionManager(dbf),
+                ParsedDefinitions = new ParsedDictionaryDefinitionManager(dbf),
+                Statements        = new StatementManager(dbf),
+                TestRecords       = new TestRecordsManager(dbf),
+                TextualMedia      = new TextualMediaManager(dbf),
+                Sessions          = new TextualMediaSessionManager(dbf),
+            };
+
+            ManagerState = DataManagersState.Initialised;
         }
-
-
     }
 }
