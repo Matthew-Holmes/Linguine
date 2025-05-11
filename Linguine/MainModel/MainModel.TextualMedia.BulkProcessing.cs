@@ -18,7 +18,7 @@ namespace Linguine
         
         internal record ProcessingJobInfo(String TextName, int Total, int Complete, decimal SecondsPerStep, int CharPerStep, bool IsProcessing);
 
-        internal ProcessingJobInfo GetProcessingInfo(String name, bool isProcessing, decimal secondsPerStep, int charPerStep, LinguineDbContext context)
+        internal ProcessingJobInfo GetProcessingInfo(String name, bool isProcessing, decimal secondsPerStep, int charPerStep, LinguineReadonlyDbContext context)
         {
             TextualMedia? tm = TextualMediaManager.GetByName(name, context);
 
@@ -37,7 +37,7 @@ namespace Linguine
         {
             List<ProcessingJobInfo> ret = new();
 
-            using LinguineDbContext context = LinguineFactory.CreateDbContext();
+            using LinguineReadonlyDbContext context = ReadonlyLinguineFactory.CreateDbContext();
 
             LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
 
@@ -55,7 +55,7 @@ namespace Linguine
 
         internal async Task StartBulkProcessing(string textName, Action<int>? progressCallback = null, Action<int>? finished = null)
         {
-            using var context = LinguineFactory.CreateDbContext();
+            using LinguineReadonlyDbContext context = ReadonlyLinguineFactory.CreateDbContext();
             TextualMedia? tm = TextualMediaManager?.GetByName(textName, context) ?? null;
 
             if (tm is null)

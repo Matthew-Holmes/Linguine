@@ -31,7 +31,7 @@ namespace Linguine
                 {
                     throw new Exception("trying to access dictionary before it is available");
                 }
-                TestRecordsManager? tr = new TestRecordsManager(_linguineDbContextFactory);
+                TestRecordsManager? tr = new TestRecordsManager(_linguineReadonlyDbContextFactory);
                 return tr?.NumberDistinctDefinitionsTested() ?? 0;
             }
         }

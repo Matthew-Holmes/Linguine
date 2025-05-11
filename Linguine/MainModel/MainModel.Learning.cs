@@ -12,9 +12,6 @@ using System.Threading;
 
 namespace Linguine
 {
-
-
-
     public partial class MainModel
     {
         private DefinitionLearningService? _defLearningService = null;
@@ -77,7 +74,7 @@ namespace Linguine
                 throw new Exception("trying to access the dictionary before it is available");
             }
 
-            TestRecordsManager trm = new TestRecordsManager(_linguineDbContextFactory);
+            TestRecordsManager trm = new TestRecordsManager(_linguineReadonlyDbContextFactory); // TODO - homogonise this!!
 
             List<TestRecord>? allRecords = trm.AllRecordsTimeSorted();
 

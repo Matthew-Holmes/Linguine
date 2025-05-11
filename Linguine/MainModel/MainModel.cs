@@ -16,7 +16,7 @@ namespace Linguine
 
 
         public LinguineDbContextFactory         LinguineFactory        { get => _linguineDbContextFactory; }
-        public LinguineReadonlyDbContextFactory ReadonlyLingineFactory { get => _linguineReadonlyDbContextFactory}
+        public LinguineReadonlyDbContextFactory ReadonlyLinguineFactory { get => _linguineReadonlyDbContextFactory; }
         
 
         public MainModel() { }

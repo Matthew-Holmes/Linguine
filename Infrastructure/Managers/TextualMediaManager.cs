@@ -63,7 +63,9 @@ namespace Infrastructure
         public void DeleteByName(string selectedTextName, LinguineDbContext context)
         {
 
-            TextualMedia? tm = GetByName(selectedTextName, context);
+            using var roContext = _dbf.CreateDbContext();
+
+            TextualMedia? tm = GetByName(selectedTextName, roContext);
 
             if (tm is null)
             {

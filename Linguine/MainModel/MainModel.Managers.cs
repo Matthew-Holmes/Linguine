@@ -18,13 +18,13 @@ namespace Linguine
         private bool _needToImportADictionary;
         private void LoadManagers()
         {
-            _dictionaryDefinitionManager        = new DictionaryDefinitionManager(LinguineFactory);
-            _textualMediaManager                = new TextualMediaManager(LinguineFactory);
-            _textualMediaSessionManager         = new TextualMediaSessionManager(LinguineFactory);
-            _variantsManager                    = new VariantsManager(LinguineFactory);
-            _statementManager                   = new StatementManager(LinguineFactory);
-            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(LinguineFactory);
-            _definitionVocalisationManager      = new DefinitionVocalisationManager(LinguineFactory);
+            _dictionaryDefinitionManager        = new DictionaryDefinitionManager(ReadonlyLinguineFactory);
+            _textualMediaManager                = new TextualMediaManager(ReadonlyLinguineFactory);
+            _textualMediaSessionManager         = new TextualMediaSessionManager(ReadonlyLinguineFactory);
+            _variantsManager                    = new VariantsManager(ReadonlyLinguineFactory);
+            _statementManager                   = new StatementManager(ReadonlyLinguineFactory);
+            _parsedDictionaryDefinitionManager  = new ParsedDictionaryDefinitionManager(ReadonlyLinguineFactory);
+            _definitionVocalisationManager      = new DefinitionVocalisationManager(ReadonlyLinguineFactory);
 
             _needToImportADictionary = !_dictionaryDefinitionManager.AnyDefinitions();
 

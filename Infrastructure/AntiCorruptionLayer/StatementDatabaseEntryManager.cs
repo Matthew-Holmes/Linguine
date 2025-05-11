@@ -75,7 +75,10 @@ namespace Infrastructure
             while (chain.Last().ContextCheckpoint is null)
             {
                 // just manually do the chain reverse traversal
-                StatementDatabaseEntry previous = context.Statements.Where(s => s.DatabasePrimaryKey == chain.Last().PreviousKey).First();
+                StatementDatabaseEntry previous = context.Statements
+                    .Where(s => s.DatabasePrimaryKey == chain.Last().PreviousKey)
+                    .Include(s => s.Parent)
+                    .First();
                 chain.Add(previous); // will throw if first statement doesn't have checkpoint
                 // it should, so a throw is correct
             }
@@ -100,6 +103,7 @@ namespace Infrastructure
                 .Where(s => s.ParentKey == tm.DatabasePrimaryKey)
                 .Where(s => s.LastCharIndex >= start && s.FirstCharIndex <= stop)
                 .Include(s => s.Previous)
+                .Include(s => s.Parent)
                 .ToList();
         }
 

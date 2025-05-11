@@ -1,5 +1,6 @@
 ﻿using Helpers;
 using DataClasses;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
@@ -74,12 +75,13 @@ namespace Infrastructure
 
         private List<TextualMediaSession> Sessions(TextualMedia tm, LinguineDbContext context)
         {
-            return context.TextualMediaSessions.Where(
+            return context.TextualMediaSessions.Include(s => s.TextualMedia).Where(
                 s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
         }
 
         private List<TextualMediaSession> Sessions(TextualMedia tm, LinguineReadonlyDbContext context)
         {
+            throw new NotImplementedException("do we need to be using the with text version?");
             return context.TextualMediaSessions.Where(
                 s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
         }

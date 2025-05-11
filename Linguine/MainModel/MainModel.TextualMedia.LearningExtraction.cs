@@ -17,7 +17,7 @@ namespace Linguine
 {
     public partial class MainModel
     {
-
+        // TODO - put these in the engines part of ServiceManager?
         private ICanAnalyseText?        TextAnalyser     { get; set; }
 
         private ICanParseDefinitions?   DefinitionParser { get; set; }
@@ -76,10 +76,10 @@ namespace Linguine
         {
 
             // determine the chunk of text to process next
-            (String? text, List<String>? context, bool isTail, int firstChar) = GetNextChunkInfo(tm);
-            if (text is null || context is null) { return -1; }
+            (String? text, List<String>? semanticContext, bool isTail, int firstChar) = GetNextChunkInfo(tm);
+            if (text is null || semanticContext is null) { return -1; }
 
-            List<ProtoStatement>? builders = await DoProcessingStep(text, context, isTail, token);
+            List<ProtoStatement>? builders = await DoProcessingStep(text, semanticContext, isTail, token);
 
             if (token.IsCancellationRequested)
             {
@@ -94,7 +94,9 @@ namespace Linguine
 
             List<Statement> statements = FromProtoStatements(builders, tm, firstChar);
 
-            StatementManager.AddStatements(statements);
+            using var context = LinguineFactory.CreateDbContext();
+
+            StatementManager.AddStatements(statements, context);
 
             if (token.IsCancellationRequested)
             {
@@ -123,7 +125,7 @@ namespace Linguine
 
         private async Task VocaliseDefinition(DictionaryDefinition definition, Voice voice)
         {
-            using var context = _linguineDbContextFactory.CreateDbContext();
+            using var context = LinguineFactory.CreateDbContext();
 
             if (DefinitionVocalisationManager.HasAnyFilesSpecificVoice(definition, voice, context))
             {
@@ -164,7 +166,7 @@ namespace Linguine
         {
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
 
-            using var context = _linguineDbContextFactory.CreateDbContext();
+            using var context = LinguineFactory.CreateDbContext();
 
             List<DictionaryDefinition> newDefinitions = definitions.Where(
                 d => DefinitionVocalisationManager.HasAnyFiles(d, context) == false).ToList();
@@ -222,6 +224,9 @@ namespace Linguine
 
         private async Task PronounceDefinitions(List<Statement> statements)
         {
+            using var context = LinguineFactory.CreateDbContext();
+
+
             if (Pronouncer is null)
             {
                 StartPronunciationEngine();
@@ -246,7 +251,6 @@ namespace Linguine
 
             List<Tuple<String, String>> pronunciations = await Pronouncer.GetDefinitionPronunciations(newDefinitionsList);
 
-            using var context = _linguineDbContextFactory.CreateDbContext();
             context.ChangeTracker.Clear();
 
             for (int i = 0; i != newDefinitionsList.Count; i++)
@@ -281,6 +285,8 @@ namespace Linguine
 
         private async Task ParseDefinitions(List<Statement> statements)
         {
+            using var context = LinguineFactory.CreateDbContext();
+
             if (DefinitionParser is null)
             {
                 StartParsingEngine();
@@ -305,7 +311,7 @@ namespace Linguine
                 await DefinitionParser.ParseStatementsDefinitions(
                     newDefinitionsSet, level, native);
 
-            ParsedDictionaryDefinitionManager.AddSet(parsedDefinitions);
+            ParsedDictionaryDefinitionManager.AddSet(parsedDefinitions, context);
         }
 
 
@@ -357,6 +363,8 @@ namespace Linguine
             return protos;
 
         }
+
+        // TODO - put this logic in service manager?
 
         private void StartStatementEngine()
         {

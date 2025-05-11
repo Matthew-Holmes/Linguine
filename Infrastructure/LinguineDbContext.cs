@@ -9,6 +9,7 @@ namespace Infrastructure
     // one context per target language should be replaced on config change
     public class LinguineDbContext : DbContext
     {
+
         #region custom dispose with logging
         private bool _disposed = false;
 
