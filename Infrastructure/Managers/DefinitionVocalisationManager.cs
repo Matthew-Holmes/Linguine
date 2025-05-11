@@ -7,14 +7,12 @@ namespace Infrastructure
 {
     public class DefinitionVocalisationManager : DataManagerBase
     {
-        public DefinitionVocalisationManager(LinguineDbContextFactory dbf) : base(dbf)
+        public DefinitionVocalisationManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
-        public async Task CleanupMissingFilesAsync()
+        public async Task CleanupMissingFilesAsync(LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             var allVocalised = await context.VocalisedDefinitionFiles.ToListAsync();
 
             foreach (var record in allVocalised)
@@ -30,10 +28,11 @@ namespace Infrastructure
             await context.SaveChangesAsync();
         }
 
-        public async Task<VocalisedDefinitionFile> AddVocalisationAsync(byte[] audioData,
-                                               DictionaryDefinition def,
-                                               Voice voice,
-                                               string fileName)
+        public async Task<VocalisedDefinitionFile> AddVocalisationAsync(
+            byte[]               audioData,
+            DictionaryDefinition def,
+            Voice                voice,
+            string               fileName)
         {
             var fullPath = Path.Combine(ConfigManager.Config.AudioStoreDirectory, fileName);
 
@@ -84,10 +83,8 @@ namespace Infrastructure
                 .Any();
         }   
 
-        public async Task<bool> RemoveVocalisationAsync(int primaryKey)
+        public async Task<bool> RemoveVocalisationAsync(int primaryKey, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             var record = await context.VocalisedDefinitionFiles.FindAsync(primaryKey);
             if (record == null)
                 return false;

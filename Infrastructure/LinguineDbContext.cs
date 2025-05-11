@@ -9,6 +9,7 @@ namespace Infrastructure
     // one context per target language should be replaced on config change
     public class LinguineDbContext : DbContext
     {
+
         #region custom dispose with logging
         private bool _disposed = false;
 
@@ -46,24 +47,20 @@ namespace Infrastructure
             Dispose(false);
         }
         #endregion
+
         private readonly String _connectionString;
 
         // Tables
-        public DbSet<DictionaryDefinition> DictionaryDefinitions { get; set; }
-        public DbSet<VariantRoot> Variants { get; set; }
-        public DbSet<TextualMedia> TextualMedia { get; set; }
-        public DbSet<TextualMediaSession> TextualMediaSessions { get; set; }
-
-        public DbSet<StatementDatabaseEntry> Statements { get; set; }
-        public DbSet<StatementDefinitionNode> StatementDefinitions { get; set; }
-
-        public DbSet<ParsedDictionaryDefinition> ParsedDictionaryDefinitions { get; set; }
-        public DbSet<TestRecord> TestRecords { get; set; }
-
-        // TODO - pluralise this next migration
-        public DbSet<VocalisedDefinitionFile> VocalisedDefinitionFiles { get; set; }
-
-        public DbSet<TranslatedStatementDatabaseEntry> TranslatedStatements { get; set; }
+        public DbSet<DictionaryDefinition>             DictionaryDefinitions       { get; set; }
+        public DbSet<VariantRoot>                      Variants                    { get; set; }
+        public DbSet<TextualMedia>                     TextualMedia                { get; set; }
+        public DbSet<TextualMediaSession>              TextualMediaSessions        { get; set; }
+        public DbSet<StatementDatabaseEntry>           Statements                  { get; set; }
+        public DbSet<StatementDefinitionNode>          StatementDefinitions        { get; set; }
+        public DbSet<ParsedDictionaryDefinition>       ParsedDictionaryDefinitions { get; set; }
+        public DbSet<TestRecord>                       TestRecords                 { get; set; }
+        public DbSet<VocalisedDefinitionFile>          VocalisedDefinitionFiles    { get; set; }    
+        public DbSet<TranslatedStatementDatabaseEntry> TranslatedStatements        { get; set; }
 
         public LinguineDbContext()
         {
@@ -89,11 +86,13 @@ namespace Infrastructure
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
 
+
             modelBuilder.Entity<VariantRoot>()
                 .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<VariantRoot>()
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
+
 
             modelBuilder.Entity<TextualMedia>()
                 .HasKey(e => e.DatabasePrimaryKey);
@@ -112,6 +111,7 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.TextualMediaKey)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<StatementDatabaseEntry>()
                 .HasKey(e => e.DatabasePrimaryKey);
@@ -134,6 +134,7 @@ namespace Infrastructure
                 .Property(e => e.ContextCheckpoint)
                 .HasConversion(new ContextJSONConverter());
 
+
             modelBuilder.Entity<StatementDefinitionNode>()
                 .HasKey(e => e.DatabasePrimaryKey);
             modelBuilder.Entity<StatementDefinitionNode>()
@@ -146,11 +147,13 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.DefinitionKey);
 
+
             modelBuilder.Entity<TranslatedStatementDatabaseEntry>()
                 .HasOne(e => e.StatementDatabaseEntry)
                 .WithMany()
                 .HasForeignKey(e => e.StatementKey)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<ParsedDictionaryDefinition>()
                 .HasKey(e => e.DatabasePrimaryKey);
@@ -162,10 +165,12 @@ namespace Infrastructure
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
 
+
             modelBuilder.Entity<TestRecord>()
                 .HasOne(e => e.Definition)
                 .WithMany()
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
+
 
             modelBuilder.Entity<VocalisedDefinitionFile>()
                 .HasKey(e => e.DatabasePrimaryKey);

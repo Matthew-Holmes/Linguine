@@ -3,12 +3,19 @@ using System.Diagnostics;
 using Helpers;
 using Serilog;
 using DataClasses;
+using System.Text;
 
 namespace LearningExtraction
 {
     public class TextDecomposer
     {
-        private static List<char> ProblemChars = new List<char> { '\n', '\r' };
+
+
+        private static List<Rune> ProblemRunes = new List<Rune>
+            {
+                new Rune('\n'),
+                new Rune('\r')
+            };
 
         public int MaxVolumeToProcess { get; set; }  // if given text larger than this, chunk it
 
@@ -24,7 +31,7 @@ namespace LearningExtraction
             }
 
             Func<TextDecomposition, bool> MaintainsInvariants = (TextDecomposition td)
-                => (!mustBiject || td.Bijects()) && (!mustInject || td.Injects());
+                => (!mustBiject || td.Bijects()) && (!mustInject || td.Injects()) && td.Decomposition?.Count > 0 && !td.Decomposition.All(subtd => subtd.Total == "");
 
             Func<TextDecomposition, bool> IsNonTrivial = (TextDecomposition td)
                 => (td.Decomposition?.Count ?? 1) > 1;
@@ -99,7 +106,7 @@ namespace LearningExtraction
             TextDecomposition ret = TextDecomposition.FromNewLinedString(text, await agent.GetResponse(text), true);
 
             // fixup weird /r/n newlines 
-            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemChars);
+            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemRunes);
 
             return ret;
         }
@@ -110,7 +117,7 @@ namespace LearningExtraction
             TextDecomposition ret = TextDecomposition.FromNewLinedString(text, await agent.GetResponse(strippedText), true);
 
             // fixup weird /r/n newlines 
-            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemChars);
+            ret = DecompositionHelper.ReintercalateMissingCharacters(ret, ProblemRunes);
 
             return ret;
         }

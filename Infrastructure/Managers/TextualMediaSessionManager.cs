@@ -1,18 +1,17 @@
 ﻿using Helpers;
 using DataClasses;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
     public class TextualMediaSessionManager : DataManagerBase
     {
-        public TextualMediaSessionManager(LinguineDbContextFactory dbf) : base(dbf)
+        public TextualMediaSessionManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
-        public void CloseSession(TextualMediaSession session)
+        public void CloseSession(TextualMediaSession session, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             context.Attach(session);
 
             if (session.Active)
@@ -62,7 +61,7 @@ namespace Infrastructure
         {
             // returns if active and progress percentage
 
-            TidySessionsFor(tm);
+            TidySessionsFor(tm, context);
 
             List<TextualMediaSession> sessions = Sessions(tm, context);
 
@@ -76,13 +75,19 @@ namespace Infrastructure
 
         private List<TextualMediaSession> Sessions(TextualMedia tm, LinguineDbContext context)
         {
+            return context.TextualMediaSessions.Include(s => s.TextualMedia).Where(
+                s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
+        }
+
+        private List<TextualMediaSession> Sessions(TextualMedia tm, LinguineReadonlyDbContext context)
+        {
+            throw new NotImplementedException("do we need to be using the with text version?");
             return context.TextualMediaSessions.Where(
                 s => s.TextualMedia.DatabasePrimaryKey == tm.DatabasePrimaryKey).ToList();
         }
 
-        private void TidySessionsFor(TextualMedia tm)
+        private void TidySessionsFor(TextualMedia tm, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
             // don't want multiple cursors pointing at the same location
 
             List<TextualMediaSession> sessions = Sessions(tm, context)

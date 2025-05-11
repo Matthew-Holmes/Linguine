@@ -4,7 +4,7 @@ namespace Infrastructure
 {
     public class VariantsManager : DataManagerBase
     {
-        public VariantsManager(LinguineDbContextFactory dbf) : base(dbf)
+        public VariantsManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
@@ -40,10 +40,8 @@ namespace Infrastructure
             return true;
         }
 
-        internal bool Add(List<VariantRoot> variantRoots)
+        internal bool Add(List<VariantRoot> variantRoots, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             foreach (var vr in variantRoots)
             {
                 Add(vr, context, false);
@@ -65,9 +63,9 @@ namespace Infrastructure
         }
 
 
-        public void AddNewVariantsSourceFromCSV(String filename)
+        public void AddNewVariantsSourceFromCSV(String filename, LinguineDbContext context)
         {
-            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(this, filename);
+            VariantsCSVParser.ParseVariantsFromCSVToSQLiteAndSave(this, filename, context);
 
             VerifyIntegrity();
 

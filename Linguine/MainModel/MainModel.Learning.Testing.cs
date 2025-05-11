@@ -209,9 +209,11 @@ namespace Linguine
                 throw new Exception("couldn't find a dictionary");
             }
 
-            TestRecordsManager trm = new TestRecordsManager(_linguineDbContextFactory);
+            TestRecordsManager trm = new TestRecordsManager(ReadonlyLinguineFactory);
 
-            TestRecord added = trm.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct);
+            using var context = LinguineFactory.CreateDbContext();
+
+            TestRecord added = trm.AddRecord(definitionForTesting.Parent, posed, answered, finished, correct, context);
 
             if (added.Correct) { lastNcorrect++; } else { lastNcorrect = 0; }
 

@@ -11,8 +11,12 @@ namespace Linguine
         public event EventHandler? Loaded;
         public event EventHandler? LoadingFailed;
 
-        private LinguineDbContextFactory _linguineDbContextFactory;
-        public LinguineDbContextFactory LinguineFactory { get => _linguineDbContextFactory; }
+        private LinguineDbContextFactory         _linguineDbContextFactory;
+        private LinguineReadonlyDbContextFactory _linguineReadonlyDbContextFactory;
+
+
+        public LinguineDbContextFactory         LinguineFactory        { get => _linguineDbContextFactory; }
+        public LinguineReadonlyDbContextFactory ReadonlyLinguineFactory { get => _linguineReadonlyDbContextFactory; }
         
 
         public MainModel() { }
@@ -33,7 +37,9 @@ namespace Linguine
                     Directory.CreateDirectory(config.DatabaseDirectory);
                 }
 
-                EnsureDatabase(config);
+                StartContextFactories(config);
+
+                EnsureDatabase();
 
                 LoadManagers();
 
@@ -47,10 +53,15 @@ namespace Linguine
             }
         }
 
-        private void EnsureDatabase(Config.Config config)
+        private void StartContextFactories(Config.Config config)
         {
             String connString = config.GetDatabaseString();
             _linguineDbContextFactory = new LinguineDbContextFactory(connString);
+            _linguineReadonlyDbContextFactory = new LinguineReadonlyDbContextFactory(_linguineDbContextFactory);
+        }
+
+        private void EnsureDatabase()
+        {
             var context = LinguineFactory.CreateDbContext();
             context.Database.EnsureCreated();
             context.Dispose();

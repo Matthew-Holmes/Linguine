@@ -11,12 +11,12 @@ namespace Infrastructure
         // TODO  - we may want to be able to edit terms; or even merge or insert statements
         // add those methods as reqired
         private object _lock = new();
-        internal StatementDatabaseEntryManager(LinguineDbContextFactory dbf) : base(dbf)
+        internal StatementDatabaseEntryManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
 
-        internal Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> AttachDefinition(StatementDatabaseEntry statement, LinguineDbContext context)
+        internal Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>> AttachDefinition(StatementDatabaseEntry statement, LinguineReadonlyDbContext context)
         {
             List<StatementDefinitionNode> defs = context.StatementDefinitions
                    .Where(d => d.StatementDatabaseEntry == statement)
@@ -40,17 +40,17 @@ namespace Infrastructure
         internal List<StatementDatabaseEntry> GetAllStatementsEntriesFor(TextualMedia tm)
         {
             using var context = _dbf.CreateDbContext();
-            context.Attach(tm);
+            //context.Attach(tm);
             return context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
         }
 
         internal List<StatementDatabaseEntry> GetNStatementsFor(DictionaryDefinition def, int n)
         {
             using var context = _dbf.CreateDbContext();
-            context.Attach(def);
+            //context.Attach(def);
 
             List<StatementDefinitionNode> nodes = context.StatementDefinitions
-                .Where(n => n.DictionaryDefinition == def)
+                .Where(n => n.DefinitionKey == def.DatabasePrimaryKey)
                 .Include(n => n.StatementDatabaseEntry)
                 .Include(n => n.StatementDatabaseEntry.Parent)
                 .ToList();
@@ -70,15 +70,16 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
 
-            context.Attach(lastInChain);
-
             List<StatementDatabaseEntry> chain = new List<StatementDatabaseEntry> { lastInChain };
 
             while (chain.Last().ContextCheckpoint is null)
             {
-                context.Entry(chain.Last()).Reference(e => e.Previous).Load();
-                StatementDatabaseEntry previous = chain.Last().Previous;
-                chain.Add(chain.Last().Previous); // will throw if first statement doesn't have checkpoint
+                // just manually do the chain reverse traversal
+                StatementDatabaseEntry previous = context.Statements
+                    .Where(s => s.DatabasePrimaryKey == chain.Last().PreviousKey)
+                    .Include(s => s.Parent)
+                    .First();
+                chain.Add(previous); // will throw if first statement doesn't have checkpoint
                 // it should, so a throw is correct
             }
 
@@ -88,9 +89,8 @@ namespace Infrastructure
         internal List<StatementDatabaseEntry> GetStatementsInsideRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
             using var context = _dbf.CreateDbContext();
-            context.Attach(tm);
             return context.Statements
-                .Where(s => s.Parent == tm)
+                .Where(s => s.ParentKey == tm.DatabasePrimaryKey)
                 .Where(s => s.FirstCharIndex >= start && s.LastCharIndex <= stop)
                 .Include(s => s.Previous)
                 .ToList();
@@ -99,11 +99,11 @@ namespace Infrastructure
         internal List<StatementDatabaseEntry> GetStatementsCoveringRangeWithEndpoints(TextualMedia tm, int start, int stop)
         {
             using var context = _dbf.CreateDbContext();
-            context.Attach(tm);
             return context.Statements
-                .Where(s => s.Parent == tm)
+                .Where(s => s.ParentKey == tm.DatabasePrimaryKey)
                 .Where(s => s.LastCharIndex >= start && s.FirstCharIndex <= stop)
                 .Include(s => s.Previous)
+                .Include(s => s.Parent)
                 .ToList();
         }
 
@@ -136,25 +136,25 @@ namespace Infrastructure
         //}
 
         internal void AddContinuationOfChain(
-            List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
+            List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain, LinguineDbContext context)
         {
             if (statementsChain.First().Item1.Previous is null)
             {
                 throw new ArgumentException("should be calling AddStartOfChain if first statement has no previous");
             }
-            AddInternal(statementsChain);
+            AddInternal(statementsChain, context);
         }
 
-        internal void AddStartOfChain(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
+        internal void AddStartOfChain(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain, LinguineDbContext context)
         {
             if (statementsChain[0].Item1.Previous is not null)
             {
                 throw new ArgumentException("not a start of a chain, should be calling Add");
             }
-            AddInternal(statementsChain);
+            AddInternal(statementsChain, context);
         }
 
-        internal void AddInternal(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain)
+        internal void AddInternal(List<Tuple<StatementDatabaseEntry, List<StatementDefinitionNode>>> statementsChain, LinguineDbContext context)
         {
             lock (_lock)
             {
@@ -176,8 +176,6 @@ namespace Infrastructure
                     }
                 }
                 // now update the database
-
-                using var context = _dbf.CreateDbContext();
 
                 // Sharp edge - have to attach some properties back to the tracking graph
                 // otherwise this will throw System.InvalidOperationException

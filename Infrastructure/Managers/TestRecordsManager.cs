@@ -5,7 +5,10 @@ namespace Infrastructure
 {
     public class TestRecordsManager : DataManagerBase
     {
-        public TestRecordsManager(LinguineDbContextFactory dbf) : base(dbf)
+        public TestRecordsManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
+        private LinguineDbContextFactory _dbf;
+
+        public TestRecordsManager(LinguineDbContextFactory dbf)
         {
         }
 
@@ -29,9 +32,8 @@ namespace Infrastructure
 
         public TestRecord AddRecord(DictionaryDefinition definition,
             DateTime posed, DateTime answered, DateTime finished,
-            bool correct)
+            bool correct, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
 
             context.Attach(definition);
 

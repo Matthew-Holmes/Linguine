@@ -8,7 +8,8 @@ namespace Infrastructure
     {
         public static void ParseVariantsFromCSVToSQLiteAndSave(
             VariantsManager mngr,
-            String csvFileLocation)
+            String csvFileLocation,
+            LinguineDbContext context)
         {
             var records = ParseCSV(csvFileLocation);
 
@@ -17,7 +18,7 @@ namespace Infrastructure
                 throw new DataException("record parsing failed, are you sure there are records present?");
             }
 
-            mngr.Add(records);
+            mngr.Add(records, context);
         }
 
         public static List<VariantRoot> ParseCSV(String filePath)

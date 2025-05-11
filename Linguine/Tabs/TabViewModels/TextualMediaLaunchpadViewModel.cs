@@ -74,7 +74,7 @@ namespace Linguine.Tabs
                 decimal timePerStep = ConfigManager.Config.Gimmicks.TimeToProcessSeconds[target];
                 int charPerStep = ConfigManager.Config.Gimmicks.CharsProcessedPerStep[target];
 
-                using var context = _model.LinguineFactory.CreateDbContext();
+                using var context = _model.ReadonlyLinguineFactory.CreateDbContext();
                 MainModel.ProcessingJobInfo info = _model.GetProcessingInfo(
                     textName, false, timePerStep, charPerStep, context);
                 var newVm = new ProcessingJobViewModel(_model, info);
@@ -255,7 +255,9 @@ namespace Linguine.Tabs
 
                 if (IsADuplicate(tm, manager)) { return; }
 
-                manager.Add(tm);
+                using var context = _model.LinguineFactory.CreateDbContext();
+
+                manager.Add(tm, context);
 
                 OnPropertyChanged(nameof(AvailableTexts));
 
@@ -273,7 +275,7 @@ namespace Linguine.Tabs
 
         private bool IsADuplicate(TextualMedia tm, TextualMediaManager manager)
         {
-            using var context = _parent.Model.LinguineFactory.CreateDbContext();
+            using var context = _parent.Model.ReadonlyLinguineFactory.CreateDbContext();
 
 
             if (manager.AvailableTextualMediaNames(context).Contains(tm.Name))

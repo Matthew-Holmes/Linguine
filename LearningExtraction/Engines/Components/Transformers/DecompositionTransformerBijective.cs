@@ -6,7 +6,9 @@ namespace LearningExtraction
 {
     public static class DecompositionTransformerBijective
     {
-        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int retry = 2, bool trim=false)
+
+
+        public static async Task<TextDecomposition> ApplyAgent(AgentBase agent, TextDecomposition source, int retry = 2, bool trim=false, bool clean = false)
         {
             // prompts the agent with a prompt derived from each decomposition unit on each line
             // the response is converted to a response decomposition
@@ -17,7 +19,14 @@ namespace LearningExtraction
                 return TextDecomposition.FromNewLinedString(source.Total, "");
             }
 
-            String prompt = String.Join('\n', source.Decomposition.Select(unit => unit.Total));
+            Func<string, string> cleanFunc = s => s;
+
+            if (clean)
+            {
+                // use this when a unit is for some reason split across two lines (does happen occasionally)
+                cleanFunc = s => s.Replace("\n", "").Replace("\r", "");
+            }
+            String prompt = String.Join('\n', source.Decomposition.Select(unit => cleanFunc(unit.Total)));
 
             String response = await GetResponse(agent, prompt, retry); // agent best at identifying lower --> upper, not the other way around
 

@@ -8,7 +8,8 @@ namespace Infrastructure
     {
         public static void ParseDictionaryFromCSVToSQLiteAndSave(
             DictionaryDefinitionManager mngr,
-            String csvFileLocation)
+            String csvFileLocation,
+            LinguineDbContext context)
         {
             var records = ParseCsv(csvFileLocation);
 
@@ -17,7 +18,7 @@ namespace Infrastructure
                 throw new DataException("record parsing failed, are you sure there are records present?");
             }
 
-            mngr.Add(records);
+            mngr.Add(records, context);
         }
 
         private static List<DictionaryDefinition> ParseCsv(String filePath)

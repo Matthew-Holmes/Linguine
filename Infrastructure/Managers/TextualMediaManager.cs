@@ -4,14 +4,12 @@ namespace Infrastructure
 {
     public class TextualMediaManager : DataManagerBase
     {
-        public TextualMediaManager(LinguineDbContextFactory dbf) : base(dbf)
+        public TextualMediaManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
-        public void Add(TextualMedia tm)
+        public void Add(TextualMedia tm, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             if (AvailableTextualMediaNames(context).Contains(tm.Name))
             {
                 throw new ArgumentException("already have a text of this name");
@@ -27,17 +25,25 @@ namespace Infrastructure
                                  .ToList();
         }
 
-        public bool HaveMediaWithSameDescription(String description, LinguineDbContext context)
+        public List<String> AvailableTextualMediaNames(LinguineReadonlyDbContext context)
+        {
+            return context.TextualMedia.Select(m => m.Name)
+                                 .Distinct()
+                                 .ToList();
+        }
+
+
+        public bool HaveMediaWithSameDescription(String description, LinguineReadonlyDbContext context)
         {
             return context.TextualMedia.Where(m => m.Description == description).Any();
         }
 
-        public bool HaveMediaWithSameContent(String text, LinguineDbContext context)
+        public bool HaveMediaWithSameContent(String text, LinguineReadonlyDbContext context)
         {
             return context.TextualMedia.Where(m => m.Description == text).Any();
         }
 
-        public TextualMedia? GetByName(string selectedText, LinguineDbContext context)
+        public TextualMedia? GetByName(string selectedText, LinguineReadonlyDbContext context)
         {
             var possibilities = context.TextualMedia.Where(m => m.Name == selectedText).ToList();
     
@@ -57,7 +63,9 @@ namespace Infrastructure
         public void DeleteByName(string selectedTextName, LinguineDbContext context)
         {
 
-            TextualMedia? tm = GetByName(selectedTextName, context);
+            using var roContext = _dbf.CreateDbContext();
+
+            TextualMedia? tm = GetByName(selectedTextName, roContext);
 
             if (tm is null)
             {

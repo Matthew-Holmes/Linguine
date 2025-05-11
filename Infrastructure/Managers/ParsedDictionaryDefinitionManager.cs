@@ -4,7 +4,7 @@ namespace Infrastructure
 {
     public class ParsedDictionaryDefinitionManager : DataManagerBase
     {
-        public ParsedDictionaryDefinitionManager(LinguineDbContextFactory dbf) : base(dbf)
+        public ParsedDictionaryDefinitionManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
@@ -40,10 +40,8 @@ namespace Infrastructure
             }
         }
 
-        public void AddSet(HashSet<ParsedDictionaryDefinition> definitions)
+        public void AddSet(HashSet<ParsedDictionaryDefinition> definitions, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             foreach (var def in definitions)
             {
                 Add(def, context, false);

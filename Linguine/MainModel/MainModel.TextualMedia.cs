@@ -16,7 +16,7 @@ namespace Linguine
         {
             get
             {
-                using var context = LinguineFactory.CreateDbContext();
+                using var context = ReadonlyLinguineFactory.CreateDbContext();
                 return TextualMediaManager.AvailableTextualMediaNames(context);
             }
         }
@@ -92,6 +92,8 @@ namespace Linguine
 
         internal async Task<string> GetStatementTranslationText(Statement statement)
         {
+            using var context = LinguineFactory.CreateDbContext();
+
             // check for existing translations in the database
             LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
             List<StatementTranslation> existing = StatementManager.GetTranslations(statement, native);
@@ -110,7 +112,7 @@ namespace Linguine
 
             if (generated is not null) 
             {
-                StatementManager.AddTranslation(generated);
+                StatementManager.AddTranslation(generated, context);
             }
 
             if (generated is null)
@@ -130,6 +132,9 @@ namespace Linguine
 
         internal async Task<List<Tuple<int, string>>> GetExistingDefinitionKeysAndTexts(string rootedWordText)
         {
+            using var context = LinguineFactory.CreateDbContext(); // not thread safe so make a new one here
+            
+
             // TODO - maybe play around with the casing here??
             List<DictionaryDefinition> defs = DictionaryDefinitionManager.TryGetDefinition(rootedWordText);
 
@@ -163,6 +168,7 @@ namespace Linguine
 
             // get the parsed definition for those that were not parsed
 
+
             if (toParseNow.Count > 0)
             {
                 if (DefinitionParser is null)
@@ -172,7 +178,7 @@ namespace Linguine
                 HashSet<ParsedDictionaryDefinition> newParsed = await DefinitionParser
                     .ParseStatementsDefinitions(toParseNow, lvl, native);
 
-                ParsedDictionaryDefinitionManager.AddSet(newParsed);
+                ParsedDictionaryDefinitionManager.AddSet(newParsed, context);
 
                 pdefs.AddRange(newParsed);
             }
@@ -188,7 +194,7 @@ namespace Linguine
 
             List<Tuple<String, String>> pronunciations = await Pronouncer.GetDefinitionPronunciations(withoutPronunciations);
 
-            using var context = _linguineDbContextFactory.CreateDbContext();
+
             context.ChangeTracker.Clear();
 
             for (int i = 0; i != pronunciations.Count; i++)
@@ -199,7 +205,7 @@ namespace Linguine
                 def.RomanisedPronuncation = pronunciations[i].Item2;
 
                 context.Update(def);
-                await context.SaveChangesAsync();
+                context.SaveChanges();
 
                 context.ChangeTracker.Clear();
             }

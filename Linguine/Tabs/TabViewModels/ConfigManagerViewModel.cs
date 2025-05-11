@@ -185,7 +185,8 @@ namespace Linguine.Tabs
                 DictionaryDefinitionManager manager = _model.DictionaryDefinitionManager;
                 try
                 {
-                    manager.AddDictionaryFromCSV(filename); // TODO - return message rather than throw for duplicates??
+                    using var context = _model.LinguineFactory.CreateDbContext(); // TODO - push this down to model method?
+                    manager.AddDictionaryFromCSV(filename, context); // TODO - return message rather than throw for duplicates??
                 }
                 catch (Exception e)
                 {

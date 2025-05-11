@@ -4,14 +4,14 @@ namespace Infrastructure
 {
     public class DictionaryDefinitionManager : DataManagerBase
     {
-        public DictionaryDefinitionManager(LinguineDbContextFactory db) : base(db)
+        public DictionaryDefinitionManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
         {
         }
 
         #region adding from csv
-        public void AddDictionaryFromCSV(String filename)
+        public void AddDictionaryFromCSV(String filename, LinguineDbContext context)
         {
-            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(this, filename);
+            ExternalDictionaryCSVParser.ParseDictionaryFromCSVToSQLiteAndSave(this, filename, context);
 
             VerifyIntegrity();
         }
@@ -78,10 +78,8 @@ namespace Infrastructure
             return true;
         }
 
-        internal bool Add(List<DictionaryDefinition> definitions)
+        internal bool Add(List<DictionaryDefinition> definitions, LinguineDbContext context)
         {
-            using var context = _dbf.CreateDbContext();
-
             foreach (var def in definitions)
             {
                 Add(def, context, false);
