@@ -3,11 +3,11 @@ namespace Infrastructure
 {
     public class DataManagerBase
     {
-        protected LinguineDbContextFactory _dbf;
+        protected LinguineReadonlyDbContextFactory _dbf;
 
 
          // keep this ABC, but somehow get a way to give it a readonly context factory??
-        public DataManagerBase(LinguineDbContextFactory dbf)
+        public DataManagerBase(LinguineReadonlyDbContextFactory dbf)
         {
             _dbf = dbf;
         }

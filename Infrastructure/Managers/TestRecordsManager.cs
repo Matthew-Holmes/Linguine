@@ -6,9 +6,6 @@ namespace Infrastructure
     public class TestRecordsManager : DataManagerBase
     {
         public TestRecordsManager(LinguineReadonlyDbContextFactory dbf) : base(dbf)
-        private LinguineDbContextFactory _dbf;
-
-        public TestRecordsManager(LinguineDbContextFactory dbf)
         {
         }
 
