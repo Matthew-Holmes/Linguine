@@ -21,7 +21,7 @@ namespace Learning
         public static IDefinitionLearningService BuildDLS(
             FrequencyData freqData, List<TestRecord> allRecords, CancellationTokenSource cts)
         {
-            List<List<TestRecord>>    sessions  = LearningTacticsHelper.GetSessions(allRecords);
+            List<List<TestRecord>>     sessions = LearningTacticsHelper.GetSessions(allRecords);
             List<DictionaryDefinition> distinct = DistinctDefinitionTested(allRecords);
 
 

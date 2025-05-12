@@ -13,15 +13,15 @@ namespace Infrastructure
 
     public record FrequencyData(FrequencyMap freqs, ZipfMap zipfs, double zipfLo, double zipfHi);
 
-    public static class DefinitionFrequencyEngine
+    public class DefinitionFrequencyEngine : IDefinitionFrequencyEngine
     {
-        public static FrequencyMap?       DefinitionFrequencies       { get; private set; }
-        public static FrequencyBucketMap? SortedDefinitionFrequencies { get; private set; }
-        public static ZipfMap?            DefinitionZipfScores        { get; private set; }
-        public static double              ZipfLo                      { get; private set; }
-        public static double              ZipfHi                      { get; private set; }
+        public FrequencyMap?       DefinitionFrequencies       { get; private set; }
+        public FrequencyBucketMap? SortedDefinitionFrequencies { get; private set; }
+        public ZipfMap?            DefinitionZipfScores        { get; private set; }
+        public double              ZipfLo                      { get; private set; }
+        public double              ZipfHi                      { get; private set; }
 
-        public static FrequencyData? FrequencyData
+        private FrequencyData? FrequencyData
         {
             get 
             {
@@ -35,7 +35,7 @@ namespace Infrastructure
         }
 
 
-        public static void UpdateDefinitionFrequencies(LinguineDbContext context)
+        public FrequencyData? ComputeFrequencyData(LinguineReadonlyDbContext context)
         {
             // basic frequencies
 
@@ -43,7 +43,7 @@ namespace Infrastructure
             {
                 DefinitionFrequencies = new Dictionary<DefinitionId, Frequency>().AsReadOnly();
                 SortedDefinitionFrequencies = new Dictionary<Frequency, HashSet<DefinitionId>>().AsReadOnly();
-                return;
+                return null;
             }
 
             var frequencyTable = context.DictionaryDefinitions
@@ -91,7 +91,7 @@ namespace Infrastructure
             {
                 DefinitionZipfScores = frequencyTable.Keys.ToDictionary(id => id, _ => 0.0).AsReadOnly();
                 Log.Error("total frequency zero when computing Zipf scores!");
-                return;
+                return null;
             }
 
             // TODO - as outlined in notebooks, this falls victim to survivorship bias
@@ -124,11 +124,13 @@ namespace Infrastructure
             }
 
             DefinitionZipfScores = zipfScores.AsReadOnly();
+
+            return FrequencyData;
         }
 
 
 
-        public static void SaveDefinitionFrequenciesToCsv(LinguineDbContext context, string filePath)
+        public void SaveDefinitionFrequenciesToCsv(LinguineDbContext context, string filePath)
         {
             var frequencyTable = context.StatementDefinitions
                 .Include(s => s.DictionaryDefinition) // Eager load definitions
@@ -156,7 +158,7 @@ namespace Infrastructure
             }
         }
 
-        private static string EscapeCsv(string input)
+        private string EscapeCsv(string input)
         {
             if (input.Contains(",") || input.Contains("\"") || input.Contains("\n"))
             {
