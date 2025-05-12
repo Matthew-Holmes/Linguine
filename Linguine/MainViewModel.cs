@@ -17,6 +17,7 @@ namespace Linguine
     {
         private UIComponents _UIcomponents;
         private MainModel? _model;
+        private bool tabButtonsEnabled;
         private readonly SynchronizationContext _syncContext;
 
         public ObservableCollection<TabViewModelBase> Tabs { get; private set; } 
@@ -147,6 +148,8 @@ namespace Linguine
             OpenTestLearningTabCommand =
                 new RelayCommand(() => AddUniquely<TestLearningLaunchpadViewModel>(_UIcomponents, Model, this));
 
+            TabButtonsEnabled = true;
+
             OnPropertyChanged(nameof(OpenHomeTabCommand));
             OnPropertyChanged(nameof(OpenTextualMediaViewerTabCommand));
             OnPropertyChanged(nameof(OpenConfigManagerTabCommand));
@@ -164,6 +167,18 @@ namespace Linguine
         public ICommand? OpenConfigManagerTabCommand { get; private set; }
         public ICommand? OpenTextualMediaViewerTabCommand { get; private set; }
         public ICommand? OpenTestLearningTabCommand { get; private set; }
+
+
+        public bool TabButtonsEnabled
+        {
+            // TODO - cascaded startup as services come online??
+            get => tabButtonsEnabled;
+            private set 
+            { 
+                tabButtonsEnabled = value;
+                OnPropertyChanged(nameof(TabButtonsEnabled));
+            }
+        }
         #endregion
 
         #region tab opening
