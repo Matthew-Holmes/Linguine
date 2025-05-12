@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Linguine.ServiceManager.Sketches
+namespace Linguine.Sketches
 {
     // some ideas for when the manual state/dependency checking becomes a handful
 
