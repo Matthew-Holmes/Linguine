@@ -25,6 +25,6 @@ namespace Infrastructure
         public int StatementKey { get; set; }
         public StatementDatabaseEntry StatementDatabaseEntry { get; set; }
 
-        public EntryMethod WasManuallyEntered { get; set; } = EntryMethod.Machine;
+        public EntryMethod EntryMethod { get; set; } = EntryMethod.Machine;
     }
 }
