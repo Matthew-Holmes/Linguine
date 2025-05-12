@@ -201,7 +201,18 @@ namespace Linguine.Tabs
 
         private void WrongDefinition()
         {
-            throw new NotImplementedException();
+            if (SelectedStatement is null)
+            {
+                _uiComponents.CanMessage.Show("failed to find surrounding statement for definition");
+                return;
+            }
+
+            if (SelectedUnitIndex == -1)
+            {
+                _uiComponents.CanMessage.Show("failed to located definition in statement");
+            }
+
+            _parent.BeginDefinitionResolution(SelectedStatement, SelectedUnitIndex);
         }
 
         private void ResolveSelectedDefinition()

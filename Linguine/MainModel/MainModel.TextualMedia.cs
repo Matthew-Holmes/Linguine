@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using LearningExtraction;
 using Serilog;
+using System.Windows.Forms;
 
 namespace Linguine
 {
@@ -211,12 +212,6 @@ namespace Linguine
                 throw new NotImplementedException("need to implement this for multi level decompositions");
             }
 
-            if (statement.RootedDecomposition.Decomposition[defIndex].Definition is not null)
-            {
-                Log.Error("trying to resolve a definition we already know");
-                throw new Exception("already have a definition");
-            }
-
             int? statementID = statement.ID;
 
             if (statementID is null)
@@ -226,16 +221,56 @@ namespace Linguine
 
             int statementKey = (int)statementID;
 
+            using var context = LinguineFactory.CreateDbContext();
+
+            StatementDefinitionNode? existing = context.StatementDefinitions
+                .Where(sd => sd.CurrentLevel == 1)
+                .Where(sd => sd.IndexAtCurrentLevel == defIndex)
+                .Where(sd => sd.StatementKey == statementKey)
+                .FirstOrDefault();
+
+            EntryMethod method = EntryMethod.User;
+
+            if (existing is not null)
+            {
+                if (existing.DefinitionKey == selectedDefKey)
+                {
+                    Log.Information("same definition selected, not changing the database");
+                    return true;
+                }
+
+                switch (existing.EntryMethod)
+                {
+                    case EntryMethod.User:
+                        method = EntryMethod.UserOverwriteUser;
+                        break;
+                    case EntryMethod.Machine:
+                        method = EntryMethod.UserOverwriteMachine;
+                        break;
+                    case EntryMethod.UserOverwriteUser:
+                        method = EntryMethod.UserOverwriteUser;
+                        break;
+                    case EntryMethod.UserOverwriteMachine:
+                        method = EntryMethod.UserOverwriteUser;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                Log.Information("removing old definition");
+                context.Remove(existing);
+            }
+
+
             StatementDefinitionNode toAdd = new StatementDefinitionNode
             {
                 CurrentLevel         = 1,
                 IndexAtCurrentLevel  = defIndex,
                 DefinitionKey        = def.DatabasePrimaryKey,
                 StatementKey         = statementKey,
-                EntryMethod   = EntryMethod.User,
+                EntryMethod          = method,
             };
 
-            using var context = _linguineDbContextFactory.CreateDbContext();
 
             context.Add(toAdd);
             context.SaveChanges();
