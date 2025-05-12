@@ -24,15 +24,9 @@ namespace Learning
             // adaptive binning approach to get good coverage
             int chosenId;
 
-            if (DefinitionFrequencyEngine.DefinitionZipfScores is null)
-            {
-                Log.Error("need to compute the definition Zipf scores");
-                throw new Exception();
-            }
-
             IReadOnlyDictionary<int, TestRecord> latest = LatestTestRecords(AllRecords);
 
-            IReadOnlyDictionary<int, double> zipfScores = DefinitionFrequencyEngine.DefinitionZipfScores;
+            IReadOnlyDictionary<int, double> zipfScores = Frequencies.zipfs;
 
             if (zipfScores == null || zipfScores.Count == 0)
             {
@@ -40,9 +34,8 @@ namespace Learning
                 throw new Exception();
             }
 
-
-            double minZipf = DefinitionFrequencyEngine.ZipfLo;
-            double maxZipf = DefinitionFrequencyEngine.ZipfHi;
+            double minZipf = Frequencies.zipfLo;
+            double maxZipf = Frequencies.zipfHi;
 
             double binWidth = (maxZipf - minZipf) / _zipfBinCount;
 
@@ -94,12 +87,6 @@ namespace Learning
                 {
                     ret = GetFrequentDefinition(1);
                     cnt++;
-                    if (cnt > _minWordsTested)
-                    {
-                        Log.Warning("couldn't find a definition to test, even though we should have enough data");
-                        ret = -1;
-                        break;
-                    }
                 }
 
                 Log.Information("took {count} cycles to find a unseen word", cnt);

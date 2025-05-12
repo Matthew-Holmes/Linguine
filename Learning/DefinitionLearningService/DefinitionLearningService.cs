@@ -27,15 +27,12 @@ namespace Learning
             return Tactician.GetBestDefID();
         }
 
+        // TODO - decide what to do here
+
         public int GetFrequentDefinition(int freq = 5)
         {
-            if (DefinitionFrequencyEngine.DefinitionFrequencies is null)
-            {
-                Log.Error("need to compute the definition frequencies!");
-                throw new Exception();
-            }
 
-            var eligibleKeys = DefinitionFrequencyEngine.DefinitionFrequencies
+            var eligibleKeys = Frequencies.freqs
                 .Where(kvp => kvp.Value > freq) 
                 .Select(kvp => kvp.Key)
                 .ToList();

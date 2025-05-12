@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Linguine
 {
-    internal partial class ServiceManager
+    public partial class ServiceManager
     {
 
         private LinguineReadonlyDbContextFactory DBF { get; init; }

@@ -39,7 +39,7 @@ namespace Linguine
         public EngineState PronouncerState { get; set; } = EngineState.NotYetStarted;
         
         public ICanResolveDefinitions? DefinitionResolver { get; set; }
-        public EngineState DefinitionResolverState { get; set; } = EngineState.NotYetStarted
+        public EngineState DefinitionResolverState { get; set; } = EngineState.NotYetStarted;
     }
 
     partial class ServiceManager

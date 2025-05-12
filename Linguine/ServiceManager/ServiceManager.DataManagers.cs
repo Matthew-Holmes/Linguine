@@ -44,6 +44,8 @@ namespace Linguine
         private int _minWordsProcessed = 300;
         private int _minWordsTested    = 50;
 
+        public int VocabTestWordCount => _minWordsTested;
+
         // TODO - callbacks when these change??
         public DataManagersState ManagerState { get; private set; } = DataManagersState.NoDatabaseYet;
         public DataQuality       DataQuality  { get; private set; } = DataQuality.NeedManagers;  

@@ -279,7 +279,7 @@ namespace Linguine
                     definitions, level, native);
 
             HashSet<ParsedDictionaryDefinition> parsedDefinitions = 
-                await DefinitionParser.ParseStatementsDefinitions(
+                await SM.Engines.DefinitionParser.ParseStatementsDefinitions(
                     newDefinitionsSet, level, native);
 
             SM.Managers!.ParsedDefinitions.AddSet(parsedDefinitions, context);

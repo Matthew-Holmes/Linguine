@@ -11,7 +11,7 @@ namespace Linguine
 {
     partial class MainModel
     {
-        public int? VocabTestWordCount => SM.Services.DefLearning.VocabTestWordCount;
+        public int? VocabTestWordCount => SM.VocabTestWordCount;
 
         public Tuple<double[], double[]> GetPKnownByBinnedZipf()
         {

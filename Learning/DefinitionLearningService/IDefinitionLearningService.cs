@@ -13,8 +13,6 @@ namespace Learning
         public int GetHighLearningDefinitionID();
         public int GetFrequentDefinition(int freq = 5);
         public int GetInitialVocabEstimationDefinition();
-        public DLSRequirements RequirementsMet();
-        public int VocabTestWordCount { get; }
         public Tuple<double[], double[]>? GetPKnownByBinnedZipf();
 
     }

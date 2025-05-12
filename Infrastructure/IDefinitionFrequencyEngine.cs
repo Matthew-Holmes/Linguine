@@ -11,5 +11,7 @@ namespace Infrastructure
     {
         public FrequencyData ComputeFrequencyData(LinguineReadonlyDbContext context);
 
+        // TODO - some sort of caching here??
+
     }
 }
