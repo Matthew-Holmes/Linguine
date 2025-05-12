@@ -47,8 +47,6 @@ namespace Linguine
 
                 SM.Initialise();
 
-                StartDefinitionLearningService();
-
                 Loaded?.Invoke(this, EventArgs.Empty);
 
             }

@@ -18,13 +18,7 @@ namespace Linguine
     public partial class MainModel
     {
         // TODO - put these in the engines part of ServiceManager?
-        private ICanAnalyseText?        TextAnalyser     { get; set; }
 
-        private ICanParseDefinitions?   DefinitionParser { get; set; }
-
-        private ICanPronounce?          Pronouncer       { get; set; }
-
-        private ICanResolveDefinitions? DefinitionResolver { get; set; }
 
         private int CharsToProcess { get; set; } = 1_000;
 
@@ -226,18 +220,6 @@ namespace Linguine
         {
             using var context = LinguineFactory.CreateDbContext();
 
-
-            if (Pronouncer is null)
-            {
-                StartPronunciationEngine();
-            }
-
-            if (Pronouncer is null)
-            {
-                Log.Fatal("Couldn't start pronunciation engine!");
-                throw new Exception("failed to start pronunciation engine");
-            }
-
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
 
 
@@ -249,7 +231,7 @@ namespace Linguine
                 return;
             }
 
-            List<Tuple<String, String>> pronunciations = await Pronouncer.GetDefinitionPronunciations(newDefinitionsList);
+            List<Tuple<String, String>> pronunciations = await SM.Engines.Pronouncer.GetDefinitionPronunciations(newDefinitionsList);
 
             context.ChangeTracker.Clear();
 
@@ -286,17 +268,6 @@ namespace Linguine
         private async Task ParseDefinitions(List<Statement> statements)
         {
             using var context = LinguineFactory.CreateDbContext();
-
-            if (DefinitionParser is null)
-            {
-                StartParsingEngine();
-            }
-            
-            if (DefinitionParser is null)
-            {
-                Log.Fatal("Couldn't start parsing engine!");
-                throw new Exception("failed to start parsing engine");
-            }
 
             HashSet<DictionaryDefinition> definitions = StatementManager.GetAllUniqueDefinitions(statements);
 
@@ -342,63 +313,18 @@ namespace Linguine
 
         private async Task<List<ProtoStatement>?> DoProcessingStep(String text, List<String> context, bool isTail, CancellationToken token)
         {
-            if (TextAnalyser is null)
-            {
-                StartStatementEngine();
-            }
-
-            if (TextAnalyser is null)
-            {
-                Log.Fatal("couldn't start statement engine");
-                throw new Exception("couldn't start statement engine");
-            }
 
             if (token.IsCancellationRequested)
             {
                 return null;
             }
 
-            List<ProtoStatement>? protos = await TextAnalyser.GenerateStatementsFor(text, context, isTail, token);
+            List<ProtoStatement>? protos = await SM.Engines.TextAnalyser.GenerateStatementsFor(text, context, isTail, token);
 
             return protos;
 
         }
 
-        // TODO - extract engines to service managers
-
-        private void StartStatementEngine()
-        {
-            if (SM.DataQuality == DataQuality.NeedDictionary)
-            {
-                throw new Exception("no dictionary!");
-            }
-            else
-            {
-                APIKeysConfig keys = ConfigManager.Config.APIKeys;
-
-                if (SM.ManagerState != DataManagersState.Initialised)
-                {
-                    throw new Exception("Managers not initialised yet!");
-                }
-
-                TextAnalyser = StatementEngineFactory.BuildStatementEngine(SM.Managers!.Definitions);
-            }
-        }
-
-        private void StartParsingEngine()
-        {
-            DefinitionParser = DefinitionParserFactory.BuildParsingEngine();
-        }
-
-        private void StartPronunciationEngine()
-        {
-            Pronouncer = DefinitionPronouncerFactory.BuildPronunciationEngine();
-        }
-
-        private void StartDefinitionResolutionEngine()
-        {
-            DefinitionResolver = InteractiveDefinitionResolutionEngineFactory.BuildDefinitionResolutionEngine();
-        }
 
         private List<String> GetPreviousContext(TextualMedia tm)
         {

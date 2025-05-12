@@ -11,7 +11,7 @@ namespace Linguine
 {
     partial class MainModel
     {
-        public int? VocabTestWordCount => DefLearningService?.VocabTestWordCount ?? null;
+        public int? VocabTestWordCount => SM.Services.DefLearning.VocabTestWordCount;
 
         public Tuple<double[], double[]> GetPKnownByBinnedZipf()
         {
@@ -35,7 +35,7 @@ namespace Linguine
 
             // TODO - where should def learning service go, engines??
 
-            return DefLearningService.GetPKnownByBinnedZipf();
+            return SM.Services.DefLearning.GetPKnownByBinnedZipf();
         }
 
         public int DistinctWordsTested

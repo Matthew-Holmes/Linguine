@@ -22,14 +22,17 @@ namespace Linguine
 
 
     // TODO - un-extract ToTestFromKey
+
+    // TODO - spin up the definition learning service after going to learning launchpad tab
+
     partial class MainModel
     {
         #region get definition methods
         public DefinitionForTesting GetHighLearningDefinition()
         {
-            int defId = DefLearningService.GetHighLearningDefinitionID();
+            int defId = SM.Services.DefLearning.GetHighLearningDefinitionID();
 
-            if (lastNcorrect > 10) { defId = DefLearningService.GetFrequentDefinition(1); } // edge case not giving amything hard
+            if (lastNcorrect > 10) { defId = SM.Services.DefLearning.GetFrequentDefinition(1); } // edge case not giving amything hard
             
             DictionaryDefinition toTest = ToTestFromKey(defId);
 
@@ -49,7 +52,7 @@ namespace Linguine
 
         public DefinitionForTesting GetRandomDefinition(int freq = 5)
         {
-            int toTestKey = DefLearningService.GetFrequentDefinition(freq);
+            int toTestKey = SM.Services.DefLearning.GetFrequentDefinition(freq);
 
             DictionaryDefinition toTest = ToTestFromKey(toTestKey);
 
@@ -59,7 +62,7 @@ namespace Linguine
 
         public DefinitionForTesting GetHighInformationDefinition()
         {
-            int toTestKey = DefLearningService.GetInitialVocabEstimationDefinition();
+            int toTestKey = SM.Services.DefLearning.GetInitialVocabEstimationDefinition();
 
             DictionaryDefinition toTest = ToTestFromKey(toTestKey);
 
@@ -205,7 +208,7 @@ namespace Linguine
 
             if (added.Correct) { lastNcorrect++; } else { lastNcorrect = 0; }
 
-            DefLearningService.Inform(added);
+            SM.Services.DefLearning.Inform(added);
         }
         #endregion
     }

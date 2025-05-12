@@ -79,13 +79,7 @@ namespace Linguine
                 throw new Exception("requires an existing referece translation"); // TODO - fix the architecture so don't need this
             }
 
-            if (DefinitionResolver is null)
-            {
-                StartDefinitionResolutionEngine();
-                
-            }
-
-            InitialDefinitionAnalyis ida = await DefinitionResolver.GetInitialAnalysis(existing.First(), defIndex, native);
+            InitialDefinitionAnalyis ida = await SM.Engines.DefinitionResolver.GetInitialAnalysis(existing.First(), defIndex, native);
 
             return ida.wordBestTranslation; // TODO - flesh this out with more
         }
@@ -103,12 +97,7 @@ namespace Linguine
                 return existing.First().Translation;
             }
 
-            if (DefinitionResolver is null)
-            {
-                StartDefinitionResolutionEngine();
-            }
-
-            StatementTranslation? generated = await DefinitionResolver.GetTranslation(statement);
+            StatementTranslation? generated = await SM.Engines.DefinitionResolver.GetTranslation(statement);
 
             if (generated is not null) 
             {
@@ -170,11 +159,8 @@ namespace Linguine
 
             if (toParseNow.Count > 0)
             {
-                if (DefinitionParser is null)
-                {
-                    StartParsingEngine();
-                }
-                HashSet<ParsedDictionaryDefinition> newParsed = await DefinitionParser
+
+                HashSet<ParsedDictionaryDefinition> newParsed = await SM.Engines.DefinitionParser
                     .ParseStatementsDefinitions(toParseNow, lvl, native);
 
                 SM.Managers!.ParsedDefinitions.AddSet(newParsed, context);
@@ -186,12 +172,7 @@ namespace Linguine
 
             List<DictionaryDefinition> withoutPronunciations = defs.Where(def => def.RomanisedPronuncation is null).ToList();
 
-            if (Pronouncer is null)
-            {
-                StartPronunciationEngine();
-            }
-
-            List<Tuple<String, String>> pronunciations = await Pronouncer.GetDefinitionPronunciations(withoutPronunciations);
+            List<Tuple<String, String>> pronunciations = await SM.Engines.Pronouncer.GetDefinitionPronunciations(withoutPronunciations);
 
 
             context.ChangeTracker.Clear();
