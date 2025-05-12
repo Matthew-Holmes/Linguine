@@ -40,11 +40,17 @@
                             Command="{Binding ResolveSelectedDefinitionCommand}"
                             Visibility="{Binding ShowResolveDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
                             Width="120"/>
+                    <Button Content="Wrong Definition"
+                            Command="{Binding WrongDefinitionCommand}"
+                            Visibility="{Binding ShowWrongDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Width="100"
+                            Margin="5,20,5,5"/>
                     <Button Content="Repair Definition"
                             Command="{Binding RepairSelectedDefinitionCommand}"
                             Visibility="{Binding ShowRepairDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
                             Width="100"
-                            Margin="5,50,5,5"/>
+                            Margin="5,20,5,5"/>
+
                 </StackPanel>
                 <!-- <ListBox ItemsSource="{Binding SelectedUnitContextInfo}"/> /-->
             </ScrollViewer>

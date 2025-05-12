@@ -6,6 +6,7 @@ using System.Windows.Input;
 using UserInputInterfaces;
 using DataClasses;
 using System.Windows.Forms;
+using System.Security.RightsManagement;
 
 namespace Linguine.Tabs
 {
@@ -60,9 +61,11 @@ namespace Linguine.Tabs
 
         private bool _showResolveDefinitionButton = false;
         private bool _showRepairDefinitionButton  = false;
+        private bool _showWrongDefinitionButton;
 
         public ICommand ResolveSelectedDefinitionCommand { get; init; }
         public ICommand RepairSelectedDefinitionCommand  { get; init; }
+        public ICommand WrongDefinitionCommand           { get; init; }
 
         // right hand pane unit properties
         public String SelectedUnitText
@@ -145,6 +148,16 @@ namespace Linguine.Tabs
             }
         }
 
+        public bool ShowWrongDefinitionButton
+        {
+            get => _showWrongDefinitionButton;
+            private set
+            {
+                _showWrongDefinitionButton = value;
+                OnPropertyChanged(nameof(ShowWrongDefinitionButton));
+            }
+        }
+
         public bool ShowSaveWordButton
         {
             get => _showSaveWordButton;
@@ -183,6 +196,12 @@ namespace Linguine.Tabs
             
             RepairSelectedDefinitionCommand  = new RelayCommand(() => RepairSelectedDefinition());
             ResolveSelectedDefinitionCommand = new RelayCommand(() => ResolveSelectedDefinition());
+            WrongDefinitionCommand           = new RelayCommand(() => WrongDefinition());
+        }
+
+        private void WrongDefinition()
+        {
+            throw new NotImplementedException();
         }
 
         private void ResolveSelectedDefinition()
@@ -274,6 +293,7 @@ namespace Linguine.Tabs
             {
                 ShowResolveDefinitionButton = true;
                 ShowRepairDefinitionButton  = false;
+                ShowWrongDefinitionButton   = false;
 
                 ShowSaveWordButton = false;
                 SelectedUnitParsedDefinitionText = "";
@@ -283,6 +303,7 @@ namespace Linguine.Tabs
             {
                 ShowResolveDefinitionButton = false;
                 ShowRepairDefinitionButton  = true;
+                ShowWrongDefinitionButton   = true;
 
                 ShowSaveWordButton = true;
                 SelectedUnitParsedDefinitionText = _model.GetParsedDictionaryDefinition(SelectedUnitDefinition)?.ParsedDefinition
