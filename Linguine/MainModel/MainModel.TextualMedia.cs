@@ -232,7 +232,7 @@ namespace Linguine
                 IndexAtCurrentLevel  = defIndex,
                 DefinitionKey        = def.DatabasePrimaryKey,
                 StatementKey         = statementKey,
-                WasManuallyEntered   = true,
+                WasManuallyEntered   = EntryMethod.User,
             };
 
             using var context = _linguineDbContextFactory.CreateDbContext();

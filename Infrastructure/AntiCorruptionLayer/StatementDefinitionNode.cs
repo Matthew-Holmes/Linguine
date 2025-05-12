@@ -3,6 +3,14 @@ using DataClasses;
 
 namespace Infrastructure
 {
+    public enum EntryMethod
+    {
+        Machine = 0,
+        User = 1,
+        UserOverwriteMachine = 2,
+        UserOverwriteUser = 3
+    }
+
     public class StatementDefinitionNode
     {
         [Key]
@@ -17,6 +25,6 @@ namespace Infrastructure
         public int StatementKey { get; set; }
         public StatementDatabaseEntry StatementDatabaseEntry { get; set; }
 
-        public bool WasManuallyEntered { get; set; } = false;
+        public EntryMethod WasManuallyEntered { get; set; } = EntryMethod.Machine;
     }
 }
