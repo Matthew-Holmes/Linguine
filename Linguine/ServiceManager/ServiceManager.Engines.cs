@@ -33,15 +33,17 @@ namespace Linguine
 
         public void StartDefinitionFrequencyEngine()
         {
-            if (Engines.DefFrequenciesState is not EngineState.NotYetStarted)
-            {
-                throw new Exception("already started, should be using restart");
-            }
 
             if (Engines.DefFrequenciesState is EngineState.Building)
             {
                 return;
             }
+
+            if (Engines.DefFrequenciesState is not EngineState.NotYetStarted)
+            {
+                throw new Exception("already started, should be using restart");
+            }
+
 
             Engines.DefFrequenciesState = EngineState.Building;
 
