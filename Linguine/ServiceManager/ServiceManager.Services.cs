@@ -41,7 +41,7 @@ namespace Linguine
 
         public void InitialiseServices()
         {
-            //IDefinitionLearningService dl = DefinitionLearningServiceFactory.BuildDLS();
+            StartDefinitionLearningService();
         }
 
         internal void StartDefinitionLearningService()
