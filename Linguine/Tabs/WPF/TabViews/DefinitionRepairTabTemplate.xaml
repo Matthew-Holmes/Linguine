@@ -9,8 +9,104 @@
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <local:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter"/>
             <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter"/>
+            <local:EditMethodToBackgroundConverter x:Key="EditMethodToBackgroundConverter"/>
         </DataTemplate.Resources>
         <Grid>
+            <StackPanel Orientation="Vertical">
+
+                <TextBlock Text="{Binding Word}" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"    x:Name="Key"/>
+                        <ColumnDefinition Width="2*"   x:Name="Value"/>
+                        <ColumnDefinition Width="0.33*" x:Name="RegenButton"/>
+                        <ColumnDefinition Width="0.33*" x:Name="CustomValueButton"/>
+                        <ColumnDefinition Width="2*"   x:Name="Pad"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" x:Name="CoreDefinition"/>
+                        <RowDefinition Height="auto" x:Name="ParsedDefinition"/>
+                        <RowDefinition Height="auto" x:Name="IPA"/>
+                        <RowDefinition Height="auto" x:Name="Romanised"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Core Definition -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Definition:" VerticalAlignment="Center" Margin="5"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                       Text="{Binding DefinitionCoreText}" 
+                       Background="{Binding CoredDefinitionChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="5"/>
+
+                    <Button Grid.Row="0" Grid.Column="2" Width="30" Height="30"
+                    Content="↺" FontSize="16"
+                    Command="{Binding MachineRefreshCoreDefinitionCommand}"/>
+
+                    <Button Grid.Row="0" Grid.Column="3" Width="30" Height="30"
+                    Command="{Binding UserRefreshCoreDefinitionCommand}">
+                        <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
+                    </Button>
+
+                    <!-- Parsed Definition -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Parsed:" VerticalAlignment="Center" Margin="5"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                       Text="{Binding ParsedDefinitionText}"
+                       Background="{Binding ParsedDefinitionChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"
+                       Margin="5"/>
+
+                    <Button Grid.Row="1" Grid.Column="2" Width="30" Height="30"
+                    Content="↺" FontSize="16"
+                    Command="{Binding MachineRefreshParsedDefinitionCommand}"/>
+
+                    <Button Grid.Row="1" Grid.Column="3" Width="30" Height="30"
+                    Command="{Binding UserRefreshParsedDefinitionCommand}">
+                        <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
+                    </Button>
+
+                    <!-- IPA Pronunciation -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="IPA:" VerticalAlignment="Center" Margin="5"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1"
+                       Text="{Binding IpaPronunciation}"
+                       Background="{Binding IpaChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="5"/>
+
+                    <Button Grid.Row="2" Grid.Column="2" Width="30" Height="30"
+                    Content="↺" FontSize="16"
+                    Command="{Binding MachineRefreshIpaCommand}"/>
+
+                    <Button Grid.Row="2" Grid.Column="3" Width="30" Height="30"
+                    Command="{Binding UserRefreshIpaCommand}">
+                        <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
+                    </Button>
+
+                    <!-- Romanised Pronunciation -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Romanised:" VerticalAlignment="Center" Margin="5"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1"
+                       Text="{Binding RomanisedPronunciation}"
+                       Background="{Binding RomanisedChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="5"/>
+
+                    <Button Grid.Row="3" Grid.Column="2" Width="30" Height="30"
+                    Content="↺" FontSize="16"
+                    Command="{Binding MachineRefreshRomanisedCommand}"/>
+
+                    <Button Grid.Row="3" Grid.Column="3" Width="30" Height="30"
+                    Command="{Binding UserRefreshRomanisedCommand}">
+                        <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
+                    </Button>
+
+                </Grid>
+            </StackPanel>
         </Grid>
+
     </DataTemplate>
 </ResourceDictionary>
