@@ -64,6 +64,7 @@ namespace LearningExtraction
 
             foreach (DictionaryDefinition definition in newDefinitions)
             {
+                // TODO - use localised versions for these
                 StringBuilder builder = new StringBuilder();
                 builder.Append("word: ");
                 builder.Append(definition.Word);
