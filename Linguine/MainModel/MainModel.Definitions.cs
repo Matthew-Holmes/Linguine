@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Linguine 
-{ 
+{
     public partial class MainModel
     {
         internal async Task<String> GenerateNewDefinition(DictionaryDefinition faulty)
@@ -23,6 +23,18 @@ namespace Linguine
             prompt.Append($"{PromptFactory.DefinitionInNative(target)}: \n {faulty.Definition}");
 
             return await agent.GetResponse(prompt.ToString());
+        }
+
+        internal async Task<ParsedDictionaryDefinition> GenerateSingleParsedDefinition(DictionaryDefinition faulty)
+        {
+            LearnerLevel lvl = ConfigManager.Config.GetLearnerLevel();
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+
+            HashSet<DictionaryDefinition> singleton = new HashSet<DictionaryDefinition> { faulty };
+
+            HashSet<ParsedDictionaryDefinition> ret = await SM.Engines.DefinitionParser.ParseStatementsDefinitions(singleton, lvl, native);
+
+            return ret.First();
         }
     }
 }
