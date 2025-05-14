@@ -13,6 +13,7 @@
         DefinitionParsing,
         DefinitionIPAPronouncing,
         DefinitionRomanisedPronouncing,
+        DefinitionRewriting,
         GeneralPurpose,
     }
 
