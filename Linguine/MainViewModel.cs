@@ -303,7 +303,12 @@ namespace Linguine
         {
             Tabs.Add(new DefinitionResolverViewModel(selectedStatement, selectedUnitIndex, _UIcomponents, _model, this));
             SelectTab(Tabs.Last());
-            // TODO - add new definition resolution tab
+        }
+
+        internal void BeginDefinitionRepair(DictionaryDefinition? selectedUnitDefinition)
+        {
+            Tabs.Add(new DefinitionRepairViewModel(selectedUnitDefinition, _UIcomponents, _model, this));
+            SelectTab(Tabs.Last());
         }
         #endregion
     }

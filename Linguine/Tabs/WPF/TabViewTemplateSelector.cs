@@ -32,6 +32,9 @@ namespace Linguine.Tabs.WPF
             if (item is Tabs.DefinitionResolverViewModel)
                 return element.FindResource("DefinitionResolverTabTemplate") as DataTemplate;
 
+            if (item is Tabs.DefinitionRepairViewModel)
+                return element.FindResource("DefinitionRepairTabTemplate") as DataTemplate;
+
             if (item is null)
                 return null;
 

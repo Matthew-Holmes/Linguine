@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Linguine.Tabs.WPF"
+                    xmlns:controls="clr-namespace:Linguine.Tabs.WPF.Controls">
+    <!-- any template like this must be referenced in App.xaml too! -->
+    <DataTemplate x:Key="DefinitionRepairTabTemplate">
+        <DataTemplate.Resources>
+            <local:HighlightConverter x:Key="HighlightConverter"/>
+            <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <local:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter"/>
+            <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter"/>
+        </DataTemplate.Resources>
+        <Grid>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

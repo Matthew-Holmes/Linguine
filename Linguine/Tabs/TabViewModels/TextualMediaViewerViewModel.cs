@@ -233,9 +233,14 @@ namespace Linguine.Tabs
 
         private void RepairSelectedDefinition()
         {
-            _uiComponents.CanMessage.Show("need to implement this");
-        }
+            if (SelectedUnitDefinition is null)
+            {
+                _uiComponents.CanMessage.Show("no definition selected!");
+                return;
+            }
 
+            _parent.BeginDefinitionRepair(SelectedUnitDefinition);
+        }
         private DictionaryDefinition? SelectedUnitDefinition { get; set; }
 
         private void SaveSelectedUnit()

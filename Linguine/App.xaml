@@ -14,6 +14,7 @@
                 <ResourceDictionary Source="Tabs/WPF/TabViews/TestLearningTabTemplate.xaml"/>
                 <ResourceDictionary Source="Tabs/WPF/TabViews/TestLearningLaunchpadTabTemplate.xaml"/>
                 <ResourceDictionary Source="Tabs/WPF/TabViews/DefinitionResolverTabTemplate.xaml"/>
+                <ResourceDictionary Source="Tabs/WPF/TabViews/DefinitionRepairTabTemplate.xaml"/>
                 <!-- Add other Resource Dictionaries as needed -->
                 <!-- Remember to update the TabViewTemplateSelector too! -->
             </ResourceDictionary.MergedDictionaries>
