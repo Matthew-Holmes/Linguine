@@ -106,6 +106,16 @@ namespace Linguine.Tabs
             }
         }
 
+        public bool ButtonsEnabled
+        {
+            get => _refreshButtonsEnabled;
+            set
+            {
+                _refreshButtonsEnabled = value;
+                OnPropertyChanged(nameof(ButtonsEnabled));
+            }
+        }
+
         #endregion
 
         #region commands
@@ -125,6 +135,7 @@ namespace Linguine.Tabs
         #endregion
 
         DictionaryDefinition faulty;
+        private bool _refreshButtonsEnabled;
 
         public DefinitionRepairViewModel(DictionaryDefinition faultyDef, UIComponents uiComponents, MainModel model, MainViewModel parent)
             : base(uiComponents, model, parent)
@@ -145,7 +156,7 @@ namespace Linguine.Tabs
             IpaChanged              = EditMethod.NotEdited;
             RomanisedChanged        = EditMethod.NotEdited;
 
-            MachineRefreshCoreDefinitionCommand = new RelayCommand(() => RefreshCoreDefinitionFromMachine());
+            MachineRefreshCoreDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshCoreDefinition));
             UserRefreshCoreDefinitionCommand    = new RelayCommand(() => PromptUserCoreDefinition());
 
             MachineRefreshParsedDefinitionCommand = new RelayCommand(() => RefreshParsedDefinitionFromMachine());
@@ -158,10 +169,14 @@ namespace Linguine.Tabs
             UserRefreshRomanisedCommand    = new RelayCommand(() => PromptUserRomanised());
         }
 
-        private void RefreshCoreDefinitionFromMachine()
+        private async Task MachineRefreshCoreDefinition()
         {
-            DefinitionCoreText = _model.GenerateNewDefinition(faulty);
+            ButtonsEnabled = false;
+
+            DefinitionCoreText = await _model.GenerateNewDefinition(faulty);
             CoredDefinitionChanged = EditMethod.MachineEdited;
+
+            ButtonsEnabled = true;
         }
 
         private void PromptUserCoreDefinition()
