@@ -30,7 +30,15 @@ namespace LearningExtraction
 
             String response = await GetResponse(agent, prompt, retry); // agent best at identifying lower --> upper, not the other way around
 
-            return TextDecomposition.FromNewLinedString(source.Total, response, trim);
+            TextDecomposition ret = TextDecomposition.FromNewLinedString(source.Total, response, trim);
+
+            if (ret.Flattened().Decomposition.Count != source.Flattened().Decomposition.Count)
+            {
+                throw new Exception("bijectivity compromised");
+                // could be because of newline weirdness (use the re-intercalate method)
+            }
+
+            return ret;
         }
 
         private static bool Bijects(String prompt, String response)

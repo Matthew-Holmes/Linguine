@@ -82,9 +82,21 @@ namespace Linguine
             TextDecomposition flatInjective = statement.InjectiveDecomposition.Flattened();
             TextDecomposition flatRooted    = statement.RootedDecomposition.Flattened();
 
+            if (flatInjective.Decomposition is null)
+            {
+                Log.Error("null injective decomposition");
+                return null;
+            }
+
+            if (flatRooted.Decomposition is null)
+            {
+                Log.Error("null rooted decomposition");
+                return null;
+            }
+
             if (flatInjective.Decomposition.Count != flatRooted.Decomposition.Count)
             {
-                throw new Exception("mismatched decompositions");
+                Log.Error("mismatched decompositions");
             }
 
             int start = 0;
