@@ -42,7 +42,11 @@ namespace Agents
 
             {AgentTask.DefinitionRomanisedPronouncing, "given the following word (definition also provided) provide a simple pronunciation, using only alphabet letters, no IPA or diacritics, only reply with the word's pronunciation, nothing else" },
 
+            {AgentTask.DefinitionRewriting, "You are an expert lexicographer, given the following word and definition, please write a new definition, the definition should avoid politicalisation and dated language, if the definition provided points to another, do not do the same, write one for this word. Reply with only the new definition" },
+
             {AgentTask.GeneralPurpose, "you are a helpful assistant for language learners" },
+
+
         };
 
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
@@ -66,6 +70,8 @@ namespace Agents
             {AgentTask.DefinitionIPAPronouncing, "étant donné le mot suivant (définition également fournie), fournissez la prononciation du mot en utilisant l'alphabet phonétique international (API), répondez uniquement avec la prononciation du mot, rien d'autre" },
 
             {AgentTask.DefinitionRomanisedPronouncing, "étant donné le mot suivant (définition également fournie), fournissez une prononciation simple du mot, n'utilisez pas l'API, répondez uniquement avec la prononciation simple du mot, rien d'autre" },
+
+            {AgentTask.DefinitionRewriting, "Vous êtes un lexicographe expert. Étant donné le mot et sa définition, veuillez rédiger une nouvelle définition. Cette définition doit éviter toute politisation et tout langage désuet. Si la définition fournie renvoie à une autre définition, n'en faites pas autant. Répondez en utilisant uniquement la nouvelle définition." },
 
             {AgentTask.GeneralPurpose, "vous êtes un assistant utile pour les apprenants de langues" },
 
@@ -92,6 +98,8 @@ namespace Agents
             {AgentTask.DefinitionIPAPronouncing, "给出以下单词（也为您提供了一个定义），使用国际音标 (IPA) 提供该单词的发音。仅回复发音，无需其他" },
 
             {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（也为你提供了一个定义）提供该单词的拼音，只用该单词的拼音回复，不用其他内容" },
+
+            {AgentTask.DefinitionRewriting, "您是一位词典编纂专家，请根据以下单词及其定义，写出一个新的定义。定义应避免政治化和过时的语言。如果现有定义指向其他定义，请勿照搬，请为该单词另写一个定义。请仅使用新的定义进行回复。" },
 
             {AgentTask.GeneralPurpose, "你是语言学习者的得力助手" },
         };
