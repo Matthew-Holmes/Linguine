@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Optimization;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Serilog;
 
 namespace Learning.Strategy
 {
@@ -55,7 +56,13 @@ namespace Learning.Strategy
             features.Add(1.0); // bias
 
             var oneHot = new double[_tacticTypeToIndex.Count];
-            oneHot[_tacticTypeToIndex[datum.sessionTacticType]] = 1;
+            if (_tacticTypeToIndex.ContainsKey(datum.sessionTacticType))
+            {
+                oneHot[_tacticTypeToIndex[datum.sessionTacticType]] = 1;
+            } else
+            {
+                Log.Error("couldn't find tactic in tactic dictionary!");
+            }
             features.AddRange(oneHot);
 
             return Vector<double>.Build.DenseOfEnumerable(features);
