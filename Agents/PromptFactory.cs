@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,6 +26,37 @@ namespace Agents
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        public static String DefinitionInNative(LanguageCode native)
+        {
+            switch (native)
+            {
+                case LanguageCode.eng:
+                    return "definition";
+                case LanguageCode.fra:
+                    return "définition";
+                case LanguageCode.zho:
+                    return "定义";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public static String WordInNative(LanguageCode native)
+        {
+            switch (native)
+            {
+                case LanguageCode.eng:
+                    return "word";
+                case LanguageCode.fra:
+                    return "mot";
+                case LanguageCode.zho:
+                    return "单词";
+                default:
+                    throw new NotImplementedException();
+            }
+
         }
     }
 }
