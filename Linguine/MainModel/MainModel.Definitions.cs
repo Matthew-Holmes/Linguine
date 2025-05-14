@@ -1,4 +1,6 @@
-﻿using DataClasses;
+﻿using Agents;
+using Config;
+using DataClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +11,18 @@ namespace Linguine
 { 
     public partial class MainModel
     {
-        internal string GenerateNewDefinition(DictionaryDefinition faulty)
+        internal async Task<String> GenerateNewDefinition(DictionaryDefinition faulty)
         {
-            throw new NotImplementedException();
+            LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
+
+            AgentBase agent = AgentFactory.GenerateProcessingAgent(AgentTask.DefinitionRewriting, target, isHighPerformance: true);
+
+            StringBuilder prompt = new StringBuilder();
+
+            prompt.Append($"{PromptFactory.WordInNative(target)}: {faulty.Word}, ");
+            prompt.Append($"{PromptFactory.DefinitionInNative(target)}: \n {faulty.Definition}");
+
+            return await agent.GetResponse(prompt.ToString());
         }
     }
 }
