@@ -7,6 +7,7 @@ using UserInputInterfaces;
 using DataClasses;
 using Linguine.Helpers;
 using System.Windows.Input;
+using Config;
 
 namespace Linguine.Tabs
 {
@@ -108,13 +109,15 @@ namespace Linguine.Tabs
 
         public bool ButtonsEnabled
         {
-            get => _refreshButtonsEnabled;
+            get => _buttonsEnabled;
             set
             {
-                _refreshButtonsEnabled = value;
+                _buttonsEnabled = value;
                 OnPropertyChanged(nameof(ButtonsEnabled));
             }
         }
+
+        public bool ShowParsing { get; init; }
 
         #endregion
 
@@ -135,7 +138,7 @@ namespace Linguine.Tabs
         #endregion
 
         DictionaryDefinition faulty;
-        private bool _refreshButtonsEnabled;
+        private bool _buttonsEnabled = true;
 
         public DefinitionRepairViewModel(DictionaryDefinition faultyDef, UIComponents uiComponents, MainModel model, MainViewModel parent)
             : base(uiComponents, model, parent)
@@ -159,7 +162,7 @@ namespace Linguine.Tabs
             MachineRefreshCoreDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshCoreDefinition));
             UserRefreshCoreDefinitionCommand    = new RelayCommand(() => PromptUserCoreDefinition());
 
-            MachineRefreshParsedDefinitionCommand = new RelayCommand(() => RefreshParsedDefinitionFromMachine());
+            MachineRefreshParsedDefinitionCommand = new RelayCommand(() => MachineRefreshParsedDefinition());
             UserRefreshParsedDefinitionCommand    = new RelayCommand(() => PromptUserParsedDefinition());
 
             MachineRefreshIpaCommand = new RelayCommand(() => RefreshIpaFromMachine());
@@ -167,6 +170,8 @@ namespace Linguine.Tabs
 
             MachineRefreshRomanisedCommand = new RelayCommand(() => RefreshRomanisedFromMachine());
             UserRefreshRomanisedCommand    = new RelayCommand(() => PromptUserRomanised());
+
+            ShowParsing = ConfigManager.Config.LearningForeignLanguage();
         }
 
         private async Task MachineRefreshCoreDefinition()
@@ -175,6 +180,8 @@ namespace Linguine.Tabs
 
             DefinitionCoreText = await _model.GenerateNewDefinition(faulty);
             CoredDefinitionChanged = EditMethod.MachineEdited;
+
+            await MachineRefreshParsedDefinition();
 
             ButtonsEnabled = true;
         }
@@ -194,10 +201,22 @@ namespace Linguine.Tabs
             CoredDefinitionChanged = EditMethod.UserEdited;
         }
 
-        private void RefreshParsedDefinitionFromMachine()
+        private ParsedDictionaryDefinition ParsedDefinition { get; set; }
+
+        private async Task MachineRefreshParsedDefinition()
         {
-            ParsedDefinitionText = GenerateParsedDefinition();
+            ButtonsEnabled = false;
+
+            DictionaryDefinition custom = faulty; // in case we have changed the core text
+
+            custom.Definition = DefinitionCoreText;
+
+            ParsedDefinition = await _model.GenerateSingleParsedDefinition(custom);
+            ParsedDefinitionText = ParsedDefinition.ParsedDefinition;
+
             ParsedDefinitionChanged = EditMethod.MachineEdited;
+
+            ButtonsEnabled = true;
         }
 
         private void PromptUserParsedDefinition()
