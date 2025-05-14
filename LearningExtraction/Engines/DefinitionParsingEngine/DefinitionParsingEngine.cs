@@ -65,6 +65,8 @@ namespace LearningExtraction
         {
             List<String> ret = new List<String>();
 
+            // TODO - this is English specific - need to localise!
+
             foreach (DictionaryDefinition definition in newDefinitions) 
             {
                 StringBuilder builder = new StringBuilder();
