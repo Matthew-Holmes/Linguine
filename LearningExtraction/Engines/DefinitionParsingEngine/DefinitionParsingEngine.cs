@@ -28,6 +28,8 @@ namespace LearningExtraction
             LearnerLevel level,
             LanguageCode native)
         {
+            // TODO - does it make sense to do the parsing if the learner level is native??
+
             List<DictionaryDefinition> newDefinitions = definitions.ToList();
 
             List<String> prompts = FormPrompts(newDefinitions, level);
