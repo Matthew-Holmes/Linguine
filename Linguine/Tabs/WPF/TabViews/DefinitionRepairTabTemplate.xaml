@@ -42,19 +42,22 @@
                        Margin="5"/>
 
                     <Button Grid.Row="0" Grid.Column="2" Width="30" Height="30"
-                    Content="↺" FontSize="16"
-                    Command="{Binding MachineRefreshCoreDefinitionCommand}"/>
+                            Content="↺" FontSize="16"
+                            Command="{Binding MachineRefreshCoreDefinitionCommand}"
+                            IsEnabled="{Binding ButtonsEnabled}"/>
 
                     <Button Grid.Row="0" Grid.Column="3" Width="30" Height="30"
-                    Command="{Binding UserRefreshCoreDefinitionCommand}">
+                            Command="{Binding UserRefreshCoreDefinitionCommand}"
+                            IsEnabled="{Binding ButtonsEnabled}">
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
                     </Button>
 
                     <!-- Parsed Definition -->
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Parsed:" VerticalAlignment="Center" Margin="5"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Parsed:" VerticalAlignment="Center" Margin="5" Visibility="{Binding ShowParsing, Converter={StaticResource BoolToCollapsedConverter}}"/>
                     <TextBlock Grid.Row="1" Grid.Column="1"
                        Text="{Binding ParsedDefinitionText}"
                        Background="{Binding ParsedDefinitionChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
+                       Visibility="{Binding ShowParsing, Converter={StaticResource BoolToCollapsedConverter}}"
                        TextWrapping="Wrap"
                        VerticalAlignment="Center"
                        Margin="5"/>
@@ -62,11 +65,13 @@
                     <Button Grid.Row="1" Grid.Column="2" Width="30" Height="30"
                             Content="↺" FontSize="16"
                             Command="{Binding MachineRefreshParsedDefinitionCommand}"
-                            IsEnabled="{Binding ButtonsEnabled}"/>
+                            IsEnabled="{Binding ButtonsEnabled}"
+                            Visibility="{Binding ShowParsing, Converter={StaticResource BoolToCollapsedConverter}}"/>
 
                     <Button Grid.Row="1" Grid.Column="3" Width="30" Height="30"
                             Command="{Binding UserRefreshParsedDefinitionCommand}"
-                            IsEnabled="{Binding ButtonsEnabled}">
+                            IsEnabled="{Binding ButtonsEnabled}"
+                            Visibility="{Binding ShowParsing, Converter={StaticResource BoolToCollapsedConverter}}">
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
                     </Button>
 
@@ -105,8 +110,8 @@
                             IsEnabled="{Binding ButtonsEnabled}"/>
 
                     <Button Grid.Row="3" Grid.Column="3" Width="30" Height="30"
-                        Command="{Binding UserRefreshRomanisedCommand}"
-                        IsEnabled="{Binding ButtonsEnabled}">
+                            Command="{Binding UserRefreshRomanisedCommand}"
+                            IsEnabled="{Binding ButtonsEnabled}">
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
                     </Button>
 
