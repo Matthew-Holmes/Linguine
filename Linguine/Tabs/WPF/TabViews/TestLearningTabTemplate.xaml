@@ -8,6 +8,7 @@
         <DataTemplate.Resources>
             <local:HighlightConverter x:Key="HighlightConverter"/>
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <local:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter"/>
         </DataTemplate.Resources>
 
         <Grid>
@@ -46,6 +47,11 @@
                         <TextBlock.Inlines>
                             <Run Text="{Binding CurrentContext.Item1, Mode=OneWay}" /><Run Text="{Binding CurrentContext.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/><Run Text="{Binding CurrentContext.Item3, Mode=OneWay}" />
                         </TextBlock.Inlines>
+                        <TextBlock.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Is this right?" Command="{Binding CheckContextCommand}"/>
+                            </ContextMenu>
+                        </TextBlock.ContextMenu>
                     </TextBlock>
                         
                 </ScrollViewer>
@@ -174,7 +180,8 @@
                         Width="50"
                         Height="40"
                         Margin="5"
-                        Command="{Binding SubmissionCorrectCommand}">
+                        Command="{Binding SubmissionCorrectCommand}"
+                        IsEnabled="{Binding SubmissionButtonsEnabled}">
                     <Button.InputBindings>
                         <KeyBinding Command="{Binding SubmissionIncorrectCommand}" Key="Back"/>
                     </Button.InputBindings>
@@ -189,6 +196,16 @@
                     </Button.Style>
                 </Button>
 
+                <Button x:Name="NextButton"
+                        Content="Next"
+                        FontSize="18"
+                        Width="50"
+                        Height="40"
+                        Margin="5"
+                        Command="{Binding NextCommand}"
+                        Visibility="{Binding ShowNextButton, Converter={StaticResource BoolToCollapsedConverter}}">
+                </Button>
+
                 <!-- Cross Button (Incorrect Submission) -->
                 <Button x:Name="CrossButton"
                         Content="✖"
@@ -197,7 +214,8 @@
                         Height="40"
                         Margin="5"
                         Foreground="Red"
-                        Command="{Binding SubmissionIncorrectCommand}">
+                        Command="{Binding SubmissionIncorrectCommand}"
+                        IsEnabled="{Binding SubmissionButtonsEnabled}">
                     <Button.InputBindings>
                         <KeyBinding Command="{Binding SubmissionIncorrectCommand}" Key="Back"/>
                     </Button.InputBindings>

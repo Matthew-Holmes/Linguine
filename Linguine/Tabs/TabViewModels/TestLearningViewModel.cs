@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 using System.Media;
 using System.IO;
 using QuickGraph;
+using System.Windows.Annotations;
+using System.Windows.Media.Animation;
 
 namespace Linguine.Tabs
 {
@@ -21,6 +23,8 @@ namespace Linguine.Tabs
         public ICommand NextContextCommand         { get; private set; }
         public ICommand PreviousContextCommand     { get; private set; }
         public ICommand PlayCurrentSoundCommand    { get; private set; }
+        public ICommand CheckContextCommand        { get; private set; }
+        public ICommand NextCommand                { get; private set; }
 
         public bool ShowPlayCurrentSoundButton
         {
@@ -74,7 +78,56 @@ namespace Linguine.Tabs
 
             PlayCurrentSoundCommand = new RelayCommand(() => SoundPlayer?.Play());
 
+            CheckContextCommand = new RelayCommand(() => CheckContext());
+            NextCommand         = new RelayCommand(() => Reset());
+
             Reset();
+        }
+
+        private void CheckContext()
+        {
+            if (!ShowNextButton)
+            {
+                // once we have paused already it will be shown, so if it isn't shown we need to tie up the loose ends
+                // before going and trying to fix the definition
+                // otherwise we will get weirdly long times for answering in the database
+
+                bool correct;
+
+                if (!AnswerSubmitted)
+                {
+
+                    UserAnswer = _uiComponents.CanGetText.GetResponse("Before we leave, what is your answer?");
+
+                    while (DisallowSubmission())
+                    {
+                        UserAnswer = _uiComponents.CanGetText.GetResponse("Please provide an answer: ");
+                    }
+
+                    SubmitAnswer();
+
+                    correct = _uiComponents.CanVerify.AskYesNo("Were you correct?");
+
+                } else
+                {
+                    correct = _uiComponents.CanVerify.AskYesNo("Before we leave, was your answer correct?");
+                }
+
+                _finished = DateTime.Now;
+                _model.RecordTest(_definitionForTesting, _posed, _answered, _finished, correct);
+
+                Pause();
+            }
+
+            WordInContext wic = _definitionForTesting.Contexts[_currentContextId];
+
+            _parent.BeginDefinitionResolution(wic.Parent, wic.Index);
+        }
+
+        private void Pause()
+        {
+            SubmissionButtonsEnabled = false;
+            ShowNextButton           = true;
         }
 
         private void NextContext()
@@ -116,6 +169,8 @@ namespace Linguine.Tabs
         private Tuple<string, string, string> _currentContext;
         private int _currentContextId = 0;
         private bool _showPlayCurrentSoundButton;
+        private bool _submissionButtonsEnabled = true;
+        private bool _showNextButton = false;
 
         public List<Tuple<string, string, string>> Contexts
         {
@@ -197,11 +252,35 @@ namespace Linguine.Tabs
             }
         }
 
+        public bool SubmissionButtonsEnabled
+        {
+            get => _submissionButtonsEnabled;
+            private set
+            {
+                _submissionButtonsEnabled = value;
+                OnPropertyChanged(nameof(SubmissionButtonsEnabled));
+            }
+        }
 
+        public bool ShowNextButton
+        {
+            get => _showNextButton;
+            private set
+            {
+                _showNextButton = value;
+                OnPropertyChanged(nameof(ShowNextButton));
+            }
+        }
+
+
+        private bool DisallowSubmission()
+        {
+            return UserAnswer == "" || UserAnswer is null;
+        }
 
         private void SubmitAnswer()
         {
-            if (UserAnswer == "" || UserAnswer is null)
+            if (DisallowSubmission())
             {
                 SoundPlayer?.Play();
                 return; // don't allow accidentaly non-input
@@ -230,6 +309,9 @@ namespace Linguine.Tabs
 
         private void Reset()
         {
+            ShowNextButton           = false;
+            SubmissionButtonsEnabled = true;
+
             if (_isVocabTest)
             {
                 Title = $"Remaining: {_vocabTestRemaining}";

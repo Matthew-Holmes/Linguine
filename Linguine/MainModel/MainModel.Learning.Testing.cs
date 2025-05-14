@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Linguine
 {
     // data classes for UI
-    public record WordInContext(string StatementText, int WordStart, int Len);
+    public record WordInContext(string StatementText, int WordStart, int Len, DataClasses.Statement Parent, int Index);
     public record DefinitionForTesting(
         String Prompt,
         String CorrectAnswer,

@@ -10,14 +10,16 @@ namespace Linguine
     {
         public static WordInContext? AsWordInContext(DictionaryDefinition def, Statement context)
         {
-            Tuple<int, int> startLen = StatementHelper.GetStartLenOfDefinition(context, def);
+            Tuple<int, int, int> startLenIndex = StatementHelper.GetStartLenIndexOfDefinition(context, def);
 
-            if (startLen is null) { return null; }
+            if (startLenIndex is null) { return null; }
 
             WordInContext ret = new WordInContext(
                 context.StatementText,
-                startLen.Item1,
-                startLen.Item2
+                startLenIndex.Item1,
+                startLenIndex.Item2,
+                context,
+                startLenIndex.Item3
             );
             return ret;
         }
@@ -32,7 +34,7 @@ namespace Linguine
                 return null;
             }
 
-            WordInContext wic = new WordInContext(statement.StatementText, startLen.Item1, startLen.Item2);
+            WordInContext wic = new WordInContext(statement.StatementText, startLen.Item1, startLen.Item2, statement, defIndex);
 
             return AsRun(wic);
         }
@@ -66,19 +68,24 @@ namespace Linguine
             // TODO - what about song lyrics/subtitles etc
             // should we have a "meaningul newlines" flag??
             prepend = Regex.Replace(prepend, @"\t|\n|\r", " ");
-            word = Regex.Replace(word, @"\t|\n|\r", " ");
-            append = Regex.Replace(append, @"\t|\n|\r", " ");
+            word    = Regex.Replace(word,    @"\t|\n|\r", " ");
+            append  = Regex.Replace(append,  @"\t|\n|\r", " ");
 
             return Tuple.Create(prepend, word, append);
 
         }
 
 
-        public static Tuple<int, int>? GetStartLenOfDefinition(
+        public static Tuple<int, int, int>? GetStartLenIndexOfDefinition(
             Statement statement, DictionaryDefinition def)
         {
             TextDecomposition flatInjective = statement.InjectiveDecomposition.Flattened();
             TextDecomposition flatRooted    = statement.RootedDecomposition.Flattened();
+
+            if (flatInjective.Decomposition.Count != flatRooted.Decomposition.Count)
+            {
+                throw new Exception("mismatched decompositions");
+            }
 
             int start = 0;
             int index = 0;
@@ -86,7 +93,7 @@ namespace Linguine
             if (flatInjective.Decomposition is null)
             {
                 // if the statement a leaf
-                return Tuple.Create(0, statement.StatementText.Length);
+                return Tuple.Create(0, statement.StatementText.Length, 0);
             }
 
             while (index < flatInjective.Decomposition.Count)
@@ -107,7 +114,7 @@ namespace Linguine
 
                 if (thisDef.DatabasePrimaryKey == def.DatabasePrimaryKey)
                 {
-                    return Tuple.Create(start, flatInjective.Decomposition[index].Total.Length);
+                    return Tuple.Create(start, flatInjective.Decomposition[index].Total.Length, index);
                 }
 
                 index++;
