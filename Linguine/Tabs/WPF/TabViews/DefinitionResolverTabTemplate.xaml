@@ -69,7 +69,7 @@
                 <ScrollViewer Background="Transparent"
                               Visibility="{Binding ShowExistingDefinitions, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" 
                               HorizontalScrollBarVisibility="Auto" 
-                              VerticalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto"
                               HorizontalAlignment="Center"
                               Margin="0,0,0,0">
                     <ItemsControl ItemsSource="{Binding ExistingDefinitions, Mode=OneWay}">
