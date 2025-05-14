@@ -36,5 +36,29 @@ namespace Linguine
 
             return ret.First();
         }
+
+        internal async Task<String> GetNewIPA(DictionaryDefinition faulty)
+        {
+            List<DictionaryDefinition> singleton = new List<DictionaryDefinition> { faulty };
+
+            List<Tuple<String, String>> ret = await SM.Engines.Pronouncer.GetDefinitionPronunciations(singleton);
+
+            Tuple<String, String> ipa_romanised = ret.First();
+
+            return ipa_romanised.Item1;
+
+        }
+
+        internal async Task<String> GetNewRomanised(DictionaryDefinition faulty)
+        {
+            List<DictionaryDefinition> singleton = new List<DictionaryDefinition> { faulty };
+
+            List<Tuple<String, String>> ret = await SM.Engines.Pronouncer.GetDefinitionPronunciations(singleton);
+
+            Tuple<String, String> ipa_romanised = ret.First();
+
+            return ipa_romanised.Item2;
+
+        }
     }
 }

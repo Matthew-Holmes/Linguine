@@ -162,13 +162,13 @@ namespace Linguine.Tabs
             MachineRefreshCoreDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshCoreDefinition));
             UserRefreshCoreDefinitionCommand    = new RelayCommand(() => PromptUserCoreDefinition());
 
-            MachineRefreshParsedDefinitionCommand = new RelayCommand(() => MachineRefreshParsedDefinition());
+            MachineRefreshParsedDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshParsedDefinition));
             UserRefreshParsedDefinitionCommand    = new RelayCommand(() => PromptUserParsedDefinition());
 
-            MachineRefreshIpaCommand = new RelayCommand(() => RefreshIpaFromMachine());
+            MachineRefreshIpaCommand = new RelayCommand(() => Task.Run(MachineRefreshIpa));
             UserRefreshIpaCommand    = new RelayCommand(() => PromptUserIpa());
 
-            MachineRefreshRomanisedCommand = new RelayCommand(() => RefreshRomanisedFromMachine());
+            MachineRefreshRomanisedCommand = new RelayCommand(() => Task.Run(MachineRefreshRomanised));
             UserRefreshRomanisedCommand    = new RelayCommand(() => PromptUserRomanised());
 
             ShowParsing = ConfigManager.Config.LearningForeignLanguage();
@@ -234,10 +234,14 @@ namespace Linguine.Tabs
             ParsedDefinitionChanged = EditMethod.UserEdited;
         }
 
-        private void RefreshIpaFromMachine()
+        private async Task MachineRefreshIpa()
         {
-            IpaPronunciation = GenerateIpa();
+            ButtonsEnabled = false;
+
+            IpaPronunciation = await _model.GetNewIPA(faulty);
             IpaChanged = EditMethod.MachineEdited;
+
+            ButtonsEnabled = true;
         }
 
         private void PromptUserIpa()
@@ -255,10 +259,14 @@ namespace Linguine.Tabs
             IpaChanged = EditMethod.UserEdited;
         }
 
-        private void RefreshRomanisedFromMachine()
+        private async Task MachineRefreshRomanised()
         {
-            RomanisedPronunciation = GenerateRomanised();
+            ButtonsEnabled = false;
+
+            RomanisedPronunciation = await _model.GetNewRomanised(faulty); ;
             RomanisedChanged = EditMethod.MachineEdited;
+
+            ButtonsEnabled = true;
         }
 
         private void PromptUserRomanised()
@@ -275,11 +283,5 @@ namespace Linguine.Tabs
             RomanisedPronunciation = newRomanised;
             RomanisedChanged = EditMethod.UserEdited;
         }
-
-        // Placeholder business logic methods
-        private string GenerateParsedDefinition() => throw new NotImplementedException();
-        private string GenerateIpa() => throw new NotImplementedException();
-        private string GenerateRomanised() => throw new NotImplementedException();
     }
-
 }
