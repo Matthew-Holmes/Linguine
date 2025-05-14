@@ -24,6 +24,8 @@ namespace Linguine.Tabs
         private string _romanisedText;
         private EditMethod _romanisedChanged;
 
+        #region UI properties
+
         public string DefinitionCoreText
         {
             get => _definitionCoreText;
@@ -104,6 +106,10 @@ namespace Linguine.Tabs
             }
         }
 
+        #endregion
+
+        #region commands
+
         public ICommand MachineRefreshCoreDefinitionCommand   { get; set; }
         public ICommand UserRefreshCoreDefinitionCommand      { get; set; }
 
@@ -116,10 +122,16 @@ namespace Linguine.Tabs
         public ICommand MachineRefreshRomanisedCommand        { get; set; }
         public ICommand UserRefreshRomanisedCommand           { get; set; }
 
-        public DefinitionRepairViewModel(DictionaryDefinition faulty, UIComponents uiComponents, MainModel model, MainViewModel parent)
+        #endregion
+
+        DictionaryDefinition faulty;
+
+        public DefinitionRepairViewModel(DictionaryDefinition faultyDef, UIComponents uiComponents, MainModel model, MainViewModel parent)
             : base(uiComponents, model, parent)
         {
             Title = "Repair Definition";
+
+            faulty = faultyDef;
 
             ParsedDictionaryDefinition? pdef = _model.GetParsedDictionaryDefinition(faulty);
 
@@ -148,13 +160,22 @@ namespace Linguine.Tabs
 
         private void RefreshCoreDefinitionFromMachine()
         {
-            DefinitionCoreText = GenerateCoreDefinition();
+            DefinitionCoreText = _model.GenerateNewDefinition(faulty);
             CoredDefinitionChanged = EditMethod.MachineEdited;
         }
 
         private void PromptUserCoreDefinition()
         {
-            DefinitionCoreText = PromptForUserInput("Edit Core Definition");
+            String newDef = _uiComponents.CanGetText.GetResponse("enter the custom definition");
+
+            if (String.IsNullOrWhiteSpace(newDef)) { return; }
+
+            if (!_uiComponents.CanVerify.AskYesNo($"proceed with new definition: {newDef}"))
+            {
+                return;
+            }
+
+            DefinitionCoreText = newDef;
             CoredDefinitionChanged = EditMethod.UserEdited;
         }
 
@@ -166,7 +187,16 @@ namespace Linguine.Tabs
 
         private void PromptUserParsedDefinition()
         {
-            ParsedDefinitionText = PromptForUserInput("Edit Parsed Definition");
+            String newDef = _uiComponents.CanGetText.GetResponse("enter the custom definition");
+
+            if (String.IsNullOrWhiteSpace(newDef)) { return; }
+
+            if (!_uiComponents.CanVerify.AskYesNo($"proceed with new definition: {newDef}"))
+            {
+                return;
+            }
+
+            ParsedDefinitionText = newDef;
             ParsedDefinitionChanged = EditMethod.UserEdited;
         }
 
@@ -178,7 +208,16 @@ namespace Linguine.Tabs
 
         private void PromptUserIpa()
         {
-            IpaPronunciation = PromptForUserInput("Edit IPA");
+            String newIPA = _uiComponents.CanGetText.GetResponse("enter the custom IPA");
+
+            if (String.IsNullOrWhiteSpace(newIPA)) { return; }
+
+            if (!_uiComponents.CanVerify.AskYesNo($"proceed with new IPA: {newIPA}"))
+            {
+                return;
+            }
+
+            IpaPronunciation = newIPA;
             IpaChanged = EditMethod.UserEdited;
         }
 
@@ -190,16 +229,23 @@ namespace Linguine.Tabs
 
         private void PromptUserRomanised()
         {
-            RomanisedPronunciation = PromptForUserInput("Edit Romanised");
+            String newRomanised = _uiComponents.CanGetText.GetResponse("enter the custom romanised pronunciation");
+
+            if (String.IsNullOrWhiteSpace(newRomanised)) { return; }
+
+            if (!_uiComponents.CanVerify.AskYesNo($"proceed with new romanised pronunciation: {newRomanised}"))
+            {
+                return;
+            }
+
+            RomanisedPronunciation = newRomanised;
             RomanisedChanged = EditMethod.UserEdited;
         }
 
         // Placeholder business logic methods
-        private string GenerateCoreDefinition() => throw new NotImplementedException();
         private string GenerateParsedDefinition() => throw new NotImplementedException();
         private string GenerateIpa() => throw new NotImplementedException();
         private string GenerateRomanised() => throw new NotImplementedException();
-        private string PromptForUserInput(string fieldName) => throw new NotImplementedException();
     }
 
 }
