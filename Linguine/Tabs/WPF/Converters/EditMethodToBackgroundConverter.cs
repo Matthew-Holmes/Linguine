@@ -1,13 +1,13 @@
-﻿using Linguine.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows.Media;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using Linguine.Helpers;
+
 
 namespace Linguine.Tabs.WPF
 {
