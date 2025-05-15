@@ -3,14 +3,6 @@ using DataClasses;
 
 namespace Infrastructure
 {
-    public enum EntryMethod
-    {
-        Machine = 0,
-        User = 1,
-        UserOverwriteMachine = 2,
-        UserOverwriteUser = 3
-    }
-
     public class StatementDefinitionNode
     {
         [Key]
