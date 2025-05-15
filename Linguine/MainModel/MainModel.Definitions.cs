@@ -1,6 +1,7 @@
 ﻿using Agents;
 using Config;
 using DataClasses;
+using Linguine.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,6 +60,27 @@ namespace Linguine
 
             return ipa_romanised.Item2;
 
+        }
+
+
+        internal void UpdateRomanised(DictionaryDefinition faulty, string romanisedPronunciation, EditMethod romanisedChanged)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void UpdateIPA(DictionaryDefinition faulty, string ipaPronunciation, EditMethod ipaChanged)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void UpdateParsedDefinition(ParsedDictionaryDefinition parsedDefinition, string parsedDefinitionText, EditMethod parsedDefinitionChanged)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void UpdateCoreDefinition(DictionaryDefinition faulty, string definitionCoreText, EditMethod coredDefinitionChanged)
+        {
+            throw new NotImplementedException();
         }
     }
 }

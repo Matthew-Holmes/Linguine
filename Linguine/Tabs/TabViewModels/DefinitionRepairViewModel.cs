@@ -210,17 +210,45 @@ namespace Linguine.Tabs
 
             MachineRefreshCoreDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshCoreDefinition));
             UserRefreshCoreDefinitionCommand    = new RelayCommand(() => Task.Run(PromptUserCoreDefinition));
+            SaveCoreDefinitionChangesCommand    = new RelayCommand(() => SaveCoreDefinitionChanges());
 
             MachineRefreshParsedDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshParsedDefinition));
             UserRefreshParsedDefinitionCommand    = new RelayCommand(() => PromptUserParsedDefinition());
+            SaveParsedDefinitionChangesCommand    = new RelayCommand(() => SaveParsedDefinitionChanges());
 
             MachineRefreshIpaCommand = new RelayCommand(() => Task.Run(MachineRefreshIpa));
             UserRefreshIpaCommand    = new RelayCommand(() => PromptUserIpa());
+            SaveIPAChangesCommand    = new RelayCommand(() => SaveIPAChanges());
 
             MachineRefreshRomanisedCommand = new RelayCommand(() => Task.Run(MachineRefreshRomanised));
             UserRefreshRomanisedCommand    = new RelayCommand(() => PromptUserRomanised());
+            SaveRomanisedChangesCommand    = new RelayCommand(() => SaveRomanisedChanges());
 
             ShowParsing = ConfigManager.Config.LearningForeignLanguage();
+        }
+
+        private void SaveRomanisedChanges()
+        {
+            _model.UpdateRomanised(faulty, RomanisedPronunciation, RomanisedChanged);
+            RomanisedChanged = EditMethod.NotEdited; // since now the default
+        }
+
+        private void SaveIPAChanges()
+        {
+            _model.UpdateIPA(faulty, IpaPronunciation, IpaChanged);
+            IpaChanged = EditMethod.NotEdited;
+        }
+
+        private void SaveParsedDefinitionChanges()
+        {
+            _model.UpdateParsedDefinition(ParsedDefinition, ParsedDefinitionText, ParsedDefinitionChanged);
+            ParsedDefinitionChanged = EditMethod.NotEdited;
+        }
+
+        private void SaveCoreDefinitionChanges()
+        {
+            _model.UpdateCoreDefinition(faulty, DefinitionCoreText, CoredDefinitionChanged);
+            CoredDefinitionChanged = EditMethod.NotEdited;
         }
 
         private async Task MachineRefreshCoreDefinition()
