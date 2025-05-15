@@ -11,6 +11,7 @@
             <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter"/>
         </DataTemplate.Resources>
         <Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical">
 			    <TextBlock FontSize="16"
 			    TextWrapping="Wrap"
@@ -130,7 +131,7 @@
                            Visibility="{Binding ResolutionComplete, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
                 
             </StackPanel>
-
+            </ScrollViewer>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
