@@ -15,15 +15,19 @@ namespace Linguine.Tabs
     {
         private string _definitionCoreText;
         private EditMethod _coredDefinitionChanged;
+        private bool _showCoreDefinitionSaveChanges = false;
 
         private string _parsedDefinitionText;
         private EditMethod _parsedDefinitionChanged;
+        private bool _showParsedDefinitionSaveChanges = false;
 
         private string _ipaText;
         private EditMethod _ipaChanged;
+        private bool _showIPASaveChanges = false;
 
         private string _romanisedText;
         private EditMethod _romanisedChanged;
+        private bool _showRomanisedSaveChanges = false;
 
         #region UI properties
 
@@ -117,6 +121,46 @@ namespace Linguine.Tabs
             }
         }
 
+        public bool ShowCoreDefinitionSaveChanges
+        {
+            get => _showCoreDefinitionSaveChanges;
+            set
+            {
+                _showCoreDefinitionSaveChanges = value;
+                OnPropertyChanged(nameof(ShowCoreDefinitionSaveChanges));
+            }
+        }
+
+        public bool ShowParsedDefinitionSaveChanges
+        {
+            get => _showParsedDefinitionSaveChanges;
+            set
+            {
+                _showParsedDefinitionSaveChanges = value;
+                OnPropertyChanged(nameof(ShowParsedDefinitionSaveChanges));
+            }
+        }
+
+        public bool ShowIPASaveChanges
+        {
+            get => _showIPASaveChanges;
+            set
+            {
+                _showIPASaveChanges = value;
+                OnPropertyChanged(nameof(ShowIPASaveChanges));
+            }
+        }
+
+        public bool ShowRomanisedSaveChanges
+        {
+            get => _showRomanisedSaveChanges;
+            set
+            {
+                _showRomanisedSaveChanges = value;
+                OnPropertyChanged(nameof(ShowRomanisedSaveChanges));
+            }
+        }
+
         public bool ShowParsing { get; init; }
 
         #endregion
@@ -125,15 +169,20 @@ namespace Linguine.Tabs
 
         public ICommand MachineRefreshCoreDefinitionCommand   { get; set; }
         public ICommand UserRefreshCoreDefinitionCommand      { get; set; }
+        public ICommand SaveCoreDefinitionChangesCommand      { get; set; }
 
         public ICommand MachineRefreshParsedDefinitionCommand { get; set; }
         public ICommand UserRefreshParsedDefinitionCommand    { get; set; }
+        public ICommand SaveParsedDefinitionChangesCommand    { get; set; }
 
         public ICommand MachineRefreshIpaCommand              { get; set; }
         public ICommand UserRefreshIpaCommand                 { get; set; }
+        public ICommand SaveIPAChangesCommand                 { get; set; }
 
         public ICommand MachineRefreshRomanisedCommand        { get; set; }
         public ICommand UserRefreshRomanisedCommand           { get; set; }
+        public ICommand SaveRomanisedChangesCommand           { get; set; }
+
 
         #endregion
 
@@ -178,15 +227,25 @@ namespace Linguine.Tabs
         {
             ButtonsEnabled = false;
 
-            DefinitionCoreText = await _model.GenerateNewDefinition(faulty);
-            CoredDefinitionChanged = EditMethod.MachineEdited;
+            String newDef = await _model.GenerateNewDefinition(faulty);
 
-            await MachineRefreshParsedDefinition();
+            if (newDef != DefinitionCoreText)
+            {
+                DefinitionCoreText = newDef;
+                CoredDefinitionChanged = EditMethod.MachineEdited;
+                await MachineRefreshParsedDefinition();
+
+                ShowCoreDefinitionSaveChanges = true;
+            } 
+            else
+            {
+                _uiComponents.CanMessage.Show("machine generated the same as before!");
+            }
 
             ButtonsEnabled = true;
         }
 
-        private void PromptUserCoreDefinition()
+        private async Task PromptUserCoreDefinition()
         {
             String newDef = _uiComponents.CanGetText.GetResponse("enter the custom definition");
 
@@ -197,8 +256,17 @@ namespace Linguine.Tabs
                 return;
             }
 
-            DefinitionCoreText = newDef;
-            CoredDefinitionChanged = EditMethod.UserEdited;
+            if (newDef != DefinitionCoreText)
+            {
+                DefinitionCoreText = newDef;
+                CoredDefinitionChanged = EditMethod.UserEdited;
+                await MachineRefreshParsedDefinition();
+                ShowCoreDefinitionSaveChanges = true;
+            } 
+            else
+            {
+                _uiComponents.CanMessage.Show("you provided the existing definition!");
+            }
         }
 
         private ParsedDictionaryDefinition ParsedDefinition { get; set; }
@@ -211,8 +279,19 @@ namespace Linguine.Tabs
 
             custom.Definition = DefinitionCoreText;
 
-            ParsedDefinition = await _model.GenerateSingleParsedDefinition(custom);
-            ParsedDefinitionText = ParsedDefinition.ParsedDefinition;
+            ParsedDictionaryDefinition newPdef = await _model.GenerateSingleParsedDefinition(custom);
+
+            if (newPdef.ParsedDefinition != ParsedDefinitionText)
+            {
+                ParsedDefinition = newPdef;
+                ParsedDefinitionText = ParsedDefinition.ParsedDefinition;
+
+                ShowParsedDefinitionSaveChanges = true;
+            }
+            else
+            {
+                _uiComponents.CanMessage.Show("Machine generated the same parsed definition!");
+            }
 
             ParsedDefinitionChanged = EditMethod.MachineEdited;
 
@@ -230,16 +309,35 @@ namespace Linguine.Tabs
                 return;
             }
 
-            ParsedDefinitionText = newDef;
-            ParsedDefinitionChanged = EditMethod.UserEdited;
+            if (newDef != ParsedDefinitionText)
+            {
+                ParsedDefinitionText = newDef;
+                ParsedDefinitionChanged = EditMethod.UserEdited;
+                ShowParsedDefinitionSaveChanges = true;
+            } 
+            else
+            {
+                _uiComponents.CanMessage.Show("You provided the existing parsed definition!");
+            }
         }
 
         private async Task MachineRefreshIpa()
         {
             ButtonsEnabled = false;
 
-            IpaPronunciation = await _model.GetNewIPA(faulty);
-            IpaChanged = EditMethod.MachineEdited;
+            String newIpa = await _model.GetNewIPA(faulty);
+
+            if (newIpa != IpaPronunciation)
+            {
+                IpaPronunciation = newIpa;
+                IpaChanged = EditMethod.MachineEdited;
+
+                ShowIPASaveChanges = true;
+            } 
+            else
+            {
+                _uiComponents.CanMessage.Show("Machine generated the same IPA as before");
+            }
 
             ButtonsEnabled = true;
         }
@@ -255,16 +353,35 @@ namespace Linguine.Tabs
                 return;
             }
 
-            IpaPronunciation = newIPA;
-            IpaChanged = EditMethod.UserEdited;
+            if (newIPA != IpaPronunciation)
+            {
+                IpaPronunciation = newIPA;
+                IpaChanged = EditMethod.UserEdited;
+
+                ShowIPASaveChanges = true;
+            } 
+            else
+            {
+                _uiComponents.CanMessage.Show("You provided the existing IPA");
+            }
         }
 
         private async Task MachineRefreshRomanised()
         {
             ButtonsEnabled = false;
 
-            RomanisedPronunciation = await _model.GetNewRomanised(faulty); ;
-            RomanisedChanged = EditMethod.MachineEdited;
+            String newRoman = await _model.GetNewRomanised(faulty);
+
+            if (newRoman != RomanisedPronunciation)
+            {
+                RomanisedPronunciation = newRoman;
+                RomanisedChanged = EditMethod.MachineEdited;
+
+                ShowRomanisedSaveChanges = true;
+            } else
+            {
+                _uiComponents.CanMessage.Show("Machine generated the same Romanised pronunciation");
+            }
 
             ButtonsEnabled = true;
         }
@@ -280,8 +397,17 @@ namespace Linguine.Tabs
                 return;
             }
 
-            RomanisedPronunciation = newRomanised;
-            RomanisedChanged = EditMethod.UserEdited;
+            if (newRomanised != RomanisedPronunciation)
+            {
+
+                RomanisedPronunciation = newRomanised;
+                RomanisedChanged = EditMethod.UserEdited;
+
+                ShowRomanisedSaveChanges = true;
+            } else
+            {
+                _uiComponents.CanMessage.Show("You provided the existing pronunciation");
+            }
         }
     }
 }
