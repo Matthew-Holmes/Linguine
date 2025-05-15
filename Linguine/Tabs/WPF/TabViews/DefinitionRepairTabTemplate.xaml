@@ -45,14 +45,18 @@
 
                     <!-- Core Definition -->
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Definition:" VerticalAlignment="Center" Margin="5"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" 
-                       Text="{Binding DefinitionCoreText}" 
-                       Background="{Binding CoredDefinitionChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap"
-                       Margin="5"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                         Text="{Binding DefinitionCoreText}" 
+                         Background="{Binding CoredDefinitionChanged, Converter={StaticResource EditMethodToBackgroundConverter}}" 
+                         VerticalAlignment="Center"
+                         TextWrapping="Wrap"
+                         Margin="5"
+                         IsReadOnly="True"
+                         BorderThickness="0"
+                         IsReadOnlyCaretVisible="False"/>
 
-                    <Button Grid.Row="0" Grid.Column="2" Width="30" Height="30"
+
+                        <Button Grid.Row="0" Grid.Column="2" Width="30" Height="30"
                             Content="↺" FontSize="16"
                             Command="{Binding MachineRefreshCoreDefinitionCommand}"
                             IsEnabled="{Binding ButtonsEnabled}"/>
