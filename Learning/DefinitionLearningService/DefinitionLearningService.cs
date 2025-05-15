@@ -22,6 +22,11 @@ namespace Learning
             Tactician.Inform(added);
         }
 
+        public void Ignore(int defKey)
+        {
+            Tactician.Ignore(defKey);
+        }
+
         public int GetHighLearningDefinitionID()
         {
             return Tactician.GetBestDefID();

@@ -10,6 +10,7 @@ namespace Learning
     public interface IDefinitionLearningService
     {
         public void Inform(TestRecord tr);
+        public void Ignore(int defKey);
         public int GetHighLearningDefinitionID();
         public int GetFrequentDefinition(int freq = 5);
         public int GetInitialVocabEstimationDefinition();

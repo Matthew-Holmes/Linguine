@@ -19,10 +19,14 @@ namespace Learning
         Dictionary<int, int> CoolOff    { get; set; } = new Dictionary<int, int>();
         Dictionary<int, int> CoolOffMax { get; set; } = new Dictionary<int, int>();
 
+
+        private HashSet<int> Ignored { get; init; } = new HashSet<int>();
+
         internal int GetBestDefID()
         {
             var candidates = CurrentTwistScores
-                .Where(kv => !CoolOff.ContainsKey(kv.Key));
+                .Where(kv => !CoolOff.ContainsKey(kv.Key))
+                .Where(kv => !Ignored.Contains(kv.Key));
 
             var maxScore = candidates.Max(kv => kv.Value);
 
@@ -60,6 +64,11 @@ namespace Learning
             UpdateTacticalState();
         }
 
+
+        internal void Ignore(int defKey)
+        {
+            Ignored.Add(defKey);
+        }
         private void UpdateCoolOffs(int defKey, bool correct)
         {
 

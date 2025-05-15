@@ -209,7 +209,7 @@ namespace Linguine.Tabs
             RomanisedChanged        = EditMethod.NotEdited;
 
             MachineRefreshCoreDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshCoreDefinition));
-            UserRefreshCoreDefinitionCommand    = new RelayCommand(() => PromptUserCoreDefinition());
+            UserRefreshCoreDefinitionCommand    = new RelayCommand(() => Task.Run(PromptUserCoreDefinition));
 
             MachineRefreshParsedDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshParsedDefinition));
             UserRefreshParsedDefinitionCommand    = new RelayCommand(() => PromptUserParsedDefinition());

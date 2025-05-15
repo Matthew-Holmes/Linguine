@@ -42,6 +42,7 @@ namespace Linguine
             {
                 // edge case where user knows every word every seen
                 Log.Warning("had to revert to frequent definition, since no contexts");
+                SM.Services.DefLearning.Ignore(defId);
                 return GetRandomDefinition(freq: 1);
             }
             else
