@@ -99,7 +99,7 @@ namespace Agents
 
             {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（也为你提供了一个定义）提供该单词的拼音，只用该单词的拼音回复，不用其他内容" },
 
-            {AgentTask.DefinitionRewriting, "您是一位词典编纂专家，请根据以下单词及其定义，写出一个新的定义。定义应避免政治化和过时的语言。如果现有定义指向其他定义，请勿照搬，请为该单词另写一个定义。请仅使用新的定义进行回复。" },
+            {AgentTask.DefinitionRewriting, "您是一位词典编纂专家，请根据以下单词及其定义，写出一个新的定义。定义应避免政治化和过时的语言。如果现有定义指向其他定义，请勿照搬，请为该单词另写一个定义。请仅使用新的定义进行回复。用标准拼音写在定义的开头，单词之间不加点。" },
 
             {AgentTask.GeneralPurpose, "你是语言学习者的得力助手" },
         };
