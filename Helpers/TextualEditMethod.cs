@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Linguine.Helpers
 {
-    public enum EditMethod
+    public enum TextualEditMethod
     {
         NotEdited,
         MachineEdited,

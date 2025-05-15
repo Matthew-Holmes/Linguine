@@ -14,19 +14,19 @@ namespace Linguine.Tabs
     class DefinitionRepairViewModel : TabViewModelBase
     {
         private string _definitionCoreText;
-        private EditMethod _coredDefinitionChanged;
+        private TextualEditMethod _coredDefinitionChanged;
         private bool _showCoreDefinitionSaveChanges = false;
 
         private string _parsedDefinitionText;
-        private EditMethod _parsedDefinitionChanged;
+        private TextualEditMethod _parsedDefinitionChanged;
         private bool _showParsedDefinitionSaveChanges = false;
 
         private string _ipaText;
-        private EditMethod _ipaChanged;
+        private TextualEditMethod _ipaChanged;
         private bool _showIPASaveChanges = false;
 
         private string _romanisedText;
-        private EditMethod _romanisedChanged;
+        private TextualEditMethod _romanisedChanged;
         private bool _showRomanisedSaveChanges = false;
 
         #region UI properties
@@ -43,7 +43,7 @@ namespace Linguine.Tabs
             }
         }
 
-        public EditMethod CoredDefinitionChanged
+        public TextualEditMethod CoredDefinitionChanged
         {
             get => _coredDefinitionChanged;
             set
@@ -63,7 +63,7 @@ namespace Linguine.Tabs
             }
         }
 
-        public EditMethod ParsedDefinitionChanged
+        public TextualEditMethod ParsedDefinitionChanged
         {
             get => _parsedDefinitionChanged;
             set
@@ -83,7 +83,7 @@ namespace Linguine.Tabs
             }
         }
 
-        public EditMethod IpaChanged
+        public TextualEditMethod IpaChanged
         {
             get => _ipaChanged;
             set
@@ -103,7 +103,7 @@ namespace Linguine.Tabs
             }
         }
 
-        public EditMethod RomanisedChanged
+        public TextualEditMethod RomanisedChanged
         {
             get => _romanisedChanged;
             set
@@ -207,10 +207,10 @@ namespace Linguine.Tabs
             IpaPronunciation       = faulty.IPAPronunciation ?? "";
             RomanisedPronunciation = faulty.RomanisedPronuncation ?? "";
 
-            CoredDefinitionChanged  = EditMethod.NotEdited;
-            ParsedDefinitionChanged = EditMethod.NotEdited;
-            IpaChanged              = EditMethod.NotEdited;
-            RomanisedChanged        = EditMethod.NotEdited;
+            CoredDefinitionChanged  = TextualEditMethod.NotEdited;
+            ParsedDefinitionChanged = TextualEditMethod.NotEdited;
+            IpaChanged              = TextualEditMethod.NotEdited;
+            RomanisedChanged        = TextualEditMethod.NotEdited;
 
             MachineRefreshCoreDefinitionCommand = new RelayCommand(() => Task.Run(MachineRefreshCoreDefinition));
             UserRefreshCoreDefinitionCommand    = new RelayCommand(() => Task.Run(PromptUserCoreDefinition));
@@ -234,25 +234,29 @@ namespace Linguine.Tabs
         private void SaveRomanisedChanges()
         {
             _model.UpdateRomanised(faulty, RomanisedPronunciation, RomanisedChanged);
-            RomanisedChanged = EditMethod.NotEdited; // since now the default
+            RomanisedChanged = TextualEditMethod.NotEdited; // since now the default
+            ShowRomanisedSaveChanges = false;
         }
 
         private void SaveIPAChanges()
         {
             _model.UpdateIPA(faulty, IpaPronunciation, IpaChanged);
-            IpaChanged = EditMethod.NotEdited;
+            IpaChanged = TextualEditMethod.NotEdited;
+            ShowIPASaveChanges = false;
         }
 
         private void SaveParsedDefinitionChanges()
         {
             _model.UpdateParsedDefinition(ParsedDefinition, ParsedDefinitionText, ParsedDefinitionChanged);
-            ParsedDefinitionChanged = EditMethod.NotEdited;
+            ParsedDefinitionChanged = TextualEditMethod.NotEdited;
+            ShowParsedDefinitionSaveChanges = false;
         }
 
         private void SaveCoreDefinitionChanges()
         {
             _model.UpdateCoreDefinition(faulty, DefinitionCoreText, CoredDefinitionChanged);
-            CoredDefinitionChanged = EditMethod.NotEdited;
+            CoredDefinitionChanged = TextualEditMethod.NotEdited;
+            ShowCoreDefinitionSaveChanges = false;
         }
 
         private async Task MachineRefreshCoreDefinition()
@@ -264,7 +268,7 @@ namespace Linguine.Tabs
             if (newDef != DefinitionCoreText)
             {
                 DefinitionCoreText = newDef;
-                CoredDefinitionChanged = EditMethod.MachineEdited;
+                CoredDefinitionChanged = TextualEditMethod.MachineEdited;
                 await MachineRefreshParsedDefinition();
 
                 ShowCoreDefinitionSaveChanges = true;
@@ -291,7 +295,7 @@ namespace Linguine.Tabs
             if (newDef != DefinitionCoreText)
             {
                 DefinitionCoreText = newDef;
-                CoredDefinitionChanged = EditMethod.UserEdited;
+                CoredDefinitionChanged = TextualEditMethod.UserEdited;
                 await MachineRefreshParsedDefinition();
                 ShowCoreDefinitionSaveChanges = true;
             } 
@@ -325,7 +329,7 @@ namespace Linguine.Tabs
                 _uiComponents.CanMessage.Show("Machine generated the same parsed definition!");
             }
 
-            ParsedDefinitionChanged = EditMethod.MachineEdited;
+            ParsedDefinitionChanged = TextualEditMethod.MachineEdited;
 
             ButtonsEnabled = true;
         }
@@ -344,7 +348,7 @@ namespace Linguine.Tabs
             if (newDef != ParsedDefinitionText)
             {
                 ParsedDefinitionText = newDef;
-                ParsedDefinitionChanged = EditMethod.UserEdited;
+                ParsedDefinitionChanged = TextualEditMethod.UserEdited;
                 ShowParsedDefinitionSaveChanges = true;
             } 
             else
@@ -362,7 +366,7 @@ namespace Linguine.Tabs
             if (newIpa != IpaPronunciation)
             {
                 IpaPronunciation = newIpa;
-                IpaChanged = EditMethod.MachineEdited;
+                IpaChanged = TextualEditMethod.MachineEdited;
 
                 ShowIPASaveChanges = true;
             } 
@@ -388,7 +392,7 @@ namespace Linguine.Tabs
             if (newIPA != IpaPronunciation)
             {
                 IpaPronunciation = newIPA;
-                IpaChanged = EditMethod.UserEdited;
+                IpaChanged = TextualEditMethod.UserEdited;
 
                 ShowIPASaveChanges = true;
             } 
@@ -407,7 +411,7 @@ namespace Linguine.Tabs
             if (newRoman != RomanisedPronunciation)
             {
                 RomanisedPronunciation = newRoman;
-                RomanisedChanged = EditMethod.MachineEdited;
+                RomanisedChanged = TextualEditMethod.MachineEdited;
 
                 ShowRomanisedSaveChanges = true;
             } else
@@ -433,7 +437,7 @@ namespace Linguine.Tabs
             {
 
                 RomanisedPronunciation = newRomanised;
-                RomanisedChanged = EditMethod.UserEdited;
+                RomanisedChanged = TextualEditMethod.UserEdited;
 
                 ShowRomanisedSaveChanges = true;
             } else

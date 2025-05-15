@@ -15,15 +15,15 @@ namespace Linguine.Tabs.WPF
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is EditMethod em)
+            if (value is TextualEditMethod em)
             {
                 switch (em)
                 {
-                    case EditMethod.NotEdited:
+                    case TextualEditMethod.NotEdited:
                         return Brushes.White;
-                    case EditMethod.MachineEdited:
+                    case TextualEditMethod.MachineEdited:
                         return Brushes.LightGray;
-                    case EditMethod.UserEdited:
+                    case TextualEditMethod.UserEdited:
                         return Brushes.LightBlue;
                     default:
                         throw new NotImplementedException();
