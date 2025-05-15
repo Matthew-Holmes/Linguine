@@ -12,17 +12,20 @@
             <local:EditMethodToBackgroundConverter x:Key="EditMethodToBackgroundConverter"/>
         </DataTemplate.Resources>
         <Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical">
 
                 <TextBlock Text="{Binding Word}" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
 
+                
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"    x:Name="Key"/>
-                        <ColumnDefinition Width="2*"   x:Name="Value"/>
+                        <ColumnDefinition Width="*"     x:Name="Key"/>
+                        <ColumnDefinition Width="2*"    x:Name="Value"/>
                         <ColumnDefinition Width="0.33*" x:Name="RegenButton"/>
                         <ColumnDefinition Width="0.33*" x:Name="CustomValueButton"/>
-                        <ColumnDefinition Width="2*"   x:Name="Pad"/>
+                        <ColumnDefinition Width="*"     x:Name="ChangeSaving"/>
+                        <ColumnDefinition Width="2*"    x:Name="Pad"/>
                     </Grid.ColumnDefinitions>
 
                     <Grid.RowDefinitions>
@@ -52,6 +55,12 @@
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
                     </Button>
 
+                    <Button Grid.Row="0" Grid.Column="4" Width="30" Height="30"
+                            Command="{Binding SaveCoreDefinitionChangesCommand}"
+                            Visibility="{Binding ShowCoreDefinitionSaveChanges, Converter={StaticResource BoolToCollapsedConverter}}">
+                        <TextBlock Text="💾" FontSize="16"/>
+                    </Button>
+
                     <!-- Parsed Definition -->
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Parsed:" VerticalAlignment="Center" Margin="5" Visibility="{Binding ShowParsing, Converter={StaticResource BoolToCollapsedConverter}}"/>
                     <TextBlock Grid.Row="1" Grid.Column="1"
@@ -75,6 +84,12 @@
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
                     </Button>
 
+                    <Button Grid.Row="1" Grid.Column="4" Width="30" Height="30"
+                            Command="{Binding SaveParsedDefinitionChangesCommand}"
+                            Visibility="{Binding ShowParsedDefinitionSaveChanges, Converter={StaticResource BoolToCollapsedConverter}}">
+                        <TextBlock Text="💾" FontSize="16"/>
+                    </Button>
+
                     <!-- IPA Pronunciation -->
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="IPA:" VerticalAlignment="Center" Margin="5"/>
                     <TextBlock Grid.Row="2" Grid.Column="1"
@@ -93,6 +108,12 @@
                             Command="{Binding UserRefreshIpaCommand}"
                             IsEnabled="{Binding ButtonsEnabled}">
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
+                    </Button>
+
+                    <Button Grid.Row="2" Grid.Column="4" Width="30" Height="30"
+                            Command="{Binding SaveIPAChangesCommand}"
+                            Visibility="{Binding ShowIPASaveChanges, Converter={StaticResource BoolToCollapsedConverter}}">
+                        <TextBlock Text="💾" FontSize="16"/>
                     </Button>
 
                     <!-- Romanised Pronunciation -->
@@ -115,8 +136,16 @@
                         <TextBlock Text="✍️" FontSize="16" Margin="0,-4,0,0"/>
                     </Button>
 
+                    <Button Grid.Row="3" Grid.Column="4" Width="30" Height="30"
+                            Command="{Binding SaveRomanisedChangesCommand}"
+                            Visibility="{Binding ShowRomanisedSaveChanges, Converter={StaticResource BoolToCollapsedConverter}}">
+                        <TextBlock Text="💾" FontSize="16"/>
+                    </Button>
+
                 </Grid>
             </StackPanel>
+            </ScrollViewer>
+
         </Grid>
 
     </DataTemplate>
