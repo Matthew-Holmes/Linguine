@@ -14,12 +14,14 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Name="Texts" Grid.Column="0">
-                <TextBlock Text="Texts"/>
-                <ListBox ItemsSource="{Binding AvailableTexts}"
-                         SelectedItem="{Binding SelectedTextName}"/>
-                <Button Content="Import" Command="{Binding ImportNewCommand}" Margin="30"/>
-            </StackPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Name="Texts" Grid.Column="0">
+                    <TextBlock Text="Texts"/>
+                    <ListBox ItemsSource="{Binding AvailableTexts}"
+                             SelectedItem="{Binding SelectedTextName}"/>
+                    <Button Content="Import" Command="{Binding ImportNewCommand}" Margin="30"/>
+                </StackPanel>
+            </ScrollViewer>
 
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
