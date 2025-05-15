@@ -31,6 +31,8 @@ namespace Linguine.Tabs
 
         #region UI properties
 
+        public String Word { get; init; }
+
         public string DefinitionCoreText
         {
             get => _definitionCoreText;
@@ -195,6 +197,8 @@ namespace Linguine.Tabs
             Title = "Repair Definition";
 
             faulty = faultyDef;
+
+            Word = faulty.Word;
 
             ParsedDictionaryDefinition? pdef = _model.GetParsedDictionaryDefinition(faulty);
 
