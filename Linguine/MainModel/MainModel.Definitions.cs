@@ -1,6 +1,7 @@
 ﻿using Agents;
 using Config;
 using DataClasses;
+using Helpers;
 using Linguine.Helpers;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Linguine
 {
     public partial class MainModel
     {
+        #region generation
         internal async Task<String> GenerateNewDefinition(DictionaryDefinition faulty)
         {
             LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;
@@ -62,25 +64,61 @@ namespace Linguine
 
         }
 
+        #endregion
 
-        internal void UpdateRomanised(DictionaryDefinition faulty, string romanisedPronunciation, EditMethod romanisedChanged)
+        #region saving
+        internal void UpdateRomanised(DictionaryDefinition faulty, string romanisedPronunciation, TextualEditMethod romanisedChanged)
         {
-            throw new NotImplementedException();
+            faulty.RomanisedPronuncation = romanisedPronunciation;
+
+            faulty.RomanisedEntryMethod = EntryMethodHelper.NewEntryMethodForTextual(
+                faulty.RomanisedEntryMethod, romanisedChanged);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            context.Update(faulty);
+            context.SaveChanges();
         }
 
-        internal void UpdateIPA(DictionaryDefinition faulty, string ipaPronunciation, EditMethod ipaChanged)
+        internal void UpdateIPA(DictionaryDefinition faulty, string ipaPronunciation, TextualEditMethod ipaChanged)
         {
-            throw new NotImplementedException();
+            faulty.IPAPronunciation = ipaPronunciation;
+
+            faulty.IPAEntryMethod = EntryMethodHelper.NewEntryMethodForTextual(
+                faulty.IPAEntryMethod, ipaChanged);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            context.Update(faulty);
+            context.SaveChanges();
         }
 
-        internal void UpdateParsedDefinition(ParsedDictionaryDefinition parsedDefinition, string parsedDefinitionText, EditMethod parsedDefinitionChanged)
+        internal void UpdateParsedDefinition(ParsedDictionaryDefinition faulty, string parsedDefinitionText, TextualEditMethod parsedDefinitionChanged)
         {
-            throw new NotImplementedException();
+            faulty.ParsedDefinition = parsedDefinitionText;
+
+            faulty.ParsedDefinitionEntryMethod = EntryMethodHelper.NewEntryMethodForTextual(
+                faulty.ParsedDefinitionEntryMethod, parsedDefinitionChanged);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            context.Update(faulty);
+            context.SaveChanges();
         }
 
-        internal void UpdateCoreDefinition(DictionaryDefinition faulty, string definitionCoreText, EditMethod coredDefinitionChanged)
+        internal void UpdateCoreDefinition(DictionaryDefinition faulty, string definitionCoreText, TextualEditMethod coredDefinitionChanged)
         {
-            throw new NotImplementedException();
+            faulty.Definition = definitionCoreText;
+
+            faulty.DefinitionEntryMethod = EntryMethodHelper.NewEntryMethodForTextual(
+                faulty.DefinitionEntryMethod, coredDefinitionChanged);
+
+            using var context = _linguineDbContextFactory.CreateDbContext();
+
+            context.Update(faulty);
+            context.SaveChanges();
         }
+
+        #endregion
     }
 }
