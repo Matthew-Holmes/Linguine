@@ -162,7 +162,13 @@
                            Margin="150,10,10,10"
                            TextWrapping="Wrap"
                            MaxWidth="400"
-                           Visibility="{Binding AnswerSubmitted, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                           Visibility="{Binding AnswerSubmitted, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Needs repair?" Command="{Binding RepairDefinitionCommand}"/>
+                        </ContextMenu>
+                    </TextBlock.ContextMenu>
+                </TextBlock>
             </ScrollViewer>
 
             <!-- Tick and Cross Buttons (Appear Only After Submission) -->

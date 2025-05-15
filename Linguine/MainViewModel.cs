@@ -305,7 +305,7 @@ namespace Linguine
             SelectTab(Tabs.Last());
         }
 
-        internal void BeginDefinitionRepair(DictionaryDefinition? selectedUnitDefinition)
+        internal void BeginDefinitionRepair(DictionaryDefinition selectedUnitDefinition)
         {
             Tabs.Add(new DefinitionRepairViewModel(selectedUnitDefinition, _UIcomponents, _model, this));
             SelectTab(Tabs.Last());

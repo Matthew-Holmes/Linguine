@@ -24,6 +24,7 @@ namespace Linguine.Tabs
         public ICommand PreviousContextCommand     { get; private set; }
         public ICommand PlayCurrentSoundCommand    { get; private set; }
         public ICommand CheckContextCommand        { get; private set; }
+        public ICommand RepairDefinitionCommand    { get; private set; }
         public ICommand NextCommand                { get; private set; }
 
         public bool ShowPlayCurrentSoundButton
@@ -78,11 +79,32 @@ namespace Linguine.Tabs
 
             PlayCurrentSoundCommand = new RelayCommand(() => SoundPlayer?.Play());
 
-            CheckContextCommand = new RelayCommand(() => CheckContext());
-            NextCommand         = new RelayCommand(() => Reset());
+            CheckContextCommand     = new RelayCommand(() => CheckContext());
+            RepairDefinitionCommand = new RelayCommand(() => RepairDefinition());
+            NextCommand             = new RelayCommand(() => Reset());
 
             Reset();
         }
+
+        private void RepairDefinition()
+        {
+            if (!ShowNextButton)
+            {
+                // once we have paused already it will be shown, so if it isn't shown we need to tie up the loose ends
+                // before going and trying to fix the definition
+                // otherwise we will get weirdly long times for answering in the database
+
+                bool correct = _uiComponents.CanVerify.AskYesNo("Before we leave, was your answer correct?");
+
+                _finished = DateTime.Now;
+                _model.RecordTest(_definitionForTesting, _posed, _answered, _finished, correct);
+
+                Pause();
+            }
+
+            _parent.BeginDefinitionRepair(_definitionForTesting.Parent);
+        }
+
 
         private void CheckContext()
         {
