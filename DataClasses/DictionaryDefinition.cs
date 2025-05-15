@@ -14,6 +14,11 @@ namespace DataClasses
         public String? RomanisedPronuncation { get; set; }
 
 
+        public EntryMethod DefinitionEntryMethod { get; set; } = EntryMethod.Machine;
+        public EntryMethod IPAEntryMethod        { get; set; } = EntryMethod.Machine;
+        public EntryMethod RomanisedEntryMethod  { get; set; } = EntryMethod.Machine;
+        
+
         
         public string GetSafeFileName()
         {
