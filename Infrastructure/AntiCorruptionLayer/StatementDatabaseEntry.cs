@@ -28,6 +28,9 @@ namespace Infrastructure
         // compressed TextDecompositions
         public String HeadlessInjectiveDecompositionJSON { get; set; }
         public String HeadlessRootedDecompositionJSON { get; set; }
+
+        public bool IsHiddenFromTesting { get; set; } = false;
+
     }
 
     public class InsertionsJSONConverter : ValueConverter<List<Tuple<int, string>>, string>

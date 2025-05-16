@@ -49,6 +49,8 @@ namespace Infrastructure
             using var context = _dbf.CreateDbContext();
             //context.Attach(def);
 
+            // TODO - ignore hidden entries
+
             List<StatementDefinitionNode> nodes = context.StatementDefinitions
                 .Where(n => n.DefinitionKey == def.DatabasePrimaryKey)
                 .Include(n => n.StatementDatabaseEntry)
