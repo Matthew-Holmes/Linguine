@@ -72,6 +72,5 @@
             _injectiveDecomposition = injective;
             _rootedDecomposition = rooted;
         }
-
      }
 }

@@ -26,6 +26,7 @@ namespace Linguine.Tabs
         public ICommand CheckContextCommand        { get; private set; }
         public ICommand RepairDefinitionCommand    { get; private set; }
         public ICommand NextCommand                { get; private set; }
+        public ICommand HideContextCommand         { get; private set; }
 
         public bool ShowPlayCurrentSoundButton
         {
@@ -82,8 +83,18 @@ namespace Linguine.Tabs
             CheckContextCommand     = new RelayCommand(() => CheckContext());
             RepairDefinitionCommand = new RelayCommand(() => RepairDefinition());
             NextCommand             = new RelayCommand(() => Reset());
-
+            HideContextCommand      = new RelayCommand(() => HideSelectedContext());
             Reset();
+        }
+
+        private void HideSelectedContext()
+        {
+            if (_uiComponents.CanVerify.AskYesNo("Are you sure you want to hide this example from future testing?"))
+            {
+                WordInContext wic = _definitionForTesting.Contexts[_currentContextId];
+
+                _model.HideStatementForTesting(wic.Parent);
+            }
         }
 
         private void RepairDefinition()

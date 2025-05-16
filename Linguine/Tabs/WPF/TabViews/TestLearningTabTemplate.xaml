@@ -41,19 +41,25 @@
                                 Margin="0"
                                 MaxHeight="90">
 
-                    <TextBlock FontSize="16"
-                                TextWrapping="Wrap"
-                                TextAlignment="Center">
-                        <TextBlock.Inlines>
-                            <Run Text="{Binding CurrentContext.Item1, Mode=OneWay}" /><Run Text="{Binding CurrentContext.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/><Run Text="{Binding CurrentContext.Item3, Mode=OneWay}" />
-                        </TextBlock.Inlines>
-                        <TextBlock.ContextMenu>
+                    <RichTextBox IsReadOnly="True"
+             BorderThickness="0"
+             Background="Transparent"
+             FontSize="16"
+             IsDocumentEnabled="True">
+                        <FlowDocument TextAlignment="Center">
+                            <Paragraph>
+                                <Run Text="{Binding CurrentContext.Item1, Mode=OneWay}" /><Run Text="{Binding CurrentContext.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/><Run Text="{Binding CurrentContext.Item3, Mode=OneWay}" />
+                            </Paragraph>
+                        </FlowDocument>
+                        <RichTextBox.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Is this right?" Command="{Binding CheckContextCommand}"/>
+                                <MenuItem Header="Is this right?" Command="{Binding CheckContextCommand}" />
+                                <MenuItem Header="Hide this example" Command="{Binding HideContextCommand}" />
                             </ContextMenu>
-                        </TextBlock.ContextMenu>
-                    </TextBlock>
-                        
+                        </RichTextBox.ContextMenu>
+                    </RichTextBox>
+
+
                 </ScrollViewer>
             </Grid>
 

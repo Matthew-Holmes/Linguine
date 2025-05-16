@@ -280,6 +280,23 @@ namespace Linguine
             return true;
         }
 
+        internal void HideStatementForTesting(Statement parent)
+        {
+            using var context = LinguineFactory.CreateDbContext();
 
+            StatementDatabaseEntry? entry = context.Statements.Where(s => s.DatabasePrimaryKey == parent.ID).FirstOrDefault();
+
+            if (entry is null)
+            {
+                Log.Error("tried to hide non-existant statement");
+                return;
+            }
+
+            entry.IsHiddenFromTesting = true;
+
+            context.Update(entry);
+
+            context.SaveChanges();
+        }
     }
 }
