@@ -8,6 +8,7 @@ using DataClasses;
 using Linguine.Helpers;
 using System.Windows.Input;
 using Config;
+using System.Windows;
 
 namespace Linguine.Tabs
 {
@@ -283,7 +284,10 @@ namespace Linguine.Tabs
 
         private async Task PromptUserCoreDefinition()
         {
-            String newDef = _uiComponents.CanGetText.GetResponse("enter the custom definition");
+            string newDef = await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                return _uiComponents.CanGetText.GetResponse("Enter the custom definition");
+            });
 
             if (String.IsNullOrWhiteSpace(newDef)) { return; }
 
@@ -336,7 +340,7 @@ namespace Linguine.Tabs
 
         private void PromptUserParsedDefinition()
         {
-            String newDef = _uiComponents.CanGetText.GetResponse("enter the custom definition");
+            String newDef = _uiComponents.CanGetText.GetResponse("enter the custom parsed definition");
 
             if (String.IsNullOrWhiteSpace(newDef)) { return; }
 
