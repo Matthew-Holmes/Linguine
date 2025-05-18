@@ -10,9 +10,14 @@ namespace DataClasses
         public int ID { get; set; }
         public String Word { get; set; }
         public String Definition { get; set; }
+
+        // TODO - keep a history of previous definitions used, in the cases when the user overwrites it
+
         public String? IPAPronunciation { get; set; }
         public String? RomanisedPronuncation { get; set; }
 
+
+        // TODO - add source option - dictionary vs synthetic
 
         public EntryMethod DefinitionEntryMethod { get; set; } = EntryMethod.Machine;
         public EntryMethod IPAEntryMethod        { get; set; } = EntryMethod.Machine;
