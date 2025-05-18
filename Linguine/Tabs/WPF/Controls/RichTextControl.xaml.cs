@@ -59,18 +59,39 @@ namespace Linguine.Tabs.WPF.Controls
 
         private void CreateHyperlinkStyle()
         {
-            // Create the style for the hyperlinks
             hyperlinkStyle = new Style(typeof(Hyperlink));
             hyperlinkStyle.Setters.Add(new Setter(Hyperlink.FocusVisualStyleProperty, null));
             hyperlinkStyle.Setters.Add(new Setter(Hyperlink.ForegroundProperty, Brushes.Black));
             hyperlinkStyle.Setters.Add(new Setter(TextBlock.TextDecorationsProperty, null));
 
-            Trigger mouseOverTrigger = new Trigger { Property = Hyperlink.IsMouseOverProperty, Value = true };
-            mouseOverTrigger.Setters.Add(new Setter(Hyperlink.ForegroundProperty, Brushes.Red));
-            //mouseOverTrigger.Setters.Add(new Setter(TextBlock.TextDecorationsProperty, TextDecorations.Underline));
-
-            hyperlinkStyle.Triggers.Add(mouseOverTrigger);
+            // Use attached event handlers instead of triggers
+            hyperlinkStyle.Setters.Add(new EventSetter(Hyperlink.MouseEnterEvent, new MouseEventHandler(Hyperlink_MouseEnter)));
+            hyperlinkStyle.Setters.Add(new EventSetter(Hyperlink.MouseLeaveEvent, new MouseEventHandler(Hyperlink_MouseLeave)));
         }
+
+        private static readonly Brush DefaultHyperlinkBrush = Brushes.Black;
+        private static readonly Brush HoverHyperlinkBrush = Brushes.Red;
+
+        private static void Hyperlink_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is Hyperlink link)
+            {
+                link.Foreground = HoverHyperlinkBrush;
+                // Uncomment if you want underline on hover
+                // link.TextDecorations = TextDecorations.Underline;
+            }
+        }
+
+        private static void Hyperlink_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is Hyperlink link)
+            {
+                link.Foreground = DefaultHyperlinkBrush;
+                // Uncomment if you want to remove underline on leave
+                // link.TextDecorations = null;
+            }
+        }
+
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -211,12 +232,13 @@ namespace Linguine.Tabs.WPF.Controls
                     }
                     else
                     {
-                        para.Inlines.Add(new Hyperlink(highlightRun)
+                        var hyperlink = new Hyperlink(highlightRun)
                         {
                             Style = hyperlinkStyle,
-                        });
-                        ((Hyperlink)para.Inlines.LastInline).Click += (sender, args)
-                            => OnUnitClick(Tuple.Create(section.Item4, section.Item5));
+                            Tag = Tuple.Create(section.Item4, section.Item5),
+                        };
+                        hyperlink.Click += Hyperlink_Click;
+                        para.Inlines.Add(hyperlink);
                     }
                 }
 
@@ -232,6 +254,15 @@ namespace Linguine.Tabs.WPF.Controls
             doc.Blocks.Add(para);
             TextDisplayRegion.Document = doc;
         }
+
+        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Hyperlink hyperlink && hyperlink.Tag is Tuple<int, int>data)
+            {
+                OnUnitClick(data);
+            }
+        }
+
 
         private void OnUnitClick(Tuple<int, int> tuple)
         {
