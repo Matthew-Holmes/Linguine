@@ -19,16 +19,20 @@ namespace Learning.Strategy
             _tacticTypeToIndex = tacticTypes.Select((type, i) => new { type, i })
                                             .ToDictionary(x => x.type, x => x.i);
         }
-        //                           DiagQuad        bias
+        //                           DiagQuad          bias
         //                         Linear  TopTriangle       
-        internal int FeatureCount => 8 + 8+((8*8-8)/2) + 1 + _tacticTypeToIndex.Count;
+        internal int FeatureCount => 10 + 10+((10*10-10)/2) + 1 + _tacticTypeToIndex.Count;
 
         internal Vector<double> Vectorize(FollowingSessionDatum datum)
         {
             var features = new List<double>();
 
+
+            // different rates since coefficients will go into the log as powers
             var def = datum.defFeatures;
-            double intervalLogRatio = Math.Log(datum.intervalDays / (def.halfLifeDays + 1e-6));
+            double intervalLogRatio1 = Math.Log(1.0 * datum.intervalDays / (def.halfLifeDays + 1e-6));
+            double intervalLogRatio2 = Math.Log(2.0 * datum.intervalDays / (def.halfLifeDays + 1e-6));
+            double intervalLogRatio3 = Math.Log(0.5 * datum.intervalDays / (def.halfLifeDays + 1e-6));
 
 
             var baseFeatures = new List<double>
@@ -40,7 +44,9 @@ namespace Learning.Strategy
                 def.avgTimeBetweenSessionsDays,
                 def.halfLifeDays,
                 def.zipfScore,
-                intervalLogRatio
+                intervalLogRatio1,
+                intervalLogRatio2,
+                intervalLogRatio3,
             };
 
             features.AddRange(baseFeatures);
@@ -87,6 +93,8 @@ namespace Learning.Strategy
                 "halfLifeDays",
                 "zipfScore",
                 "log(interval / halfLife)",
+                "log(2.0 * interval / halfLife)",
+                "log(0.5 * interval / halfLife)",
             };
 
             var productNames = new List<string>();
@@ -104,7 +112,7 @@ namespace Learning.Strategy
 
             names.Add("bias");
 
-
+            // TODO - add the single features each per tactic as extra predictors
             // Add one-hot encoded tactic names in order of their index
             var orderedTactics = _tacticTypeToIndex.OrderBy(kv => kv.Value);
             foreach (var kvp in orderedTactics)
