@@ -6,6 +6,6 @@
              xmlns:local="clr-namespace:Linguine.Tabs.WPF.Controls"
              mc:Ignorable="d">
     <Grid>
-        <TextBlock Name="TextDisplayRegion" TextWrapping="Wrap" Margin="10"/>
+        <FlowDocumentReader x:Name="TextDisplayRegion" ViewingMode="Scroll" Margin="10"/>
     </Grid>
 </UserControl>

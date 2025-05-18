@@ -40,7 +40,6 @@ namespace Linguine.Tabs.WPF.Controls
         // adds highlights and hyperlinks
 
         private int LocalCursor;
-        private int EndOfPage;
         private String FullText;
         private String PageText;
         private List<int> SortedStatementStartIndices;
@@ -78,9 +77,6 @@ namespace Linguine.Tabs.WPF.Controls
         {
             if (e.OldValue is TextualMediaViewerViewModel oldViewModel)
             {
-                oldViewModel.PageForwards  -= HandlePageForwards;
-                oldViewModel.PageBackwards -= HandlePageBackwards;
-
                 oldViewModel.StatementsCoveringPageChanged -= ProcessStatementInformation;
                 oldViewModel.UnderlyingStatementsChanged   -= UnderlyingStatementsChanged;
             }
@@ -91,41 +87,26 @@ namespace Linguine.Tabs.WPF.Controls
 
                 FullText                    = newViewModel.FullText;
                 SortedStatementStartIndices = newViewModel.SortedStatementStartIndices;
-                PageLocatedCommand          = newViewModel.PageLocatedCommand;
                 UnitSelectedCommand         = newViewModel.UnitSelectedCommand;
                 LocalCursor                 = newViewModel.LocalCursor;
 
                 newViewModel.StatementsCoveringPageChanged += ProcessStatementInformation;
                 newViewModel.UnderlyingStatementsChanged   += UnderlyingStatementsChanged;
 
-                if (IsLoaded)
-                {
-                    // if not loaded the text display region is 0 tall and nothing displays
-                    CalculatePageFromStartIndex(LocalCursor); // populates EndOfPage
-                    PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage)); // updates the ViewModel
-                }
-
-                newViewModel.PageForwards  += HandlePageForwards;
-                newViewModel.PageBackwards += HandlePageBackwards;
+                // if not loaded the text display region is 0 tall and nothing displays
+                ProcessStatementInformation(this, newViewModel.StatementsCoveringPage);
             }
         }
 
         private void UnderlyingStatementsChanged(object? sender, List<int> e)
         {
             SortedStatementStartIndices = e;
-
-            // redraw the page
-            CalculatePageFromStartIndex(LocalCursor);
-            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage)); 
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             if (this.DataContext is TextualMediaViewerViewModel viewModel)
             {
-                // OnLoaded called after DataContext updates, so these won't be doing weird stuff
-                CalculatePageFromStartIndex(LocalCursor); // populates EndOfPage
-                PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage)); // updates the ViewModel
                 return;
             }
             else
@@ -192,11 +173,11 @@ namespace Linguine.Tabs.WPF.Controls
             }
             #endregion
 
-            // clear so we can use the fancy placement
-            TextDisplayRegion.Text = ""; 
-            TextDisplayRegion.Inlines.Clear();
+            FlowDocument doc = new FlowDocument();
+            Paragraph para = new Paragraph();
+            // add Runs/Hyperlinks to para.Inlines here
 
-            int currentIndex = LocalCursor;
+            int currentIndex = 0; // TODO - sort this out
 
             for (int i = 0; i != highlights.Count; i++)
             {
@@ -207,11 +188,11 @@ namespace Linguine.Tabs.WPF.Controls
                 // Add unhighlighted text before the highlighted section
                 if (currentIndex < start)
                 {
-                    TextDisplayRegion.Inlines.Add(new Run(FullText.Substring(currentIndex, start - currentIndex)));
+                    para.Inlines.Add(new Run(FullText.Substring(currentIndex, start - currentIndex)));
                 }
 
                 // Add highlighted text
-                if (start <= end && end <= EndOfPage)
+                if (start <= end)
                 {
                     if (FullText[end] == '\r' && FullText[end+1] == '\n')
                     {
@@ -224,15 +205,15 @@ namespace Linguine.Tabs.WPF.Controls
                     if (section.Item5 == -1)
                     {
                         // indicates no unit here
-                        TextDisplayRegion.Inlines.Add(highlightRun);
+                        para.Inlines.Add(highlightRun);
                     }
                     else
                     {
-                        TextDisplayRegion.Inlines.Add(new Hyperlink(highlightRun)
+                        para.Inlines.Add(new Hyperlink(highlightRun)
                         {
                             Style = hyperlinkStyle,
                         });
-                        ((Hyperlink)TextDisplayRegion.Inlines.LastInline).Click += (sender, args) 
+                        ((Hyperlink)para.Inlines.LastInline).Click += (sender, args) 
                             => OnUnitClick(Tuple.Create(section.Item4, section.Item5));
                     }
                 }
@@ -241,10 +222,13 @@ namespace Linguine.Tabs.WPF.Controls
             }
 
             // Add any remaining unhighlighted text
-            if (currentIndex <= EndOfPage)
+            if (currentIndex < FullText.Length - 1)
             {
-                TextDisplayRegion.Inlines.Add(new Run(FullText.Substring(currentIndex, EndOfPage - currentIndex + 1)));
+                para.Inlines.Add(new Run(FullText.Substring(currentIndex, FullText.Length - 1 - currentIndex)));
             }
+
+            doc.Blocks.Add(para);
+            TextDisplayRegion.Document = doc;
         }
 
         private void OnUnitClick(Tuple<int, int> tuple)
@@ -255,272 +239,8 @@ namespace Linguine.Tabs.WPF.Controls
         #endregion
 
 
-        #region paging
-
-        private void HandlePageBackwards(object? sender, int pages)
-        {
-            if (pages <= 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i != pages; i++)
-            {
-                CalculatePageFromEndIndex(LocalCursor - 1);
-            }
-
-            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
-        }
-
-        private void HandlePageForwards(object? sender, int pages)
-        {
-            if (pages <= 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i != pages; i++)
-            {
-                CalculatePageFromStartIndex(EndOfPage + 1);
-            }
-
-            PageLocatedCommand?.Execute(Tuple.Create(LocalCursor, EndOfPage));
-        }
 
 
-
-        private String ClippedSubstring(String str, int start, int span)
-        {
-            var indices = DoClip(str, start, span);
-            return str.Substring(indices.Item1, indices.Item2);
-        }
-
-        public Tuple<int,int> DoClip(String str, int start, int span)
-        {
-            start = Math.Max(start, 0);
-            start = Math.Min(str.Length - 1, start);
-
-            span = Math.Max(span, 0);
-            span = Math.Min(span, str.Length - start - 1);
-
-            return Tuple.Create(start, span);
-        }
-
-        int _charsPerPageStartGuess = 1000;
-        private void CalculatePageFromStartIndex(int newStartIndex)
-        {
-            if (newStartIndex >= FullText.Length) { return; }
-
-            TextDisplayRegion.Inlines.Clear();
-
-            int maxHeight = (int)TextDisplayRegion.ActualHeight;
-
-            Typeface typeface = CreateTypeface();
-
-            FormattedText formattedText;
-
-            while (true)
-            {
-                formattedText = new FormattedText(
-                    ClippedSubstring(FullText, newStartIndex, _charsPerPageStartGuess),
-                    System.Globalization.CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight,
-                    typeface,
-                    TextDisplayRegion.FontSize,
-                    Brushes.Black,
-                    new NumberSubstitution(),
-                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
-
-                bool clipped = FullText.Length < newStartIndex + _charsPerPageStartGuess;
-
-                if (formattedText.Height < maxHeight && !clipped /* if at the end then a small page is fine */)
-                {
-                    _charsPerPageStartGuess = (int)(_charsPerPageStartGuess * 1.618);
-                } 
-                else
-                {
-                    break;
-                }
-            }
-
-            double ratioOnDisplay = maxHeight / formattedText.Height;
-            double charSpan = _charsPerPageStartGuess * ratioOnDisplay;
-
-            while (true)
-            {
-                formattedText = new FormattedText(
-                    ClippedSubstring(FullText, newStartIndex, (int)charSpan),
-                    System.Globalization.CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight,
-                    typeface,
-                    TextDisplayRegion.FontSize,
-                    Brushes.Black,
-                    new NumberSubstitution(),
-                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
-
-                if (formattedText.Height > maxHeight && charSpan != 0 /* no infinite loop*/)
-                {
-                    charSpan = charSpan * 0.9; 
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            int span = (int)charSpan;
-
-            span = Math.Min(span, FullText.Length - newStartIndex - 1);
-
-            if (SortedStatementStartIndices.Count > 0 && SortedStatementStartIndices.Last() > newStartIndex + span)
-            {
-                // if we have statements use them to for page intervals
-                int lastStatementStartListIndex = BinarySearchForLargestIndexBefore(newStartIndex + span);
-                int lastStatementStartIndex = SortedStatementStartIndices[lastStatementStartListIndex];
-                if (lastStatementStartIndex > newStartIndex + span - 100)
-                {
-                    span = lastStatementStartIndex - newStartIndex;
-                }
-            }
-            else
-            {
-                // try to get somewhere to break that is less jarring
-                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& span > 0; i++)
-                {
-                    if (Char.IsWhiteSpace(FullText[newStartIndex + span - 1]))
-                    {
-                        break;
-                    }
-                    else if (Char.IsPunctuation(FullText[newStartIndex + span - 1]))
-                    {
-                        break;
-                    }
-                    span--;
-                }
-            }
-
-            var bounds = DoClip(FullText, newStartIndex, span);
-
-            PageText = FullText.Substring(bounds.Item1, bounds.Item2);
-            TextDisplayRegion.Text = PageText;
-
-            LocalCursor = bounds.Item1;
-            EndOfPage   = bounds.Item1 + bounds.Item2 - 1;
-        }
-
-        private void CalculatePageFromEndIndex(int newEndIndex)
-        {
-            if (newEndIndex < 0) { return; }
-
-            TextDisplayRegion.Inlines.Clear();
-
-            int maxHeight = (int)TextDisplayRegion.ActualHeight;
-
-            Typeface typeface = CreateTypeface();
-
-            FormattedText formattedText;
-
-            while (true)
-            {
-                formattedText = new FormattedText(
-                    ClippedSubstring(FullText, newEndIndex - _charsPerPageStartGuess + 1, _charsPerPageStartGuess),
-                    System.Globalization.CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight,
-                    typeface,
-                    TextDisplayRegion.FontSize,
-                    Brushes.Black,
-                    new NumberSubstitution(),
-                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
-
-                bool clipped = FullText.Length < newEndIndex + _charsPerPageStartGuess;
-
-                if (formattedText.Height < maxHeight && !clipped /* if at the end then a small page is fine */)
-                {
-                    _charsPerPageStartGuess = (int)(_charsPerPageStartGuess * 1.618);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            double ratioOnDisplay = maxHeight / formattedText.Height;
-            double charSpan = _charsPerPageStartGuess * ratioOnDisplay;
-
-            if (newEndIndex - charSpan <= 0)
-            {
-                CalculatePageFromStartIndex(0); // display the full first page
-                return;
-            }
-
-
-            while (true)
-            {
-                formattedText = new FormattedText(
-                    ClippedSubstring(FullText, newEndIndex - (int)charSpan + 1, (int)charSpan),
-                    System.Globalization.CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight,
-                    typeface,
-                    TextDisplayRegion.FontSize,
-                    Brushes.Black,
-                    new NumberSubstitution(),
-                    VisualTreeHelper.GetDpi(TextDisplayRegion).PixelsPerDip);
-
-                if (formattedText.Height > maxHeight && charSpan != 0 /* no infinite loop*/)
-                {
-                    charSpan = charSpan * 0.9;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            int span = (int)charSpan;
-            span = Math.Max(span, newEndIndex - LocalCursor + 1);
-
-            if (SortedStatementStartIndices.Count != 0 && SortedStatementStartIndices.Last() > newEndIndex - span)
-            {
-                // if we have statements use them to for page intervals
-                int firstStatementStartListIndex = BinarySearchForLargestIndexBefore(newEndIndex - span);
-
-                // edge case at the end, we'll just use the whitespace method
-                if (firstStatementStartListIndex + 1 < SortedStatementStartIndices.Count)
-                {
-                    int firstStatementStartIndex = SortedStatementStartIndices[firstStatementStartListIndex + 1];
-                    // use the first statement after
-                    if (firstStatementStartIndex > newEndIndex - span - 100)
-                    {
-                        span = newEndIndex - firstStatementStartIndex + 1;
-                    }
-                }
-            }
-            else
-            {
-
-                // try to get somewhere to break that is less jarring
-                for (int i = 0; i != 50 /* don't strip more than 50 chars */&& span >= 0; i++)
-                {
-                    if (Char.IsWhiteSpace(FullText[newEndIndex - span]))
-                    {
-                        break;
-                    }
-                    else if (Char.IsPunctuation(FullText[newEndIndex - span]))
-                    {
-                        break;
-                    }
-                    charSpan--;
-                }
-            }
-
-            var bounds = DoClip(FullText, newEndIndex - span + 1, span);
-
-            PageText = FullText.Substring(bounds.Item1, bounds.Item2);
-            TextDisplayRegion.Text = PageText;
-
-            LocalCursor = bounds.Item1;
-            EndOfPage   = bounds.Item1 + bounds.Item2 - 1;
-        }
 
         private Typeface CreateTypeface()
         {
@@ -557,11 +277,5 @@ namespace Linguine.Tabs.WPF.Controls
 
             return mid;
         }
-
-
-        #endregion
-
     }
-
-
 }

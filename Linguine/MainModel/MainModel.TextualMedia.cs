@@ -8,6 +8,7 @@ using System.Linq;
 using LearningExtraction;
 using Serilog;
 using System.Windows.Forms;
+using MathNet.Numerics.LinearAlgebra.Factorization;
 
 namespace Linguine
 {
@@ -44,6 +45,14 @@ namespace Linguine
             ret.Sort();
 
             return ret;
+        }
+
+        internal List<Statement>? GetAllStatementsFor(int sessionId)
+        {
+            var session = GetSessionFromID(sessionId);
+            if (session is null) { return null; }
+
+            return SM.Managers!.Statements.GetAllStatementsFor(session.TextualMedia);
         }
 
 

@@ -183,11 +183,9 @@ namespace Linguine.Tabs
             SortedStatementStartIndices =   model.GetSortedStatementStartIndicesFromSessionID(sessionId) 
                     ?? throw new Exception("couldn't find session");
 
-            PageLocatedCommand  = new RelayCommand<Tuple<int, int>>(OnPageLocated);
             UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
             LocalCursor = model.GetCursor(SessionID);
 
-            SetupTraversalCommands();
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
 
             ShowSaveWordButton = false;
@@ -197,6 +195,13 @@ namespace Linguine.Tabs
             RepairSelectedDefinitionCommand  = new RelayCommand(() => RepairSelectedDefinition());
             ResolveSelectedDefinitionCommand = new RelayCommand(() => ResolveSelectedDefinition());
             WrongDefinitionCommand           = new RelayCommand(() => WrongDefinition());
+
+
+            List<Statement>? toUpdate = _model.GetAllStatementsFor(sessionId);
+
+            StatementsCoveringPage = toUpdate;
+
+            StatementsCoveringPageChanged?.Invoke(this, StatementsCoveringPage);
         }
 
         private void WrongDefinition()
@@ -350,49 +355,10 @@ namespace Linguine.Tabs
         }
 
         #region traversal
-        public ICommand StepRightCommand { get; set; }
-        public ICommand StepLeftCommand { get; set; }
-        public ICommand BigStepRightCommand { get; set; }
-        public ICommand BigStepLeftCommand { get; set; }
-
-        private void SetupTraversalCommands()
-        {
-            StepLeftCommand = new RelayCommand(() => StepBack(1));
-            StepRightCommand = new RelayCommand(() => StepForward(1));
-            BigStepLeftCommand = new RelayCommand(() => StepBack(10));
-            BigStepRightCommand = new RelayCommand(() => StepForward(10));
-        }
 
 
-        private void StepForward(int pages)
-        {
-            PageForwards?.Invoke(this, pages);
-        }
 
-        private void StepBack(int pages)
-        {
-            PageBackwards?.Invoke(this, pages);
-        }
 
-        private void OnPageLocated(Tuple<int,int> indices)
-        {
-            LocalCursor = indices.Item1;
-
-            _model.CursorMoved(SessionID, indices.Item1); // now we are static can update the database
-
-            List<Statement>? toUpdate = _model.GetStatementsCoveringRange(
-                SessionID, indices.Item1, indices.Item2);
-
-            if (toUpdate == null)
-            {
-                _uiComponents.CanMessage.Show("statements covering page call failed");
-                return;
-            }
-
-            StatementsCoveringPage = toUpdate;
-
-            StatementsCoveringPageChanged?.Invoke(this, StatementsCoveringPage);
-        }
         #endregion
     }
 }
