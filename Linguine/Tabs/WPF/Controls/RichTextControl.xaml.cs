@@ -42,7 +42,6 @@ namespace Linguine.Tabs.WPF.Controls
         private int LocalCursor;
         private String FullText;
         private String PageText;
-        private List<int> SortedStatementStartIndices;
         private ICommand PageLocatedCommand;
         private ICommand UnitSelectedCommand;
 
@@ -77,30 +76,34 @@ namespace Linguine.Tabs.WPF.Controls
         {
             if (e.OldValue is TextualMediaViewerViewModel oldViewModel)
             {
-                oldViewModel.StatementsCoveringPageChanged -= ProcessStatementInformation;
-                oldViewModel.UnderlyingStatementsChanged   -= UnderlyingStatementsChanged;
+                oldViewModel.UnderlyingStatementsChanged -= UnderlyingStatementsChanged;
             }
 
             if (e.NewValue is TextualMediaViewerViewModel newViewModel)
             {
                 // order matters here, don't move reorder unless sure
 
-                FullText                    = newViewModel.FullText;
-                SortedStatementStartIndices = newViewModel.SortedStatementStartIndices;
-                UnitSelectedCommand         = newViewModel.UnitSelectedCommand;
-                LocalCursor                 = newViewModel.LocalCursor;
+                FullText = newViewModel.FullText;
+                UnitSelectedCommand = newViewModel.UnitSelectedCommand;
+                LocalCursor = newViewModel.LocalCursor;
 
-                newViewModel.StatementsCoveringPageChanged += ProcessStatementInformation;
-                newViewModel.UnderlyingStatementsChanged   += UnderlyingStatementsChanged;
+                newViewModel.UnderlyingStatementsChanged += UnderlyingStatementsChanged;
 
                 // if not loaded the text display region is 0 tall and nothing displays
-                ProcessStatementInformation(this, newViewModel.StatementsCoveringPage);
+                ProcessStatementInformation(this, newViewModel.TextStatements);
             }
         }
 
-        private void UnderlyingStatementsChanged(object? sender, List<int> e)
+        private void UnderlyingStatementsChanged(object? sender, EventArgs e)
         {
-            SortedStatementStartIndices = e;
+            if (sender is TextualMediaViewerViewModel tmv_mv)
+            {
+                ProcessStatementInformation(this, tmv_mv.TextStatements);
+            }
+            else
+            {
+                throw new Exception("wrong sender!");
+            }
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -116,9 +119,8 @@ namespace Linguine.Tabs.WPF.Controls
         }
 
         Brush faintGreyBrush = new SolidColorBrush(Color.FromArgb(20, 128, 128, 128));
-        Brush faintRedBrush  = new SolidColorBrush(Color.FromArgb(20, 255, 0,   0));
+        Brush faintRedBrush  = new SolidColorBrush(Color.FromArgb(20, 255, 0, 0));
 
-        #region typesetting
 
         private void ProcessStatementInformation(object? sender, List<Statement> statementsCoveringPage)
         {
@@ -142,7 +144,7 @@ namespace Linguine.Tabs.WPF.Controls
                 // TODO - empty units
                 if (unitStarts.Count == 0)
                 {
-                    highlights.Add(Tuple.Create(start, end, faintGreyBrush, j , -1)); continue;
+                    highlights.Add(Tuple.Create(start, end, faintGreyBrush, j, -1)); continue;
                 }
 
                 // initial grey highlight
@@ -157,10 +159,10 @@ namespace Linguine.Tabs.WPF.Controls
                     highlights.Add(Tuple.Create(unitStarts[i], unitStarts[i] + unitLengths[i] - 1, faintRedBrush, j, i));
 
                     // grey after
-                    if (i != unitStarts.Count - 1 && unitStarts[i] + unitLengths[i] < unitStarts[i+1])
+                    if (i != unitStarts.Count - 1 && unitStarts[i] + unitLengths[i] < unitStarts[i + 1])
                     {
                         highlights.Add(Tuple.Create(
-                            unitStarts[i] + unitLengths[i], unitStarts[i + 1] - 1, faintGreyBrush, j , -1));
+                            unitStarts[i] + unitLengths[i], unitStarts[i + 1] - 1, faintGreyBrush, j, -1));
                     }
                 }
 
@@ -194,7 +196,7 @@ namespace Linguine.Tabs.WPF.Controls
                 // Add highlighted text
                 if (start <= end)
                 {
-                    if (FullText[end] == '\r' && FullText[end+1] == '\n')
+                    if (FullText[end] == '\r' && FullText[end + 1] == '\n')
                     {
                         end++; // don't split these chars as the agents sometimes like to do
                     }
@@ -213,12 +215,12 @@ namespace Linguine.Tabs.WPF.Controls
                         {
                             Style = hyperlinkStyle,
                         });
-                        ((Hyperlink)para.Inlines.LastInline).Click += (sender, args) 
+                        ((Hyperlink)para.Inlines.LastInline).Click += (sender, args)
                             => OnUnitClick(Tuple.Create(section.Item4, section.Item5));
                     }
                 }
 
-                currentIndex = end+1;
+                currentIndex = end + 1;
             }
 
             // Add any remaining unhighlighted text
@@ -234,48 +236,6 @@ namespace Linguine.Tabs.WPF.Controls
         private void OnUnitClick(Tuple<int, int> tuple)
         {
             UnitSelectedCommand?.Execute(tuple);
-        }
-
-        #endregion
-
-
-
-
-
-        private Typeface CreateTypeface()
-        {
-            return new Typeface(
-                TextDisplayRegion.FontFamily,
-                TextDisplayRegion.FontStyle,
-                TextDisplayRegion.FontWeight,
-                TextDisplayRegion.FontStretch);
-        }
-
-
-
-        int BinarySearchForLargestIndexBefore(int target)
-        {
-            int left = 0;
-            int right = SortedStatementStartIndices.Count - 1;
-
-            int mid = 0;
-            while (left <= right)
-            {
-                mid = left + (right - left) / 2;
-
-                if (SortedStatementStartIndices[mid] < target)
-                {
-                    // Move to the right half to potentially find a larger value
-                    left = mid + 1;
-                }
-                else
-                {
-                    // If _statementsStartIndices[mid] >= target, move to the left half
-                    right = mid - 1;
-                }
-            }
-
-            return mid;
         }
     }
 }

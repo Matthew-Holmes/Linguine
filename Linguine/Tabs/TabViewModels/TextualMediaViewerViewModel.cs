@@ -15,28 +15,9 @@ namespace Linguine.Tabs
         public readonly int SessionID;
         public String FullText { get; set; }
 
-
-        // ****************** UI Interaction Properties ************************
-        // they use custom events, and are used to handle paging 
-        // since only the UI will be able to tell how much of the text can
-        // be displayed on the given display region
-
         public int LocalCursor;
 
-        // UI handles these, can do multiple page steps if desired
-        public event EventHandler<int> PageForwards;
-        public event EventHandler<int> PageBackwards;
-
-        // this is used by the UI to choose where to break the text
-        public List<int> SortedStatementStartIndices;
-
-        // the UI then invokes this when it has done paging
-        public ICommand PageLocatedCommand { get; set; }
-
-        // ViewModel then raises this once has pulled the statements covering
-        // the page displayed
-        public event EventHandler<List<Statement>> StatementsCoveringPageChanged;
-        public List<Statement> StatementsCoveringPage;
+        public List<Statement> TextStatements;
 
         // the user can then select a unit to see its details
         public ICommand UnitSelectedCommand { get; internal set; }
@@ -46,9 +27,7 @@ namespace Linguine.Tabs
 
         // invoke this to trigger a redraw, e.g. once a processing step
         // has been completed
-        public event EventHandler<List<int>> UnderlyingStatementsChanged;
-
-        // *********************************************************************        
+        public event EventHandler UnderlyingStatementsChanged;
 
 
         private string _selectedUnitText;
@@ -180,8 +159,6 @@ namespace Linguine.Tabs
             TabClosed += (s,e) => model.CloseSession(sessionId);
 
             FullText = model.GetFullTextFromSessionID(sessionId) ?? throw new Exception("couldn't find session");
-            SortedStatementStartIndices =   model.GetSortedStatementStartIndicesFromSessionID(sessionId) 
-                    ?? throw new Exception("couldn't find session");
 
             UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
             LocalCursor = model.GetCursor(SessionID);
@@ -198,10 +175,7 @@ namespace Linguine.Tabs
 
 
             List<Statement>? toUpdate = _model.GetAllStatementsFor(sessionId);
-
-            StatementsCoveringPage = toUpdate;
-
-            StatementsCoveringPageChanged?.Invoke(this, StatementsCoveringPage);
+            TextStatements = toUpdate;
         }
 
         private void WrongDefinition()
@@ -294,7 +268,7 @@ namespace Linguine.Tabs
             int statementIndex = tuple.Item1;
             int unitIndex = tuple.Item2;
 
-            Statement statement = StatementsCoveringPage[statementIndex];
+            Statement statement = TextStatements[statementIndex];
 
             SelectedStatement = statement;
             SelectedUnitIndex = unitIndex;
@@ -348,17 +322,7 @@ namespace Linguine.Tabs
                 await Task.FromResult(false);
             }
 
-            SortedStatementStartIndices = _model.GetSortedStatementStartIndicesFromSessionID(SessionID)
-                ?? throw new Exception("couldn't find session");
-
-            UnderlyingStatementsChanged?.Invoke(this, SortedStatementStartIndices);
+            UnderlyingStatementsChanged?.Invoke(this, new EventArgs());
         }
-
-        #region traversal
-
-
-
-
-        #endregion
     }
 }
