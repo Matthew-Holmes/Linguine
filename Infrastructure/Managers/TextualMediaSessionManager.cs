@@ -42,13 +42,16 @@ namespace Infrastructure
                 return true;
             }
 
+            context.ChangeTracker.Clear();
+
             TextualMediaSession toAdd = new TextualMediaSession
             {
                 Active = true,
-                TextualMedia = tm,
+                TextualMediaKey = tm.DatabasePrimaryKey,
                 Cursor = 0,
                 LastActive = DateTime.Now
             };
+
 
             context.TextualMediaSessions.Add(toAdd);
             context.SaveChanges();

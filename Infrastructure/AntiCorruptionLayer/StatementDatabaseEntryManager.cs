@@ -41,7 +41,7 @@ namespace Infrastructure
         {
             using var context = _dbf.CreateDbContext();
             //context.Attach(tm);
-            return context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).ToList();
+            return context.Statements.Where(s => s.ParentKey == tm.DatabasePrimaryKey).Include(s => s.Previous).Include(s => s.Parent).ToList();
         }
 
         internal List<StatementDatabaseEntry> GetNStatementsFor(DictionaryDefinition def, int n)

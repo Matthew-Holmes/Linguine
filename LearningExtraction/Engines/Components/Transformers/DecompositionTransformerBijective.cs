@@ -32,10 +32,23 @@ namespace LearningExtraction
 
             TextDecomposition ret = TextDecomposition.FromNewLinedString(source.Total, response, trim);
 
-            if (ret.Flattened().Decomposition.Count != source.Flattened().Decomposition.Count)
+            if (ret.Decomposition is null)
+            {
+                throw new Exception("no decomposition!");
+            }
+
+            if (ret.Flattened().Decomposition is null && source.Flattened().Decomposition is not null)
             {
                 throw new Exception("bijectivity compromised");
-                // could be because of newline weirdness (use the re-intercalate method)
+            }
+
+            if (ret.Flattened().Decomposition is not null) 
+            { 
+                if (ret.Flattened().Decomposition.Count != source.Flattened().Decomposition.Count)
+                {
+                    throw new Exception("bijectivity compromised");
+                    // could be because of newline weirdness (use the re-intercalate method)
+                } 
             }
 
             return ret;

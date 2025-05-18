@@ -31,6 +31,8 @@ namespace Linguine
                 return false;
             }
 
+            roContext.Dispose();
+
             using var context = LinguineFactory.CreateDbContext();
 
             if (SM.Managers!.Sessions.NewSession(tm, context))
