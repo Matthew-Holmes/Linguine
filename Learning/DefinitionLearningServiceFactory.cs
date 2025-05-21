@@ -29,7 +29,7 @@ namespace Learning
             Strategist      strategist = new Strategist(vocabModel, sessions, distinct, cts);
             Tactician       tactician  = new Tactician(strategist, sessions, cts);
 
-            MakeDebugPlots(strategist, tactician);
+            //MakeDebugPlots(strategist, tactician);
 
             return new DefinitionLearningService
             {

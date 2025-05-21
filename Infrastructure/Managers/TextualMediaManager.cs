@@ -45,9 +45,7 @@ namespace Infrastructure
 
         public List<TextualMedia> GetOpen(LinguineReadonlyDbContext context)
         {
-            // TODO - update the model
-            //return context.TextualMedia.Where(tm => tm.IsOpen).ToList();
-            return new List<TextualMedia>();
+            return context.TextualMedia.Where(tm => tm.IsOpen).ToList();
         }
 
         public TextualMedia? GetByName(string selectedText, LinguineReadonlyDbContext context)

@@ -17,7 +17,7 @@ namespace Linguine.Tabs
     {
         private TextualMediaImporter _loader;
 
-        private bool                        _showOpenButton = false;
+        private bool                        _showTextOptions = false;
         private string                      _selectedTextName;
 
         private ObservableCollection<ProcessingJobViewModel> _processingJobs = new();
@@ -35,6 +35,8 @@ namespace Linguine.Tabs
             set
             {
                 _selectedTextName = value;
+
+                ShowTextOptions = true;
 
                 OnPropertyChanged(nameof(SelectedTextName));
                 BulkProcessingViewLogicFor(value);
@@ -73,13 +75,13 @@ namespace Linguine.Tabs
         }
 
 
-        public bool ShowOpenButton
+        public bool ShowTextOptions
         {
-            get => _showOpenButton;
+            get => _showTextOptions;
             set
             {
-                _showOpenButton = value;
-                OnPropertyChanged(nameof(ShowOpenButton));
+                _showTextOptions = value;
+                OnPropertyChanged(nameof(ShowTextOptions));
 
             }
         }
@@ -117,6 +119,12 @@ namespace Linguine.Tabs
             if (tm is null)
             {
                 _uiComponents.CanMessage.Show("failed to located text in database");
+                return;
+            }
+            
+            if (!_model.OpenText(tm))
+            {
+                _uiComponents.CanMessage.Show("opening text failed");
             }
 
             _parent.CloseThisAndOpenTextualMedia(this, tm);

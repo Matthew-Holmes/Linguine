@@ -235,31 +235,35 @@ namespace Linguine
 
         internal void CloseThisAndOpenTextualMedia(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel, TextualMedia tm)
         {
-            throw new NotImplementedException();
-
             // bit of a rough edge, required since the sync context messes up consecutive calls from other classes
             // when some events are invoked, this means that they get posted after if the invocation was before
-            _syncContext.Post(_ => CloseThisAndSwitchToLastSessionInternal(textualMediaLaunchpadViewModel), null);
+            _syncContext.Post(_ => CloseThisAndSwitchToLastSessionInternal(textualMediaLaunchpadViewModel, tm), null);
         }
 
-        private void CloseThisAndSwitchToLastSessionInternal(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
+        private void CloseThisAndSwitchToLastSessionInternal(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel, TextualMedia tm)
         {
-            Tabs.Remove(textualMediaLaunchpadViewModel);
 
-            List<TextualMediaViewerViewModel> existingSessionTabs = Tabs
-               .Where(t => t.GetType() == typeof(TextualMediaViewerViewModel))
-               .Cast<TextualMediaViewerViewModel>()
-               .ToList();
+            List<TextualMediaViewerViewModel> existing = Tabs
+                .Where(t => t.GetType() == typeof(TextualMediaViewerViewModel))
+                .Select(t => (TextualMediaViewerViewModel)t)
+                .ToList();
 
-            var latest = existingSessionTabs.Last();
+            TextualMediaViewerViewModel? already = existing.Where(e => e.TextID == tm.DatabasePrimaryKey).FirstOrDefault();
 
-            if (latest is not null)
+            if (already is not null)
             {
-                SelectedTab = latest;
+                SelectTab(already);
             }
             else
             {
-                _UIcomponents.CanMessage.Show("Switching to latest session failed!");
+
+                TextualMediaViewerViewModel toAdd = new TextualMediaViewerViewModel(tm, _UIcomponents, _model, this);
+
+                Tabs.Remove(textualMediaLaunchpadViewModel);
+
+                Tabs.Add(toAdd);
+
+                SelectTab(toAdd);
             }
         }
 

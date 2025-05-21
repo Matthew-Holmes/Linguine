@@ -31,14 +31,18 @@
                 </Grid.RowDefinitions>
                 
                 <StackPanel Name="Sessions" Grid.Row="0">
-                    <Button Content="New Session"
+                    <Button Content="Open"
                             Command="{Binding OpenTextCommand}"
-                            Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            Visibility="{Binding ShowTextOptions, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Margin="15"
+                            Width="160"
+                            Height="60"/>
                     <Button Content="Delete Text"
                             Command="{Binding DeleteSelectedTextualMediaCommand}"
-                            Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"
-                            Margin="30"
-                            Width="80"/>
+                            Visibility="{Binding ShowTextOptions, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Margin="15"
+                            Width="80"
+                            Height="30"/>
                 </StackPanel>
 
 

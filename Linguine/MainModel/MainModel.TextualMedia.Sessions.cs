@@ -20,28 +20,17 @@ namespace Linguine
             }
         }
 
-        internal bool StartNewTextualMediaSession(string selectedTextName)
+        internal bool OpenText(TextualMedia tm)
         {
-            using var roContext = ReadonlyLinguineFactory.CreateDbContext();
-
-            var tm = SM.Managers!.TextualMedia.GetByName(selectedTextName, roContext) ?? null;
-
-            if (tm is null)
-            {
-                return false;
-            }
-
-            roContext.Dispose();
-
             using var context = LinguineFactory.CreateDbContext();
 
             SM.Managers!.Sessions.Open(tm, context);
 
-            return false;
+            return true;
         }
 
 
-        internal void CloseSession(TextualMedia tm)
+        internal void CloseText(TextualMedia tm)
         {
 
             using var context = LinguineFactory.CreateDbContext();

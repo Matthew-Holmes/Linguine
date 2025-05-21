@@ -152,7 +152,7 @@ namespace Linguine.Tabs
             : base(uiComponents, model, parent)
         {
             Title = "Text Viewer";
-            TabClosed += (s,e) => model.CloseSession(tm);
+            TabClosed += (s,e) => model.CloseText(tm);
 
             FullText = tm.Text;
             TextID = tm.DatabasePrimaryKey;
