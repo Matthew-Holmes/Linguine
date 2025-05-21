@@ -21,9 +21,6 @@ namespace Infrastructure
         public IQueryable<DictionaryDefinition> DictionaryDefinitions => _dbContext.DictionaryDefinitions.AsNoTracking();
         public IQueryable<VariantRoot> Variants => _dbContext.Variants.AsNoTracking();
         public IQueryable<TextualMedia> TextualMedia => _dbContext.TextualMedia.AsNoTracking();
-        public IQueryable<TextualMediaSession> TextualMediaSessions => _dbContext.TextualMediaSessions.AsNoTracking();
-        // TODO - maybe track the ones with text so the updates stream live to the user??
-        public IQueryable<TextualMediaSession> TextualMediaSessionsWithText => _dbContext.TextualMediaSessions.Include(s => s.TextualMedia).AsNoTracking();
         public IQueryable<StatementDatabaseEntry> Statements => _dbContext.Statements.AsNoTracking();
         public IQueryable<StatementDefinitionNode> StatementDefinitions => _dbContext.StatementDefinitions.AsNoTracking();
         public IQueryable<ParsedDictionaryDefinition> ParsedDictionaryDefinitions => _dbContext.ParsedDictionaryDefinitions.AsNoTracking();

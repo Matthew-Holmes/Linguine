@@ -57,15 +57,6 @@ namespace Linguine
             return Tuple.Create<String?, List<String>?, bool, int>(chunk, previousContext, isTail, firstChar);
         }
 
-        // TODO - make use of the cancellation token?
-        internal async Task ProcessNextChunkForSession(int sessionID)
-        {
-            TextualMedia? tm = GetSessionFromID(sessionID)?.TextualMedia ?? null;
-            if (tm is null) { return; }
-
-            await ProcessNextChunk(tm, new CancellationToken());
-        }
-
         internal async Task<int> ProcessNextChunk(TextualMedia tm, CancellationToken token)
         {
 

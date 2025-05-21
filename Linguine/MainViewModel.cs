@@ -239,10 +239,10 @@ namespace Linguine
 
             // bit of a rough edge, required since the sync context messes up consecutive calls from other classes
             // when some events are invoked, this means that they get posted after if the invocation was before
-            _syncContext.Post(_ => CloseThisAndSwitchToLatestSessionInternal(textualMediaLaunchpadViewModel), null);
+            _syncContext.Post(_ => CloseThisAndSwitchToLastSessionInternal(textualMediaLaunchpadViewModel), null);
         }
 
-        private void CloseThisAndSwitchToLatestSessionInternal(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
+        private void CloseThisAndSwitchToLastSessionInternal(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
         {
             Tabs.Remove(textualMediaLaunchpadViewModel);
 
@@ -251,8 +251,7 @@ namespace Linguine
                .Cast<TextualMediaViewerViewModel>()
                .ToList();
 
-            var latest = existingSessionTabs.OrderByDescending(t => _model.WhenLastActive(t.SessionID))
-                .FirstOrDefault();
+            var latest = existingSessionTabs.Last();
 
             if (latest is not null)
             {

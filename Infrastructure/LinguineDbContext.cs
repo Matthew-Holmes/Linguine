@@ -54,7 +54,6 @@ namespace Infrastructure
         public DbSet<DictionaryDefinition>             DictionaryDefinitions       { get; set; }
         public DbSet<VariantRoot>                      Variants                    { get; set; }
         public DbSet<TextualMedia>                     TextualMedia                { get; set; }
-        public DbSet<TextualMediaSession>              TextualMediaSessions        { get; set; }
         public DbSet<StatementDatabaseEntry>           Statements                  { get; set; }
         public DbSet<StatementDefinitionNode>          StatementDefinitions        { get; set; }
         public DbSet<ParsedDictionaryDefinition>       ParsedDictionaryDefinitions { get; set; }
@@ -99,19 +98,6 @@ namespace Infrastructure
             modelBuilder.Entity<TextualMedia>()
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
-
-
-            modelBuilder.Entity<TextualMediaSession>()
-                .HasKey(e => e.DatabasePrimaryKey);
-            modelBuilder.Entity<TextualMediaSession>()
-                .Property(e => e.DatabasePrimaryKey)
-                .ValueGeneratedOnAdd();
-            modelBuilder.Entity<TextualMediaSession>()
-                .HasOne(e => e.TextualMedia)
-                .WithMany()
-                .HasForeignKey(e => e.TextualMediaKey)
-                .OnDelete(DeleteBehavior.Cascade);
-
 
             modelBuilder.Entity<StatementDatabaseEntry>()
                 .HasKey(e => e.DatabasePrimaryKey);

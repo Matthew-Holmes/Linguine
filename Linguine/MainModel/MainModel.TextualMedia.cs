@@ -31,42 +31,12 @@ namespace Linguine
 
         public LanguageCode Native => ConfigManager.Config.Languages.NativeLanguage;
 
-        internal string? GetFullTextFromSessionID(int sessionId)
-        {
-            var session = GetSessionFromID(sessionId);
-
-            if (session is null) { return null; };
-
-            return session.TextualMedia.Text;
-        }
-
-        internal List<int>? GetSortedStatementStartIndicesFromSessionID(int sessionId)
-        {
-            var session = GetSessionFromID(sessionId);
-
-            if (session is null) { return null; }
-
-            var ret = SM.Managers!.Statements.StatementStartIndices(session.TextualMedia);
-
-            ret.Sort();
-
-            return ret;
-        }
-
+  
         internal List<Statement>? GetAllStatementsFor(TextualMedia tm)
         {
             return SM.Managers?.Statements.GetAllStatementsFor(tm) ?? null;
         }
 
-
-        internal List<Statement>? GetStatementsCoveringRange(int sessionId, int start, int end)
-        {
-            var session = GetSessionFromID(sessionId);
-
-            if (session is null) { return null; }
-
-            return SM.Managers!.Statements.GetStatementsCoveringRange(session.TextualMedia, start, end);
-        }
 
         internal ParsedDictionaryDefinition? GetParsedDictionaryDefinition(DictionaryDefinition core)
         {

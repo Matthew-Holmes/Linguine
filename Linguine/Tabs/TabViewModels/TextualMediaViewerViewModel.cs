@@ -159,8 +159,6 @@ namespace Linguine.Tabs
 
             UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
 
-            ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
-
             ShowSaveWordButton = false;
             SaveWordCommand          = new RelayCommand(() => SaveSelectedUnit());
             ExportLearnerListCommand = new RelayCommand(() => ExportLearnerListToCsv());
@@ -310,21 +308,6 @@ namespace Linguine.Tabs
             //throw new NotImplementedException();
             // the logic to query the parsed definition from the model, and setup a callback if
             // it needs to be recomputed
-        }
-
-        private async Task ProcessChunk()
-        {
-            try
-            {
-                await _model.ProcessNextChunkForSession(SessionID);
-            }
-            catch (Agents.MissingAPIKeyException e)
-            {
-                _parent.HandleMissingApiKeys(e);
-                await Task.FromResult(false);
-            }
-
-            UnderlyingStatementsChanged?.Invoke(this, new EventArgs());
         }
     }
 }

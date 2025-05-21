@@ -10,5 +10,6 @@ namespace DataClasses
         [Key]
         public int DatabasePrimaryKey { get; set; }
         public bool IsOpen { get; set; } = false;
+        public DateTime LastActive { get; set; }
     }
 }
