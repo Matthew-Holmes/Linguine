@@ -53,12 +53,9 @@ namespace Linguine
             return ret;
         }
 
-        internal List<Statement>? GetAllStatementsFor(int sessionId)
+        internal List<Statement>? GetAllStatementsFor(TextualMedia tm)
         {
-            var session = GetSessionFromID(sessionId);
-            if (session is null) { return null; }
-
-            return SM.Managers!.Statements.GetAllStatementsFor(session.TextualMedia);
+            return SM.Managers?.Statements.GetAllStatementsFor(tm) ?? null;
         }
 
 

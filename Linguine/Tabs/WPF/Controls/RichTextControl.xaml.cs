@@ -106,7 +106,6 @@ namespace Linguine.Tabs.WPF.Controls
 
                 FullText = newViewModel.FullText;
                 UnitSelectedCommand = newViewModel.UnitSelectedCommand;
-                LocalCursor = newViewModel.LocalCursor;
 
                 newViewModel.UnderlyingStatementsChanged += UnderlyingStatementsChanged;
 

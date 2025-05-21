@@ -168,14 +168,14 @@ namespace Linguine.Tabs
             WrongDefinitionCommand           = new RelayCommand(() => WrongDefinition());
 
 
-            List<Statement>? toUpdate = _model.GetAllStatementsFor(sessionId);
+            List<Statement>? textStatements = _model.GetAllStatementsFor(tm);
 
-            if (toUpdate is null)
+            if (textStatements is null)
             {
                 _uiComponents.CanMessage.Show("failed to access processed information for selected text");
             }
 
-            TextStatements = toUpdate;
+            TextStatements = textStatements;
         }
 
         private void WrongDefinition()
