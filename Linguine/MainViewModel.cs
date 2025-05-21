@@ -56,7 +56,7 @@ namespace Linguine
                     _model.LoadingFailed   += (s, e) => RunOnUIThread(() => DatabaseLoadingFailed());
                     _model.Loaded          += (s, e) => RunOnUIThread(() => SetupTabs());
                     _model.Loaded          += (s, e) => RunOnUIThread(() => TurnSessionsToTabs());
-                    _model.SessionsChanged += (s, e) => RunOnUIThread(() => TurnSessionsToTabs());
+                    _model.TextsOpenChanged += (s, e) => RunOnUIThread(() => TurnSessionsToTabs());
 
                     if (reopenConfigTab)
                     {

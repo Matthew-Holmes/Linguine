@@ -87,9 +87,9 @@ namespace Linguine
             {
                 Loaded -= (EventHandler)d;
             }
-            foreach (Delegate d in SessionsChanged.GetInvocationList())
+            foreach (Delegate d in TextsOpenChanged.GetInvocationList())
             {
-                SessionsChanged -= (EventHandler)d;
+                TextsOpenChanged -= (EventHandler)d;
             }
         }
     }

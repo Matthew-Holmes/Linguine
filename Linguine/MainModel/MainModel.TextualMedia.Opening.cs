@@ -9,7 +9,7 @@ namespace Linguine
 {
     public partial class MainModel
     {
-        public event EventHandler? SessionsChanged;
+        public event EventHandler? TextsOpenChanged;
 
         public List<TextualMedia> OpenTextualMedia
         {
