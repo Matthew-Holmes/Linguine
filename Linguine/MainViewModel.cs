@@ -10,6 +10,7 @@ using System.Threading;
 using Agents;
 using Config;
 using DataClasses;
+using System.Windows.Documents;
 
 namespace Linguine
 {
@@ -110,26 +111,28 @@ namespace Linguine
 
             if (_model is null) { throw new Exception("model is null"); }
 
-            var sessions = _model.ActiveSessionsIDs;
+            var sessions = _model.OpenTextualMedia;
 
             // close non-existent tabs - the ones we had open from a previous target language perhaps?
-            foreach (TextualMediaViewerViewModel tab in existingTabs)
-            {
-                if (!sessions.Contains(tab.SessionID))
-                {
-                    tab.CloseCommand.Execute(this); // deactivates in the session database
-                }
-            }
+            //foreach (TextualMediaViewerViewModel tab in existingTabs)
+            //{
+            //    if (!sessions.Contains(tab.SessionID))
+            //    {
+            //        tab.CloseCommand.Execute(this); // deactivates in the session database
+            //    }
+            //}
 
-            var existingSessions = existingTabs.Select(t => t.SessionID);
+            //var existingSessions = existingTabs.Select(t => t.SessionID);
 
-            foreach(int session in sessions)
-            {
-                if (!existingSessions.Contains(session))
-                {
-                    Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model, this));
-                }
-            }
+            //foreach(int session in sessions)
+            //{
+            //    if (!existingSessions.Contains(session))
+            //    {
+            //        Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model, this));
+            //    }
+            //}
+
+            throw new NotImplementedException();
 
         }
 
@@ -235,8 +238,10 @@ namespace Linguine
 
         #region tab switching
 
-        internal void CloseThisAndSwitchToLatestSession(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel)
+        internal void CloseThisAndOpenTextualMedia(TextualMediaLaunchpadViewModel textualMediaLaunchpadViewModel, TextualMedia tm)
         {
+            throw new NotImplementedException();
+
             // bit of a rough edge, required since the sync context messes up consecutive calls from other classes
             // when some events are invoked, this means that they get posted after if the invocation was before
             _syncContext.Post(_ => CloseThisAndSwitchToLatestSessionInternal(textualMediaLaunchpadViewModel), null);

@@ -17,15 +17,13 @@ namespace Linguine.Tabs
     {
         private TextualMediaImporter _loader;
 
-        private bool                        _showNewSessionButton = false;
+        private bool                        _showOpenButton = false;
         private string                      _selectedTextName;
-        private List<string>                _availableSessions;
-        private List<Tuple<bool, decimal>>  _sessionInfo;
 
         private ObservableCollection<ProcessingJobViewModel> _processingJobs = new();
 
         public ICommand ImportNewCommand { get; private set; }
-        public ICommand NewSessionCommand { get; private set; }
+        public ICommand OpenTextCommand { get; private set; }
         
         public ICommand DeleteSelectedTextualMediaCommand { get; private set; }
 
@@ -37,17 +35,6 @@ namespace Linguine.Tabs
             set
             {
                 _selectedTextName = value;
-
-                if (value == "")
-                {
-                    SessionInfo = new List<Tuple<bool, decimal>>();
-                    AvailableSessions = new List<string>();
-                    ShowSessions = false;
-                } else
-                {
-                    LoadSessionsFor(value);
-                    ShowSessions = true;
-                }
 
                 OnPropertyChanged(nameof(SelectedTextName));
                 BulkProcessingViewLogicFor(value);
@@ -86,101 +73,18 @@ namespace Linguine.Tabs
         }
 
 
-        public bool ShowSessions
+        public bool ShowOpenButton
         {
-            get => _showNewSessionButton;
+            get => _showOpenButton;
             set
             {
-                _showNewSessionButton = value;
-                OnPropertyChanged(nameof(ShowSessions));
+                _showOpenButton = value;
+                OnPropertyChanged(nameof(ShowOpenButton));
 
-            }
-        }
-
-        private List<Tuple<bool, decimal>> SessionInfo
-        { 
-            get => _sessionInfo;
-            set
-            {
-                AvailableSessions = BuildSessionStrings(SelectedTextName, value);
-                _sessionInfo = value;
-            }
-        }
-
-        public List<String> AvailableSessions
-        {
-            get => _availableSessions;
-            set
-            {
-                _availableSessions = value;
-                OnPropertyChanged(nameof(AvailableSessions));
             }
         }
 
         public ObservableCollection<ProcessingJobViewModel> ProcessingJobs => _processingJobs;
-
-        public String SelectedSession
-        {
-            set
-            {
-                int index = AvailableSessions.IndexOf(value);
-
-                if (index == -1)
-                {
-                    _uiComponents.CanMessage.Show("something went wrong!");
-                    return;
-                }
-
-                decimal progress = SessionInfo[index].Item2;
-
-                // TODO - having sessions receive a name would mean we didn't have to search them by progress
-
-                bool success = _model.ActivateExistingSessionFor(SelectedTextName, progress);
-
-                if (!success)
-                {
-                    _uiComponents.CanMessage.Show("activating session failed!");
-                    return;
-                }
-
-                _parent.CloseThisAndSwitchToLatestSession(this);
-            }
-        }
-
-        private void LoadSessionsFor(string name)
-        {
-            var info = _model.GetSessionInfoByName(name);
-
-            if (info is null)
-            {
-                _uiComponents.CanMessage.Show("$failed to load sessions for {name}");
-            }
-            else
-            {
-                SessionInfo = info; 
-            }
-        }
-
-        private List<String> BuildSessionStrings(String name, List<Tuple<bool, decimal>> info)
-        {
-            // need to decide whether to show active sessions, or just inactive ones
-
-            List<String> ret = new List<String>();
-
-            foreach(var sessionInfo in info)
-            {
-                StringBuilder builder = new StringBuilder(name);
-                builder.Append(" | ");
-                builder.Append(sessionInfo.Item2.ToString());
-                builder.Append('%');
-
-                ret.Add(builder.ToString());
-            }
-
-            return ret;
-        }
-
-
 
 
         public TextualMediaLaunchpadViewModel(
@@ -196,7 +100,7 @@ namespace Linguine.Tabs
 
             ImportNewCommand = new RelayCommand(() => ImportNew());
 
-            NewSessionCommand = new RelayCommand(() => NewSession());
+            OpenTextCommand = new RelayCommand(() => OpenText());
 
             DeleteSelectedTextualMediaCommand = new RelayCommand(() => DeleteSelectedTextualMedia());
      
@@ -204,6 +108,18 @@ namespace Linguine.Tabs
                 _model.GetProcessingJobs()
                       .Select(info => new ProcessingJobViewModel(model, info))
                       .ToList());
+        }
+
+        private void OpenText()
+        {
+            TextualMedia? tm = _model.TextByName(SelectedTextName);
+
+            if (tm is null)
+            {
+                _uiComponents.CanMessage.Show("failed to located text in database");
+            }
+
+            _parent.CloseThisAndOpenTextualMedia(this, tm);
         }
 
         private void DeleteSelectedTextualMedia()
@@ -221,17 +137,6 @@ namespace Linguine.Tabs
                     }
                 }
             }
-        }
-
-        private void NewSession()
-        {
-            if (_model.StartNewTextualMediaSession(SelectedTextName))
-            {
-                _parent.CloseThisAndSwitchToLatestSession(this);
-                return;
-            }
-
-            _uiComponents.CanMessage.Show("something went wrong generating a session!");
         }
 
         private void ImportNew()
@@ -262,9 +167,6 @@ namespace Linguine.Tabs
                 OnPropertyChanged(nameof(AvailableTexts));
 
                 SelectedTextName = tm.Name;
-
-                NewSession();
-
             }
             catch (Exception e)
             {
@@ -299,12 +201,6 @@ namespace Linguine.Tabs
             }
 
             return false;
-        }
-
-        private void BrowseAll()
-        {
-            // TODO - decide what to do if we don't want to just list all the files
-            throw new NotImplementedException();
         }
     }
 }

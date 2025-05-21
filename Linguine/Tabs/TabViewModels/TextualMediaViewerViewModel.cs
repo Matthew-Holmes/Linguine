@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using UserInputInterfaces;
 using DataClasses;
-using System.Windows.Forms;
-using System.Security.RightsManagement;
 
 namespace Linguine.Tabs
 {
@@ -149,14 +147,13 @@ namespace Linguine.Tabs
         public ICommand SaveWordCommand { get; private set; }
         public ICommand ExportLearnerListCommand { get; private set; }
 
-        public TextualMediaViewerViewModel(int sessionId, UIComponents uiComponents, MainModel model, MainViewModel parent) 
+        public TextualMediaViewerViewModel(TextualMedia tm, UIComponents uiComponents, MainModel model, MainViewModel parent) 
             : base(uiComponents, model, parent)
         {
             Title = "Text Viewer";
-            SessionID = sessionId;
-            TabClosed += (s,e) => model.CloseSession(sessionId);
+            TabClosed += (s,e) => model.CloseSession(tm);
 
-            FullText = model.GetFullTextFromSessionID(sessionId) ?? throw new Exception("couldn't find session");
+            FullText = tm.Text;
 
             UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
 

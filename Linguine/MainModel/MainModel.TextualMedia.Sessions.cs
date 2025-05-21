@@ -11,13 +11,9 @@ namespace Linguine
     {
         public event EventHandler? SessionsChanged;
 
-        public List<int> ActiveSessionsIDs
+        public List<TextualMedia> OpenTextualMedia
         {
-            get => SM.Managers!.Sessions
-                ?.ActiveSessions()
-                ?.Select(s => s.DatabasePrimaryKey)
-                ?.ToList() 
-                ?? new List<int>();
+            get => throw new NotImplementedException();
         }
 
         internal bool StartNewTextualMediaSession(string selectedTextName)
@@ -55,17 +51,20 @@ namespace Linguine
             return ret;
         }
 
-        internal void CloseSession(int sessionID)
+        internal void CloseSession(TextualMedia tm)
         {
-            using var context = LinguineFactory.CreateDbContext();
+            throw new NotImplementedException();
 
-            var session = GetSessionFromID(sessionID); 
+            // TODO - add a property to TextualMedia for "IsOpen"
 
-            if (session is null) { return; }
+            //using var context = LinguineFactory.CreateDbContext();
 
-            SM.Managers!.Sessions.CloseSession(session, context); // not the end of the world if we don't have it, 
+            //    var session = GetSessionFromID(sessionID); 
+
+            //    if (session is null) { return; }
+
+            //    SM.Managers!.Sessions.CloseSession(session, context); // not the end of the world if we don't have it, 
         }
-
         internal List<Tuple<bool, decimal>>? GetSessionInfoByName(string name)
         {
             using var context = ReadonlyLinguineFactory.CreateDbContext();

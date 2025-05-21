@@ -23,6 +23,12 @@ namespace Linguine
             }
         }
 
+        internal TextualMedia? TextByName(string selectedTextName)
+        {
+            using var context = ReadonlyLinguineFactory.CreateDbContext();
+            return SM.Managers!.TextualMedia.GetByName(selectedTextName, context);
+        }
+
         public LanguageCode Native => ConfigManager.Config.Languages.NativeLanguage;
 
         internal string? GetFullTextFromSessionID(int sessionId)
@@ -307,5 +313,7 @@ namespace Linguine
 
             context.SaveChanges();
         }
+
+
     }
 }
