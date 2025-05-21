@@ -111,29 +111,24 @@ namespace Linguine
 
             if (_model is null) { throw new Exception("model is null"); }
 
-            var sessions = _model.OpenTextualMedia;
+            var texts = _model.OpenTextualMedia;
 
             // close non-existent tabs - the ones we had open from a previous target language perhaps?
-            //foreach (TextualMediaViewerViewModel tab in existingTabs)
-            //{
-            //    if (!sessions.Contains(tab.SessionID))
-            //    {
-            //        tab.CloseCommand.Execute(this); // deactivates in the session database
-            //    }
-            //}
+            foreach (TextualMediaViewerViewModel tab in existingTabs)
+            {
+                if (!texts.Select(s => s.DatabasePrimaryKey).Contains(tab.TextID))
+                {
+                    tab.CloseCommand.Execute(this); // deactivates in the session database
+                }
+            }
 
-            //var existingSessions = existingTabs.Select(t => t.SessionID);
-
-            //foreach(int session in sessions)
-            //{
-            //    if (!existingSessions.Contains(session))
-            //    {
-            //        Add(new TextualMediaViewerViewModel(session, _UIcomponents, _model, this));
-            //    }
-            //}
-
-            throw new NotImplementedException();
-
+            foreach (TextualMedia tm in texts)
+            {
+                if (!existingTabs.Select(t => t.TextID).Contains(tm.DatabasePrimaryKey))
+                {
+                    Add(new TextualMediaViewerViewModel(tm, _UIcomponents, _model, this));
+                }
+            }
         }
 
         private void SetupTabs()

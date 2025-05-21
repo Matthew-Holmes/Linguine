@@ -12,6 +12,7 @@ namespace Linguine.Tabs
     {
         public readonly int SessionID;
         public String FullText { get; set; }
+        public int TextID { get; set; }
 
         public List<Statement> TextStatements;
 
@@ -154,6 +155,7 @@ namespace Linguine.Tabs
             TabClosed += (s,e) => model.CloseSession(tm);
 
             FullText = tm.Text;
+            TextID = tm.DatabasePrimaryKey;
 
             UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
 

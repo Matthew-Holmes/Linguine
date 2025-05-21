@@ -13,7 +13,11 @@ namespace Linguine
 
         public List<TextualMedia> OpenTextualMedia
         {
-            get => throw new NotImplementedException();
+            get
+            {
+                using var context = ReadonlyLinguineFactory.CreateDbContext();
+                return SM.Managers!.TextualMedia.GetOpen(context);
+            }
         }
 
         internal bool StartNewTextualMediaSession(string selectedTextName)

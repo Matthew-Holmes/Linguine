@@ -9,5 +9,6 @@ namespace DataClasses
         public string Description { get; set; }
         [Key]
         public int DatabasePrimaryKey { get; set; }
+        public bool IsOpen { get; set; } = false;
     }
 }
