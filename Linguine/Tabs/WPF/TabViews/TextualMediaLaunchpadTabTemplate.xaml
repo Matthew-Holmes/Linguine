@@ -31,12 +31,8 @@
                 </Grid.RowDefinitions>
                 
                 <StackPanel Name="Sessions" Grid.Row="0">
-                    <TextBlock Text="Sessions" Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <ListBox ItemsSource= "{Binding AvailableSessions}"
-                             SelectedItem="{Binding SelectedSession}"
-                             Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <Button Content="New Session"
-                            Command="{Binding NewSessionCommand}"
+                            Command="{Binding OpenTextCommand}"
                             Visibility="{Binding ShowSessions, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <Button Content="Delete Text"
                             Command="{Binding DeleteSelectedTextualMediaCommand}"
