@@ -15,8 +15,6 @@ namespace Linguine.Tabs
         public readonly int SessionID;
         public String FullText { get; set; }
 
-        public int LocalCursor;
-
         public List<Statement> TextStatements;
 
         // the user can then select a unit to see its details
@@ -161,7 +159,6 @@ namespace Linguine.Tabs
             FullText = model.GetFullTextFromSessionID(sessionId) ?? throw new Exception("couldn't find session");
 
             UnitSelectedCommand = new RelayCommand<Tuple<int, int>>(OnUnitSelected);
-            LocalCursor = model.GetCursor(SessionID);
 
             ProcessChunkCommand = new RelayCommand(async () => await ProcessChunk());
 
@@ -175,6 +172,12 @@ namespace Linguine.Tabs
 
 
             List<Statement>? toUpdate = _model.GetAllStatementsFor(sessionId);
+
+            if (toUpdate is null)
+            {
+                _uiComponents.CanMessage.Show("failed to access processed information for selected text");
+            }
+
             TextStatements = toUpdate;
         }
 

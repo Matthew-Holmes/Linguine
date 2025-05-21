@@ -112,7 +112,7 @@ namespace Linguine
 
             var sessions = _model.ActiveSessionsIDs;
 
-            // close non-existent tabs
+            // close non-existent tabs - the ones we had open from a previous target language perhaps?
             foreach (TextualMediaViewerViewModel tab in existingTabs)
             {
                 if (!sessions.Contains(tab.SessionID))
