@@ -31,6 +31,7 @@ namespace Linguine
             get => _model;
             set
             {
+                TabButtonsEnabled = false;
                 // config manager is special, it will update its model and the MainViewModel's model 
                 // kill the remaining tabs, those based off sessions will be revivable
 
