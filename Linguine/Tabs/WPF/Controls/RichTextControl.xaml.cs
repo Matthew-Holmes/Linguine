@@ -22,22 +22,6 @@ namespace Linguine.Tabs.WPF.Controls
 
     public partial class RichTextControl : UserControl
     {
-        // UI                      VM
-        // button --------------> invoke PageForwards<int>
-        //                               |
-        // HandlePageForwards(int) <-----
-        //        | 
-        // Computes pages until reach final
-        //        |
-        // PageLocatedCommand(start,end) --
-        //                                 |
-        //                          loads statements for range
-        //                                 |
-        //                  invoke StatementsCoveringPageChanged 
-        //                                 |
-        // ProcessStatementInformation <---
-        //        |
-        // adds highlights and hyperlinks
 
         private int LocalCursor;
         private String FullText;
