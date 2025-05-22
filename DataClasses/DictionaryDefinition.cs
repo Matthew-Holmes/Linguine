@@ -11,6 +11,8 @@ namespace DataClasses
         public String Word { get; set; }
         public String Definition { get; set; }
 
+        public List<String>? PreviousDefinitions { get; set; } = null;
+
         // TODO - keep a history of previous definitions used, in the cases when the user overwrites it
 
         public String? IPAPronunciation { get; set; }
@@ -51,5 +53,4 @@ namespace DataClasses
         }
 
     }
-
 }

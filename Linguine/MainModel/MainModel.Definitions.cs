@@ -3,6 +3,7 @@ using Config;
 using DataClasses;
 using Helpers;
 using Linguine.Helpers;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,12 +104,18 @@ namespace Linguine
             using var context = _linguineDbContextFactory.CreateDbContext();
 
             context.Update(faulty);
+
             context.SaveChanges();
         }
 
         internal void UpdateCoreDefinition(DictionaryDefinition faulty, string definitionCoreText, TextualEditMethod coredDefinitionChanged)
         {
+            List<String> previous = faulty.PreviousDefinitions ?? new List<string>();
+
+            previous.Add(faulty.Definition);
+
             faulty.Definition = definitionCoreText;
+            faulty.PreviousDefinitions = previous;
 
             faulty.DefinitionEntryMethod = EntryMethodHelper.NewEntryMethodForTextual(
                 faulty.DefinitionEntryMethod, coredDefinitionChanged);

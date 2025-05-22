@@ -3,6 +3,8 @@ using Serilog;
 using System.Diagnostics;
 using DataClasses;
 using Infrastructure.AntiCorruptionLayer;
+using System.Text.Json;
+using System.Xml;
 
 namespace Infrastructure
 {
@@ -84,6 +86,11 @@ namespace Infrastructure
             modelBuilder.Entity<DictionaryDefinition>()
                 .Property(e => e.DatabasePrimaryKey)
                 .ValueGeneratedOnAdd();
+            modelBuilder.Entity<DictionaryDefinition>()
+                .Property(e => e.PreviousDefinitions)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null));
 
 
             modelBuilder.Entity<VariantRoot>()
