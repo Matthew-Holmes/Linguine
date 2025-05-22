@@ -19,9 +19,9 @@ namespace Learning.Strategy
             _tacticTypeToIndex = tacticTypes.Select((type, i) => new { type, i })
                                             .ToDictionary(x => x.type, x => x.i);
         }
-        //                           DiagQuad          bias
-        //                         Linear  TopTriangle       
-        internal int FeatureCount => 10 + 10+((10*10-10)/2) + 1 + _tacticTypeToIndex.Count;
+        //                             DiagQuad              bias
+        //                         Linear       TopTriangle                          one hot and 3x decays
+        internal int FeatureCount => 10 + 10 +((10*10-10)/2) + 1 + _tacticTypeToIndex.Count * 4;
 
         internal Vector<double> Vectorize(FollowingSessionDatum datum)
         {
@@ -70,6 +70,10 @@ namespace Learning.Strategy
                 Log.Error("couldn't find tactic in tactic dictionary!");
             }
             features.AddRange(oneHot);
+
+            features.AddRange(oneHot.Select(x => x * intervalLogRatio1).ToArray());
+            features.AddRange(oneHot.Select(x => x * intervalLogRatio2).ToArray());
+            features.AddRange(oneHot.Select(x => x * intervalLogRatio3).ToArray());
 
             return Vector<double>.Build.DenseOfEnumerable(features);
         }
@@ -120,6 +124,18 @@ namespace Learning.Strategy
                 names.Add($"oneHot_Tactic_{kvp.Key.Name}");
             }
 
+            foreach (var kvp in orderedTactics)
+            {
+                names.Add($"oneHot_Tactic_{kvp.Key.Name}_timedecayed_1.0");
+            }
+            foreach (var kvp in orderedTactics)
+            {
+                names.Add($"oneHot_Tactic_{kvp.Key.Name}_timedecayed_2.0");
+            }
+            foreach (var kvp in orderedTactics)
+            {
+                names.Add($"oneHot_Tactic_{kvp.Key.Name}_timedecayed_0.5");
+            }
 
             return names;
         }
