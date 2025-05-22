@@ -204,6 +204,7 @@ namespace Linguine.Tabs
             ParsedDictionaryDefinition? pdef = _model.GetParsedDictionaryDefinition(faulty);
 
             DefinitionCoreText     = faulty.Definition;
+            ParsedDefinition       = pdef;
             ParsedDefinitionText   = pdef?.ParsedDefinition ?? "";
             IpaPronunciation       = faulty.IPAPronunciation ?? "";
             RomanisedPronunciation = faulty.RomanisedPronuncation ?? "";
@@ -309,7 +310,7 @@ namespace Linguine.Tabs
             }
         }
 
-        private ParsedDictionaryDefinition ParsedDefinition { get; set; }
+        private ParsedDictionaryDefinition? ParsedDefinition { get; set; }
 
         private async Task MachineRefreshParsedDefinition()
         {
@@ -323,8 +324,7 @@ namespace Linguine.Tabs
 
             if (newPdef.ParsedDefinition != ParsedDefinitionText)
             {
-                ParsedDefinition = newPdef;
-                ParsedDefinitionText = ParsedDefinition.ParsedDefinition;
+                ParsedDefinitionText = newPdef.ParsedDefinition;
 
                 ShowParsedDefinitionSaveChanges = true;
             }
