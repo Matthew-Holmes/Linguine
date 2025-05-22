@@ -275,6 +275,12 @@ namespace Linguine.Tabs.WPF.Controls
 
             doc.Blocks.Add(para);
             TextDisplayRegion.Document = doc;
+
+            if (FullText.Length > 10_000 /* TODO - Tune this */)
+            {
+                TextDisplayRegion.ViewingMode = FlowDocumentReaderViewingMode.TwoPage;
+                TextDisplayRegion.IsScrollViewEnabled = false;
+            }
         }
 
         //private void para_loaded(object sender, RoutedEventArgs e)
