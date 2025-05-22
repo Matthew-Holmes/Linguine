@@ -115,14 +115,23 @@
 
                 <TextBlock Text="~" FontSize="16" HorizontalAlignment="Center" FontWeight="DemiBold"/>
 
+                <Button Content="I am still stuck"
+                    FontSize="16"
+                    Command="{Binding GenerateExplanationsCommand}"
+                    Width="75"
+                    Height="30"
+                    Margin="5,10,5,5"
+                    Visibility="{Binding ShowIAmStillStuckButton,  Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}"/>
+
+                <TextBlock Text="~" FontSize="16" HorizontalAlignment="Center" FontWeight="DemiBold"  Visibility="{Binding ShowIAmStillStuckButton,  Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}"/>
 
                 <Button Content="Resolve" 
-                        FontSize="16"
-                        Command="{Binding ResolveCommand}" 
-                        Width="75"
-                        Height="30"
-                        Margin="5,10,5,5"
-                        Visibility="{Binding ShowResolveButton, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
+                    FontSize="16"
+                    Command="{Binding ResolveCommand}" 
+                    Width="75"
+                    Height="30"
+                    Margin="5,10,5,5"
+                    Visibility="{Binding ShowResolveButton, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
 
                 <TextBlock Text="Resolution complete, you may close this tab"
                            FontSize="16"

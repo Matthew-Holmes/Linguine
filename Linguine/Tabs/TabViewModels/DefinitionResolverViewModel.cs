@@ -3,6 +3,7 @@ using Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using UserInputInterfaces;
@@ -20,12 +21,15 @@ namespace Linguine.Tabs
         private Statement _statement;
         private String    _statementTranslationText;
 
-        private List<int>    _existingDefinitionsKeys = new List<int>();
-        private List<String> _existingDefinitionTexts = new List<string>();
+        private List<int>    _existingDefinitionsKeys          = new List<int>();
+        private List<String> _existingDefinitionTexts          = new List<string>();
 
         private bool _showWaitingForDefinitions      = true;
         private bool _showExistingDefinitions        = false;
         private bool _showNoExistingDefinitionsFound = false;
+        private bool _showIAmStillStuckButton        = false;
+
+        public ICommand GenerateExplanationsCommand { get; set; }
 
         public ICommand SelectDefinitionCommand { get; set; }
         private String  _selectedDefinition     { get; set; }
@@ -51,12 +55,19 @@ namespace Linguine.Tabs
             _wordText       = selectedStatement.InjectiveDecomposition.Units[defIndex].Trim();
             _rootedWordText = selectedStatement.RootedDecomposition.Units[defIndex].Trim();
 
-            SelectDefinitionCommand = new RelayCommand<String>(OnSelectDefinition);
-            ResolveCommand          = new RelayCommand(() => Resolve());
+            SelectDefinitionCommand     = new RelayCommand<String>(OnSelectDefinition);
+            ResolveCommand              = new RelayCommand(() => Resolve());
+            GenerateExplanationsCommand = new RelayCommand(() => GenerateExplanations());
 
 
             Task.Run(() => GoAndGetDetailsForUser());
             Task.Run(() => GetExistingDefinitionOptions());          
+        }
+
+        private void GenerateExplanations()
+        {
+            // update the existing definition translations with the information from the explanations
+            throw new NotImplementedException();
         }
 
         private void Resolve()
@@ -98,6 +109,15 @@ namespace Linguine.Tabs
 
         #region UI properties
 
+        public bool ShowIAmStillStuckButton
+        {
+            get => _showIAmStillStuckButton;
+            set
+            {
+                _showIAmStillStuckButton = value;
+                OnPropertyChanged(nameof(ShowIAmStillStuckButton));
+            }
+        }
         public bool ResolutionComplete
         {
             get => _resolutionComplete;
@@ -223,6 +243,10 @@ namespace Linguine.Tabs
 
             _existingDefinitionsKeys = existing.Select(t => t.Item1).ToList();
             ExistingDefinitions      = existing.Select(t => t.Item2).ToList();
+
+            Thread.Sleep(5_000);
+
+            ShowIAmStillStuckButton = true;
         }
     }
 }
