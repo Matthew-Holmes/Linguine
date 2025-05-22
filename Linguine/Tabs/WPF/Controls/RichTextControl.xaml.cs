@@ -141,6 +141,7 @@ namespace Linguine.Tabs.WPF.Controls
         Brush faintGreyBrush = new SolidColorBrush(Color.FromArgb(20, 128, 128, 128));
         Brush faintRedBrush  = new SolidColorBrush(Color.FromArgb(20, 255, 0, 0));
 
+        // TODO - this needs to be chunked into paragraphs for streaming in the data
 
         private void ProcessStatementInformation(object? sender, List<Statement> statementsCoveringPage)
         {
@@ -197,7 +198,8 @@ namespace Linguine.Tabs.WPF.Controls
 
             FlowDocument doc = new FlowDocument();
             Paragraph para = new Paragraph();
-            // add Runs/Hyperlinks to para.Inlines here
+
+            // add Runs/ Hyperlinks to para.Inlines here
 
             int currentIndex = 0; // TODO - sort this out
 
@@ -250,9 +252,40 @@ namespace Linguine.Tabs.WPF.Controls
                 para.Inlines.Add(new Run(FullText.Substring(currentIndex, FullText.Length - 1 - currentIndex)));
             }
 
+
+            //int cursor = 0;
+
+            //while (cursor < FullText.Length)
+            //{
+            //    Paragraph para = new Paragraph();
+
+            //    int toTake = Math.Min(FullText.Length - cursor, 1_000);
+
+            //    para.Inlines.Add(FullText.Substring(cursor, toTake));
+
+            //    doc.Blocks.Add(para);
+
+            //    cursor += 1_000;
+
+            //    if (cursor > 10_000 && cursor <= 11_000)
+            //    {
+            //        para.Loaded += para_loaded;
+            //    }
+            //}
+
             doc.Blocks.Add(para);
             TextDisplayRegion.Document = doc;
         }
+
+        //private void para_loaded(object sender, RoutedEventArgs e)
+        //{
+        //    Paragraph para = sender as Paragraph;
+
+        //    if (para is not null)
+        //    {
+        //        para.BringIntoView();
+        //    }
+        //}
 
         private void Hyperlink_Click(object sender, RoutedEventArgs e)
         {
