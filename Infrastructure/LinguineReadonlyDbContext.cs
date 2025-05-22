@@ -27,6 +27,7 @@ namespace Infrastructure
         public IQueryable<TestRecord> TestRecords => _dbContext.TestRecords.AsNoTracking();
         public IQueryable<VocalisedDefinitionFile> VocalisedDefinitionFiles => _dbContext.VocalisedDefinitionFiles.AsNoTracking();
         public IQueryable<TranslatedStatementDatabaseEntry> TranslatedStatements => _dbContext.TranslatedStatements.AsNoTracking();
+        public IQueryable<DictionaryDefinitionExplanation> DefinitionExplanations => _dbContext.DefinitionExplanations.AsNoTracking();
 
         public void Dispose()
         {

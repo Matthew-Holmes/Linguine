@@ -62,6 +62,7 @@ namespace Infrastructure
         public DbSet<TestRecord>                       TestRecords                 { get; set; }
         public DbSet<VocalisedDefinitionFile>          VocalisedDefinitionFiles    { get; set; }    
         public DbSet<TranslatedStatementDatabaseEntry> TranslatedStatements        { get; set; }
+        public DbSet<DictionaryDefinitionExplanation>  DefinitionExplanations      { get; set; }
 
         public LinguineDbContext()
         {
@@ -170,6 +171,13 @@ namespace Infrastructure
             modelBuilder.Entity<VocalisedDefinitionFile>()
                 .HasOne(e => e.Definition)
                 .WithMany()
+                .HasForeignKey(e => e.DictionaryDefinitionKey);
+
+            modelBuilder.Entity<DictionaryDefinitionExplanation>()
+                .HasKey(e => e.DatabasePrimaryKey);
+            modelBuilder.Entity<DictionaryDefinitionExplanation>()
+                .HasOne(e => e.CoreDefinition)
+                .WithMany(/* since multiple languages technically possible*/)
                 .HasForeignKey(e => e.DictionaryDefinitionKey);
 
             // Other configurations...
