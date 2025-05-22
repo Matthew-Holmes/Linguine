@@ -25,7 +25,7 @@ namespace Learning
         {
             DateTime now = DateTime.Now;
 
-            List<DefinitionFeatures> features = new List<DefinitionFeatures>();
+            List<DefinitionFeatures>   features = new List<DefinitionFeatures>();
             List<List<LearningTactic?>> tactics = new List<List<LearningTactic?>>();
 
             foreach (DictionaryDefinition def in defs)
@@ -74,7 +74,7 @@ namespace Learning
             }
 
 
-            Dictionary<Type, int> tacticTally = new Dictionary<Type, int>();
+            Dictionary<Type, int> tacticTally     = new Dictionary<Type, int>();
             Dictionary<Type, int> wasCorrectTally = new Dictionary<Type, int>();
 
             foreach (FollowingSessionDatum datum in dataPoints)
@@ -103,6 +103,12 @@ namespace Learning
 
             double avgReward = (double)wasCorrectTally.Values.Sum() / (double)tacticTally.Values.Sum();
 
+            Dictionary<Type, double> tacticProportions = tacticTally
+                .Select(kvp => new KeyValuePair<Type, double>(
+                    kvp.Key, 
+                    (double)kvp.Value / (double)dataPoints.Count))
+                .ToDictionary();
+
             return new ModelData(
                 dataPoints,
                 features,
@@ -112,7 +118,8 @@ namespace Learning
                 lastTacticUsed,
                 defFeaturesLookup,
                 followingSessionAverages,
-                avgReward);
+                avgReward,
+                tacticProportions);
         }
 
         private static List<FollowingSessionDatum> GenerateFollowingSessionData(

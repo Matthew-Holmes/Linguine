@@ -20,10 +20,22 @@ namespace Learning
         Dictionary<int, int> CoolOffMax { get; set; } = new Dictionary<int, int>();
 
 
+        private double Temperature { get; set; } = 0.03; // P(sample a low data volume tactic definition)
+
+
         private HashSet<int> Ignored { get; init; } = new HashSet<int>();
 
         internal int GetBestDefID()
         {
+            var random = new Random();
+
+            double temp = random.NextDouble();
+
+            if (temp < Temperature)
+            {
+                return InfrequentlySeenTacticDefinition(temp);
+            }
+
             var candidates = CurrentTwistScores
                 .Where(kv => !CoolOff.ContainsKey(kv.Key))
                 .Where(kv => !Ignored.Contains(kv.Key));
@@ -33,8 +45,7 @@ namespace Learning
             var topCandidates = candidates
                 .Where(kv => kv.Value == maxScore)
                 .ToList();
-
-            var random = new Random();
+            
             int ret = topCandidates[random.Next(topCandidates.Count)].Key;
             Log.Information("found id with twist score of {value}", CurrentTwistScores[ret]);
             Log.Information("total occurences: {occurences}", Strategist.VocabModel.WordFrequencies[ret]);
@@ -47,6 +58,74 @@ namespace Learning
             return ret;
         }
 
+        private int InfrequentlySeenTacticDefinition(double stop)
+        {
+            if (stop > 1.0)
+            {
+                throw new ArgumentException("stop must be in [0,1]");
+            }
+
+            Log.Information("getting infrequent definition with temperature {temp}", stop);
+
+            // the low datavolume models are pretty bad - so we make sure to pick out samples from them
+            // regardless from time to time, so hopefully over time they will improve
+
+            var loToHi = Strategist.ModelData.tacticProportions.OrderBy(kvp => kvp.Value).ToList(); ;
+
+            double cum = 0;
+            int index = -1;
+            Type toTest = loToHi.Last().Key;
+
+            // use this accumulation method to keep the return tactic roughly "on distribution"
+            // since we don't want to always return the very rare tactics, since then modelling them becomes a bit pointless
+            // since this method would dominate the serving of those definitions, not the statistical model!
+
+            while (index < loToHi.Count)
+            {
+                index++;
+
+                cum += loToHi[index].Value;
+
+                if (cum > stop)
+                {
+                    toTest = loToHi[index].Key; break;
+                }
+            }
+
+            Log.Information("want to test {totest}", toTest.Name);
+
+            List<KeyValuePair<int, Tuple<LearningTactic, DateTime>>> ofThisTactic = Strategist.ModelData.distinctDefinitionsLastTacticUsed
+                .Where(kvp => kvp.Value.Item1.GetType() == toTest)
+                .ToList();
+            
+            if (ofThisTactic.Count == 0)
+            {
+
+                Log.Information("found no examples");
+
+                while (true)
+                {
+                    index++;
+
+                    toTest = loToHi[index].Key;
+
+                    ofThisTactic = Strategist.ModelData.distinctDefinitionsLastTacticUsed
+                        .Where(kvp => kvp.Value.Item1.GetType() == toTest)
+                        .ToList();
+
+                    if (ofThisTactic.Count > 0) { break; }
+
+                    Log.Information("found no examples");
+                }
+            }
+
+            Log.Information("testing {testingName}", toTest.Name);
+
+            Random rng = new Random();
+            var shuffled = ofThisTactic.OrderBy(_ => rng.Next()).ToList();
+
+            return shuffled.First().Key;
+        }
 
         internal void Inform(TestRecord tr)
         {
