@@ -14,6 +14,7 @@
         DefinitionIPAPronouncing,
         DefinitionRomanisedPronouncing,
         DefinitionRewriting,
+        DefinitionExplaining,
         GeneralPurpose,
     }
 

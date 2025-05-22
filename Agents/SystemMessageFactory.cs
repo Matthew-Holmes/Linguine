@@ -44,6 +44,8 @@ namespace Agents
 
             {AgentTask.DefinitionRewriting, "You are an expert lexicographer, given the following word and definition, please write a new definition, the definition should avoid politicalisation and dated language, if the definition provided points to another, do not do the same, write one for this word. Reply with only the new definition" },
 
+            {AgentTask.DefinitionExplaining, "Given this definition in a foreign language, please give a detailed explanation on how it is used, what sort of sentences include it, and any other pieces of information that would be useful for a language learner, who is unsure about this word" },
+
             {AgentTask.GeneralPurpose, "you are a helpful assistant for language learners" },
 
 
@@ -73,6 +75,8 @@ namespace Agents
 
             {AgentTask.DefinitionRewriting, "Vous êtes un lexicographe expert. Étant donné le mot et sa définition, veuillez rédiger une nouvelle définition. Cette définition doit éviter toute politisation et tout langage désuet. Si la définition fournie renvoie à une autre définition, n'en faites pas autant. Répondez en utilisant uniquement la nouvelle définition." },
 
+            {AgentTask.DefinitionExplaining, "Étant donné cette définition dans une langue étrangère, veuillez donner une explication détaillée sur la façon dont elle est utilisée, le type de phrases qui l'incluent et toute autre information qui serait utile à un apprenant de langue qui n'est pas sûr de ce mot" },
+
             {AgentTask.GeneralPurpose, "vous êtes un assistant utile pour les apprenants de langues" },
 
         };
@@ -100,6 +104,8 @@ namespace Agents
             {AgentTask.DefinitionRomanisedPronouncing, "给出以下单词（也为你提供了一个定义）提供该单词的拼音，只用该单词的拼音回复，不用其他内容" },
 
             {AgentTask.DefinitionRewriting, "您是一位词典编纂专家，请根据以下单词及其定义，写出一个新的定义。定义应避免政治化和过时的语言。如果现有定义指向其他定义，请勿照搬，请为该单词另写一个定义。请仅使用新的定义进行回复。用标准拼音写在定义的开头，单词之间不加点。" },
+
+            {AgentTask.DefinitionExplaining, "给出外语中的这个定义，请详细解释它的用法、包含它的句子类型，以及任何其他对不确定这个词的语言学习者有用的信息" },
 
             {AgentTask.GeneralPurpose, "你是语言学习者的得力助手" },
         };

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Serilog;
+using LearningExtraction.Engines.DefinitionExplainingEngine;
 
 namespace Linguine
 {
@@ -40,6 +41,9 @@ namespace Linguine
         
         public ICanResolveDefinitions? DefinitionResolver { get; set; }
         public EngineState DefinitionResolverState { get; set; } = EngineState.NotYetStarted;
+
+        public ICanExplainDefinitions? DefinitionExplainer { get; set; }
+        public EngineState DefinitionExplainerState { get; set; } = EngineState.NotYetStarted;
     }
 
     partial class ServiceManager
@@ -55,6 +59,21 @@ namespace Linguine
             StartParsingEngine();
             StartPronunciationEngine();
             StartDefinitionResolutionEngine();
+            StartDefinitionExplanationEngine();
+        }
+
+        private void StartDefinitionExplanationEngine()
+        {
+            if (!CheckStartupState(Engines.DefinitionExplainerState))
+            {
+                return;
+            }
+
+            Engines.DefinitionExplainerState = EngineState.Building;
+
+            Engines.DefinitionExplainer = DefinitionExplainerFactory.BuildExplanationEngine();
+
+            Engines.DefinitionExplainerState = EngineState.Built;
         }
 
         public void StartDefinitionFrequencyEngine()
