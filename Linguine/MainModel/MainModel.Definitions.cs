@@ -15,6 +15,8 @@ namespace Linguine
     public partial class MainModel
     {
         #region generation
+
+        
         internal async Task<String> GenerateNewDefinition(DictionaryDefinition faulty)
         {
             LanguageCode target = ConfigManager.Config.Languages.TargetLanguage;

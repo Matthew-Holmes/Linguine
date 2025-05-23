@@ -1,4 +1,5 @@
 ﻿using DataClasses;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
@@ -16,6 +17,7 @@ namespace Infrastructure
                 .Where(d => d.CoreDefinition == core)
                 .Where(d => d.NativeLanguage == nativeLanguage)
                 .Where(d => d.LearnerLevel == level)
+                .Include(d => d.CoreDefinition)
                 .FirstOrDefault();
         }
 

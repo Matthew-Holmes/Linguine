@@ -3,6 +3,7 @@ using Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -21,8 +22,10 @@ namespace Linguine.Tabs
         private Statement _statement;
         private String    _statementTranslationText;
 
-        private List<int>    _existingDefinitionsKeys          = new List<int>();
-        private List<String> _existingDefinitionTexts          = new List<string>();
+        private List<int>                  _existingDefinitionsKeys = new List<int>();
+        private List<String>               _existingDefinitionTexts = new List<string>();
+        private List<DictionaryDefinition> _existingDefinitions     = new List<DictionaryDefinition>();
+
 
         private bool _showWaitingForDefinitions      = true;
         private bool _showExistingDefinitions        = false;
@@ -57,17 +60,37 @@ namespace Linguine.Tabs
 
             SelectDefinitionCommand     = new RelayCommand<String>(OnSelectDefinition);
             ResolveCommand              = new RelayCommand(() => Resolve());
-            GenerateExplanationsCommand = new RelayCommand(() => GenerateExplanations());
+            GenerateExplanationsCommand = new RelayCommand(() => Task.Run(GenerateExplanations));
 
 
             Task.Run(() => GoAndGetDetailsForUser());
             Task.Run(() => GetExistingDefinitionOptions());          
         }
 
-        private void GenerateExplanations()
+        private async Task GenerateExplanations()
         {
             // update the existing definition translations with the information from the explanations
-            throw new NotImplementedException();
+
+            List<String> explanations = await _model.GetExplanations(_existingDefinitions);
+
+            if (explanations.Count != _existingDefinitionTexts.Count)
+            {
+                _uiComponents.CanMessage.Show("error generating explanations");
+                return;
+            }
+
+            for (int i = 0; i != explanations.Count; i++)
+            {
+                StringBuilder b = new StringBuilder();
+                b.AppendLine(_existingDefinitionTexts[i]);
+                b.AppendLine("~");
+                b.AppendLine(explanations[i]);
+
+
+                _existingDefinitionTexts[i] = b.ToString();
+            }
+
+            OnPropertyChanged(nameof(ExistingDefinitions));
         }
 
         private void Resolve()
@@ -178,6 +201,7 @@ namespace Linguine.Tabs
             }
         }
 
+
         public bool ShowWaitingForDefinitions
         {
             get => _showWaitingForDefinitions;
@@ -228,7 +252,7 @@ namespace Linguine.Tabs
 
         private async Task GetExistingDefinitionOptions()
         {
-            List<Tuple<int, String>> existing = await _model.GetExistingDefinitionKeysAndTexts(_rootedWordText);
+            List<Tuple<int, String, DictionaryDefinition>> existing = await _model.GetExistingDefinitionKeysAndTexts(_rootedWordText);
 
             ShowWaitingForDefinitions = false;
 
@@ -243,6 +267,8 @@ namespace Linguine.Tabs
 
             _existingDefinitionsKeys = existing.Select(t => t.Item1).ToList();
             ExistingDefinitions      = existing.Select(t => t.Item2).ToList();
+            _existingDefinitions     = existing.Select(t => t.Item3).ToList();
+
 
             Thread.Sleep(5_000);
 

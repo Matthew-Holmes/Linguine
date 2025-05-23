@@ -102,7 +102,50 @@ namespace Linguine
 
         }
 
-        internal async Task<List<Tuple<int, string>>> GetExistingDefinitionKeysAndTexts(string rootedWordText)
+        internal async Task<List<String>> GetExplanations(List<DictionaryDefinition> defs)
+        {
+            LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
+
+            List<String> ret = Enumerable.Repeat(string.Empty, defs.Count).ToList();
+
+            List<Tuple<int /*lst index*/, DictionaryDefinition>> toGet = new();
+
+            for(int i = 0; i != defs.Count; i++)
+            {
+                DictionaryDefinitionExplanation? expl = SM.Managers!.Explanations
+                    .GetDefinitionExplanation(defs[i].DatabasePrimaryKey, native);
+
+                if (expl is not null)
+                {
+                    ret[i] = expl.Explanation;
+                } 
+                else
+                {
+                    toGet.Add(Tuple.Create(i, defs[i]));
+                }
+            }
+
+            List<DictionaryDefinitionExplanation> generated = await SM.Engines!.DefinitionExplainer!
+                .ExplainDefinitions(
+                    toGet.Select(t => t.Item2).ToList(), 
+                    native);
+
+            using var context = LinguineFactory.CreateDbContext();
+
+            for (int j = 0; j != toGet.Count; j++) 
+            {
+                SM.Managers!.Explanations.Add(generated[j], context, save: false);
+
+                ret[toGet[j].Item1] = generated[j].Explanation;
+            }
+
+            context.SaveChanges();
+
+            return ret;
+
+        }
+
+        internal async Task<List<Tuple<int, string, DictionaryDefinition>>> GetExistingDefinitionKeysAndTexts(string rootedWordText)
         {
             using var context = LinguineFactory.CreateDbContext(); // not thread safe so make a new one here
             
@@ -112,7 +155,7 @@ namespace Linguine
 
             if (!ConfigManager.Config.LearningForeignLanguage())
             {
-                return defs.Select(def => Tuple.Create(def.DatabasePrimaryKey, def.Definition)).ToList();
+                return defs.Select(def => Tuple.Create(def.DatabasePrimaryKey, def.Definition, def)).ToList();
             }
 
             List<ParsedDictionaryDefinition> pdefs = new List<ParsedDictionaryDefinition>();
@@ -164,7 +207,7 @@ namespace Linguine
             {
                 DictionaryDefinition def = withoutPronunciations[i];
 
-                def.IPAPronunciation = pronunciations[i].Item1;
+                def.IPAPronunciation      = pronunciations[i].Item1;
                 def.RomanisedPronuncation = pronunciations[i].Item2;
 
                 context.Update(def);
@@ -173,7 +216,7 @@ namespace Linguine
                 context.ChangeTracker.Clear();
             }
 
-            return pdefs.Select(pdef => Tuple.Create(pdef.DictionaryDefinitionKey, pdef.ParsedDefinition)).ToList();
+            return pdefs.Select(pdef => Tuple.Create(pdef.DictionaryDefinitionKey, pdef.ParsedDefinition, pdef.CoreDefinition)).ToList();
         }
 
         internal bool ResolveDefinition(Statement statement, int defIndex, int selectedDefKey)

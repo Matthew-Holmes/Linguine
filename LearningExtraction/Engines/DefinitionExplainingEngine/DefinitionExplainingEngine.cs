@@ -28,6 +28,7 @@ namespace LearningExtraction.Engines.DefinitionExplainingEngine
         public async Task<List<DictionaryDefinitionExplanation>> ExplainDefinitions(
             List<DictionaryDefinition> definitions, LanguageCode native)
         {
+
             List<String> prompts = FormPrompts(definitions, native);
 
             var getResponseTasks = prompts.Select(prompt => ExplainingAgent.GetResponse(prompt));

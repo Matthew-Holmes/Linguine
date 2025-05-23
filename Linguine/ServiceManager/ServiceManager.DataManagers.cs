@@ -29,13 +29,14 @@ namespace Linguine
 
     public class Managers
     {
-        public required DefinitionVocalisationManager     Vocalisations     { get; set; }
-        public required DictionaryDefinitionManager       Definitions       { get; set; }
-        public required ParsedDictionaryDefinitionManager ParsedDefinitions { get; set; }
-        public required StatementManager                  Statements        { get; set; }
-        public required TestRecordsManager                TestRecords       { get; set; }
-        public required TextualMediaManager               TextualMedia      { get; set; }
-        public required TextualMediaSessionManager        Sessions          { get; set; }
+        public required DefinitionVocalisationManager          Vocalisations     { get; set; }
+        public required DictionaryDefinitionManager            Definitions       { get; set; }
+        public required ParsedDictionaryDefinitionManager      ParsedDefinitions { get; set; }
+        public required StatementManager                       Statements        { get; set; }
+        public required TestRecordsManager                     TestRecords       { get; set; }
+        public required TextualMediaManager                    TextualMedia      { get; set; }
+        public required TextualMediaSessionManager             Sessions          { get; set; }
+        public required DictionaryDefinitionExplanationManager Explanations      { get; set; }
     }
 
 
@@ -67,6 +68,7 @@ namespace Linguine
                 TestRecords       = new TestRecordsManager(dbf),
                 TextualMedia      = new TextualMediaManager(dbf),
                 Sessions          = new TextualMediaSessionManager(dbf),
+                Explanations      = new DictionaryDefinitionExplanationManager(dbf),
             };
 
             InspectDataQuality();

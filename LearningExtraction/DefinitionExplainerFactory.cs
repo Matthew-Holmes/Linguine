@@ -16,7 +16,8 @@ namespace LearningExtraction
         {
             AgentBase explainingAgent = AgentFactory.GenerateProcessingAgent(
                 AgentTask.DefinitionExplaining,
-                ConfigManager.Config.Languages.NativeLanguage);
+                ConfigManager.Config.Languages.NativeLanguage,
+                isHighPerformance: true);
 
             return new DefinitionExplainingEngine(explainingAgent);
         }
