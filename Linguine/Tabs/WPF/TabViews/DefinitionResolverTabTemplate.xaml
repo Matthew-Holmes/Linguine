@@ -11,7 +11,7 @@
             <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter"/>
         </DataTemplate.Resources>
         <Grid>
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical">
 			    <TextBlock FontSize="16"
 			    TextWrapping="Wrap"
@@ -28,27 +28,17 @@
                            Margin="5,5,5,15"/>
 
                 <TextBlock Text="~" FontSize="16" HorizontalAlignment="Center" FontWeight="DemiBold"/>
-                
-                <RichTextBox IsReadOnly="True"
-                             BorderThickness="0"
-                             Background="Transparent"
-                             FontSize="16"
-                             Margin="5,15,5,5"
-                             IsDocumentEnabled="False"
-                             HorizontalAlignment="Center"
-                             HorizontalContentAlignment="Center">
-                    <FlowDocument>
-                        <Paragraph TextAlignment="Center">
-                            <Run Text="💡: "/>
-                            <Run Text="{Binding BestTranslatedAsTexts.Item1, Mode=OneWay}" />
-                            <Run Text="{Binding BestTranslatedAsTexts.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/>
-                            <Run Text="{Binding BestTranslatedAsTexts.Item3, Mode=OneWay}" />
-                            <Run Text="{Binding BestTranslatedAsTexts.Item4, Mode=OneWay}" FontWeight="Bold"/>
-                        </Paragraph>
-                    </FlowDocument>
-                </RichTextBox>
 
-                
+
+
+                    <TextBlock TextAlignment="Center" FontSize="16" Margin="5,15,5,5">
+                        <Run Text="💡: "/>
+                        <Run Text="{Binding BestTranslatedAsTexts.Item1, Mode=OneWay}" />
+                        <Run Text="{Binding BestTranslatedAsTexts.Item2, Mode=OneWay}" Foreground="Red" FontWeight="Bold"/>
+                        <Run Text="{Binding BestTranslatedAsTexts.Item3, Mode=OneWay}" />
+                        <Run Text="{Binding BestTranslatedAsTexts.Item4, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+
 
                 <TextBlock Text="💡: Searching for existing definitions..." 
                            FontSize="16"
@@ -76,7 +66,7 @@
                     <ItemsControl ItemsSource="{Binding ExistingDefinitions, Mode=OneWay}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
+                                <StackPanel Orientation="Horizontal"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
@@ -93,7 +83,7 @@
                                         </MultiBinding>
                                     </Border.Background>
 
-                                    <TextBlock Text="{Binding Mode=OneWay}" Width="150"
+                                    <TextBlock Text="{Binding Mode=OneWay}" Width="300"
                                                Cursor="Hand"
                                                FontSize="16"
                                                Background="Transparent"
