@@ -14,7 +14,13 @@
         DefinitionIPAPronouncing,
         DefinitionRomanisedPronouncing,
         DefinitionRewriting,
-        DefinitionExplaining,
+        DetailedDefinitionWriting,
+        DefinitionSynonyms,
+        WordSenseDistinguishingExplanation,
+        RegisterAnalysis,
+        SimpleExampleOfWord,
+        MediumExampleOfWord,
+        HardExampleOfWord,
         GeneralPurpose,
     }
 

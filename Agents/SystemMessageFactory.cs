@@ -22,7 +22,7 @@ namespace Agents
 
         private static Dictionary<AgentTask, String> EnglishSystemMessages = new Dictionary<AgentTask, String>
         {
-            { AgentTask.ContextChangeIdentification, "Given the following numbered statements and context, identify when the context changes, if it does. Return each context change on a new line, with a brief description of why the context is changing. Do not include any preamble besides the inline description. return format (x,y, etc line numbers): x: reason\ny: reason\n.... The line number MUST correspond to the line number where the context changes."},
+            {AgentTask.ContextChangeIdentification, "Given the following numbered statements and context, identify when the context changes, if it does. Return each context change on a new line, with a brief description of why the context is changing. Do not include any preamble besides the inline description. return format (x,y, etc line numbers): x: reason\ny: reason\n.... The line number MUST correspond to the line number where the context changes."},
 
             {AgentTask.ContextUpdating, "Consider the following statements, and context, please update the context if it has changed. Such as a change of location, time or focus. If you do think the context has changed, preserve context elements that are still applicable. Remove lines that no longer apply. Respond with just the new context, with each item on a new line as before. DO NOT SUMMARISE - provide concise contextual information only. ONLY RESPOND WITH THE NEW CONTEXT, no other information"},
 
@@ -44,13 +44,22 @@ namespace Agents
 
             {AgentTask.DefinitionRewriting, "You are an expert lexicographer, given the following word and definition, please write a new definition, the definition should avoid politicalisation and dated language, if the definition provided points to another, do not do the same, write one for this word. Reply with only the new definition" },
 
-            {AgentTask.DefinitionExplaining, "Given this definition in a foreign language, please give a detailed explanation on how it is used, what sort of sentences include it, and any other pieces of information that would be useful for a language learner, who is unsure about this word" },
+            {AgentTask.DetailedDefinitionWriting, "Given this foreign word and definition, please write a detailed definition, in English, of the word, specific to the word sense described in the existing definition. Only describe the meaning of the word, NOT synonyms, NOT register, NOR giving examples. Reply only with the definition, DO NOT write \"definition:\" at the start." },
+
+            {AgentTask.DefinitionSynonyms, "Given this foreign word and definition, please provide a list of synonymns, in English, of the word. Seperate them with commas, and only reply with the list, nothing else. DO NOT start your response with \"synonyms: \"" },
+
+            {AgentTask.WordSenseDistinguishingExplanation, "Given this foreign word and definition, write short summary of how this sense of the word differs from other senses. If you can't think of any other sense then say so. Be precise and lexicographical with your response. DO NOT format your response with headings or titles, just provide a few sentences explaining how this word sense is different from other possibilities." },
+
+            {AgentTask.RegisterAnalysis, "Given this foreign word and definition, tell me about the register of the word, types of text that may include it used in this sense, and topics/fields where I might find it. DO NOT add titles or headings to your response, just provide a few sentences helping me understand this word more." },
+
+            {AgentTask.SimpleExampleOfWord, "Given this word and definition, provide a simple example sentence using the word in the sense the definition describes, reply only with the example sentence and nothing else." },
+
+            {AgentTask.MediumExampleOfWord, "Given this word and definition, provide a moderately complex example sentence using the word in the sense the definition describes, reply only with the example sentence and nothing else." },
+
+            {AgentTask.HardExampleOfWord, "Given this word and definition, provide a very complex example sentence using the word in the sense the definition describes, reply only with the example sentence and nothing else." },
 
             {AgentTask.GeneralPurpose, "you are a helpful assistant for language learners" },
-
-
         };
-
         private static Dictionary<AgentTask, String> FrenchSystemMessages = new Dictionary<AgentTask, String>
         {
             { AgentTask.ContextChangeIdentification, "Compte tenu des déclarations numérotées et du contexte suivants, identifiez quand le contexte change, si c'est le cas. Renvoie chaque changement de contexte sur une nouvelle ligne, avec une brève description de la raison pour laquelle le contexte change. N'incluez aucun préambule autre que la description en ligne. format de retour (numéros de ligne x, y, etc) : x : raison\ny : raison\n.... Le numéro de ligne DOIT correspondre au numéro de ligne où le contexte change."},
@@ -75,7 +84,19 @@ namespace Agents
 
             {AgentTask.DefinitionRewriting, "Vous êtes un lexicographe expert. Étant donné le mot et sa définition, veuillez rédiger une nouvelle définition. Cette définition doit éviter toute politisation et tout langage désuet. Si la définition fournie renvoie à une autre définition, n'en faites pas autant. Répondez en utilisant uniquement la nouvelle définition." },
 
-            {AgentTask.DefinitionExplaining, "Étant donné cette définition dans une langue étrangère, veuillez donner une explication détaillée sur la façon dont elle est utilisée, le type de phrases qui l'incluent et toute autre information qui serait utile à un apprenant de langue qui n'est pas sûr de ce mot" },
+            {AgentTask.DetailedDefinitionWriting, "Étant donné ce mot étranger et sa définition, veuillez rédiger une définition détaillée, en français, du mot, spécifique au sens décrit dans la définition existante. Décrivez uniquement le sens du mot, SANS synonymes, SANS registre, NI exemples. Répondez uniquement avec la définition, N'écrivez PAS « définition : » au début." },
+
+            {AgentTask.DefinitionSynonyms, "Étant donné ce mot étranger et sa définition, veuillez fournir une liste de synonymes, en français, du mot. Séparez-les par des virgules et répondez uniquement avec la liste, sans plus. NE COMMENCEZ PAS votre réponse par « synonymes : »." },
+
+            {AgentTask.WordSenseDistinguishingExplanation, "Étant donné ce mot étranger et sa définition, rédigez un bref résumé expliquant en quoi ce sens diffère des autres. Si vous ne trouvez aucun autre sens, indiquez-le. Soyez précis et lexicographique dans votre réponse. N'utilisez pas de titres ou d'en-têtes dans votre réponse ; fournissez simplement quelques phrases expliquant en quoi ce sens diffère des autres possibilités." },
+
+            {AgentTask.RegisterAnalysis, "Étant donné ce mot étranger et sa définition, veuillez m'indiquer son registre, les types de textes qui pourraient l'inclure dans ce sens, ainsi que les sujets/domaines où je pourrais le trouver. N'ajoutez pas de titre ni d'intertitre à votre réponse ; fournissez simplement quelques phrases m'aidant à mieux comprendre ce mot." },
+
+            {AgentTask.SimpleExampleOfWord, "Étant donné ce mot et cette définition, fournissez un exemple de phrase simple en utilisant le mot dans le sens décrit par la définition, répondez uniquement avec l'exemple de phrase et rien d'autre." },
+
+            {AgentTask.MediumExampleOfWord, "Étant donné ce mot et cette définition, fournissez une phrase d'exemple modérément complexe en utilisant le mot dans le sens décrit par la définition, répondez uniquement avec la phrase d'exemple et rien d'autre." },
+
+            {AgentTask.HardExampleOfWord, "Étant donné ce mot et cette définition, fournissez une phrase d'exemple très complexe en utilisant le mot dans le sens décrit par la définition, répondez uniquement avec la phrase d'exemple et rien d'autre." },
 
             {AgentTask.GeneralPurpose, "vous êtes un assistant utile pour les apprenants de langues" },
 
@@ -105,7 +126,19 @@ namespace Agents
 
             {AgentTask.DefinitionRewriting, "您是一位词典编纂专家，请根据以下单词及其定义，写出一个新的定义。定义应避免政治化和过时的语言。如果现有定义指向其他定义，请勿照搬，请为该单词另写一个定义。请仅使用新的定义进行回复。用标准拼音写在定义的开头，单词之间不加点。" },
 
-            {AgentTask.DefinitionExplaining, "给出外语中的这个定义，请详细解释它的用法、包含它的句子类型，以及任何其他对不确定这个词的语言学习者有用的信息" },
+            {AgentTask.DetailedDefinitionWriting, "给出该外来词及其定义，请用中文详细解释该词，具体到现有定义中所描述的词义。仅描述该词的含义，不要描述同义词、语域或举例。回复时仅提供定义，请勿在开头写“定义：”。" },
+
+            {AgentTask.DefinitionSynonyms, "鉴于此外来词及其定义，请提供该词的中文同义词列表。请用逗号分隔，并仅回复列表，请勿添加其他内容。请勿以“同义词”开头。" },
+
+            {AgentTask.WordSenseDistinguishingExplanation, "给出这个外来词及其定义，简要概括该词义与其他词义的区别。如果想不出其他词义，请直接写出。回答应准确，并遵循词典顺序。请勿使用标题或标题，只需用几句话解释该词义与其他词义的区别即可。" },
+
+            {AgentTask.RegisterAnalysis, "给出这个外来词及其定义，请告诉我这个词的语域、可能包含该词的文本类型，以及我可能在哪些主题/领域找到它。请勿在您的回复中添加标题或小标题，只需提供几句话帮助我更好地理解这个词即可。" },
+
+            {AgentTask.SimpleExampleOfWord, "给出这个词和定义，用定义所描述的含义提供一个简单的例句，只用例句回复，不用其他任何东西。" },
+
+            {AgentTask.MediumExampleOfWord, "给出这个词和定义，用定义所描述的含义使用该词提供一个中等复杂的例句，只用例句回复，不用其他任何东西。" },
+
+            {AgentTask.HardExampleOfWord, "给出这个词和定义，用定义所描述的含义使用该词提供一个非常复杂的例句，只用例句回复，不用其他任何东西。" },
 
             {AgentTask.GeneralPurpose, "你是语言学习者的得力助手" },
         };
