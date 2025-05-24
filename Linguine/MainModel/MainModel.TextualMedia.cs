@@ -102,11 +102,11 @@ namespace Linguine
 
         }
 
-        internal async Task<List<String>> GetExplanations(List<DictionaryDefinition> defs)
+        internal async Task<List<DictionaryDefinitionExplanation>> GetExplanations(List<DictionaryDefinition> defs)
         {
             LanguageCode native = ConfigManager.Config.Languages.NativeLanguage;
 
-            List<String> ret = Enumerable.Repeat(string.Empty, defs.Count).ToList();
+            List<DictionaryDefinitionExplanation?> ret = Enumerable.Repeat<DictionaryDefinitionExplanation?>(null, defs.Count).ToList();
 
             List<Tuple<int /*lst index*/, DictionaryDefinition>> toGet = new();
 
@@ -117,7 +117,7 @@ namespace Linguine
 
                 if (expl is not null)
                 {
-                    ret[i] = expl.Explanation;
+                    ret[i] = expl;
                 } 
                 else
                 {
@@ -136,13 +136,12 @@ namespace Linguine
             {
                 SM.Managers!.Explanations.Add(generated[j], context, save: false);
 
-                ret[toGet[j].Item1] = generated[j].Explanation;
+                ret[toGet[j].Item1] = generated[j];
             }
 
             context.SaveChanges();
 
-            return ret;
-
+            return ret.Select(r => r!).ToList();
         }
 
         internal async Task<List<Tuple<int, string, DictionaryDefinition>>> GetExistingDefinitionKeysAndTexts(string rootedWordText)
