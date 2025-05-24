@@ -11,8 +11,13 @@
             <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter"/>
         </DataTemplate.Resources>
         <Grid>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <StackPanel Orientation="Vertical">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            
+            <StackPanel Orientation="Vertical" Grid.Row="0">
 			    <TextBlock FontSize="16"
 			    TextWrapping="Wrap"
 			    TextAlignment="Center"
@@ -51,16 +56,21 @@
                            Margin="5,20,5,5"
                            Visibility="{Binding ShowNoExistingDefinitionsFound, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
 
-                <TextBlock Text="💡: here are the existing definitions I found: "
+                </StackPanel>
+                
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+                    <StackPanel Orientation="Vertical">
+
+                        <TextBlock Text="💡: here are the existing definitions I found: "
                            FontSize="16"
                            HorizontalAlignment="Center"
                            Visibility="{Binding ShowExistingDefinitions, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" 
                            Margin="5,20,5,5"/>
-
+                
                 <ScrollViewer Background="Transparent"
                               Visibility="{Binding ShowExistingDefinitions, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" 
                               HorizontalScrollBarVisibility="Auto" 
-                              VerticalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Hidden"
                               HorizontalAlignment="Center"
                               Margin="0,0,0,0">
                     <ItemsControl ItemsSource="{Binding ExistingDefinitions, Mode=OneWay}">
@@ -71,7 +81,8 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="5,5,5,10"
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="300">
+                                    <Border Margin="5,5,5,10"
                                         BorderBrush="Gray"
                                         BorderThickness="1">
                                     <Border.Background>
@@ -83,7 +94,8 @@
                                         </MultiBinding>
                                     </Border.Background>
 
-                                    <TextBlock Text="{Binding Mode=OneWay}" Width="300"
+                                    <TextBlock Text="{Binding Mode=OneWay}"
+                                               Width="150"
                                                Cursor="Hand"
                                                FontSize="16"
                                                Background="Transparent"
@@ -97,6 +109,7 @@
                                         </TextBlock.InputBindings>
                                     </TextBlock>
                                 </Border>
+                                </ScrollViewer>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -128,9 +141,8 @@
                            Margin="5,10,5,5"
                            HorizontalAlignment="Center"
                            Visibility="{Binding ResolutionComplete, Converter={StaticResource BoolToCollapsedConverter}, Mode=OneWay}" />
-                
-            </StackPanel>
-            </ScrollViewer>
+                </StackPanel>
+        </ScrollViewer>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
