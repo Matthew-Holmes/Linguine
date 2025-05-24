@@ -39,7 +39,7 @@
                             Command="{Binding ResolveSelectedDefinitionCommand}"
                             Visibility="{Binding ShowResolveDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
                             Width="120"/>
-                    <Button Content="Wrong Definition"
+                    <Button Content="Other Definitions"
                             Command="{Binding WrongDefinitionCommand}"
                             Visibility="{Binding ShowWrongDefinitionButton, Converter={StaticResource BoolToVisibilityConverter}}"
                             Width="100"
