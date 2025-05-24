@@ -2,6 +2,7 @@
 using Helpers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -31,6 +32,8 @@ namespace Linguine.Tabs
         private bool _showExistingDefinitions        = false;
         private bool _showNoExistingDefinitionsFound = false;
         private bool _showIAmStillStuckButton        = false;
+        private bool _explanationButtonEnabled       = true;
+
 
         public ICommand GenerateExplanationsCommand { get; set; }
 
@@ -71,7 +74,9 @@ namespace Linguine.Tabs
         {
             // update the existing definition translations with the information from the explanations
 
-            List<String> explanations = await _model.GetExplanations(_existingDefinitions);
+            IsGenerateExplanationsButtonEnabled = false;
+
+            List<DictionaryDefinitionExplanation> explanations = await _model.GetExplanations(_existingDefinitions);
 
             if (explanations.Count != _existingDefinitionTexts.Count)
             {
@@ -79,16 +84,27 @@ namespace Linguine.Tabs
                 return;
             }
 
+            List<String> newDefinitionContent = Enumerable.Repeat("", _existingDefinitionTexts.Count).ToList();
+
             for (int i = 0; i != explanations.Count; i++)
             {
                 StringBuilder b = new StringBuilder();
                 b.AppendLine(_existingDefinitionTexts[i]);
                 b.AppendLine("~");
-                b.AppendLine(explanations[i]);
+                b.AppendLine(explanations[i].DifferencesFromOtherSenses);
+                b.AppendLine("~");
+                b.AppendLine(explanations[i].Register);
+                b.AppendLine("~");
+                b.AppendLine("Detailed Definition");
+                b.AppendLine(explanations[i].DetailedDefinition);
+                b.AppendLine("~");
+                b.AppendLine("Synonyms:");
+                b.AppendLine(explanations[i].Synonyms);
 
-
-                _existingDefinitionTexts[i] = b.ToString();
+                newDefinitionContent[i] = b.ToString();
             }
+
+            _existingDefinitionTexts = newDefinitionContent; // hard overwrite since UI needs a reference change to propagate the change
 
             OnPropertyChanged(nameof(ExistingDefinitions));
         }
@@ -131,6 +147,16 @@ namespace Linguine.Tabs
 
 
         #region UI properties
+
+        public bool IsGenerateExplanationsButtonEnabled
+        {
+            get => _explanationButtonEnabled;
+            set
+            {
+                _explanationButtonEnabled = value;
+                OnPropertyChanged(nameof(IsGenerateExplanationsButtonEnabled));
+            }
+        }
 
         public bool ShowIAmStillStuckButton
         {
